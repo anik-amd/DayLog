@@ -13,7 +13,7 @@ import { Entry } from '../../types/Entry';
 import EntryCard from './EntryCard';
 import CalendarStrip from './CalendarStrip';
 import QuickEntryBar from '../editor/QuickEntryBar';
-import WebPicker from '../editor/WebPicker';
+import Picker from '../editor/Picker';
 
 export default function EntriesScreen({ navigation }: any) {
   const { colorScheme } = useColorScheme();
@@ -297,12 +297,12 @@ export default function EntriesScreen({ navigation }: any) {
 
         {/* Web Picker - Rendered at screen level */}
         {Platform.OS === 'web' && (
-          <WebPicker
+          <Picker
             visible={pickerVisible}
             type={pickerType}
             value={pickerDate}
             onClose={() => setPickerVisible(false)}
-            onSelect={(selectedDate) => {
+            onSelect={(selectedDate: Date) => {
               const newDate = new Date(entryDate);
               if (pickerType === 'date') {
                 newDate.setFullYear(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());

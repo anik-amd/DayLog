@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { View, TextInput as RNTextInput, TouchableOpacity, Platform, UIManager, Image, Text, StyleSheet, ScrollView } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import Picker from './Picker';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -530,6 +531,50 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
             </Animated.View>
           )}
         </View>
+
+        {/* Native Date/Time Pickers - iOS uses native, Android uses custom picker */}
+        {showDatePicker && (
+          Platform.OS === 'ios' ? (
+            <DateTimePicker
+              value={entryDate}
+              mode="date"
+              display="default"
+              onChange={handleDateChange}
+            />
+          ) : (
+            <Picker
+              visible={showDatePicker}
+              type="date"
+              value={entryDate}
+              onClose={() => setShowDatePicker(false)}
+              onSelect={(date) => {
+                handleDateChange({ type: 'set' }, date);
+                setShowDatePicker(false);
+              }}
+            />
+          )
+        )}
+        {showTimePicker && (
+          Platform.OS === 'ios' ? (
+            <DateTimePicker
+              value={entryDate}
+              mode="time"
+              display="default"
+              onChange={handleTimeChange}
+            />
+          ) : (
+            <Picker
+              visible={showTimePicker}
+              type="time"
+              value={entryDate}
+              onClose={() => setShowTimePicker(false)}
+              onSelect={(date) => {
+                handleTimeChange({ type: 'set' }, date);
+                setShowTimePicker(false);
+              }}
+            />
+          )
+        )}
 
       </View>
   );
