@@ -77,7 +77,7 @@ export default function EntriesScreen({ navigation }: any) {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
       <View className="flex-1 px-5 pt-8 pb-2">
-        <Text className="text-neutral-50 text-[32px] font-extrabold tracking-tight mb-6 mt-2">Journal</Text>
+        <Text className="text-neutral-50 text-[32px] font-extrabold tracking-tight mb-6 mt-2">DayLog</Text>
 
       {loading ? (
         <ActivityIndicator size="large" color="#a1a1aa" className="mt-10" />

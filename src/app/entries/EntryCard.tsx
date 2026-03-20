@@ -2,17 +2,25 @@ import React, { useRef } from 'react';
 import { View, Text, TouchableWithoutFeedback, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Entry } from '../../types/Entry';
-import MarkdownRenderer from '../../markdown/MarkdownRenderer';
 
 interface EntryCardProps {
   entry: Entry;
 }
 
+const stripMarkdown = (text: string) => {
+  if (!text) return '';
+  return text
+    .replace(/^#+\s+/gm, '') // strip headers
+    .replace(/(\*\*|__)(.*?)\1/g, '$2') // strip bold
+    .replace(/(\*|_)(.*?)\1/g, '$2') // strip italics
+    .replace(/^[-*]\s+/gm, '') // strip lists
+    .replace(/\n+/g, ' ') // strip line breaks into spaces
+    .trim();
+};
+
 export default function EntryCard({ entry }: EntryCardProps) {
-  // Create a preview version of the text if it's too long
-  const previewText = entry.content.length > 200 
-    ? entry.content.substring(0, 200).trimEnd() + '...' 
-    : entry.content;
+  // Extract pure text for timeline preview
+  const plainTextPreview = stripMarkdown(entry.content);
 
   // Format the unix timestamp to a readable date
   const formattedDate = new Date(entry.createdAt).toLocaleDateString(undefined, {
@@ -44,7 +52,7 @@ export default function EntryCard({ entry }: EntryCardProps) {
   };
 
   return (
-    <TouchableWithoutFeedback 
+    <TouchableWithoutFeedback
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       onPress={() => navigation.navigate('FullScreenEditor', { entryId: entry.id, initialContent: entry.content, viewMode: true })}
@@ -54,9 +62,13 @@ export default function EntryCard({ entry }: EntryCardProps) {
           <Text className="text-neutral-500 text-[11px] uppercase tracking-widest mb-2.5 font-bold">
             {formattedDate}
           </Text>
-          <View className="mb-1">
-            <MarkdownRenderer content={previewText} />
-          </View>
+          <Text
+            className="text-neutral-200 text-[16px] leading-7 font-medium"
+            numberOfLines={3}
+            ellipsizeMode="tail"
+          >
+            {plainTextPreview}
+          </Text>
         </View>
       </Animated.View>
     </TouchableWithoutFeedback>
