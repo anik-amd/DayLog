@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { View, Text, ActivityIndicator, KeyboardAvoidingView, Platform, LayoutAnimation, UIManager, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, ActivityIndicator, KeyboardAvoidingView, Platform, LayoutAnimation, UIManager, TouchableOpacity, Animated, ScrollView } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useColorScheme } from "nativewind";
 import { Ionicons } from '@expo/vector-icons';
@@ -13,8 +13,6 @@ import { Entry } from '../../types/Entry';
 import EntryCard from './EntryCard';
 import CalendarStrip from './CalendarStrip';
 import QuickEntryBar from '../editor/QuickEntryBar';
-import { FlashList } from "@shopify/flash-list";
-import { BlurView } from 'expo-blur';
 
 export default function EntriesScreen({ navigation }: any) {
   const { colorScheme } = useColorScheme();
@@ -132,6 +130,38 @@ export default function EntriesScreen({ navigation }: any) {
     ? entries.filter((e: Entry) => e.date === selectedDate)
     : entries;
 
+  // Group entries by date
+  const groupedEntries = filteredEntries.reduce((groups: { [key: string]: Entry[] }, entry) => {
+    const date = entry.date;
+    if (!groups[date]) {
+      groups[date] = [];
+    }
+    groups[date].push(entry);
+    return groups;
+  }, {});
+
+  // Sort dates in descending order (newest first)
+  const sortedDates = Object.keys(groupedEntries).sort((a, b) => b.localeCompare(a));
+
+  const formatDateHeader = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (dateStr === today.toISOString().split('T')[0]) {
+      return 'Today';
+    } else if (dateStr === yesterday.toISOString().split('T')[0]) {
+      return 'Yesterday';
+    } else {
+      return date.toLocaleDateString(undefined, {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+  };
+
   return (
     <KeyboardAvoidingView 
       className="flex-1 bg-neutral-100 dark:bg-neutral-950"
@@ -139,29 +169,47 @@ export default function EntriesScreen({ navigation }: any) {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
       <View className="flex-1">
-        {/* FlashList renders under the fixed header */}
+        {/* Entries rendered under the fixed header */}
         {loading ? (
             <ActivityIndicator size="large" color="#a1a1aa" className="mt-40" />
         ) : (
-             <FlashList
-                 data={filteredEntries}
-                 keyExtractor={(item) => item.id}
-                 renderItem={({ item }) => <EntryCard entry={item} />}
-                 showsVerticalScrollIndicator={false}
-                 contentContainerStyle={{ 
-                     paddingTop: 280, // Generous space for the floating Calendar and Logo bar
-                     paddingBottom: 150, 
-                     paddingHorizontal: 15 
-                 }}
-                 ListEmptyComponent={() => (
-                     <View className="mt-40 items-center opacity-60">
-                         <Ionicons name="journal-outline" size={48} color="#d4d4d4" />
-                         <Text className="text-neutral-400 dark:text-zinc-500 text-lg font-medium mt-4">No entries for this day.</Text>
-                     </View>
-                 )}
-                 onScroll={handleScroll}
-                 scrollEventThrottle={16}
-             />
+          <Animated.ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ 
+                paddingTop: 280,
+                paddingBottom: 150, 
+                paddingHorizontal: 15 
+            }}
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
+          >
+            {filteredEntries.length === 0 ? (
+              <View className="mt-40 items-center opacity-60">
+                <Ionicons name="journal-outline" size={48} color="#d4d4d4" />
+                <Text className="text-neutral-400 dark:text-zinc-500 text-lg font-medium mt-4">No entries for this day.</Text>
+              </View>
+            ) : (
+              sortedDates.map((dateStr) => (
+                <View key={dateStr} className="mb-4">
+                  {/* Date Header */}
+                  <Text className="text-neutral-500 dark:text-neutral-400 text-[12px] font-semibold uppercase tracking-wider mb-2 px-1">
+                    {formatDateHeader(dateStr)}
+                  </Text>
+                  
+                  {/* Entries for this date */}
+                  <View className="bg-white dark:bg-neutral-900 rounded-2xl overflow-hidden">
+                    {groupedEntries[dateStr].map((entry: Entry, index: number) => (
+                      <EntryCard 
+                        key={entry.id} 
+                        entry={entry} 
+                        showBorder={index > 0}
+                      />
+                    ))}
+                  </View>
+                </View>
+              ))
+            )}
+          </Animated.ScrollView>
         )}
 
         {/* FIXED Top Logo Bar (Pinned to top) */}
