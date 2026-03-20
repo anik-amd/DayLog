@@ -21,6 +21,7 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
   const [content, setContent] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [currentEntryId, setCurrentEntryId] = useState<string | null>(null);
+  const [isFocused, setIsFocused] = useState(false);
   const isSaving = useRef(false);
   const navigation = useNavigation<any>();
 
@@ -165,51 +166,55 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
   };
 
   return (
-    <View className="bg-white dark:bg-neutral-950 border-t border-neutral-200 dark:border-neutral-900 px-4 py-3 pb-6 flex-row items-end">
-      {content.trim().length > 0 && (
-        <TouchableOpacity 
-          onPress={handleExpand}
-          className="mb-1.5 mr-2 p-1.5 bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-full"
-        >
-          <Ionicons name="expand" size={18} color="#a3a3a3" />
-        </TouchableOpacity>
-      )}
+     <View className="bg-white dark:bg-neutral-950 border-t border-neutral-200 dark:border-neutral-900 px-4 py-3 flex-row items-center">
+       <View className="flex-1 bg-neutral-50 dark:bg-neutral-950/50 rounded-[24px] border border-neutral-200 dark:border-neutral-800 overflow-hidden">
+         {content.trim().length > 0 && (
+           <View className="flex-row px-3 pt-1 pb-1">
+             {images.map((uri, i) => (
+               <Image key={i} source={{ uri }} className="w-8 h-8 rounded mr-1 border border-neutral-200 dark:border-neutral-800" />
+             ))}
+           </View>
+         )}
+         <TextInput
+           placeholder={isFocused || content.trim().length > 0 ? "" : "What's on your mind?"}
+           placeholderTextColor="#737373"
+           className="text-neutral-900 dark:text-neutral-100 text-[14px] px-4 py-2.5 leading-4 font-normal"
+           multiline={true}
+           value={content}
+           onChangeText={onChangeText}
+           textAlignVertical="center"
+           underlineColorAndroid="transparent"
+         />
+       </View>
 
-      <TouchableOpacity 
-          onPress={pickImage}
-          className="mb-1.5 mr-3 p-1.5 border border-transparent rounded-full"
-      >
-          <Ionicons name="image" size={24} color={content.trim().length > 0 ? "#737373" : "#6366f1"} />
-      </TouchableOpacity>
-      
-      <View className="flex-1 bg-neutral-100 dark:bg-neutral-900 rounded-[28px] border border-neutral-200 dark:border-neutral-800 max-h-[250px] overflow-hidden">
-        {images.length > 0 && (
-          <View className="flex-row px-4 pt-3 pb-1">
-            {images.map((uri, i) => (
-              <Image key={i} source={{ uri }} className="w-12 h-12 rounded-lg mr-2 border border-neutral-200 dark:border-neutral-800" />
-            ))}
-          </View>
-        )}
-        <TextInput
-          placeholder="What's on your mind?"
-          placeholderTextColor="#737373"
-          className="text-neutral-900 dark:text-neutral-100 text-[16px] px-5 py-3.5 leading-5 font-medium"
-          multiline={true}
-          value={content}
-          onChangeText={onChangeText}
-          textAlignVertical="center"
-          underlineColorAndroid="transparent"
-        />
-      </View>
-
-      {content.trim().length > 0 && (
-        <TouchableOpacity 
-          onPress={handleSubmit}
-          className="bg-indigo-500 w-[44px] h-[44px] rounded-full items-center justify-center ml-3 shadow-md border border-indigo-400/20 mb-0.5"
-        >
-          <Ionicons name="arrow-up" size={20} color="white" />
-        </TouchableOpacity>
-      )}
-    </View>
+       {isFocused || content.trim().length > 0 ? (
+         <>
+           <TouchableOpacity 
+               onPress={pickImage}
+               className="ml-2 p-1.5 border border-transparent rounded-full"
+           >
+               <Ionicons name="image" size={20} color="#6366f1" />
+           </TouchableOpacity>
+           
+           {content.trim().length > 0 && (
+             <TouchableOpacity 
+               onPress={handleExpand}
+               className="ml-2 p-1.5 border border-neutral-200 dark:border-neutral-800 rounded-full"
+             >
+               <Ionicons name="arrow-forward" size={16} color="#a3a3a3" />
+             </TouchableOpacity>
+           )}
+           
+           {content.trim().length > 0 && (
+             <TouchableOpacity 
+               onPress={handleSubmit}
+               className="ml-2 p-1.5 bg-indigo-500 rounded-full"
+             >
+               <Ionicons name="checkmark" size={16} color="white" />
+             </TouchableOpacity>
+           )}
+         </>
+       ) : null}
+     </View>
   );
 }
