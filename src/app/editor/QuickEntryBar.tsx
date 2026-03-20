@@ -93,19 +93,21 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
   };
 
   return (
-    <View className="bg-neutral-950 border-t border-neutral-900 p-4 pb-6 flex-row items-end">
-      <TouchableOpacity 
-        onPress={handleExpand}
-        className="mb-3 mr-3 p-1.5 bg-neutral-900 border border-neutral-800 rounded-full"
-      >
-        <Ionicons name="expand" size={18} color="#a3a3a3" />
-      </TouchableOpacity>
+    <View className="bg-neutral-950 border-t border-neutral-900 px-4 py-3 pb-6 flex-row items-end">
+      {content.trim().length > 0 && (
+        <TouchableOpacity 
+          onPress={handleExpand}
+          className="mb-1.5 mr-3 p-1.5 bg-neutral-900 border border-neutral-800 rounded-full"
+        >
+          <Ionicons name="expand" size={18} color="#a3a3a3" />
+        </TouchableOpacity>
+      )}
       
-      <View className="flex-1 bg-neutral-900 rounded-[28px] border border-neutral-800 min-h-[56px] max-h-[150px]">
+      <View className="flex-1 bg-neutral-900 rounded-[20px] border border-neutral-800 max-h-[150px] justify-center">
         <TextInput
           placeholder="What's on your mind?"
           placeholderTextColor="#737373"
-          className="text-neutral-100 text-[16px] px-5 py-4 leading-5 font-medium"
+          className="text-neutral-100 text-[16px] px-4 py-2.5 leading-5 font-medium"
           multiline={true}
           value={content}
           onChangeText={onChangeText}
@@ -115,9 +117,9 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
       {content.trim().length > 0 && (
         <TouchableOpacity 
           onPress={handleSubmit}
-          className="bg-indigo-500 w-[56px] h-[56px] rounded-full items-center justify-center ml-3 shadow-md border border-indigo-400/20"
+          className="bg-indigo-500 w-[44px] h-[44px] rounded-full items-center justify-center ml-3 shadow-md border border-indigo-400/20 mb-0.5"
         >
-          <Ionicons name="arrow-up" size={24} color="white" />
+          <Ionicons name="arrow-up" size={20} color="white" />
         </TouchableOpacity>
       )}
     </View>
