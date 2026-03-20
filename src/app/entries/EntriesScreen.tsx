@@ -143,26 +143,25 @@ export default function EntriesScreen({ navigation }: any) {
         {loading ? (
             <ActivityIndicator size="large" color="#a1a1aa" className="mt-40" />
         ) : (
-            <FlashList
-                data={filteredEntries}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => <EntryCard entry={item} />}
-                estimatedItemSize={180}
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ 
-                    paddingTop: 280, // Generous space for the floating Calendar and Logo bar
-                    paddingBottom: 150, 
-                    paddingHorizontal: 15 
-                }}
-                ListEmptyComponent={() => (
-                    <View className="mt-40 items-center opacity-60">
-                        <Ionicons name="journal-outline" size={48} color="#d4d4d4" />
-                        <Text className="text-neutral-400 dark:text-zinc-500 text-lg font-medium mt-4">No entries for this day.</Text>
-                    </View>
-                )}
-                onScroll={handleScroll}
-                scrollEventThrottle={16}
-            />
+             <FlashList
+                 data={filteredEntries}
+                 keyExtractor={(item) => item.id}
+                 renderItem={({ item }) => <EntryCard entry={item} />}
+                 showsVerticalScrollIndicator={false}
+                 contentContainerStyle={{ 
+                     paddingTop: 280, // Generous space for the floating Calendar and Logo bar
+                     paddingBottom: 150, 
+                     paddingHorizontal: 15 
+                 }}
+                 ListEmptyComponent={() => (
+                     <View className="mt-40 items-center opacity-60">
+                         <Ionicons name="journal-outline" size={48} color="#d4d4d4" />
+                         <Text className="text-neutral-400 dark:text-zinc-500 text-lg font-medium mt-4">No entries for this day.</Text>
+                     </View>
+                 )}
+                 onScroll={handleScroll}
+                 scrollEventThrottle={16}
+             />
         )}
 
         {/* FIXED Top Logo Bar (Pinned to top) */}
