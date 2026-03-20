@@ -58,17 +58,20 @@ export default function FullScreenEditor({ route, navigation }: any) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       {/* Custom Header for Full Screen */}
-      <View className="flex-row items-center justify-between px-5 py-4 border-b border-neutral-900 mt-2">
-        <TouchableOpacity onPress={handleBack} className="p-2 -ml-2">
-          <Ionicons name="arrow-back" size={24} color="#f5f5f5" />
+      <View className="flex-row items-center justify-between px-6 py-4 border-b border-neutral-900/50 mt-2">
+        <TouchableOpacity 
+          onPress={handleBack} 
+          className="bg-neutral-900 w-11 h-11 rounded-full items-center justify-center border border-neutral-800"
+        >
+          <Ionicons name="arrow-back" size={22} color="#a3a3a3" />
         </TouchableOpacity>
         
         {isViewing ? (
-          <TouchableOpacity onPress={() => setIsViewing(false)} className="bg-neutral-800 px-5 py-2 rounded-full shadow-lg border border-neutral-700">
-            <Ionicons name="pencil" size={20} color="#e5e5e5" />
+          <TouchableOpacity onPress={() => setIsViewing(false)} className="bg-neutral-800 w-11 h-11 rounded-full items-center justify-center border border-neutral-700 shadow-sm">
+            <Ionicons name="pencil" size={18} color="#e5e5e5" />
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity onPress={handleBack} className="bg-indigo-500 px-5 py-2 rounded-full shadow-lg border border-indigo-400/20">
+          <TouchableOpacity onPress={handleBack} className="bg-indigo-500 w-11 h-11 rounded-full items-center justify-center border border-indigo-400/20 shadow-sm">
             <Ionicons name="checkmark" size={20} color="white" />
           </TouchableOpacity>
         )}

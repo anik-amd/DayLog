@@ -50,3 +50,13 @@ export const getAllEntries = async (): Promise<Entry[]> => {
     media: mediaMap[entry.id] || []
   }));
 };
+
+export const getAppStats = async () => {
+    const db = await getDb();
+    const entryCount = await db.getFirstAsync<{ count: number }>('SELECT COUNT(*) as count FROM entries');
+    const mediaCount = await db.getFirstAsync<{ count: number }>('SELECT COUNT(*) as count FROM media');
+    return {
+        entries: entryCount?.count || 0,
+        photos: mediaCount?.count || 0
+    };
+};

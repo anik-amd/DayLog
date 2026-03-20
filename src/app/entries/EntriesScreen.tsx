@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, FlatList, ActivityIndicator, KeyboardAvoidingView, Platform, LayoutAnimation, UIManager } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, KeyboardAvoidingView, Platform, LayoutAnimation, UIManager, TouchableOpacity } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -84,29 +85,37 @@ export default function EntriesScreen({ navigation }: any) {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
       <View className="flex-1 px-5 pt-8 pb-2">
-        <Text className="text-neutral-50 text-[32px] font-extrabold tracking-tight mb-6 mt-2">DayLog</Text>
+        <View className="flex-row items-center justify-between mt-2 mb-6">
+          <Text className="text-neutral-50 text-[32px] font-extrabold tracking-tight">DayLog</Text>
+          <TouchableOpacity 
+            onPress={() => navigation.navigate('Settings')}
+            className="bg-neutral-900 w-11 h-11 rounded-full items-center justify-center border border-neutral-800 shadow-sm"
+          >
+            <Ionicons name="settings-outline" size={22} color="#a3a3a3" />
+          </TouchableOpacity>
+        </View>
 
         <CalendarStrip 
-          selectedDate={selectedDate} 
-          onDateSelect={setSelectedDate} 
-          entries={entries}
-        />
+            selectedDate={selectedDate} 
+            onDateSelect={setSelectedDate} 
+            entries={entries}
+          />
 
-      {loading ? (
-        <ActivityIndicator size="large" color="#a1a1aa" className="mt-10" />
-      ) : (
-        <FlatList
-          data={filteredEntries}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <EntryCard entry={item} />}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={() => (
-            <View className="mt-20 items-center opacity-40">
-              <Text className="text-zinc-500 text-lg font-medium">No entries for this day.</Text>
-            </View>
-          )}
-        />
-      )}
+        {loading ? (
+          <ActivityIndicator size="large" color="#a1a1aa" className="mt-10" />
+        ) : (
+          <FlatList
+            data={filteredEntries}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => <EntryCard entry={item} />}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={() => (
+              <View className="mt-20 items-center opacity-40">
+                <Text className="text-zinc-500 text-lg font-medium">No entries for this day.</Text>
+              </View>
+            )}
+          />
+        )}
       </View>
       <QuickEntryBar onEntrySaved={fetchEntries} />
     </KeyboardAvoidingView>
