@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { View, Text, TouchableWithoutFeedback, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Entry } from '../../types/Entry';
+import MarkdownRenderer from '../../markdown/MarkdownRenderer';
 
 interface EntryCardProps {
   entry: Entry;
@@ -53,9 +54,9 @@ export default function EntryCard({ entry }: EntryCardProps) {
           <Text className="text-neutral-500 text-[11px] uppercase tracking-widest mb-2.5 font-bold">
             {formattedDate}
           </Text>
-          <Text className="text-neutral-200 text-[16px] leading-7 font-medium break-words">
-            {previewText}
-          </Text>
+          <View className="mb-1">
+            <MarkdownRenderer content={previewText} />
+          </View>
         </View>
       </Animated.View>
     </TouchableWithoutFeedback>
