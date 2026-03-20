@@ -1,7 +1,9 @@
 import React, { useRef } from 'react';
 import { View, Text, TouchableWithoutFeedback, Animated } from 'react-native';
 import { Image } from 'expo-image';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useColorScheme } from "nativewind";
 import { Entry } from '../../types/Entry';
 
 interface EntryCardProps {
@@ -21,9 +23,10 @@ const stripMarkdown = (text: string) => {
 };
 
 function EntryCardComponent({ entry, showBorder = false }: EntryCardProps) {
+  const { colorScheme } = useColorScheme();
   const plainTextPreview = stripMarkdown(entry.content);
 
-  const formattedTime = new Date(entry.createdAt).toLocaleTimeString(undefined, {
+  const formattedTime = entry.time || new Date(entry.createdAt).toLocaleTimeString(undefined, {
     hour: '2-digit',
     minute: '2-digit'
   });
@@ -68,6 +71,28 @@ function EntryCardComponent({ entry, showBorder = false }: EntryCardProps) {
               >
                 {plainTextPreview}
               </Text>
+
+              {/* Location & Weather Pills */}
+              {(entry.location || entry.weather) && (
+                <View className="flex-row items-center mt-2">
+                  {entry.location && (
+                    <View className="flex-row items-center mr-3">
+                      <Ionicons name="location-outline" size={11} color={colorScheme === 'dark' ? '#a3a3a3' : '#737373'} />
+                      <Text className="text-neutral-400 dark:text-neutral-500 text-[10px] ml-1">
+                        {entry.location}
+                      </Text>
+                    </View>
+                  )}
+                  {entry.weather && (
+                    <View className="flex-row items-center">
+                      <Ionicons name="sunny-outline" size={11} color={colorScheme === 'dark' ? '#a3a3a3' : '#737373'} />
+                      <Text className="text-neutral-400 dark:text-neutral-500 text-[10px] ml-1">
+                        {entry.weather}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              )}
 
               {entry.media && entry.media.length > 0 && (
                 <View className="flex-row mt-2">

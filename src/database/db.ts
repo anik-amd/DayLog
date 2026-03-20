@@ -17,7 +17,10 @@ export const initDb = async () => {
       content TEXT,
       createdAt INTEGER,
       updatedAt INTEGER,
-      date TEXT
+      date TEXT,
+      time TEXT,
+      location TEXT,
+      weather TEXT
     );
     CREATE INDEX IF NOT EXISTS idx_entries_date ON entries(date);
     CREATE TABLE IF NOT EXISTS media (
@@ -28,4 +31,21 @@ export const initDb = async () => {
       createdAt INTEGER
     );
   `);
+  
+  // Migration: add new columns if they don't exist (for existing databases)
+  try {
+    await database.runAsync('ALTER TABLE entries ADD COLUMN time TEXT');
+  } catch (e) {
+    // Column might already exist, ignore error
+  }
+  try {
+    await database.runAsync('ALTER TABLE entries ADD COLUMN location TEXT');
+  } catch (e) {
+    // Column might already exist, ignore error
+  }
+  try {
+    await database.runAsync('ALTER TABLE entries ADD COLUMN weather TEXT');
+  } catch (e) {
+    // Column might already exist, ignore error
+  }
 };

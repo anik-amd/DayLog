@@ -48,7 +48,13 @@ export default function FullScreenEditor({ route, navigation }: any) {
   useAutoSave(markdown, (t) => handleSave(t), 1000);
 
   const handleBack = async () => {
-    await handleSave(markdown);
+    console.log('handleBack called');
+    try {
+      await handleSave(markdown);
+      console.log('handleBack save complete, going back');
+    } catch (e) {
+      console.error('handleBack error:', e);
+    }
     navigation.goBack();
   };
 

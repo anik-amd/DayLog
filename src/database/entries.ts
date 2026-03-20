@@ -4,18 +4,25 @@ import { Entry } from '../types/Entry';
 import { Media } from '../types/Media';
 
 export const createEntry = async (entry: Omit<Entry, 'media'>) => {
+  console.log('createEntry called with:', entry);
   const db = await getDb();
-  await db.runAsync(
-    'INSERT INTO entries (id, content, createdAt, updatedAt, date) VALUES (?, ?, ?, ?, ?)',
-    [entry.id, entry.content, entry.createdAt, entry.updatedAt, entry.date]
-  );
+  try {
+    await db.runAsync(
+      'INSERT INTO entries (id, content, createdAt, updatedAt, date, time, location, weather) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [entry.id, entry.content, entry.createdAt, entry.updatedAt, entry.date, entry.time || null, entry.location || null, entry.weather || null]
+    );
+    console.log('createEntry completed');
+  } catch (error) {
+    console.error('createEntry error:', error);
+    throw error;
+  }
 };
 
-export const updateEntry = async (id: string, content: string, updatedAt: number) => {
+export const updateEntry = async (id: string, content: string, updatedAt: number, date?: string, time?: string, location?: string, weather?: string) => {
   const db = await getDb();
   await db.runAsync(
-    'UPDATE entries SET content = ?, updatedAt = ? WHERE id = ?',
-    [content, updatedAt, id]
+    'UPDATE entries SET content = ?, updatedAt = ?, date = ?, time = ?, location = ?, weather = ? WHERE id = ?',
+    [content, updatedAt, date || null, time || null, location || null, weather || null, id]
   );
 };
 

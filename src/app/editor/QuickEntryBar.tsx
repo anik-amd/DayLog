@@ -123,34 +123,46 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
     }
   };
 
-  const handleSave = useCallback(async (textToSave: string, finalizeAndRefresh: boolean = false) => {
-    if (!textToSave.trim() || isSaving.current) return;
+  const handleSave = useCallback(async (textToSave: string, finalizeAndRefresh: boolean = false, forceSave: boolean = false) => {
+    if (!textToSave.trim()) return;
+    
+    // Skip if already saving (unless forcing save like on submit)
+    if (isSaving.current && !forceSave) return;
     
     isSaving.current = true;
     try {
       const now = entryDate.getTime();
+      const dateStr = entryDate.toISOString().split('T')[0];
+      const timeStr = formatTime(entryDate);
+      
       if (!currentEntryId) {
+        console.log('Creating new entry...');
         const newId = now.toString();
         const newEntry: Omit<Entry, 'media'> = {
           id: newId,
           content: textToSave,
           createdAt: now,
           updatedAt: now,
-          date: entryDate.toISOString().split('T')[0]
+          date: dateStr,
+          time: timeStr,
+          location: location || undefined,
+          weather: weatherError ? undefined : weather || undefined
         };
         await createEntry(newEntry);
         setCurrentEntryId(newId);
+        console.log('Entry created, calling onEntrySaved');
         if (finalizeAndRefresh) onEntrySaved();
       } else {
-        await updateEntry(currentEntryId, textToSave, now);
+        console.log('Updating existing entry...');
+        await updateEntry(currentEntryId, textToSave, now, dateStr, timeStr, location || undefined, weatherError ? undefined : weather || undefined);
         if (finalizeAndRefresh) onEntrySaved();
       }
     } finally {
       isSaving.current = false;
     }
-  }, [currentEntryId, onEntrySaved, entryDate]);
+  }, [currentEntryId, onEntrySaved, entryDate, location, weather, weatherError]);
 
-  useAutoSave(content, (text) => handleSave(text, false), 1000);
+  useAutoSave(content, (text) => handleSave(text, false, false), 1000);
 
   const onChangeText = (text: string) => {
     setContent(text);
@@ -176,12 +188,18 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   const handleSubmit = async () => {
     if (!content.trim()) return;
     
-    await handleSave(content, true);
-    
-    setContent('');
-    setImages([]);
-    setCurrentEntryId(null);
-    setEntryDate(new Date());
+    try {
+      await handleSave(content, true, true);
+      setContent('');
+      setImages([]);
+      setCurrentEntryId(null);
+      setEntryDate(new Date());
+      setIsFocused(false);
+      hasScrolledRef.current = false;
+      inputRef.current?.blur();
+    } catch (error) {
+      console.error('Failed to save entry:', error);
+    }
   };
 
   const handleExpand = async () => {

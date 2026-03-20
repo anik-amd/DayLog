@@ -6,5 +6,8 @@ export interface Entry {
   createdAt: number;
   updatedAt: number;
   date: string;
+  time?: string;
+  location?: string;
+  weather?: string;
   media?: Media[];
 }
