@@ -28,6 +28,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   const [images, setImages] = useState<string[]>([]);
   const [currentEntryId, setCurrentEntryId] = useState<string | null>(null);
   const [isFocused, setIsFocused] = useState(false);
+  const [showMetadata, setShowMetadata] = useState(false);
   
   // Date/time state - use prop if provided, otherwise local state
   const [localEntryDate, setLocalEntryDate] = useState(new Date());
@@ -56,7 +57,10 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
 
   useEffect(() => {
     if (isFocused || content.trim().length > 0) {
+      setShowMetadata(true);
       fetchLocationAndWeather();
+    } else {
+      setShowMetadata(false);
     }
   }, [isFocused, content]);
 
@@ -362,11 +366,12 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   return (
       <View className="bg-white dark:bg-neutral-900 border-t border-neutral-100 dark:border-neutral-800">
         {/* Metadata Strip */}
-        <Animated.View
-          entering={FadeIn.duration(200)}
-          exiting={FadeOut.duration(150)}
-          className="mx-4 mt-3 mb-2"
-        >
+        {showMetadata && (
+          <Animated.View
+            entering={FadeIn.duration(200)}
+            exiting={FadeOut.duration(150)}
+            className="mx-4 mt-3 mb-2"
+          >
             <ScrollView 
               horizontal 
               showsHorizontalScrollIndicator={false}
@@ -433,6 +438,15 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                 </PillItem>
               </View>
 
+              {/* Photo Pill */}
+              <TouchableOpacity 
+                onPress={pickImage}
+                className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5"
+              >
+                <Ionicons name="image" size={14} color="#6366f1" />
+                <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">Photo</Text>
+              </TouchableOpacity>
+
               {/* Location Pill */}
               <View className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5">
                 <PillItem 
@@ -452,25 +466,11 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                 </PillItem>
               </View>
             </ScrollView>
-        </Animated.View>
+          </Animated.View>
+        )}
 
         {/* Main Input Row */}
         <View className="bg-white dark:bg-neutral-900 px-4 py-3 flex-row items-center">
-          {/* Image icon */}
-          {shouldShowIcons && (
-            <Animated.View
-              entering={FadeIn.springify().damping(15).stiffness(120)}
-              exiting={FadeOut.springify().duration(150)}
-            >
-              <TouchableOpacity 
-                  onPress={pickImage}
-                  className="mr-2 p-1.5"
-              >
-                  <Ionicons name="image" size={20} color="#6366f1" />
-              </TouchableOpacity>
-            </Animated.View>
-          )}
-          
           {/* Text input */}
           <View className="flex-1 relative">
             <View className={`${isFocused ? 'bg-neutral-100 dark:bg-neutral-800/50' : ''} rounded-full`}>
