@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { View, TextInput as RNTextInput, TouchableOpacity, Platform, UIManager, Image, Text, StyleSheet } from 'react-native';
+import { View, TextInput as RNTextInput, TouchableOpacity, Platform, UIManager, Image, Text, StyleSheet, ScrollView } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
@@ -366,7 +366,13 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
           exiting={FadeOut.duration(150)}
           className="mx-4 mt-3 mb-2"
         >
-            <View className="flex-row items-center bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl px-3 py-2.5">
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ flexDirection: 'row', alignItems: 'center' }}
+              className="bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl px-3 py-2.5"
+              style={{ alignSelf: 'flex-start' }}
+            >
               {/* Date Pill */}
               <TouchableOpacity 
                 onPress={() => {
@@ -376,7 +382,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                     setShowDatePicker(true);
                   }
                 }}
-                className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5 mr-2 flex-shrink-0"
+                className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5 mr-2"
               >
                 <View className="flex-row items-center">
                   <Ionicons name="calendar-outline" size={14} color="#6366f1" />
@@ -396,7 +402,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                     setShowTimePicker(true);
                   }
                 }}
-                className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5 mr-2 flex-shrink-0"
+                className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5 mr-2"
               >
                 <View className="flex-row items-center">
                   <Ionicons name="time-outline" size={14} color="#6366f1" />
@@ -408,7 +414,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               </TouchableOpacity>
 
               {/* Weather Pill */}
-              <View className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5 mr-2 flex-shrink-0">
+              <View className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5 mr-2">
                 <PillItem 
                   icon={
                     weatherLoading ? (
@@ -427,7 +433,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               </View>
 
               {/* Location Pill */}
-              <View className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5 flex-shrink-0">
+              <View className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5">
                 <PillItem 
                   icon={
                     locationLoading ? (
@@ -444,7 +450,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                   {locationError ? 'Unavailable' : location || '...'}
                 </PillItem>
               </View>
-            </View>
+            </ScrollView>
         </Animated.View>
 
         {/* Main Input Row */}
