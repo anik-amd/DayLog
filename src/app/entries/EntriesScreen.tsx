@@ -52,12 +52,12 @@ export default function EntriesScreen({ navigation }: any) {
 
   return (
     <KeyboardAvoidingView 
-      className="flex-1 bg-zinc-900"
+      className="flex-1 bg-neutral-950"
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
-      <View className="flex-1 px-4 py-4">
-        <Text className="text-white text-2xl font-bold mb-6">Timeline</Text>
+      <View className="flex-1 px-5 pt-8 pb-2">
+        <Text className="text-neutral-50 text-[32px] font-extrabold tracking-tight mb-6 mt-2">Journal</Text>
 
       {loading ? (
         <ActivityIndicator size="large" color="#a1a1aa" className="mt-10" />
@@ -72,13 +72,7 @@ export default function EntriesScreen({ navigation }: any) {
         />
       )}
 
-      <View className="mt-4 border-t border-zinc-800 pt-4 pb-2">
-        <Button
-          title="Go to Settings"
-          color="#a1a1aa"
-          onPress={() => navigation.navigate('Settings')}
-        />
-      </View>
+      {/* Settings hidden temporarily or placed better later, removed inline border block to make it cleaner */}
       </View>
       <QuickEntryBar onEntrySaved={fetchEntries} />
     </KeyboardAvoidingView>

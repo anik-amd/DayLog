@@ -62,12 +62,12 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
   };
 
   return (
-    <View className="bg-zinc-800 border-t border-zinc-700 p-3 pt-2 shadow-lg flex-row items-end">
-      <View className="flex-1 bg-zinc-900 rounded-3xl min-h-[50px] max-h-[150px]">
+    <View className="bg-neutral-950 border-t border-neutral-900 p-4 pb-6 flex-row items-end">
+      <View className="flex-1 bg-neutral-900 rounded-[28px] border border-neutral-800 min-h-[56px] max-h-[150px]">
         <TextInput
-          placeholder="Type a quick entry..."
-          placeholderTextColor="#a1a1aa"
-          className="text-white text-base px-5 py-3"
+          placeholder="What's on your mind?"
+          placeholderTextColor="#737373"
+          className="text-neutral-100 text-[16px] px-5 py-4 leading-5 font-medium"
           multiline={true}
           value={content}
           onChangeText={onChangeText}
@@ -77,9 +77,9 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
       {content.trim().length > 0 && (
         <TouchableOpacity 
           onPress={handleSubmit}
-          className="bg-blue-600 w-12 h-12 rounded-full items-center justify-center ml-3 mb-1"
+          className="bg-indigo-500 w-[56px] h-[56px] rounded-full items-center justify-center ml-3 shadow-md border border-indigo-400/20"
         >
-          <Ionicons name="send" size={20} color="white" style={{ marginLeft: 3 }} />
+          <Ionicons name="arrow-up" size={24} color="white" />
         </TouchableOpacity>
       )}
     </View>

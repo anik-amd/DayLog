@@ -22,9 +22,11 @@ export default function EntryCard({ entry }: EntryCardProps) {
   });
 
   return (
-    <View className="bg-zinc-800 p-4 rounded-xl mb-3 border border-zinc-700">
-      <Text className="text-zinc-400 text-xs mb-2 font-medium">{formattedDate}</Text>
-      <Text className="text-white text-base leading-relaxed break-words">
+    <View className="bg-neutral-900 p-5 rounded-3xl mb-4 border border-neutral-800 shadow-sm relative overflow-hidden">
+      <Text className="text-neutral-500 text-[11px] uppercase tracking-widest mb-2.5 font-bold">
+        {formattedDate}
+      </Text>
+      <Text className="text-neutral-200 text-[16px] leading-7 font-medium break-words">
         {previewText}
       </Text>
     </View>
