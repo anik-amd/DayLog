@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, Button, FlatList, ActivityIndicator } from 'react-native';
 import { initDb } from '../../database/db';
 import { createEntry, getAllEntries } from '../../database/entries';
 import { Entry } from '../../types/Entry';
+import EntryCard from './EntryCard';
 
 export default function EntriesScreen({ navigation }: any) {
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -48,14 +49,14 @@ export default function EntriesScreen({ navigation }: any) {
       {loading ? (
         <ActivityIndicator size="large" color="#a1a1aa" className="mt-10" />
       ) : (
-        <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-          {entries.map((entry) => (
-            <View key={entry.id} className="bg-zinc-800 p-4 rounded-xl mb-3 border border-zinc-700">
-              <Text className="text-zinc-400 text-xs mb-1">{entry.date}</Text>
-              <Text className="text-white text-base leading-relaxed">{entry.content}</Text>
-            </View>
-          ))}
-        </ScrollView>
+        <FlatList
+          data={entries}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => <EntryCard entry={item} />}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          className="flex-1"
+        />
       )}
 
       <View className="mt-4 border-t border-zinc-800 pt-4 pb-2">
