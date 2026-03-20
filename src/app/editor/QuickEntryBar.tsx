@@ -170,53 +170,51 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
         {/* Image icon on the left */}
         <TouchableOpacity 
             onPress={pickImage}
-            className="ml-2 p-1.5 border border-transparent rounded-full"
+            className="mr-2 p-1.5 border border-transparent rounded-full"
         >
             <Ionicons name="image" size={20} color="#6366f1" />
         </TouchableOpacity>
         
         {/* Text input container with integrated expand icon */}
-        <View className="flex-1 relative">
-          <View className="bg-neutral-50 dark:bg-neutral-950/50 rounded-[24px] border border-neutral-200 dark:border-neutral-800 overflow-hidden">
-            {content.trim().length > 0 && (
-              <View className="flex-row px-3 pt-1 pb-1">
-                {images.map((uri, i) => (
-                  <Image key={i} source={{ uri }} className="w-8 h-8 rounded mr-1 border border-neutral-200 dark:border-neutral-800" />
-                ))}
-              </View>
-            )}
-            <TextInput
-              placeholder={isFocused || content.trim().length > 0 ? "" : "What's on your mind?"}
-              placeholderTextColor="#737373"
-              className="text-neutral-900 dark:text-neutral-100 text-[14px] px-4 py-2.5 leading-4 font-normal"
-              multiline={true}
-              value={content}
-              onChangeText={onChangeText}
-              textAlignVertical="center"
-              underlineColorAndroid="transparent"
-            />
-          </View>
+        <View className="flex-1 bg-neutral-50 dark:bg-neutral-950/50 rounded-[24px] border border-neutral-200 dark:border-neutral-800 overflow-hidden relative">
+          {content.trim().length > 0 && (
+            <View className="flex-row px-3 pt-1 pb-1">
+              {images.map((uri, i) => (
+                <Image key={i} source={{ uri }} className="w-8 h-8 rounded mr-1 border border-neutral-200 dark:border-neutral-800" />
+              ))}
+            </View>
+          )}
+          <TextInput
+            placeholder={isFocused || content.trim().length > 0 ? "" : "What's on your mind?"}
+            placeholderTextColor="#737373"
+            className="text-neutral-900 dark:text-neutral-100 text-[14px] px-4 py-2.5 pr-16 leading-4 font-normal"
+            multiline={true}
+            value={content}
+            onChangeText={onChangeText}
+            textAlignVertical="center"
+            underlineColorAndroid="transparent"
+          />
           
           {/* Expand icon integrated with input (muted color - right side of text input) */}
           {isFocused || content.trim().length > 0 && (
             <TouchableOpacity 
                 onPress={handleExpand}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-full bg-[#a3a3a3]/20"
+                className="absolute right-10 top-1/2 -translate-y-1/2 p-1.5 rounded-full"
             >
-                <Ionicons name="arrow-forward" size={16} color="#a3a3a3" />
-            </TouchableOpacity>
-          )}
-          
-          {/* Submit icon (right arrow) - to the right of expand icon */}
-          {content.trim().length > 0 && (
-            <TouchableOpacity 
-                onPress={handleSubmit}
-                className="ml-2 p-1.5 bg-indigo-500 rounded-full"
-            >
-                <Ionicons name="arrow-forward" size={16} color="white" />
+                <Ionicons name="expand-outline" size={16} color="#a3a3a3" />
             </TouchableOpacity>
           )}
         </View>
+        
+        {/* Submit icon (checkmark) - to the right of input box */}
+        {content.trim().length > 0 && (
+          <TouchableOpacity 
+              onPress={handleSubmit}
+              className="ml-2 p-2 bg-indigo-500 rounded-full"
+          >
+              <Ionicons name="checkmark" size={18} color="white" />
+          </TouchableOpacity>
+        )}
       </View>
   );
 }
