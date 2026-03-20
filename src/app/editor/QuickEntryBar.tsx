@@ -182,9 +182,9 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
           <Ionicons name="image" size={24} color={content.trim().length > 0 ? "#737373" : "#6366f1"} />
       </TouchableOpacity>
       
-      <View className="flex-1 bg-neutral-100 dark:bg-neutral-900 rounded-[20px] border border-neutral-200 dark:border-neutral-800 max-h-[250px] overflow-hidden">
+      <View className="flex-1 bg-neutral-100 dark:bg-neutral-900 rounded-[28px] border border-neutral-200 dark:border-neutral-800 max-h-[250px] overflow-hidden">
         {images.length > 0 && (
-          <View className="flex-row px-4 pt-3">
+          <View className="flex-row px-4 pt-3 pb-1">
             {images.map((uri, i) => (
               <Image key={i} source={{ uri }} className="w-12 h-12 rounded-lg mr-2 border border-neutral-200 dark:border-neutral-800" />
             ))}
@@ -193,10 +193,12 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
         <TextInput
           placeholder="What's on your mind?"
           placeholderTextColor="#737373"
-          className="text-neutral-900 dark:text-neutral-100 text-[16px] px-4 py-2.5 leading-5 font-medium"
+          className="text-neutral-900 dark:text-neutral-100 text-[16px] px-5 py-3.5 leading-5 font-medium"
           multiline={true}
           value={content}
           onChangeText={onChangeText}
+          textAlignVertical="center"
+          underlineColorAndroid="transparent"
         />
       </View>
 
