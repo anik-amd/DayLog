@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { Entry } from '../../types/Entry';
 
 interface EntryCardProps {
@@ -21,14 +22,21 @@ export default function EntryCard({ entry }: EntryCardProps) {
     minute: '2-digit'
   });
 
+  const navigation = useNavigation<any>();
+
   return (
-    <View className="bg-neutral-900 p-5 rounded-3xl mb-4 border border-neutral-800 shadow-sm relative overflow-hidden">
-      <Text className="text-neutral-500 text-[11px] uppercase tracking-widest mb-2.5 font-bold">
-        {formattedDate}
-      </Text>
-      <Text className="text-neutral-200 text-[16px] leading-7 font-medium break-words">
-        {previewText}
-      </Text>
-    </View>
+    <TouchableOpacity 
+      activeOpacity={0.7}
+      onPress={() => navigation.navigate('FullScreenEditor', { entryId: entry.id, initialContent: entry.content })}
+    >
+      <View className="bg-neutral-900 p-5 rounded-3xl mb-4 border border-neutral-800 shadow-sm relative overflow-hidden">
+        <Text className="text-neutral-500 text-[11px] uppercase tracking-widest mb-2.5 font-bold">
+          {formattedDate}
+        </Text>
+        <Text className="text-neutral-200 text-[16px] leading-7 font-medium break-words">
+          {previewText}
+        </Text>
+      </View>
+    </TouchableOpacity>
   );
 }

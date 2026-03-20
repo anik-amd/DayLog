@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { View, TextInput, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { createEntry, updateEntry } from '../../database/entries';
 import { useAutoSave } from '../../hooks/useAutoSave';
@@ -13,6 +14,7 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
   const [content, setContent] = useState('');
   const [currentEntryId, setCurrentEntryId] = useState<string | null>(null);
   const isSaving = useRef(false);
+  const navigation = useNavigation<any>();
 
   const handleSave = useCallback(async (textToSave: string, finalizeAndRefresh: boolean = false) => {
     if (!textToSave.trim() || isSaving.current) return;
@@ -61,8 +63,33 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
     setCurrentEntryId(null);
   };
 
+  const handleExpand = async () => {
+    // Pre-save the document so it accurately shifts to full screen mode
+    if (!currentEntryId && content.trim()) {
+        const now = Date.now();
+        const newId = now.toString();
+        const newEntry: Omit<Entry, 'media'> = { id: newId, content, createdAt: now, updatedAt: now, date: new Date().toISOString().split('T')[0] };
+        await createEntry(newEntry);
+        setCurrentEntryId(newId);
+        onEntrySaved();
+        navigation.navigate('FullScreenEditor', { entryId: newId, initialContent: content });
+    } else if (currentEntryId) {
+        await handleSave(content, true);
+        navigation.navigate('FullScreenEditor', { entryId: currentEntryId, initialContent: content });
+    } else {
+        navigation.navigate('FullScreenEditor', { entryId: null, initialContent: '' });
+    }
+  };
+
   return (
     <View className="bg-neutral-950 border-t border-neutral-900 p-4 pb-6 flex-row items-end">
+      <TouchableOpacity 
+        onPress={handleExpand}
+        className="mb-3 mr-3 p-1.5 bg-neutral-900 border border-neutral-800 rounded-full"
+      >
+        <Ionicons name="expand" size={18} color="#a3a3a3" />
+      </TouchableOpacity>
+      
       <View className="flex-1 bg-neutral-900 rounded-[28px] border border-neutral-800 min-h-[56px] max-h-[150px]">
         <TextInput
           placeholder="What's on your mind?"

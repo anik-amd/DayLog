@@ -22,6 +22,12 @@ export const deleteEntry = async (id: string) => {
   await db.runAsync('DELETE FROM entries WHERE id = ?', [id]);
 };
 
+export const getEntry = async (id: string): Promise<Entry | null> => {
+  const db = await getDb();
+  const entry = await db.getFirstAsync<Entry>('SELECT * FROM entries WHERE id = ?', [id]);
+  return entry || null;
+};
+
 export const getAllEntries = async (): Promise<Entry[]> => {
   const db = await getDb();
   const allRows = await db.getAllAsync<Entry>('SELECT * FROM entries ORDER BY createdAt DESC');

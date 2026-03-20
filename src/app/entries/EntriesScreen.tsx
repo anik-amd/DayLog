@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, Button, FlatList, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { initDb } from '../../database/db';
 import { createEntry, getAllEntries } from '../../database/entries';
 import { Entry } from '../../types/Entry';
@@ -18,6 +19,15 @@ export default function EntriesScreen({ navigation }: any) {
       console.error("Failed to fetch entries:", error);
     }
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      // Whenever this screen comes into focus (e.g. returning from full screen editor), refresh the timeline!
+      if (!loading) {
+        fetchEntries();
+      }
+    }, [loading])
+  );
 
   useEffect(() => {
     const setupDatabase = async () => {
