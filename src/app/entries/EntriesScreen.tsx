@@ -1,23 +1,31 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, Button, FlatList, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { initDb } from '../../database/db';
 import { createEntry, getAllEntries } from '../../database/entries';
 import { Entry } from '../../types/Entry';
 import EntryCard from './EntryCard';
+import QuickEntryBar from '../editor/QuickEntryBar';
 
 export default function EntriesScreen({ navigation }: any) {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const fetchEntries = async () => {
+    try {
+      const currentEntries = await getAllEntries();
+      setEntries(currentEntries);
+    } catch (error) {
+      console.error("Failed to fetch entries:", error);
+    }
+  };
 
   useEffect(() => {
     const setupDatabase = async () => {
       try {
         await initDb();
         
-        // Fetch current entries
         let currentEntries = await getAllEntries();
         
-        // Create a test entry if the database is completely empty
         if (currentEntries.length === 0) {
           const testEntry: Omit<Entry, 'media'> = {
             id: Date.now().toString(),
@@ -43,8 +51,13 @@ export default function EntriesScreen({ navigation }: any) {
   }, []);
 
   return (
-    <View className="flex-1 bg-zinc-900 px-4 py-4">
-      <Text className="text-white text-2xl font-bold mb-6">Timeline</Text>
+    <KeyboardAvoidingView 
+      className="flex-1 bg-zinc-900"
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+    >
+      <View className="flex-1 px-4 py-4">
+        <Text className="text-white text-2xl font-bold mb-6">Timeline</Text>
 
       {loading ? (
         <ActivityIndicator size="large" color="#a1a1aa" className="mt-10" />
@@ -66,6 +79,8 @@ export default function EntriesScreen({ navigation }: any) {
           onPress={() => navigation.navigate('Settings')}
         />
       </View>
-    </View>
+      </View>
+      <QuickEntryBar onEntrySaved={fetchEntries} />
+    </KeyboardAvoidingView>
   );
 }
