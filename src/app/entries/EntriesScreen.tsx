@@ -150,7 +150,7 @@ export default function EntriesScreen({ navigation }: any) {
                 estimatedItemSize={180}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ 
-                    paddingTop: 200, // Space for the unified header
+                    paddingTop: 280, // Generous space for the floating Calendar and Logo bar
                     paddingBottom: 150, 
                     paddingHorizontal: 15 
                 }}
