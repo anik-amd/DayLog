@@ -167,13 +167,15 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
 
   return (
       <View className="bg-white dark:bg-neutral-950 border-t border-neutral-200 dark:border-neutral-900 px-4 py-3 flex-row items-center">
-        {/* Image icon on the left */}
-        <TouchableOpacity 
-            onPress={pickImage}
-            className="mr-2 p-1.5 border border-transparent rounded-full"
-        >
-            <Ionicons name="image" size={20} color="#6366f1" />
-        </TouchableOpacity>
+        {/* Image icon on the left - only shows when focused or has content */}
+        {(isFocused || content.trim().length > 0) && (
+          <TouchableOpacity 
+              onPress={pickImage}
+              className="mr-2 p-1.5 border border-transparent rounded-full"
+          >
+              <Ionicons name="image" size={20} color="#6366f1" />
+          </TouchableOpacity>
+        )}
         
         {/* Text input container with integrated expand icon */}
         <View className="flex-1 bg-neutral-50 dark:bg-neutral-950/50 rounded-[24px] border border-neutral-200 dark:border-neutral-800 overflow-hidden relative">
