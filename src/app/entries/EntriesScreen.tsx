@@ -13,12 +13,19 @@ import { Entry } from '../../types/Entry';
 import EntryCard from './EntryCard';
 import CalendarStrip from './CalendarStrip';
 import QuickEntryBar from '../editor/QuickEntryBar';
+import WebPicker from '../editor/WebPicker';
 
 export default function EntriesScreen({ navigation }: any) {
   const { colorScheme } = useColorScheme();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState<string | null>(null); // null means "Show All" by default
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  
+  // Date/time picker state (managed at screen level for web)
+  const [pickerDate, setPickerDate] = useState(new Date());
+  const [pickerVisible, setPickerVisible] = useState(false);
+  const [pickerType, setPickerType] = useState<'date' | 'time'>('date');
+  const [entryDate, setEntryDate] = useState(new Date());
 
   // Animation values for scroll-driven UI hiding
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -270,9 +277,43 @@ export default function EntriesScreen({ navigation }: any) {
                 className="bg-white dark:bg-neutral-900 rounded-[40px] shadow-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden"
                 style={{ backgroundColor: colorScheme === 'dark' ? '#171717' : '#ffffff' }}
             >
-                <QuickEntryBar onEntrySaved={fetchEntries} />
+                <QuickEntryBar 
+                  onEntrySaved={fetchEntries}
+                  entryDate={entryDate}
+                  onEntryDateChange={setEntryDate}
+                  onDatePress={() => {
+                    setPickerType('date');
+                    setPickerDate(entryDate);
+                    setPickerVisible(true);
+                  }}
+                  onTimePress={() => {
+                    setPickerType('time');
+                    setPickerDate(entryDate);
+                    setPickerVisible(true);
+                  }}
+                />
             </View>
         </Animated.View>
+
+        {/* Web Picker - Rendered at screen level */}
+        {Platform.OS === 'web' && (
+          <WebPicker
+            visible={pickerVisible}
+            type={pickerType}
+            value={pickerDate}
+            onClose={() => setPickerVisible(false)}
+            onSelect={(selectedDate) => {
+              const newDate = new Date(entryDate);
+              if (pickerType === 'date') {
+                newDate.setFullYear(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+              } else {
+                newDate.setHours(selectedDate.getHours(), selectedDate.getMinutes());
+              }
+              setEntryDate(newDate);
+              setPickerVisible(false);
+            }}
+          />
+        )}
       </View>
     </KeyboardAvoidingView>
   );

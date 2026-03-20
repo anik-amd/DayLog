@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, Platform, UIManager, Image, Text, Modal, Platform as RNPlatform } from 'react-native';
+import { View, TextInput as RNTextInput, TouchableOpacity, Platform, UIManager, Image, Text, StyleSheet } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
@@ -12,19 +12,32 @@ import { addMediaToEntry } from '../../database/media';
 import { useAutoSave } from '../../hooks/useAutoSave';
 import { Entry } from '../../types/Entry';
 
+const IS_WEB = Platform.OS === 'web';
+
 interface QuickEntryBarProps {
   onEntrySaved: () => void;
+  entryDate?: Date;
+  onEntryDateChange?: (date: Date) => void;
+  onDatePress?: () => void;
+  onTimePress?: () => void;
 }
 
-export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
+export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, onEntryDateChange, onDatePress, onTimePress }: QuickEntryBarProps) {
   const [content, setContent] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [currentEntryId, setCurrentEntryId] = useState<string | null>(null);
   const [isFocused, setIsFocused] = useState(false);
   const [showMetadata, setShowMetadata] = useState(false);
   
-  // Date/time state
-  const [entryDate, setEntryDate] = useState(new Date());
+  // Date/time state - use prop if provided, otherwise local state
+  const [localEntryDate, setLocalEntryDate] = useState(new Date());
+  const entryDate = propEntryDate ?? localEntryDate;
+  const setEntryDate = (date: Date) => {
+    if (onEntryDateChange) {
+      onEntryDateChange(date);
+    }
+    setLocalEntryDate(date);
+  };
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   
@@ -51,7 +64,7 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
   }, [isFocused, content]);
 
   const fetchLocationAndWeather = async () => {
-    if (RNPlatform.OS === 'web') {
+    if (IS_WEB) {
       setLocation('San Francisco, CA');
       setWeather('72°F Sunny');
       return;
@@ -245,20 +258,34 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
   };
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(false);
-    if (selectedDate) {
-      const newDate = new Date(entryDate);
-      newDate.setFullYear(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
-      setEntryDate(newDate);
+    if (Platform.OS === 'android') {
+      setShowDatePicker(false);
+    }
+    if (event.type === 'dismissed' || !selectedDate) {
+      setShowDatePicker(false);
+      return;
+    }
+    const newDate = new Date(entryDate);
+    newDate.setFullYear(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+    setEntryDate(newDate);
+    if (Platform.OS === 'ios') {
+      setShowDatePicker(false);
     }
   };
 
   const handleTimeChange = (event: any, selectedTime?: Date) => {
-    setShowTimePicker(false);
-    if (selectedTime) {
-      const newDate = new Date(entryDate);
-      newDate.setHours(selectedTime.getHours(), selectedTime.getMinutes());
-      setEntryDate(newDate);
+    if (Platform.OS === 'android') {
+      setShowTimePicker(false);
+    }
+    if (event.type === 'dismissed' || !selectedTime) {
+      setShowTimePicker(false);
+      return;
+    }
+    const newDate = new Date(entryDate);
+    newDate.setHours(selectedTime.getHours(), selectedTime.getMinutes());
+    setEntryDate(newDate);
+    if (Platform.OS === 'ios') {
+      setShowTimePicker(false);
     }
   };
 
@@ -282,6 +309,40 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
   };
 
   const shouldShowIcons = isFocused || content.trim().length > 0;
+
+  // Calendar helpers
+  const getDaysInMonth = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDay = firstDay.getDay();
+    
+    const days = [];
+    // Add empty slots for days before the first day of the month
+    for (let i = 0; i < startingDay; i++) {
+      days.push(null);
+    }
+    // Add all days of the month
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(new Date(year, month, i));
+    }
+    return days;
+  };
+
+  const isSameDay = (d1: Date | null, d2: Date) => {
+    if (!d1) return false;
+    return d1.getDate() === d2.getDate() && 
+           d1.getMonth() === d2.getMonth() && 
+           d1.getFullYear() === d2.getFullYear();
+  };
+
+  const isToday = (date: Date | null) => {
+    if (!date) return false;
+    const today = new Date();
+    return isSameDay(date, today);
+  };
 
   const PillItem = ({ icon, children, onPress, isError, isLoading }: { 
     icon: React.ReactNode; 
@@ -313,32 +374,42 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
             <View className="flex-row items-center bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl px-3 py-2.5">
               {/* Date Pill */}
               <TouchableOpacity 
-                onPress={() => setShowDatePicker(true)}
+                onPress={() => {
+                  if (IS_WEB && onDatePress) {
+                    onDatePress();
+                  } else {
+                    setShowDatePicker(true);
+                  }
+                }}
                 className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5 mr-2 flex-shrink-0"
               >
-                <PillItem 
-                  icon={
-                    <Ionicons name="calendar-outline" size={14} color="#6366f1" />
-                  }
-                  onPress={() => setShowDatePicker(true)}
-                >
-                  {formatDate(entryDate)}
-                </PillItem>
+                <View className="flex-row items-center">
+                  <Ionicons name="calendar-outline" size={14} color="#6366f1" />
+                  <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">
+                    {formatDate(entryDate)}
+                  </Text>
+                  <Ionicons name="chevron-down" size={12} color="#a3a3a3" className="ml-1" />
+                </View>
               </TouchableOpacity>
 
               {/* Time Pill */}
               <TouchableOpacity 
-                onPress={() => setShowTimePicker(true)}
+                onPress={() => {
+                  if (IS_WEB && onTimePress) {
+                    onTimePress();
+                  } else {
+                    setShowTimePicker(true);
+                  }
+                }}
                 className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5 mr-2 flex-shrink-0"
               >
-                <PillItem 
-                  icon={
-                    <Ionicons name="time-outline" size={14} color="#6366f1" />
-                  }
-                  onPress={() => setShowTimePicker(true)}
-                >
-                  {formatTime(entryDate)}
-                </PillItem>
+                <View className="flex-row items-center">
+                  <Ionicons name="time-outline" size={14} color="#6366f1" />
+                  <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">
+                    {formatTime(entryDate)}
+                  </Text>
+                  <Ionicons name="chevron-down" size={12} color="#a3a3a3" className="ml-1" />
+                </View>
               </TouchableOpacity>
 
               {/* Weather Pill */}
@@ -412,7 +483,7 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
               )}
               
               <View className="flex-row items-center">
-                <TextInput
+                <RNTextInput
                   placeholder="What's on your mind?"
                   placeholderTextColor="#737373"
                   className="flex-1 text-neutral-900 dark:text-neutral-100 text-[14px] px-4 py-2 pr-10 leading-4 font-normal"
@@ -460,25 +531,8 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
           )}
         </View>
 
-        {/* Date Picker Modal */}
-        {showDatePicker && (
-          <DateTimePicker
-            value={entryDate}
-            mode="date"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onChange={handleDateChange}
-          />
-        )}
-
-        {/* Time Picker Modal */}
-        {showTimePicker && (
-          <DateTimePicker
-            value={entryDate}
-            mode="time"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onChange={handleTimeChange}
-          />
-        )}
       </View>
   );
 }
+
+const styles = StyleSheet.create({});
