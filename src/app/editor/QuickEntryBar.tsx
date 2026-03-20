@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { View, TextInput as RNTextInput, TouchableOpacity, Platform, UIManager, Image, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, TextInput as RNTextInput, TouchableOpacity, Platform, UIManager, Image, Text, StyleSheet, ScrollView, KeyboardAvoidingView } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { useColorScheme } from "nativewind";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Picker from './Picker';
 import { useNavigation } from '@react-navigation/native';
@@ -24,6 +25,8 @@ interface QuickEntryBarProps {
 }
 
 export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, onEntryDateChange, onDatePress, onTimePress }: QuickEntryBarProps) {
+  const { colorScheme } = useColorScheme();
+  const inputRef = useRef<RNTextInput>(null);
   const [content, setContent] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [currentEntryId, setCurrentEntryId] = useState<string | null>(null);
@@ -54,9 +57,10 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   
   const isSaving = useRef(false);
   const navigation = useNavigation<any>();
+  const hasScrolledRef = useRef(false);
 
   useEffect(() => {
-    if (isFocused || content.trim().length > 0) {
+    if (content.trim().length > 0 || (isFocused && !hasScrolledRef.current)) {
       setShowMetadata(true);
       fetchLocationAndWeather();
     } else {
@@ -164,6 +168,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
     setTimeout(() => {
       if (!content.trim()) {
         setIsFocused(false);
+        hasScrolledRef.current = false;
       }
     }, 200);
   };
@@ -364,17 +369,19 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   );
 
   return (
-      <View className="bg-white dark:bg-neutral-900 border-t border-neutral-100 dark:border-neutral-800 px-4 pt-3">
-        {/* Unified Card - pills and input as one */}
-        <View className="bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl overflow-hidden">
-          {/* Pills Row */}
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 10 }}
-            className=""
-            style={{ alignSelf: 'flex-start' }}
-          >
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="px-4 pt-3"
+      >
+        {/* Single Card - pills and input together */}
+        <View className="rounded-2xl bg-white dark:bg-neutral-900 py-3">
+          {/* Pills Row - only show when typing */}
+          {showMetadata && (
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 8, paddingRight: 16 }}
+            >
             {/* Date Pill */}
             <TouchableOpacity 
               onPress={() => {
@@ -384,15 +391,13 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                   setShowDatePicker(true);
                 }
               }}
-              className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5 mr-2"
+              className="flex-row items-center rounded-full bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5 mr-2"
             >
-              <View className="flex-row items-center">
-                <Ionicons name="calendar-outline" size={14} color="#6366f1" />
-                <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">
-                  {formatDate(entryDate)}
-                </Text>
-                <Ionicons name="chevron-down" size={12} color="#a3a3a3" className="ml-1" />
-              </View>
+              <Ionicons name="calendar-outline" size={14} color="#6366f1" />
+              <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">
+                {formatDate(entryDate)}
+              </Text>
+              <Ionicons name="chevron-down" size={12} color="#a3a3a3" className="ml-1" />
             </TouchableOpacity>
 
             {/* Time Pill */}
@@ -404,19 +409,17 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                   setShowTimePicker(true);
                 }
               }}
-              className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5 mr-2"
+              className="flex-row items-center rounded-full bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5 mr-2"
             >
-              <View className="flex-row items-center">
-                <Ionicons name="time-outline" size={14} color="#6366f1" />
-                <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">
-                  {formatTime(entryDate)}
-                </Text>
-                <Ionicons name="chevron-down" size={12} color="#a3a3a3" className="ml-1" />
-              </View>
+              <Ionicons name="time-outline" size={14} color="#6366f1" />
+              <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">
+                {formatTime(entryDate)}
+              </Text>
+              <Ionicons name="chevron-down" size={12} color="#a3a3a3" className="ml-1" />
             </TouchableOpacity>
 
             {/* Weather Pill */}
-            <View className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5 mr-2">
+            <View className="flex-row items-center rounded-full bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5 mr-2">
               <PillItem 
                 icon={
                   weatherLoading ? (
@@ -435,7 +438,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
             </View>
 
             {/* Location Pill */}
-            <View className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5">
+            <View className="flex-row items-center rounded-full bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5 mr-2">
               <PillItem 
                 icon={
                   locationLoading ? (
@@ -456,18 +459,16 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
             {/* Photo Pill */}
             <TouchableOpacity 
               onPress={pickImage}
-              className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5"
+              className="flex-row items-center rounded-full bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5"
             >
               <Ionicons name="image" size={14} color="#6366f1" />
               <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">Photo</Text>
             </TouchableOpacity>
           </ScrollView>
-
-          {/* Divider */}
-          <View className="h-px bg-neutral-200/50 dark:bg-neutral-700/50 mx-3" />
+          )}
 
           {/* Input Row */}
-          <View className="flex-row items-center px-3 py-3">
+          <View className={`flex-row items-center px-4 ${showMetadata ? 'mt-3' : ''}`}>
             {/* Images preview */}
             {images.length > 0 && (
               <View className="flex-row mr-2">
@@ -480,9 +481,10 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
             {/* Text input */}
             <View className="flex-1">
               <RNTextInput
+                ref={inputRef}
                 placeholder="What's on your mind?"
                 placeholderTextColor="#737373"
-                className="text-neutral-900 dark:text-neutral-100 text-[14px] leading-4 font-normal"
+                className="text-neutral-900 dark:text-neutral-100 text-[14px] leading-4 font-normal p-0"
                 multiline={true}
                 value={content}
                 onChangeText={onChangeText}
@@ -526,53 +528,52 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
         </View>
 
         {/* Bottom padding */}
-        <View className="h-1" />
+      <View className="h-1" />
 
-        {/* Native Date/Time Pickers - iOS uses native, Android uses custom picker */}
-        {showDatePicker && (
-          Platform.OS === 'ios' ? (
-            <DateTimePicker
-              value={entryDate}
-              mode="date"
-              display="default"
-              onChange={handleDateChange}
-            />
-          ) : (
-            <Picker
-              visible={showDatePicker}
-              type="date"
-              value={entryDate}
-              onClose={() => setShowDatePicker(false)}
-              onSelect={(date) => {
-                handleDateChange({ type: 'set' }, date);
-                setShowDatePicker(false);
-              }}
-            />
-          )
-        )}
-        {showTimePicker && (
-          Platform.OS === 'ios' ? (
-            <DateTimePicker
-              value={entryDate}
-              mode="time"
-              display="default"
-              onChange={handleTimeChange}
-            />
-          ) : (
-            <Picker
-              visible={showTimePicker}
-              type="time"
-              value={entryDate}
-              onClose={() => setShowTimePicker(false)}
-              onSelect={(date) => {
-                handleTimeChange({ type: 'set' }, date);
-                setShowTimePicker(false);
-              }}
-            />
-          )
-        )}
-
-      </View>
+      {/* Native Date/Time Pickers - iOS uses native, Android uses custom picker */}
+      {showDatePicker && (
+        Platform.OS === 'ios' ? (
+          <DateTimePicker
+            value={entryDate}
+            mode="date"
+            display="default"
+            onChange={handleDateChange}
+          />
+        ) : (
+          <Picker
+            visible={showDatePicker}
+            type="date"
+            value={entryDate}
+            onClose={() => setShowDatePicker(false)}
+            onSelect={(date) => {
+              handleDateChange({ type: 'set' }, date);
+              setShowDatePicker(false);
+            }}
+          />
+        )
+      )}
+      {showTimePicker && (
+        Platform.OS === 'ios' ? (
+          <DateTimePicker
+            value={entryDate}
+            mode="time"
+            display="default"
+            onChange={handleTimeChange}
+          />
+        ) : (
+          <Picker
+            visible={showTimePicker}
+            type="time"
+            value={entryDate}
+            onClose={() => setShowTimePicker(false)}
+            onSelect={(date) => {
+              handleTimeChange({ type: 'set' }, date);
+              setShowTimePicker(false);
+            }}
+          />
+        )
+      )}
+    </KeyboardAvoidingView>
   );
 }
 

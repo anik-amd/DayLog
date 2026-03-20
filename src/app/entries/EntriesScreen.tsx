@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { View, Text, ActivityIndicator, KeyboardAvoidingView, Platform, LayoutAnimation, UIManager, TouchableOpacity, Animated, ScrollView } from 'react-native';
+import { View, Text, ActivityIndicator, KeyboardAvoidingView, Platform, LayoutAnimation, UIManager, TouchableOpacity, Animated, ScrollView, Keyboard } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useColorScheme } from "nativewind";
 import { Ionicons } from '@expo/vector-icons';
@@ -49,6 +49,11 @@ export default function EntriesScreen({ navigation }: any) {
             const currentHide = (uiPosition as any)._value || 0;
             const newHide = Math.min(1, currentHide + (delta / 80)); 
             uiPosition.setValue(newHide);
+            
+            // Dismiss keyboard on significant scroll down
+            if (delta > 20) {
+              Keyboard.dismiss();
+            }
         } else if (delta < -10) {
             // SCROLL UP: Show instantly/fast
             Animated.timing(uiPosition, { toValue: 0, duration: 200, useNativeDriver: true }).start();
