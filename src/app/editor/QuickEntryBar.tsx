@@ -364,173 +364,169 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   );
 
   return (
-      <View className="bg-white dark:bg-neutral-900 border-t border-neutral-100 dark:border-neutral-800">
-        {/* Metadata Strip */}
-        {showMetadata && (
-          <Animated.View
-            entering={FadeIn.duration(200)}
-            exiting={FadeOut.duration(150)}
-            className="mx-4 mt-3 mb-2"
+      <View className="bg-white dark:bg-neutral-900 border-t border-neutral-100 dark:border-neutral-800 px-4 pt-3">
+        {/* Unified Card - pills and input as one */}
+        <View className="bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl overflow-hidden">
+          {/* Pills Row */}
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 10 }}
+            className=""
+            style={{ alignSelf: 'flex-start' }}
           >
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ flexDirection: 'row', alignItems: 'center' }}
-              className="bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl px-3 py-2.5"
-              style={{ alignSelf: 'flex-start' }}
+            {/* Date Pill */}
+            <TouchableOpacity 
+              onPress={() => {
+                if (IS_WEB && onDatePress) {
+                  onDatePress();
+                } else {
+                  setShowDatePicker(true);
+                }
+              }}
+              className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5 mr-2"
             >
-              {/* Date Pill */}
-              <TouchableOpacity 
-                onPress={() => {
-                  if (IS_WEB && onDatePress) {
-                    onDatePress();
-                  } else {
-                    setShowDatePicker(true);
-                  }
-                }}
-                className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5 mr-2"
-              >
-                <View className="flex-row items-center">
-                  <Ionicons name="calendar-outline" size={14} color="#6366f1" />
-                  <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">
-                    {formatDate(entryDate)}
-                  </Text>
-                  <Ionicons name="chevron-down" size={12} color="#a3a3a3" className="ml-1" />
-                </View>
-              </TouchableOpacity>
-
-              {/* Time Pill */}
-              <TouchableOpacity 
-                onPress={() => {
-                  if (IS_WEB && onTimePress) {
-                    onTimePress();
-                  } else {
-                    setShowTimePicker(true);
-                  }
-                }}
-                className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5 mr-2"
-              >
-                <View className="flex-row items-center">
-                  <Ionicons name="time-outline" size={14} color="#6366f1" />
-                  <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">
-                    {formatTime(entryDate)}
-                  </Text>
-                  <Ionicons name="chevron-down" size={12} color="#a3a3a3" className="ml-1" />
-                </View>
-              </TouchableOpacity>
-
-              {/* Weather Pill */}
-              <View className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5 mr-2">
-                <PillItem 
-                  icon={
-                    weatherLoading ? (
-                      <Ionicons name="cloudy-outline" size={14} color="#a3a3a3" />
-                    ) : weatherError ? (
-                      <Ionicons name="cloud-offline-outline" size={14} color="#ef4444" />
-                    ) : (
-                      <Ionicons name="sunny-outline" size={14} color="#f59e0b" />
-                    )
-                  }
-                  isError={weatherError}
-                  isLoading={weatherLoading}
-                >
-                  {weatherError ? 'N/A' : weather || '...'}
-                </PillItem>
-              </View>
-
-              {/* Location Pill */}
-              <View className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5">
-                <PillItem 
-                  icon={
-                    locationLoading ? (
-                      <Ionicons name="location-outline" size={14} color="#a3a3a3" />
-                    ) : locationError ? (
-                      <Ionicons name="location-outline" size={14} color="#ef4444" />
-                    ) : (
-                      <Ionicons name="location-outline" size={14} color="#6366f1" />
-                    )
-                  }
-                  isError={locationError}
-                  isLoading={locationLoading}
-                >
-                  {locationError ? 'Unavailable' : location || '...'}
-                </PillItem>
-              </View>
-
-              {/* Photo Pill */}
-              <TouchableOpacity 
-                onPress={pickImage}
-                className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5"
-              >
-                <Ionicons name="image" size={14} color="#6366f1" />
-                <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">Photo</Text>
-              </TouchableOpacity>
-            </ScrollView>
-          </Animated.View>
-        )}
-
-        {/* Main Input Row */}
-        <View className="bg-white dark:bg-neutral-900 px-4 py-3 flex-row items-center">
-          {/* Text input */}
-          <View className="flex-1 relative">
-            <View className={`${isFocused ? 'bg-neutral-100 dark:bg-neutral-800/50' : ''} rounded-full`}>
-              {/* Images preview */}
-              {images.length > 0 && (
-                <View className="flex-row px-3 pt-2">
-                  {images.map((uri, i) => (
-                    <Image key={i} source={{ uri }} className="w-6 h-6 rounded mr-1" />
-                  ))}
-                </View>
-              )}
-              
               <View className="flex-row items-center">
-                <RNTextInput
-                  placeholder="What's on your mind?"
-                  placeholderTextColor="#737373"
-                  className="flex-1 text-neutral-900 dark:text-neutral-100 text-[14px] px-4 py-2 pr-10 leading-4 font-normal"
-                  multiline={true}
-                  value={content}
-                  onChangeText={onChangeText}
-                  onFocus={handleFocus}
-                  onBlur={handleBlur}
-                  textAlignVertical="center"
-                  underlineColorAndroid="transparent"
-                />
-                
-                {/* Expand icon */}
-                {shouldShowIcons && (
-                  <Animated.View
-                    entering={FadeIn.springify().damping(15).stiffness(120)}
-                    exiting={FadeOut.springify().duration(150)}
-                    className="absolute right-2"
-                  >
-                    <TouchableOpacity 
-                        onPress={handleExpand}
-                        className="p-1.5"
-                    >
-                        <Ionicons name="expand-outline" size={16} color="#a3a3a3" />
-                    </TouchableOpacity>
-                  </Animated.View>
-                )}
+                <Ionicons name="calendar-outline" size={14} color="#6366f1" />
+                <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">
+                  {formatDate(entryDate)}
+                </Text>
+                <Ionicons name="chevron-down" size={12} color="#a3a3a3" className="ml-1" />
               </View>
-            </View>
-          </View>
-          
-          {/* Submit icon */}
-          {content.trim().length > 0 && (
-            <Animated.View
-              entering={FadeIn.springify().damping(15).stiffness(120)}
-              exiting={FadeOut.springify().duration(150)}
+            </TouchableOpacity>
+
+            {/* Time Pill */}
+            <TouchableOpacity 
+              onPress={() => {
+                if (IS_WEB && onTimePress) {
+                  onTimePress();
+                } else {
+                  setShowTimePicker(true);
+                }
+              }}
+              className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5 mr-2"
             >
-              <TouchableOpacity 
-                  onPress={handleSubmit}
-                  className="ml-2 p-2 bg-indigo-500 rounded-full"
+              <View className="flex-row items-center">
+                <Ionicons name="time-outline" size={14} color="#6366f1" />
+                <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">
+                  {formatTime(entryDate)}
+                </Text>
+                <Ionicons name="chevron-down" size={12} color="#a3a3a3" className="ml-1" />
+              </View>
+            </TouchableOpacity>
+
+            {/* Weather Pill */}
+            <View className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5 mr-2">
+              <PillItem 
+                icon={
+                  weatherLoading ? (
+                    <Ionicons name="cloudy-outline" size={14} color="#a3a3a3" />
+                  ) : weatherError ? (
+                    <Ionicons name="cloud-offline-outline" size={14} color="#ef4444" />
+                  ) : (
+                    <Ionicons name="sunny-outline" size={14} color="#f59e0b" />
+                  )
+                }
+                isError={weatherError}
+                isLoading={weatherLoading}
               >
-                  <Ionicons name="checkmark" size={18} color="white" />
-              </TouchableOpacity>
-            </Animated.View>
-          )}
+                {weatherError ? 'N/A' : weather || '...'}
+              </PillItem>
+            </View>
+
+            {/* Location Pill */}
+            <View className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5">
+              <PillItem 
+                icon={
+                  locationLoading ? (
+                    <Ionicons name="location-outline" size={14} color="#a3a3a3" />
+                  ) : locationError ? (
+                    <Ionicons name="location-outline" size={14} color="#ef4444" />
+                  ) : (
+                    <Ionicons name="location-outline" size={14} color="#6366f1" />
+                  )
+                }
+                isError={locationError}
+                isLoading={locationLoading}
+              >
+                {locationError ? 'Unavailable' : location || '...'}
+              </PillItem>
+            </View>
+
+            {/* Photo Pill */}
+            <TouchableOpacity 
+              onPress={pickImage}
+              className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5"
+            >
+              <Ionicons name="image" size={14} color="#6366f1" />
+              <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">Photo</Text>
+            </TouchableOpacity>
+          </ScrollView>
+
+          {/* Divider */}
+          <View className="h-px bg-neutral-200/50 dark:bg-neutral-700/50 mx-3" />
+
+          {/* Input Row */}
+          <View className="flex-row items-center px-3 py-3">
+            {/* Images preview */}
+            {images.length > 0 && (
+              <View className="flex-row mr-2">
+                {images.map((uri, i) => (
+                  <Image key={i} source={{ uri }} className="w-6 h-6 rounded" />
+                ))}
+              </View>
+            )}
+
+            {/* Text input */}
+            <View className="flex-1">
+              <RNTextInput
+                placeholder="What's on your mind?"
+                placeholderTextColor="#737373"
+                className="text-neutral-900 dark:text-neutral-100 text-[14px] leading-4 font-normal"
+                multiline={true}
+                value={content}
+                onChangeText={onChangeText}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                textAlignVertical="center"
+                underlineColorAndroid="transparent"
+              />
+            </View>
+
+            {/* Expand icon */}
+            {shouldShowIcons && (
+              <Animated.View
+                entering={FadeIn.springify().damping(15).stiffness(120)}
+                exiting={FadeOut.springify().duration(150)}
+              >
+                <TouchableOpacity 
+                    onPress={handleExpand}
+                    className="p-1.5 ml-2"
+                >
+                    <Ionicons name="expand-outline" size={16} color="#a3a3a3" />
+                </TouchableOpacity>
+              </Animated.View>
+            )}
+
+            {/* Submit icon */}
+            {content.trim().length > 0 && (
+              <Animated.View
+                entering={FadeIn.springify().damping(15).stiffness(120)}
+                exiting={FadeOut.springify().duration(150)}
+              >
+                <TouchableOpacity 
+                    onPress={handleSubmit}
+                    className="ml-2 p-2 bg-indigo-500 rounded-full"
+                >
+                    <Ionicons name="checkmark" size={18} color="white" />
+                </TouchableOpacity>
+              </Animated.View>
+            )}
+          </View>
         </View>
+
+        {/* Bottom padding */}
+        <View className="h-1" />
 
         {/* Native Date/Time Pickers - iOS uses native, Android uses custom picker */}
         {showDatePicker && (
