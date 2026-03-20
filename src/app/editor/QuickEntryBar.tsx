@@ -27,7 +27,6 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   const [images, setImages] = useState<string[]>([]);
   const [currentEntryId, setCurrentEntryId] = useState<string | null>(null);
   const [isFocused, setIsFocused] = useState(false);
-  const [showMetadata, setShowMetadata] = useState(false);
   
   // Date/time state - use prop if provided, otherwise local state
   const [localEntryDate, setLocalEntryDate] = useState(new Date());
@@ -56,10 +55,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
 
   useEffect(() => {
     if (isFocused || content.trim().length > 0) {
-      setShowMetadata(true);
       fetchLocationAndWeather();
-    } else {
-      setShowMetadata(false);
     }
   }, [isFocused, content]);
 
@@ -365,12 +361,11 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   return (
       <View className="bg-white dark:bg-neutral-900 border-t border-neutral-100 dark:border-neutral-800">
         {/* Metadata Strip */}
-        {showMetadata && (
-          <Animated.View
-            entering={FadeIn.duration(200)}
-            exiting={FadeOut.duration(150)}
-            className="mx-4 mt-3 mb-2"
-          >
+        <Animated.View
+          entering={FadeIn.duration(200)}
+          exiting={FadeOut.duration(150)}
+          className="mx-4 mt-3 mb-2"
+        >
             <View className="flex-row items-center bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl px-3 py-2.5">
               {/* Date Pill */}
               <TouchableOpacity 
@@ -450,8 +445,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                 </PillItem>
               </View>
             </View>
-          </Animated.View>
-        )}
+        </Animated.View>
 
         {/* Main Input Row */}
         <View className="bg-white dark:bg-neutral-900 px-4 py-3 flex-row items-center">
