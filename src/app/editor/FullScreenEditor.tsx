@@ -1,26 +1,32 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, TextInput, KeyboardAvoidingView, Platform, TouchableOpacity, ScrollView } from 'react-native';
+import { View, TextInput, KeyboardAvoidingView, Platform, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getEntry, updateEntry } from '../../database/entries';
+import { deleteMedia } from '../../database/media';
 import { useAutoSave } from '../../hooks/useAutoSave';
 import MarkdownRenderer from '../../markdown/MarkdownRenderer';
+import { Entry } from '../../types/Entry';
 
 export default function FullScreenEditor({ route, navigation }: any) {
   const { entryId, initialContent, viewMode = false } = route.params;
   const [content, setContent] = useState(initialContent || '');
+  const [entry, setEntry] = useState<Entry | null>(null);
   const [isViewing, setIsViewing] = useState(viewMode);
   const isSaving = useRef(false);
 
-  useEffect(() => {
-    // If we only passed an ID but no content, load it.
-    if (!initialContent && entryId) {
-      const loadEntry = async () => {
-        const data = await getEntry(entryId);
-        if (data) setContent(data.content);
-      };
-      loadEntry();
+  const loadEntry = useCallback(async () => {
+    if (entryId) {
+      const data = await getEntry(entryId);
+      if (data) {
+        setEntry(data);
+        setContent(data.content);
+      }
     }
-  }, [entryId, initialContent]);
+  }, [entryId]);
+
+  useEffect(() => {
+    loadEntry();
+  }, [loadEntry]);
 
   const handleSave = useCallback(async (textToSave: string) => {
     if (!textToSave.trim() || isSaving.current || !entryId) return;
@@ -39,6 +45,11 @@ export default function FullScreenEditor({ route, navigation }: any) {
   const handleBack = async () => {
     await handleSave(content); // Always ensure a save before going back
     navigation.goBack();
+  };
+
+  const handleRemoveMedia = async (mediaId: string) => {
+    await deleteMedia(mediaId);
+    loadEntry(); // Refresh local state
   };
 
   return (
@@ -63,24 +74,46 @@ export default function FullScreenEditor({ route, navigation }: any) {
         )}
       </View>
 
-      <View className="flex-1 px-6 py-4">
-        {isViewing ? (
-          <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        <View className="px-6 py-4">
+          {/* Media Gallery */}
+          {entry?.media && entry.media.length > 0 && (
+            <View className="flex-row flex-wrap mb-6">
+              {entry.media.map((m) => (
+                <View key={m.id} className="relative mr-3 mb-3">
+                  <Image 
+                    source={{ uri: m.path }} 
+                    className="w-24 h-24 rounded-2xl bg-neutral-900 border border-neutral-800" 
+                  />
+                  {!isViewing && (
+                    <TouchableOpacity 
+                      onPress={() => handleRemoveMedia(m.id)}
+                      className="absolute -top-2 -right-2 bg-red-500 w-6 h-6 rounded-full items-center justify-center border border-neutral-950"
+                    >
+                      <Ionicons name="close" size={14} color="white" />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              ))}
+            </View>
+          )}
+
+          {isViewing ? (
             <MarkdownRenderer content={content} />
-          </ScrollView>
-        ) : (
-          <TextInput
-            placeholder="Start writing..."
-            placeholderTextColor="#737373"
-            className="text-neutral-100 text-[18px] leading-8 font-medium flex-1"
-            multiline={true}
-            value={content}
-            onChangeText={setContent}
-            autoFocus={true}
-            textAlignVertical="top"
-          />
-        )}
-      </View>
+          ) : (
+            <TextInput
+              placeholder="Start writing..."
+              placeholderTextColor="#737373"
+              className="text-neutral-100 text-[18px] leading-8 font-medium"
+              multiline={true}
+              value={content}
+              onChangeText={setContent}
+              autoFocus={!initialContent} // Only autoFocus if we're starting a new long entry
+              scrollEnabled={false} // Handled by parent ScrollView
+            />
+          )}
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }

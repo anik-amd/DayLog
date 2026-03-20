@@ -1,12 +1,14 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { View, TextInput, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { View, TextInput, TouchableOpacity, LayoutAnimation, Platform, UIManager, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 import { createEntry, updateEntry } from '../../database/entries';
+import { addMediaToEntry } from '../../database/media';
 import { useAutoSave } from '../../hooks/useAutoSave';
 import { Entry } from '../../types/Entry';
 
@@ -16,6 +18,7 @@ interface QuickEntryBarProps {
 
 export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
   const [content, setContent] = useState('');
+  const [images, setImages] = useState<string[]>([]);
   const [currentEntryId, setCurrentEntryId] = useState<string | null>(null);
   const isSaving = useRef(false);
   const navigation = useNavigation<any>();
@@ -71,6 +74,7 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
     
     // Clear the input and reset the tracking ID for a new entry
     setContent('');
+    setImages([]);
     setCurrentEntryId(null);
   };
 
@@ -92,18 +96,65 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
     }
   };
 
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      const selectedImage = result.assets[0].uri;
+      const now = Date.now();
+      let activeEntryId = currentEntryId;
+      
+      // Auto-create entry securely before attachment if missing
+      if (!activeEntryId) {
+        activeEntryId = now.toString();
+        const newEntry: Omit<Entry, 'media'> = { id: activeEntryId, content: content || '', createdAt: now, updatedAt: now, date: new Date().toISOString().split('T')[0] };
+        await createEntry(newEntry);
+        setCurrentEntryId(activeEntryId);
+      }
+      
+      const newMedia = {
+        id: Date.now().toString(),
+        entryId: activeEntryId,
+        type: "image" as const,
+        path: selectedImage,
+        createdAt: Date.now()
+      };
+      
+      await addMediaToEntry(newMedia);
+      setImages(prev => [...prev, selectedImage]);
+      onEntrySaved(); // Prompt timeline refetch immediately
+    }
+  };
+
   return (
     <View className="bg-neutral-950 border-t border-neutral-900 px-4 py-3 pb-6 flex-row items-end">
       {content.trim().length > 0 && (
         <TouchableOpacity 
           onPress={handleExpand}
-          className="mb-1.5 mr-3 p-1.5 bg-neutral-900 border border-neutral-800 rounded-full"
+          className="mb-1.5 mr-2 p-1.5 bg-neutral-900 border border-neutral-800 rounded-full"
         >
           <Ionicons name="expand" size={18} color="#a3a3a3" />
         </TouchableOpacity>
       )}
+
+      <TouchableOpacity 
+          onPress={pickImage}
+          className="mb-1.5 mr-3 p-1.5 border border-transparent rounded-full"
+      >
+          <Ionicons name="image" size={24} color="#737373" />
+      </TouchableOpacity>
       
-      <View className="flex-1 bg-neutral-900 rounded-[20px] border border-neutral-800 max-h-[150px] justify-center">
+      <View className="flex-1 bg-neutral-900 rounded-[20px] border border-neutral-800 max-h-[250px] overflow-hidden">
+        {images.length > 0 && (
+          <View className="flex-row px-4 pt-3">
+            {images.map((uri, i) => (
+              <Image key={i} source={{ uri }} className="w-12 h-12 rounded-lg mr-2 border border-neutral-800" />
+            ))}
+          </View>
+        )}
         <TextInput
           placeholder="What's on your mind?"
           placeholderTextColor="#737373"

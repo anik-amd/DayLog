@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { View, Text, TouchableWithoutFeedback, Animated } from 'react-native';
+import { View, Text, TouchableWithoutFeedback, Animated, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Entry } from '../../types/Entry';
 
@@ -69,8 +69,21 @@ export default function EntryCard({ entry }: EntryCardProps) {
           >
             {plainTextPreview}
           </Text>
-        </View>
-      </Animated.View>
-    </TouchableWithoutFeedback>
-  );
+
+        {entry.media && entry.media.length > 0 && (
+          <View className="flex-row mt-3 mb-1">
+            {entry.media.slice(0, 3).map((m, idx) => (
+              <Image key={m.id} source={{ uri: m.path }} className="w-16 h-16 rounded-xl mr-2 bg-neutral-800 border border-neutral-700/50" />
+            ))}
+            {entry.media.length > 3 && (
+              <View className="w-16 h-16 rounded-xl bg-neutral-800/80 items-center justify-center border border-neutral-700">
+                <Text className="text-neutral-400 font-bold text-[13px] tracking-wide">+{entry.media.length - 3}</Text>
+              </View>
+            )}
+          </View>
+        )}
+      </View>
+    </Animated.View>
+  </TouchableWithoutFeedback>
+);
 }
