@@ -47,7 +47,7 @@ export default function EntryCard({ entry }: EntryCardProps) {
     <TouchableWithoutFeedback 
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      onPress={() => navigation.navigate('FullScreenEditor', { entryId: entry.id, initialContent: entry.content })}
+      onPress={() => navigation.navigate('FullScreenEditor', { entryId: entry.id, initialContent: entry.content, viewMode: true })}
     >
       <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
         <View className="bg-neutral-900 p-5 rounded-3xl mb-4 border border-neutral-800 shadow-sm relative overflow-hidden">

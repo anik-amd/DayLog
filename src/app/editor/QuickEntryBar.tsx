@@ -83,12 +83,12 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
         await createEntry(newEntry);
         setCurrentEntryId(newId);
         onEntrySaved();
-        navigation.navigate('FullScreenEditor', { entryId: newId, initialContent: content });
+        navigation.navigate('FullScreenEditor', { entryId: newId, initialContent: content, viewMode: false });
     } else if (currentEntryId) {
         await handleSave(content, true);
-        navigation.navigate('FullScreenEditor', { entryId: currentEntryId, initialContent: content });
+        navigation.navigate('FullScreenEditor', { entryId: currentEntryId, initialContent: content, viewMode: false });
     } else {
-        navigation.navigate('FullScreenEditor', { entryId: null, initialContent: '' });
+        navigation.navigate('FullScreenEditor', { entryId: null, initialContent: '', viewMode: false });
     }
   };
 
