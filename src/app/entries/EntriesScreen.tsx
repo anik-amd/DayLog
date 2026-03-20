@@ -84,14 +84,10 @@ export default function EntriesScreen({ navigation }: any) {
 
   const fetchEntries = async () => {
     try {
-      console.log('fetchEntries called');
       const currentEntries = await getAllEntries();
-      console.log('fetchEntries got:', currentEntries.length, 'entries');
       
-      // Trigger a smooth layout animation if the amount of entries has changed (e.g. a new one was added)
-      if (entries.length !== 0 && entries.length !== currentEntries.length) {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      }
+      // Trigger a smooth layout animation when entries change
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       
       setEntries(currentEntries);
     } catch (error) {

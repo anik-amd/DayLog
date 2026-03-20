@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { View, Text, TouchableWithoutFeedback, Animated } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
@@ -32,10 +32,27 @@ function EntryCardComponent({ entry, showBorder = false }: EntryCardProps) {
   });
 
   const navigation = useNavigation<any>();
-  const scaleValue = useRef(new Animated.Value(1)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(opacityAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        useNativeDriver: true,
+        friction: 8,
+        tension: 40,
+      }),
+    ]).start();
+  }, []);
 
   const handlePressIn = () => {
-    Animated.spring(scaleValue, {
+    Animated.spring(scaleAnim, {
       toValue: 0.98,
       useNativeDriver: true,
       speed: 20,
@@ -43,7 +60,7 @@ function EntryCardComponent({ entry, showBorder = false }: EntryCardProps) {
   };
 
   const handlePressOut = () => {
-    Animated.spring(scaleValue, {
+    Animated.spring(scaleAnim, {
       toValue: 1,
       useNativeDriver: true,
       speed: 20,
@@ -57,7 +74,7 @@ function EntryCardComponent({ entry, showBorder = false }: EntryCardProps) {
       onPressOut={handlePressOut}
       onPress={() => navigation.navigate('FullScreenEditor', { entryId: entry.id, initialContent: entry.content, viewMode: true })}
     >
-      <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
+      <Animated.View style={{ opacity: opacityAnim, transform: [{ scale: scaleAnim }] }}>
         <View className={`px-5 py-4 ${showBorder ? 'border-t border-neutral-100 dark:border-neutral-800' : ''}`}>
           <View className="flex-row items-start">
             <Text className="text-neutral-400 dark:text-neutral-500 text-[12px] font-medium mr-3 mt-0.5">
