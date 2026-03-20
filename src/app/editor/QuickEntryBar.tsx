@@ -54,18 +54,39 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
 
   useAutoSave(content, (text) => handleSave(text, false), 1000);
 
+  const triggerIconAnimation = (showIcons: boolean) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+  };
+
   const onChangeText = (text: string) => {
-    // Smoothly animate the appearance/disappearance of the submit button
-    const willShowButton = text.trim().length > 0;
-    const isShowingButton = content.trim().length > 0;
-    if (willShowButton !== isShowingButton) {
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    const willShowIcons = text.trim().length > 0 || isFocused;
+    const isShowingIcons = content.trim().length > 0 || isFocused;
+    if (willShowIcons !== isShowingIcons) {
+      triggerIconAnimation(willShowIcons);
     }
 
     setContent(text);
     if (text === '') {
       setCurrentEntryId(null);
     }
+  };
+
+  const handleFocus = () => {
+    const willShowIcons = content.trim().length > 0 || true;
+    const isShowingIcons = content.trim().length > 0;
+    if (willShowIcons !== isShowingIcons) {
+      triggerIconAnimation(willShowIcons);
+    }
+    setIsFocused(true);
+  };
+
+  const handleBlur = () => {
+    const willShowIcons = content.trim().length > 0;
+    const isShowingIcons = content.trim().length > 0 || true;
+    if (willShowIcons !== isShowingIcons) {
+      triggerIconAnimation(willShowIcons);
+    }
+    setIsFocused(false);
   };
 
   const handleSubmit = async () => {
@@ -193,6 +214,8 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
             multiline={true}
             value={content}
             onChangeText={onChangeText}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
             textAlignVertical="center"
             underlineColorAndroid="transparent"
           />
