@@ -16,7 +16,7 @@ export default function MarkdownRenderer({ content }: MarkdownProps) {
         // H1
         if (line.startsWith('# ')) {
           return (
-            <Text key={index} className="text-white text-[22px] leading-8 font-bold mt-3 mb-1">
+            <Text key={index} className="text-neutral-900 dark:text-white text-[22px] leading-8 font-bold mt-3 mb-1">
               {parseInline(line.substring(2))}
             </Text>
           );
@@ -24,7 +24,7 @@ export default function MarkdownRenderer({ content }: MarkdownProps) {
         // H2
         if (line.startsWith('## ')) {
           return (
-            <Text key={index} className="text-white text-[18px] leading-7 font-bold mt-2 mb-1">
+            <Text key={index} className="text-neutral-900 dark:text-white text-[18px] leading-7 font-bold mt-2 mb-1">
               {parseInline(line.substring(3))}
             </Text>
           );
@@ -32,7 +32,7 @@ export default function MarkdownRenderer({ content }: MarkdownProps) {
         // H3
         if (line.startsWith('### ')) {
           return (
-            <Text key={index} className="text-neutral-100 text-[16px] leading-6 font-bold mt-1 mb-1">
+            <Text key={index} className="text-neutral-800 dark:text-neutral-100 text-[16px] leading-6 font-bold mt-1 mb-1">
               {parseInline(line.substring(4))}
             </Text>
           );
@@ -41,8 +41,8 @@ export default function MarkdownRenderer({ content }: MarkdownProps) {
         if (line.startsWith('- ') || line.startsWith('* ')) {
           return (
             <View key={index} className="flex-row items-start mt-0.5 mb-1 pl-2 pr-2">
-              <Text className="text-neutral-500 mr-2.5 text-[18px]">•</Text>
-              <Text className="text-neutral-200 text-[16px] leading-7 font-medium flex-1 break-words">
+              <Text className="text-neutral-400 dark:text-neutral-500 mr-2.5 text-[18px]">•</Text>
+              <Text className="text-neutral-800 dark:text-neutral-200 text-[16px] leading-7 font-medium flex-1 break-words">
                 {parseInline(line.substring(2))}
               </Text>
             </View>
@@ -55,7 +55,7 @@ export default function MarkdownRenderer({ content }: MarkdownProps) {
         
         // Standard Paragraph Text
         return (
-          <Text key={index} className="text-neutral-200 text-[16px] leading-7 font-medium break-words mt-0.5">
+          <Text key={index} className="text-neutral-800 dark:text-neutral-200 text-[16px] leading-7 font-medium break-words mt-0.5">
             {parseInline(line)}
           </Text>
         );
@@ -74,7 +74,7 @@ function parseInline(text: string) {
     if (segment.startsWith('**') && segment.endsWith('**')) {
       const innerText = segment.slice(2, -2);
       parts.push(
-        <Text key={`bold-${i}`} className="font-extrabold text-white">
+        <Text key={`bold-${i}`} className="font-extrabold text-neutral-900 dark:text-white">
           {parseItalics(innerText)}
         </Text>
       );
@@ -98,7 +98,7 @@ function parseItalics(text: string) {
     if ((seg.startsWith('*') && seg.endsWith('*')) || (seg.startsWith('_') && seg.endsWith('_'))) {
       const innerText = seg.substring(1, seg.length - 1);
       parts.push(
-        <Text key={`italic-${i}`} className="italic text-neutral-100">
+        <Text key={`italic-${i}`} className="italic text-neutral-700 dark:text-neutral-100">
           {innerText}
         </Text>
       );

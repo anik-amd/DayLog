@@ -54,21 +54,21 @@ export default function FullScreenEditor({ route, navigation }: any) {
 
   return (
     <KeyboardAvoidingView 
-      className="flex-1 bg-neutral-950"
+      className="flex-1 bg-white dark:bg-neutral-950"
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       {/* Custom Header for Full Screen */}
-      <View className="flex-row items-center justify-between px-6 py-4 border-b border-neutral-900/50 mt-2">
+      <View className="flex-row items-center justify-between px-6 py-4 border-b border-neutral-100 dark:border-neutral-900/50 mt-2">
         <TouchableOpacity 
           onPress={handleBack} 
-          className="bg-neutral-900 w-11 h-11 rounded-full items-center justify-center border border-neutral-800"
+          className="bg-neutral-100 dark:bg-neutral-900 w-11 h-11 rounded-full items-center justify-center border border-neutral-200 dark:border-neutral-800"
         >
           <Ionicons name="arrow-back" size={22} color="#a3a3a3" />
         </TouchableOpacity>
         
         {isViewing ? (
-          <TouchableOpacity onPress={() => setIsViewing(false)} className="bg-neutral-800 w-11 h-11 rounded-full items-center justify-center border border-neutral-700 shadow-sm">
-            <Ionicons name="pencil" size={18} color="#e5e5e5" />
+          <TouchableOpacity onPress={() => setIsViewing(false)} className="bg-neutral-100 dark:bg-neutral-800 w-11 h-11 rounded-full items-center justify-center border border-neutral-200 dark:border-neutral-700 shadow-sm">
+            <Ionicons name="pencil" size={18} color="#a3a3a3" />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity onPress={handleBack} className="bg-indigo-500 w-11 h-11 rounded-full items-center justify-center border border-indigo-400/20 shadow-sm">
@@ -107,7 +107,7 @@ export default function FullScreenEditor({ route, navigation }: any) {
             <TextInput
               placeholder="Start writing..."
               placeholderTextColor="#737373"
-              className="text-neutral-100 text-[18px] leading-8 font-medium"
+              className="text-neutral-900 dark:text-neutral-100 text-[18px] leading-8 font-medium"
               multiline={true}
               value={content}
               onChangeText={setContent}

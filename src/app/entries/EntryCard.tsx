@@ -58,32 +58,32 @@ export default function EntryCard({ entry }: EntryCardProps) {
       onPress={() => navigation.navigate('FullScreenEditor', { entryId: entry.id, initialContent: entry.content, viewMode: true })}
     >
       <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
-        <View className="bg-neutral-900 p-5 rounded-3xl mb-4 border border-neutral-800 shadow-sm relative overflow-hidden">
-          <Text className="text-neutral-500 text-[11px] uppercase tracking-widest mb-2.5 font-bold">
+        <View className="bg-white dark:bg-neutral-900 p-5 rounded-[32px] border border-neutral-200 dark:border-neutral-800 mb-4 shadow-sm">
+          <Text className="text-neutral-400 dark:text-neutral-500 text-[11px] uppercase tracking-widest mb-2.5 font-bold">
             {formattedDate}
           </Text>
           <Text
-            className="text-neutral-200 text-[16px] leading-7 font-medium"
+            className="text-neutral-800 dark:text-neutral-200 text-[16px] leading-7 font-medium"
             numberOfLines={3}
             ellipsizeMode="tail"
           >
             {plainTextPreview}
           </Text>
 
-        {entry.media && entry.media.length > 0 && (
-          <View className="flex-row mt-3 mb-1">
-            {entry.media.slice(0, 3).map((m, idx) => (
-              <Image key={m.id} source={{ uri: m.path }} className="w-16 h-16 rounded-xl mr-2 bg-neutral-800 border border-neutral-700/50" />
-            ))}
-            {entry.media.length > 3 && (
-              <View className="w-16 h-16 rounded-xl bg-neutral-800/80 items-center justify-center border border-neutral-700">
-                <Text className="text-neutral-400 font-bold text-[13px] tracking-wide">+{entry.media.length - 3}</Text>
-              </View>
-            )}
-          </View>
-        )}
-      </View>
-    </Animated.View>
-  </TouchableWithoutFeedback>
-);
+          {entry.media && entry.media.length > 0 && (
+            <View className="flex-row mt-3 mb-1">
+              {entry.media.slice(0, 3).map((m, idx) => (
+                <Image key={m.id} source={{ uri: m.path }} className="w-16 h-16 rounded-xl mr-2 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/50" />
+              ))}
+              {entry.media.length > 3 && (
+                <View className="w-16 h-16 rounded-xl bg-neutral-100 dark:bg-neutral-800/80 items-center justify-center border border-neutral-200 dark:border-neutral-700">
+                  <Text className="text-neutral-500 dark:text-neutral-400 font-bold text-[13px] tracking-wide">+{entry.media.length - 3}</Text>
+                </View>
+              )}
+            </View>
+          )}
+        </View>
+      </Animated.View>
+    </TouchableWithoutFeedback>
+  );
 }

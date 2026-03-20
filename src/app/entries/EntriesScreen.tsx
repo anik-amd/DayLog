@@ -80,16 +80,16 @@ export default function EntriesScreen({ navigation }: any) {
 
   return (
     <KeyboardAvoidingView 
-      className="flex-1 bg-neutral-950"
+      className="flex-1 bg-neutral-100 dark:bg-neutral-950"
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
       <View className="flex-1 px-5 pt-8 pb-2">
         <View className="flex-row items-center justify-between mt-2 mb-6">
-          <Text className="text-neutral-50 text-[32px] font-extrabold tracking-tight">DayLog</Text>
+          <Text className="text-neutral-900 dark:text-neutral-50 text-[32px] font-extrabold tracking-tight">DayLog</Text>
           <TouchableOpacity 
             onPress={() => navigation.navigate('Settings')}
-            className="bg-neutral-900 w-11 h-11 rounded-full items-center justify-center border border-neutral-800 shadow-sm"
+            className="bg-white dark:bg-neutral-900 w-11 h-11 rounded-full items-center justify-center border border-neutral-200 dark:border-neutral-800 shadow-sm"
           >
             <Ionicons name="settings-outline" size={22} color="#a3a3a3" />
           </TouchableOpacity>
@@ -110,12 +110,13 @@ export default function EntriesScreen({ navigation }: any) {
             renderItem={({ item }) => <EntryCard entry={item} />}
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={() => (
-              <View className="mt-20 items-center opacity-40">
-                <Text className="text-zinc-500 text-lg font-medium">No entries for this day.</Text>
-              </View>
-            )}
-          />
-        )}
+            <View className="mt-20 items-center opacity-60">
+              <Ionicons name="journal-outline" size={48} color="#d4d4d4" />
+              <Text className="text-neutral-400 dark:text-zinc-500 text-lg font-medium mt-4">No entries for this day.</Text>
+            </View>
+          )}
+        />
+      )}
       </View>
       <QuickEntryBar onEntrySaved={fetchEntries} />
     </KeyboardAvoidingView>

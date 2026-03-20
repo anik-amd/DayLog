@@ -165,11 +165,11 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
   };
 
   return (
-    <View className="bg-neutral-950 border-t border-neutral-900 px-4 py-3 pb-6 flex-row items-end">
+    <View className="bg-white dark:bg-neutral-950 border-t border-neutral-200 dark:border-neutral-900 px-4 py-3 pb-6 flex-row items-end">
       {content.trim().length > 0 && (
         <TouchableOpacity 
           onPress={handleExpand}
-          className="mb-1.5 mr-2 p-1.5 bg-neutral-900 border border-neutral-800 rounded-full"
+          className="mb-1.5 mr-2 p-1.5 bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-full"
         >
           <Ionicons name="expand" size={18} color="#a3a3a3" />
         </TouchableOpacity>
@@ -179,21 +179,21 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
           onPress={pickImage}
           className="mb-1.5 mr-3 p-1.5 border border-transparent rounded-full"
       >
-          <Ionicons name="image" size={24} color="#737373" />
+          <Ionicons name="image" size={24} color={content.trim().length > 0 ? "#737373" : "#6366f1"} />
       </TouchableOpacity>
       
-      <View className="flex-1 bg-neutral-900 rounded-[20px] border border-neutral-800 max-h-[250px] overflow-hidden">
+      <View className="flex-1 bg-neutral-100 dark:bg-neutral-900 rounded-[20px] border border-neutral-200 dark:border-neutral-800 max-h-[250px] overflow-hidden">
         {images.length > 0 && (
           <View className="flex-row px-4 pt-3">
             {images.map((uri, i) => (
-              <Image key={i} source={{ uri }} className="w-12 h-12 rounded-lg mr-2 border border-neutral-800" />
+              <Image key={i} source={{ uri }} className="w-12 h-12 rounded-lg mr-2 border border-neutral-200 dark:border-neutral-800" />
             ))}
           </View>
         )}
         <TextInput
           placeholder="What's on your mind?"
           placeholderTextColor="#737373"
-          className="text-neutral-100 text-[16px] px-4 py-2.5 leading-5 font-medium"
+          className="text-neutral-900 dark:text-neutral-100 text-[16px] px-4 py-2.5 leading-5 font-medium"
           multiline={true}
           value={content}
           onChangeText={onChangeText}
