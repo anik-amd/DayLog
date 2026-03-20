@@ -85,18 +85,18 @@ export default function CalendarStrip({ selectedDate, onDateSelect, entries }: C
   }, [entries, selectedDate]);
 
   return (
-    <View className="mb-6 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-[32px] overflow-hidden shadow-sm">
-      <View className="flex-row items-center justify-between px-6 pt-5 pb-3">
-        <Text className="text-neutral-400 dark:text-neutral-500 text-xs font-bold uppercase tracking-widest">
+    <View className="overflow-hidden">
+      <View className="flex-row items-center justify-between px-0 pt-2 pb-4">
+        <Text className="text-neutral-400 dark:text-neutral-500 text-[10px] font-black uppercase tracking-[2px]">
           {expanded ? 'Full Calendar' : 'This Week'}
         </Text>
         <TouchableOpacity onPress={toggleExpand} className="p-1">
-          <Ionicons name={expanded ? "chevron-up" : "grid-outline"} size={18} color={isDark ? "#737373" : "#a3a3a3"} />
+          <Ionicons name={expanded ? "chevron-up" : "grid-outline"} size={16} color={isDark ? "#737373" : "#a3a3a3"} />
         </TouchableOpacity>
       </View>
 
       {expanded ? (
-        <View className="px-2 pb-4">
+        <View className="px-0 pb-4">
           <Calendar
             theme={{
               backgroundColor: 'transparent',
@@ -126,7 +126,7 @@ export default function CalendarStrip({ selectedDate, onDateSelect, entries }: C
         <ScrollView 
           horizontal 
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingLeft: 20, paddingRight: 20, paddingBottom: 22 }}
+          contentContainerStyle={{ paddingLeft: 0, paddingRight: 0, paddingBottom: 10 }}
         >
           {dates.map((date) => {
             const isSelected = date.id === selectedDate;
@@ -136,27 +136,28 @@ export default function CalendarStrip({ selectedDate, onDateSelect, entries }: C
               <TouchableOpacity
                 key={date.id}
                 onPress={() => onDateSelect(isSelected ? null : date.id)}
-                className={`items-center justify-center w-14 h-20 rounded-3xl mr-2.5 border-2 ${
+                style={{ width: 54, height: 72 }}
+                className={`items-center justify-center rounded-[24px] mr-2.5 border ${
                   isSelected 
-                  ? 'bg-indigo-600 border-indigo-400' 
+                  ? 'bg-indigo-600 border-indigo-500 shadow-sm' 
                   : isToday
-                    ? 'bg-neutral-50 dark:bg-neutral-950 border-indigo-500/50'
-                    : 'bg-neutral-50 dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800/80'
+                    ? 'bg-white dark:bg-neutral-800 border-indigo-500/30'
+                    : 'bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-800/80 shadow-sm'
                 }`}
               >
-                <Text className={`text-[10px] uppercase font-black tracking-tighter mb-1 ${
+                <Text className={`text-[9px] uppercase font-black tracking-tighter mb-0.5 ${
                   isSelected ? 'text-indigo-100' : isToday ? 'text-indigo-600 dark:text-indigo-400' : 'text-neutral-400 dark:text-neutral-500'
                 }`}>
                   {date.dayName}
                 </Text>
-                <Text className={`text-lg font-black ${
+                <Text className={`text-[16px] font-black ${
                   isSelected ? 'text-white' : isToday ? 'text-neutral-900 dark:text-white' : 'text-neutral-800 dark:text-neutral-200'
                 }`}>
                   {date.dayNum}
                 </Text>
                 
                 {date.hasEntries && !isSelected && (
-                  <View className={`absolute bottom-2.5 w-1.5 h-1.5 rounded-full ${isToday ? 'bg-indigo-400' : 'bg-neutral-300 dark:bg-neutral-600'}`} />
+                  <View className={`absolute bottom-2 w-1.5 h-1.5 rounded-full ${isToday ? 'bg-indigo-400' : 'bg-neutral-300 dark:bg-neutral-600'}`} />
                 )}
               </TouchableOpacity>
             );
