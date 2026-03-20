@@ -438,15 +438,6 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                 </PillItem>
               </View>
 
-              {/* Photo Pill */}
-              <TouchableOpacity 
-                onPress={pickImage}
-                className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5"
-              >
-                <Ionicons name="image" size={14} color="#6366f1" />
-                <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">Photo</Text>
-              </TouchableOpacity>
-
               {/* Location Pill */}
               <View className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5">
                 <PillItem 
@@ -465,6 +456,15 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                   {locationError ? 'Unavailable' : location || '...'}
                 </PillItem>
               </View>
+
+              {/* Photo Pill */}
+              <TouchableOpacity 
+                onPress={pickImage}
+                className="flex-row items-center bg-white dark:bg-neutral-900 rounded-full px-3 py-1.5"
+              >
+                <Ionicons name="image" size={14} color="#6366f1" />
+                <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">Photo</Text>
+              </TouchableOpacity>
             </ScrollView>
           </Animated.View>
         )}
