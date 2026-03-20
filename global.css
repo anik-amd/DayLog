@@ -20,3 +20,18 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #52525b; /* Neutral 600 */
 }
+
+/* Eliminate Distracting Browser Focus Rings (Web) */
+*:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove default focus handles for React Native Web inputs */
+[data-focusable="true"]:focus, 
+[role="button"]:focus,
+input:focus, 
+textarea:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
