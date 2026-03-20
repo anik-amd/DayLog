@@ -3,6 +3,7 @@ import { View, TextInput, TouchableOpacity, LayoutAnimation, Platform, UIManager
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -96,6 +97,38 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
     }
   };
 
+  const moveMediaToLocal = async (uri: string) => {
+    if (Platform.OS === 'web') {
+      // On web, blob URIs expire on page reload. We'll convert to a DataURL (Base64) 
+      // to ensure the journal entry remains persistent for this MVP.
+      try {
+        const response = await fetch(uri);
+        const blob = await response.blob();
+        return new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(blob);
+        });
+      } catch (e) {
+        console.error("Failed to persist web image:", e);
+        return uri;
+      }
+    }
+    
+    // On native mobile, we MUST copy the image to the persistent documentDirectory!
+    // Temporary cache URIs from picker will otherwise be deleted by the OS on reboot.
+    const filename = uri.split('/').pop();
+    const destPath = ((FileSystem as any).documentDirectory || '') + filename;
+    
+    try {
+      await FileSystem.copyAsync({ from: uri, to: destPath });
+      return destPath;
+    } catch (e) {
+      console.error("Failed to copy image to local storage:", e);
+      return uri; // Return original if copy fails
+    }
+  };
+
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -104,6 +137,8 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
 
     if (!result.canceled) {
       const selectedImage = result.assets[0].uri;
+      const persistentLocalPath = await moveMediaToLocal(selectedImage);
+      
       const now = Date.now();
       let activeEntryId = currentEntryId;
       
@@ -119,12 +154,12 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
         id: Date.now().toString(),
         entryId: activeEntryId,
         type: "image" as const,
-        path: selectedImage,
+        path: persistentLocalPath,
         createdAt: Date.now()
       };
       
       await addMediaToEntry(newMedia);
-      setImages(prev => [...prev, selectedImage]);
+      setImages(prev => [...prev, persistentLocalPath]);
       onEntrySaved(); // Prompt timeline refetch immediately
     }
   };
