@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, Button, FlatList, ActivityIndicator, KeyboardAvoidingView, Platform, LayoutAnimation, UIManager } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, KeyboardAvoidingView, Platform, LayoutAnimation, UIManager } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -9,11 +9,13 @@ import { initDb } from '../../database/db';
 import { createEntry, getAllEntries } from '../../database/entries';
 import { Entry } from '../../types/Entry';
 import EntryCard from './EntryCard';
+import CalendarStrip from './CalendarStrip';
 import QuickEntryBar from '../editor/QuickEntryBar';
 
 export default function EntriesScreen({ navigation }: any) {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null); // null means "Show All" by default
 
   const fetchEntries = async () => {
     try {
@@ -70,6 +72,11 @@ export default function EntriesScreen({ navigation }: any) {
     setupDatabase();
   }, []);
 
+  // Filter entries based on the selected calendar date
+  const filteredEntries = selectedDate 
+    ? entries.filter((e: Entry) => e.date === selectedDate)
+    : entries;
+
   return (
     <KeyboardAvoidingView 
       className="flex-1 bg-neutral-950"
@@ -79,20 +86,27 @@ export default function EntriesScreen({ navigation }: any) {
       <View className="flex-1 px-5 pt-8 pb-2">
         <Text className="text-neutral-50 text-[32px] font-extrabold tracking-tight mb-6 mt-2">DayLog</Text>
 
+        <CalendarStrip 
+          selectedDate={selectedDate} 
+          onDateSelect={setSelectedDate} 
+          entries={entries}
+        />
+
       {loading ? (
         <ActivityIndicator size="large" color="#a1a1aa" className="mt-10" />
       ) : (
         <FlatList
-          data={entries}
+          data={filteredEntries}
           keyExtractor={(item) => item.id}
-          showsVerticalScrollIndicator={false}
           renderItem={({ item }) => <EntryCard entry={item} />}
-          contentContainerStyle={{ paddingBottom: 20 }}
-          className="flex-1"
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={() => (
+            <View className="mt-20 items-center opacity-40">
+              <Text className="text-zinc-500 text-lg font-medium">No entries for this day.</Text>
+            </View>
+          )}
         />
       )}
-
-      {/* Settings hidden temporarily or placed better later, removed inline border block to make it cleaner */}
       </View>
       <QuickEntryBar onEntrySaved={fetchEntries} />
     </KeyboardAvoidingView>
