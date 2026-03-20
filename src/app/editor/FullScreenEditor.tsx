@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, KeyboardAvoidingView, Platform, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import { View, Text, KeyboardAvoidingView, Platform, TouchableOpacity, ScrollView, TextInput, Keyboard } from 'react-native';
 import { useColorScheme } from "nativewind";
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,6 +20,20 @@ export default function FullScreenEditor({ route, navigation }: any) {
   const isSaving = useRef(false);
   const inputRef = useRef<TextInput>(null);
   const [selection, setSelection] = useState({ start: 0, end: 0 });
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    const showListener = Keyboard.addListener('keyboardDidShow', (e) => {
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    const hideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardHeight(0);
+    });
+    return () => {
+      showListener.remove();
+      hideListener.remove();
+    };
+  }, []);
 
   const loadEntry = useCallback(async () => {
     if (entryId) {
@@ -196,7 +210,10 @@ export default function FullScreenEditor({ route, navigation }: any) {
 
         {/* NATIVE Writing Toolbar (Only shown in Edit mode) */}
         {isEditing && (
-            <View className="flex-row items-center justify-around px-4 py-4 bg-white dark:bg-neutral-950 border-t border-neutral-100 dark:border-neutral-900 shadow-2xl">
+            <View 
+                className="flex-row items-center justify-around px-4 py-4 bg-white dark:bg-neutral-950 border-t border-neutral-100 dark:border-neutral-900 shadow-2xl"
+                style={{ marginBottom: Platform.OS === 'android' ? keyboardHeight : 0 }}
+            >
                 <ToolbarButton icon="text" onPress={() => insertMarkdown('# ', '')} label="H1" />
                 <ToolbarButton icon="list" onPress={() => insertMarkdown('- ', '')} />
                 <ToolbarButton icon="link" onPress={() => insertMarkdown('[', '](url)')} />

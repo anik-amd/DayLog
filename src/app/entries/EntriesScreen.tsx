@@ -27,12 +27,29 @@ export default function EntriesScreen({ navigation }: any) {
   const [pickerType, setPickerType] = useState<'date' | 'time'>('date');
   const [entryDate, setEntryDate] = useState(new Date());
 
+  // Keyboard handling
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
   // Animation values for scroll-driven UI hiding
   const scrollY = useRef(new Animated.Value(0)).current;
   const lastScrollY = useRef(0);
   const uiPosition = useRef(new Animated.Value(0)).current; 
   const headerHideDistance = 120; // Distance the calendar slides up
   const footerHeight = 120; // QuickEntryBar height
+
+  useEffect(() => {
+    const showListener = Keyboard.addListener('keyboardDidShow', (e) => {
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    const hideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardHeight(0);
+    });
+    return () => {
+      showListener.remove();
+      hideListener.remove();
+    };
+  }, []);
+
   const handleScroll = Animated.event(
     [{ nativeEvent: { contentOffset: { y: scrollY } } }],
     { 
@@ -266,12 +283,14 @@ export default function EntriesScreen({ navigation }: any) {
 
         {/* HIDABLE Bottom Section: Quick Entry Bar (Solid Floating Card) */}
         <Animated.View 
+            key={colorScheme}
             style={{ 
                 position: 'absolute', 
                 bottom: 30,
                 left: 16, 
                 right: 16, 
                 zIndex: 10,
+                marginBottom: Platform.OS === 'android' ? keyboardHeight : 0,
                 transform: [{ translateY: footerTranslate }],
                 opacity: uiOpacity
             }}

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { View, TextInput as RNTextInput, TouchableOpacity, Platform, UIManager, Image, Text, StyleSheet, ScrollView, KeyboardAvoidingView } from 'react-native';
+import { View, TextInput as RNTextInput, TouchableOpacity, Platform, UIManager, Image, Text, StyleSheet, ScrollView } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useColorScheme } from "nativewind";
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -32,6 +32,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   const [currentEntryId, setCurrentEntryId] = useState<string | null>(null);
   const [isFocused, setIsFocused] = useState(false);
   const [showMetadata, setShowMetadata] = useState(false);
+  const pillPressedRef = useRef(false);
   
   // Date/time state - use prop if provided, otherwise local state
   const [localEntryDate, setLocalEntryDate] = useState(new Date());
@@ -60,10 +61,12 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   const hasScrolledRef = useRef(false);
 
   useEffect(() => {
-    if (content.trim().length > 0 || (isFocused && !hasScrolledRef.current)) {
+    if (content.trim().length > 0 || (isFocused && !hasScrolledRef.current) || pillPressedRef.current) {
       setShowMetadata(true);
-      fetchLocationAndWeather();
-    } else {
+      if (content.trim().length > 0) {
+        fetchLocationAndWeather();
+      }
+    } else if (!pillPressedRef.current) {
       setShowMetadata(false);
     }
   }, [isFocused, content]);
@@ -176,13 +179,13 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   };
 
   const handleBlur = () => {
-    // Delay hiding to allow for interaction with metadata
+    // Delay hiding to allow for interaction with metadata or pickers
     setTimeout(() => {
-      if (!content.trim()) {
+      if (!content.trim() && !pillPressedRef.current) {
         setIsFocused(false);
         hasScrolledRef.current = false;
       }
-    }, 200);
+    }, 500);
   };
 
   const handleSubmit = async () => {
@@ -387,106 +390,110 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   );
 
   return (
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      <View 
+        key={colorScheme}
         className="px-4 pt-3"
       >
         {/* Single Card - pills and input together */}
-        <View className="rounded-2xl bg-white dark:bg-neutral-900 py-3">
-          {/* Pills Row - only show when typing */}
-          {showMetadata && (
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 8, paddingRight: 16 }}
-            >
+        <View className="rounded-2xl bg-white dark:bg-neutral-900 py-3" pointerEvents="box-none">
+          {/* Pills Row */}
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 8, paddingRight: 16 }}
+          >
             {/* Date Pill */}
-            <TouchableOpacity 
-              onPress={() => {
-                if (IS_WEB && onDatePress) {
-                  onDatePress();
-                } else {
+            {showMetadata && (
+              <TouchableOpacity 
+                onPress={() => {
+                  pillPressedRef.current = true;
                   setShowDatePicker(true);
-                }
-              }}
-              className="flex-row items-center rounded-full bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5 mr-2"
-            >
-              <Ionicons name="calendar-outline" size={14} color="#6366f1" />
-              <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">
-                {formatDate(entryDate)}
-              </Text>
-              <Ionicons name="chevron-down" size={12} color="#a3a3a3" className="ml-1" />
-            </TouchableOpacity>
+                }}
+                hitSlop={{ top: 10, bottom: 10, left: 5, right: 5 }}
+                className="flex-row items-center rounded-full bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5 mr-2"
+              >
+                <Ionicons name="calendar-outline" size={14} color="#6366f1" />
+                <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">
+                  {formatDate(entryDate)}
+                </Text>
+                <Ionicons name="chevron-down" size={12} color="#a3a3a3" className="ml-1" />
+              </TouchableOpacity>
+            )}
 
             {/* Time Pill */}
-            <TouchableOpacity 
-              onPress={() => {
-                if (IS_WEB && onTimePress) {
-                  onTimePress();
-                } else {
+            {showMetadata && (
+              <TouchableOpacity 
+                onPress={() => {
+                  pillPressedRef.current = true;
                   setShowTimePicker(true);
-                }
-              }}
-              className="flex-row items-center rounded-full bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5 mr-2"
-            >
-              <Ionicons name="time-outline" size={14} color="#6366f1" />
-              <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">
-                {formatTime(entryDate)}
-              </Text>
-              <Ionicons name="chevron-down" size={12} color="#a3a3a3" className="ml-1" />
-            </TouchableOpacity>
+                }}
+                hitSlop={{ top: 10, bottom: 10, left: 5, right: 5 }}
+                className="flex-row items-center rounded-full bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5 mr-2"
+              >
+                <Ionicons name="time-outline" size={14} color="#6366f1" />
+                <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">
+                  {formatTime(entryDate)}
+                </Text>
+                <Ionicons name="chevron-down" size={12} color="#a3a3a3" className="ml-1" />
+              </TouchableOpacity>
+            )}
 
             {/* Weather Pill */}
-            <View className="flex-row items-center rounded-full bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5 mr-2">
-              <PillItem 
-                icon={
-                  weatherLoading ? (
-                    <Ionicons name="cloudy-outline" size={14} color="#a3a3a3" />
-                  ) : weatherError ? (
-                    <Ionicons name="cloud-offline-outline" size={14} color="#ef4444" />
-                  ) : (
-                    <Ionicons name="sunny-outline" size={14} color="#f59e0b" />
-                  )
-                }
-                isError={weatherError}
-                isLoading={weatherLoading}
-              >
-                {weatherError ? 'N/A' : weather || '...'}
-              </PillItem>
-            </View>
+            {showMetadata && (
+              <View className="flex-row items-center rounded-full bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5 mr-2">
+                <PillItem 
+                  icon={
+                    weatherLoading ? (
+                      <Ionicons name="cloudy-outline" size={14} color="#a3a3a3" />
+                    ) : weatherError ? (
+                      <Ionicons name="cloud-offline-outline" size={14} color="#ef4444" />
+                    ) : (
+                      <Ionicons name="sunny-outline" size={14} color="#f59e0b" />
+                    )
+                  }
+                  isError={weatherError}
+                  isLoading={weatherLoading}
+                >
+                  {weatherError ? 'N/A' : weather || '...'}
+                </PillItem>
+              </View>
+            )}
 
             {/* Location Pill */}
-            <View className="flex-row items-center rounded-full bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5 mr-2">
-              <PillItem 
-                icon={
-                  locationLoading ? (
-                    <Ionicons name="location-outline" size={14} color="#a3a3a3" />
-                  ) : locationError ? (
-                    <Ionicons name="location-outline" size={14} color="#ef4444" />
-                  ) : (
-                    <Ionicons name="location-outline" size={14} color="#6366f1" />
-                  )
-                }
-                isError={locationError}
-                isLoading={locationLoading}
-              >
-                {locationError ? 'Unavailable' : location || '...'}
-              </PillItem>
-            </View>
+            {showMetadata && (
+              <View className="flex-row items-center rounded-full bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5 mr-2">
+                <PillItem 
+                  icon={
+                    locationLoading ? (
+                      <Ionicons name="location-outline" size={14} color="#a3a3a3" />
+                    ) : locationError ? (
+                      <Ionicons name="location-outline" size={14} color="#ef4444" />
+                    ) : (
+                      <Ionicons name="location-outline" size={14} color="#6366f1" />
+                    )
+                  }
+                  isError={locationError}
+                  isLoading={locationLoading}
+                >
+                  {locationError ? 'Unavailable' : location || '...'}
+                </PillItem>
+              </View>
+            )}
 
             {/* Photo Pill */}
-            <TouchableOpacity 
-              onPress={pickImage}
-              className="flex-row items-center rounded-full bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5"
-            >
-              <Ionicons name="image" size={14} color="#6366f1" />
-              <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">Photo</Text>
-            </TouchableOpacity>
+            {showMetadata && (
+              <TouchableOpacity 
+                onPress={pickImage}
+                className="flex-row items-center rounded-full bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5"
+              >
+                <Ionicons name="image" size={14} color="#6366f1" />
+                <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">Photo</Text>
+              </TouchableOpacity>
+            )}
           </ScrollView>
-          )}
 
           {/* Input Row */}
-          <View className={`flex-row items-center px-4 ${showMetadata ? 'mt-3' : ''}`}>
+          <View className={`flex-row items-center px-4 pt-3 ${showMetadata ? '' : 'pb-3'}`}>
             {/* Images preview */}
             {images.length > 0 && (
               <View className="flex-row mr-2">
@@ -508,6 +515,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                 onChangeText={onChangeText}
                 onFocus={handleFocus}
                 onBlur={handleBlur}
+                blurOnSubmit={false}
                 textAlignVertical="center"
                 underlineColorAndroid="transparent"
               />
@@ -555,17 +563,28 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
             value={entryDate}
             mode="date"
             display="default"
-            onChange={handleDateChange}
+            onChange={(event, date) => {
+              handleDateChange(event, date);
+              if (event.type === 'set' && date) {
+                setTimeout(() => inputRef.current?.focus(), 100);
+              }
+            }}
           />
         ) : (
           <Picker
             visible={showDatePicker}
             type="date"
             value={entryDate}
-            onClose={() => setShowDatePicker(false)}
+            onClose={() => {
+              setShowDatePicker(false);
+              pillPressedRef.current = false;
+              setTimeout(() => inputRef.current?.focus(), 100);
+            }}
             onSelect={(date) => {
               handleDateChange({ type: 'set' }, date);
               setShowDatePicker(false);
+              pillPressedRef.current = false;
+              setTimeout(() => inputRef.current?.focus(), 100);
             }}
           />
         )
@@ -576,22 +595,33 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
             value={entryDate}
             mode="time"
             display="default"
-            onChange={handleTimeChange}
+            onChange={(event, date) => {
+              handleTimeChange(event, date);
+              if (event.type === 'set' && date) {
+                setTimeout(() => inputRef.current?.focus(), 100);
+              }
+            }}
           />
         ) : (
           <Picker
             visible={showTimePicker}
             type="time"
             value={entryDate}
-            onClose={() => setShowTimePicker(false)}
+            onClose={() => {
+              setShowTimePicker(false);
+              pillPressedRef.current = false;
+              setTimeout(() => inputRef.current?.focus(), 100);
+            }}
             onSelect={(date) => {
               handleTimeChange({ type: 'set' }, date);
               setShowTimePicker(false);
+              pillPressedRef.current = false;
+              setTimeout(() => inputRef.current?.focus(), 100);
             }}
           />
         )
       )}
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Platform, Modal } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, TouchableOpacity, Text, StyleSheet, Platform, Modal, TouchableWithoutFeedback } from 'react-native';
 import { useColorScheme } from "nativewind";
 import { Ionicons } from '@expo/vector-icons';
+import ClockPicker from './ClockPicker';
 
 interface PickerProps {
   visible: boolean;
@@ -13,8 +14,15 @@ interface PickerProps {
 
 export default function Picker({ visible, type, value, onClose, onSelect }: PickerProps) {
   const [calendarMonth, setCalendarMonth] = useState(value);
+  const [tempTime, setTempTime] = useState(value);
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
+
+  useEffect(() => {
+    if (visible) {
+      setTempTime(value);
+    }
+  }, [visible, value]);
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -60,157 +68,109 @@ export default function Picker({ visible, type, value, onClose, onSelect }: Pick
 
   if (type === 'date') {
     return (
-      <Modal transparent visible={visible} animationType="fade" onRequestClose={onClose}>
+      <Modal transparent visible={visible} animationType="fade" onRequestClose={onClose} presentationStyle="overFullScreen">
+        <TouchableWithoutFeedback onPress={onClose}>
+          <View style={styles.overlay}>
+            <TouchableWithoutFeedback>
+              <View style={[styles.card, { backgroundColor: bgColor }]}>
+                <View style={styles.header}>
+                  <TouchableOpacity onPress={onClose} style={styles.headerButton}>
+                    <Text style={[styles.cancelText, { color: subtextColor }]}>Cancel</Text>
+                  </TouchableOpacity>
+                  <Text style={[styles.title, { color: textColor }]}>Select Date</Text>
+                  <TouchableOpacity onPress={onClose} style={styles.headerButton}>
+                    <Text style={styles.doneText}>Done</Text>
+                  </TouchableOpacity>
+                </View>
+                
+                <View style={styles.monthNav}>
+                  <TouchableOpacity 
+                    onPress={() => {
+                      const newMonth = new Date(calendarMonth);
+                      newMonth.setMonth(newMonth.getMonth() - 1);
+                      setCalendarMonth(newMonth);
+                    }}
+                    style={[styles.navButton, { backgroundColor: isDark ? '#262626' : '#f4f4f5' }]}
+                  >
+                    <Ionicons name="chevron-back" size={20} color="#6366f1" />
+                  </TouchableOpacity>
+                  <Text style={[styles.monthTitle, { color: textColor }]}>
+                    {calendarMonth.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+                  </Text>
+                  <TouchableOpacity 
+                    onPress={() => {
+                      const newMonth = new Date(calendarMonth);
+                      newMonth.setMonth(newMonth.getMonth() + 1);
+                      setCalendarMonth(newMonth);
+                    }}
+                    style={[styles.navButton, { backgroundColor: isDark ? '#262626' : '#f4f4f5' }]}
+                  >
+                    <Ionicons name="chevron-forward" size={20} color="#6366f1" />
+                  </TouchableOpacity>
+                </View>
+                
+                <View style={styles.dayHeaders}>
+                  {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
+                    <Text key={day} style={[styles.dayHeader, { color: subtextColor }]}>{day}</Text>
+                  ))}
+                </View>
+                
+                <View style={styles.calendarGrid}>
+                  {getDaysInMonth(calendarMonth).map((day, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={[
+                        styles.dayCell,
+                        isSameDay(day, value) && { backgroundColor: '#6366f1' },
+                        isToday(day) && !isSameDay(day, value) && { borderColor: '#6366f1', borderWidth: 1 },
+                      ]}
+                      onPress={() => {
+                        if (day) {
+                          onSelect(day);
+                          onClose();
+                        }
+                      }}
+                    >
+                      {day && (
+                        <Text style={[
+                          styles.dayText,
+                          { color: textColor },
+                          isSameDay(day, value) && { color: '#ffffff', fontWeight: '600' },
+                          isToday(day) && !isSameDay(day, value) && { color: '#6366f1' },
+                        ]}>
+                          {day.getDate()}
+                        </Text>
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+    );
+  }
+
+  return (
+    <Modal transparent visible={visible} animationType="fade" onRequestClose={onClose} presentationStyle="overFullScreen">
+      <TouchableWithoutFeedback>
         <View style={styles.overlay}>
           <View style={[styles.card, { backgroundColor: bgColor }]}>
             <View style={styles.header}>
               <TouchableOpacity onPress={onClose} style={styles.headerButton}>
                 <Text style={[styles.cancelText, { color: subtextColor }]}>Cancel</Text>
               </TouchableOpacity>
-              <Text style={[styles.title, { color: textColor }]}>Select Date</Text>
-              <TouchableOpacity onPress={onClose} style={styles.headerButton}>
+              <Text style={[styles.title, { color: textColor }]}>Select Time</Text>
+              <TouchableOpacity onPress={() => { onSelect(tempTime); onClose(); }} style={styles.headerButton}>
                 <Text style={styles.doneText}>Done</Text>
               </TouchableOpacity>
             </View>
             
-            <View style={styles.monthNav}>
-              <TouchableOpacity 
-                onPress={() => {
-                  const newMonth = new Date(calendarMonth);
-                  newMonth.setMonth(newMonth.getMonth() - 1);
-                  setCalendarMonth(newMonth);
-                }}
-                style={[styles.navButton, { backgroundColor: isDark ? '#262626' : '#f4f4f5' }]}
-              >
-                <Ionicons name="chevron-back" size={20} color="#6366f1" />
-              </TouchableOpacity>
-              <Text style={[styles.monthTitle, { color: textColor }]}>
-                {calendarMonth.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
-              </Text>
-              <TouchableOpacity 
-                onPress={() => {
-                  const newMonth = new Date(calendarMonth);
-                  newMonth.setMonth(newMonth.getMonth() + 1);
-                  setCalendarMonth(newMonth);
-                }}
-                style={[styles.navButton, { backgroundColor: isDark ? '#262626' : '#f4f4f5' }]}
-              >
-                <Ionicons name="chevron-forward" size={20} color="#6366f1" />
-              </TouchableOpacity>
-            </View>
-            
-            <View style={styles.dayHeaders}>
-              {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
-                <Text key={day} style={[styles.dayHeader, { color: subtextColor }]}>{day}</Text>
-              ))}
-            </View>
-            
-            <View style={styles.calendarGrid}>
-              {getDaysInMonth(calendarMonth).map((day, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={[
-                    styles.dayCell,
-                    isSameDay(day, value) && { backgroundColor: '#6366f1' },
-                    isToday(day) && !isSameDay(day, value) && { borderColor: '#6366f1', borderWidth: 1 },
-                  ]}
-                  onPress={() => {
-                    if (day) {
-                      onSelect(day);
-                      onClose();
-                    }
-                  }}
-                >
-                  {day && (
-                    <Text style={[
-                      styles.dayText,
-                      { color: textColor },
-                      isSameDay(day, value) && { color: '#ffffff', fontWeight: '600' },
-                      isToday(day) && !isSameDay(day, value) && { color: '#6366f1' },
-                    ]}>
-                      {day.getDate()}
-                    </Text>
-                  )}
-                </TouchableOpacity>
-              ))}
-            </View>
+            <ClockPicker value={tempTime} onChange={setTempTime} />
           </View>
         </View>
-      </Modal>
-    );
-  }
-
-  return (
-    <Modal transparent visible={visible} animationType="fade" onRequestClose={onClose}>
-      <View style={styles.overlay}>
-        <View style={[styles.card, { backgroundColor: bgColor }]}>
-          <View style={styles.header}>
-            <TouchableOpacity onPress={onClose} style={styles.headerButton}>
-              <Text style={[styles.cancelText, { color: subtextColor }]}>Cancel</Text>
-            </TouchableOpacity>
-            <Text style={[styles.title, { color: textColor }]}>Select Time</Text>
-            <TouchableOpacity onPress={onClose} style={styles.headerButton}>
-              <Text style={styles.doneText}>Done</Text>
-            </TouchableOpacity>
-          </View>
-          
-          <View style={styles.timeDisplay}>
-            <Text style={[styles.timeText, { color: textColor }]}>{formatTime(value)}</Text>
-          </View>
-          
-          <View style={styles.timePickerGrid}>
-            <View style={styles.timeColumn}>
-              <TouchableOpacity 
-                onPress={() => {
-                  const newDate = new Date(value);
-                  newDate.setHours(newDate.getHours() - 1);
-                  onSelect(newDate);
-                }}
-                style={styles.timeButton}
-              >
-                <Ionicons name="chevron-up" size={24} color="#6366f1" />
-              </TouchableOpacity>
-              <Text style={[styles.timeLabel, { color: subtextColor }]}>Hour</Text>
-              <TouchableOpacity 
-                onPress={() => {
-                  const newDate = new Date(value);
-                  newDate.setHours(newDate.getHours() + 1);
-                  onSelect(newDate);
-                }}
-                style={styles.timeButton}
-              >
-                <Ionicons name="chevron-down" size={24} color="#6366f1" />
-              </TouchableOpacity>
-            </View>
-            
-            <Text style={[styles.timeSeparator, { color: textColor }]}>:</Text>
-            
-            <View style={styles.timeColumn}>
-              <TouchableOpacity 
-                onPress={() => {
-                  const newDate = new Date(value);
-                  newDate.setMinutes(newDate.getMinutes() - 15);
-                  onSelect(newDate);
-                }}
-                style={styles.timeButton}
-              >
-                <Ionicons name="chevron-up" size={24} color="#6366f1" />
-              </TouchableOpacity>
-              <Text style={[styles.timeLabel, { color: subtextColor }]}>Min</Text>
-              <TouchableOpacity 
-                onPress={() => {
-                  const newDate = new Date(value);
-                  newDate.setMinutes(newDate.getMinutes() + 15);
-                  onSelect(newDate);
-                }}
-                style={styles.timeButton}
-              >
-                <Ionicons name="chevron-down" size={24} color="#6366f1" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 }
@@ -297,35 +257,5 @@ const styles = StyleSheet.create({
   dayText: {
     fontSize: 15,
     fontWeight: '500',
-  },
-  timeDisplay: {
-    alignItems: 'center',
-    paddingVertical: 24,
-  },
-  timeText: {
-    fontSize: 48,
-    fontWeight: '200',
-  },
-  timePickerGrid: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingBottom: 24,
-  },
-  timeColumn: {
-    alignItems: 'center',
-  },
-  timeButton: {
-    padding: 12,
-    marginVertical: 4,
-  },
-  timeLabel: {
-    fontSize: 12,
-    marginVertical: 4,
-  },
-  timeSeparator: {
-    fontSize: 48,
-    fontWeight: '200',
-    marginHorizontal: 16,
   },
 });
