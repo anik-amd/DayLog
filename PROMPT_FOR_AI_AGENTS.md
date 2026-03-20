@@ -210,6 +210,11 @@ The agent must NOT:
 
 If a feature is not in the roadmap, do not implement it.
 
+# Git Safety Protocol
+- NEVER commit unless the user says "commit it" or similar explicit instruction
+- If you finish work and haven't been asked to commit, just stop and say you're done
+- Never auto-commit after making changes
+
 ---
 
 # 13. How the Agent Should Work
