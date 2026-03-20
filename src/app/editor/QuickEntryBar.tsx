@@ -1,13 +1,10 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { View, TextInput, TouchableOpacity, LayoutAnimation, Platform, UIManager, Image } from 'react-native';
+import { View, TextInput, TouchableOpacity, Platform, UIManager, Image } from 'react-native';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 import { createEntry, updateEntry } from '../../database/entries';
 import { addMediaToEntry } from '../../database/media';
 import { useAutoSave } from '../../hooks/useAutoSave';
@@ -54,17 +51,7 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
 
   useAutoSave(content, (text) => handleSave(text, false), 1000);
 
-  const triggerIconAnimation = (showIcons: boolean) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-  };
-
   const onChangeText = (text: string) => {
-    const willShowIcons = text.trim().length > 0 || isFocused;
-    const isShowingIcons = content.trim().length > 0 || isFocused;
-    if (willShowIcons !== isShowingIcons) {
-      triggerIconAnimation(willShowIcons);
-    }
-
     setContent(text);
     if (text === '') {
       setCurrentEntryId(null);
@@ -72,20 +59,10 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
   };
 
   const handleFocus = () => {
-    const willShowIcons = content.trim().length > 0 || true;
-    const isShowingIcons = content.trim().length > 0;
-    if (willShowIcons !== isShowingIcons) {
-      triggerIconAnimation(willShowIcons);
-    }
     setIsFocused(true);
   };
 
   const handleBlur = () => {
-    const willShowIcons = content.trim().length > 0;
-    const isShowingIcons = content.trim().length > 0 || true;
-    if (willShowIcons !== isShowingIcons) {
-      triggerIconAnimation(willShowIcons);
-    }
     setIsFocused(false);
   };
 
@@ -186,59 +163,84 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
     }
   };
 
+  const shouldShowIcons = isFocused || content.trim().length > 0;
+
   return (
-      <View className="bg-white dark:bg-neutral-950 border-t border-neutral-200 dark:border-neutral-900 px-4 py-3 flex-row items-center">
+      <View className="bg-white dark:bg-neutral-900 border-t border-neutral-100 dark:border-neutral-800 px-4 py-2 flex-row items-center">
         {/* Image icon on the left - only shows when focused or has content */}
-        {(isFocused || content.trim().length > 0) && (
-          <TouchableOpacity 
-              onPress={pickImage}
-              className="mr-2 p-1.5 border border-transparent rounded-full"
+        {shouldShowIcons && (
+          <Animated.View
+            entering={FadeIn.springify().damping(15).stiffness(120)}
+            exiting={FadeOut.springify().duration(150)}
           >
-              <Ionicons name="image" size={20} color="#6366f1" />
-          </TouchableOpacity>
+            <TouchableOpacity 
+                onPress={pickImage}
+                className="mr-2 p-1.5"
+            >
+                <Ionicons name="image" size={20} color="#6366f1" />
+            </TouchableOpacity>
+          </Animated.View>
         )}
         
-        {/* Text input container with integrated expand icon */}
-        <View className="flex-1 bg-neutral-50 dark:bg-neutral-950/50 rounded-[24px] border border-neutral-200 dark:border-neutral-800 overflow-hidden relative">
-          {content.trim().length > 0 && (
-            <View className="flex-row px-3 pt-1 pb-1">
-              {images.map((uri, i) => (
-                <Image key={i} source={{ uri }} className="w-8 h-8 rounded mr-1 border border-neutral-200 dark:border-neutral-800" />
-              ))}
+        {/* Text input - minimal, no border by default */}
+        <View className="flex-1 relative">
+          {/* Input container - subtle bg when needed, transparent by default */}
+          <View className={`${isFocused ? 'bg-neutral-100 dark:bg-neutral-800/50' : ''} rounded-full`}>
+            {/* Images preview */}
+            {images.length > 0 && (
+              <View className="flex-row px-3 pt-2">
+                {images.map((uri, i) => (
+                  <Image key={i} source={{ uri }} className="w-6 h-6 rounded mr-1" />
+                ))}
+              </View>
+            )}
+            
+            <View className="flex-row items-center">
+              <TextInput
+                placeholder="What's on your mind?"
+                placeholderTextColor="#737373"
+                className="flex-1 text-neutral-900 dark:text-neutral-100 text-[14px] px-4 py-2 pr-10 leading-4 font-normal"
+                multiline={true}
+                value={content}
+                onChangeText={onChangeText}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                textAlignVertical="center"
+                underlineColorAndroid="transparent"
+              />
+              
+              {/* Expand icon - inside input, right side */}
+              {shouldShowIcons && (
+                <Animated.View
+                  entering={FadeIn.springify().damping(15).stiffness(120)}
+                  exiting={FadeOut.springify().duration(150)}
+                  className="absolute right-2"
+                >
+                  <TouchableOpacity 
+                      onPress={handleExpand}
+                      className="p-1.5"
+                  >
+                      <Ionicons name="expand-outline" size={16} color="#a3a3a3" />
+                  </TouchableOpacity>
+                </Animated.View>
+              )}
             </View>
-          )}
-          <TextInput
-            placeholder={isFocused || content.trim().length > 0 ? "" : "What's on your mind?"}
-            placeholderTextColor="#737373"
-            className="text-neutral-900 dark:text-neutral-100 text-[14px] px-4 py-2.5 pr-16 leading-4 font-normal"
-            multiline={true}
-            value={content}
-            onChangeText={onChangeText}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
-            textAlignVertical="center"
-            underlineColorAndroid="transparent"
-          />
-          
-          {/* Expand icon integrated with input (muted color - right side of text input) */}
-          {isFocused || content.trim().length > 0 && (
-            <TouchableOpacity 
-                onPress={handleExpand}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full"
-            >
-                <Ionicons name="expand-outline" size={16} color="#a3a3a3" />
-            </TouchableOpacity>
-          )}
+          </View>
         </View>
         
-        {/* Submit icon (checkmark) - to the right of input box */}
+        {/* Submit icon (checkmark) - to the right */}
         {content.trim().length > 0 && (
-          <TouchableOpacity 
-              onPress={handleSubmit}
-              className="ml-2 p-2 bg-indigo-500 rounded-full"
+          <Animated.View
+            entering={FadeIn.springify().damping(15).stiffness(120)}
+            exiting={FadeOut.springify().duration(150)}
           >
-              <Ionicons name="checkmark" size={18} color="white" />
-          </TouchableOpacity>
+            <TouchableOpacity 
+                onPress={handleSubmit}
+                className="ml-2 p-2 bg-indigo-500 rounded-full"
+            >
+                <Ionicons name="checkmark" size={18} color="white" />
+            </TouchableOpacity>
+          </Animated.View>
         )}
       </View>
   );
