@@ -1,6 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, Button, FlatList, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, Button, FlatList, ActivityIndicator, KeyboardAvoidingView, Platform, LayoutAnimation, UIManager } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 import { initDb } from '../../database/db';
 import { createEntry, getAllEntries } from '../../database/entries';
 import { Entry } from '../../types/Entry';
@@ -14,6 +18,12 @@ export default function EntriesScreen({ navigation }: any) {
   const fetchEntries = async () => {
     try {
       const currentEntries = await getAllEntries();
+      
+      // Trigger a smooth layout animation if the amount of entries has changed (e.g. a new one was added)
+      if (entries.length !== 0 && entries.length !== currentEntries.length) {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      }
+      
       setEntries(currentEntries);
     } catch (error) {
       console.error("Failed to fetch entries:", error);

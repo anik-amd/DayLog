@@ -1,7 +1,11 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { View, TextInput, TouchableOpacity } from 'react-native';
+import { View, TextInput, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 import { createEntry, updateEntry } from '../../database/entries';
 import { useAutoSave } from '../../hooks/useAutoSave';
 import { Entry } from '../../types/Entry';
@@ -46,6 +50,13 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
   useAutoSave(content, (text) => handleSave(text, false), 1000);
 
   const onChangeText = (text: string) => {
+    // Smoothly animate the appearance/disappearance of the submit button
+    const willShowButton = text.trim().length > 0;
+    const isShowingButton = content.trim().length > 0;
+    if (willShowButton !== isShowingButton) {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    }
+
     setContent(text);
     if (text === '') {
       setCurrentEntryId(null);

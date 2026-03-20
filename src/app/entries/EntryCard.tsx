@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import React, { useRef } from 'react';
+import { View, Text, TouchableWithoutFeedback, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Entry } from '../../types/Entry';
 
@@ -23,20 +23,41 @@ export default function EntryCard({ entry }: EntryCardProps) {
   });
 
   const navigation = useNavigation<any>();
+  const scaleValue = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    Animated.spring(scaleValue, {
+      toValue: 0.97,
+      useNativeDriver: true,
+      speed: 20,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleValue, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 20,
+      bounciness: 12,
+    }).start();
+  };
 
   return (
-    <TouchableOpacity 
-      activeOpacity={0.7}
+    <TouchableWithoutFeedback 
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
       onPress={() => navigation.navigate('FullScreenEditor', { entryId: entry.id, initialContent: entry.content })}
     >
-      <View className="bg-neutral-900 p-5 rounded-3xl mb-4 border border-neutral-800 shadow-sm relative overflow-hidden">
-        <Text className="text-neutral-500 text-[11px] uppercase tracking-widest mb-2.5 font-bold">
-          {formattedDate}
-        </Text>
-        <Text className="text-neutral-200 text-[16px] leading-7 font-medium break-words">
-          {previewText}
-        </Text>
-      </View>
-    </TouchableOpacity>
+      <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
+        <View className="bg-neutral-900 p-5 rounded-3xl mb-4 border border-neutral-800 shadow-sm relative overflow-hidden">
+          <Text className="text-neutral-500 text-[11px] uppercase tracking-widest mb-2.5 font-bold">
+            {formattedDate}
+          </Text>
+          <Text className="text-neutral-200 text-[16px] leading-7 font-medium break-words">
+            {previewText}
+          </Text>
+        </View>
+      </Animated.View>
+    </TouchableWithoutFeedback>
   );
 }
