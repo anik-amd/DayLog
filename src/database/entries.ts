@@ -35,7 +35,7 @@ export const getEntry = async (id: string): Promise<Entry | null> => {
 
 export const getAllEntries = async (): Promise<Entry[]> => {
   const db = await getDb();
-  const allRows = await db.getAllAsync<Entry>('SELECT * FROM entries ORDER BY createdAt DESC');
+  const allRows = await db.getAllAsync<Entry>('SELECT * FROM entries ORDER BY date DESC, createdAt DESC');
   const allMedia = await db.getAllAsync<Media>('SELECT * FROM media ORDER BY createdAt ASC');
 
   // Performantly group array relationships in raw client memory rather than complex SQL mapping

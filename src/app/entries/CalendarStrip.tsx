@@ -87,9 +87,17 @@ export default function CalendarStrip({ selectedDate, onDateSelect, entries }: C
   return (
     <View className="overflow-hidden">
       <View className="flex-row items-center justify-between px-0 pt-2 pb-4">
-        <Text className="text-neutral-400 dark:text-neutral-500 text-[10px] font-black uppercase tracking-[2px]">
-          {expanded ? 'Full Calendar' : 'This Week'}
-        </Text>
+        <TouchableOpacity 
+          onPress={() => selectedDate && onDateSelect(null)}
+          className="flex-row items-center"
+        >
+          <Text className="text-neutral-400 dark:text-neutral-500 text-[10px] font-black uppercase tracking-[2px]">
+            {selectedDate ? 'Filtered' : expanded ? 'Full Calendar' : 'All Entries'}
+          </Text>
+          {selectedDate && (
+            <Ionicons name="close-circle" size={14} color="#6366f1" className="ml-1" />
+          )}
+        </TouchableOpacity>
         <TouchableOpacity onPress={toggleExpand} className="p-1">
           <Ionicons name={expanded ? "chevron-up" : "grid-outline"} size={16} color={isDark ? "#737373" : "#a3a3a3"} />
         </TouchableOpacity>
