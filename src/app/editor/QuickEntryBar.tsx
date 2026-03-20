@@ -199,7 +199,7 @@ export default function QuickEntryBar({ onEntrySaved }: QuickEntryBarProps) {
           {isFocused || content.trim().length > 0 && (
             <TouchableOpacity 
                 onPress={handleExpand}
-                className="absolute right-10 top-1/2 -translate-y-1/2 p-1.5 rounded-full"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full"
             >
                 <Ionicons name="expand-outline" size={16} color="#a3a3a3" />
             </TouchableOpacity>
