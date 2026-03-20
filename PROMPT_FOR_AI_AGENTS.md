@@ -206,6 +206,7 @@ The agent must NOT:
 - Add complex settings
 - Add unnecessary UI animations
 - Add third-party diary features
+- Commit or push code unless explicitly asked by the user
 
 If a feature is not in the roadmap, do not implement it.
 
