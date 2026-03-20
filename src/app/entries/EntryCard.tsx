@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
-import { View, Text, TouchableWithoutFeedback, Animated, Image } from 'react-native';
+import { View, Text, TouchableWithoutFeedback, Animated } from 'react-native';
+import { Image } from 'expo-image';
 import { useNavigation } from '@react-navigation/native';
 import { Entry } from '../../types/Entry';
 
@@ -18,7 +19,7 @@ const stripMarkdown = (text: string) => {
     .trim();
 };
 
-export default function EntryCard({ entry }: EntryCardProps) {
+function EntryCardComponent({ entry }: EntryCardProps) {
   // Extract pure text for timeline preview
   const plainTextPreview = stripMarkdown(entry.content);
 
@@ -62,7 +63,7 @@ export default function EntryCard({ entry }: EntryCardProps) {
           <Text className="text-neutral-400 dark:text-neutral-500 text-[11px] uppercase tracking-widest mb-2.5 font-bold">
             {formattedDate}
           </Text>
-          <Text
+          <Text 
             className="text-neutral-800 dark:text-neutral-200 text-[16px] leading-7 font-medium"
             numberOfLines={3}
             ellipsizeMode="tail"
@@ -73,8 +74,14 @@ export default function EntryCard({ entry }: EntryCardProps) {
           {entry.media && entry.media.length > 0 && (
             <View className="flex-row mt-3 mb-1">
               {entry.media.slice(0, 3).map((m, idx) => (
-                <Image key={m.id} source={{ uri: m.path }} className="w-16 h-16 rounded-xl mr-2 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/50" />
-              ))}
+              <Image 
+                key={m.id} 
+                source={{ uri: m.path }} 
+                className="w-16 h-16 rounded-xl mr-2 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/50" 
+                contentFit="cover"
+                transition={200}
+              />
+            ))}
               {entry.media.length > 3 && (
                 <View className="w-16 h-16 rounded-xl bg-neutral-100 dark:bg-neutral-800/80 items-center justify-center border border-neutral-200 dark:border-neutral-700">
                   <Text className="text-neutral-500 dark:text-neutral-400 font-bold text-[13px] tracking-wide">+{entry.media.length - 3}</Text>
@@ -87,3 +94,6 @@ export default function EntryCard({ entry }: EntryCardProps) {
     </TouchableWithoutFeedback>
   );
 }
+
+const EntryCard = React.memo(EntryCardComponent);
+export default EntryCard;

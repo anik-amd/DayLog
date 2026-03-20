@@ -12,6 +12,7 @@ import { Entry } from '../../types/Entry';
 import EntryCard from './EntryCard';
 import CalendarStrip from './CalendarStrip';
 import QuickEntryBar from '../editor/QuickEntryBar';
+import { FlashList } from "@shopify/flash-list";
 
 export default function EntriesScreen({ navigation }: any) {
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -104,10 +105,11 @@ export default function EntriesScreen({ navigation }: any) {
         {loading ? (
           <ActivityIndicator size="large" color="#a1a1aa" className="mt-10" />
         ) : (
-          <FlatList
+          <FlashList
             data={filteredEntries}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => <EntryCard entry={item} />}
+            estimatedItemSize={180}
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={() => (
             <View className="mt-20 items-center opacity-60">

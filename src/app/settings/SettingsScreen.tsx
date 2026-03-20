@@ -4,16 +4,43 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useColorScheme } from "nativewind";
 import { getAppStats } from '../../database/entries';
+import { useBackupEngine } from '../../services/BackupEngine';
 
 export default function SettingsScreen() {
   const navigation = useNavigation();
   const { colorScheme, setColorScheme } = useColorScheme();
   const [stats, setStats] = useState({ entries: 0, photos: 0 });
   const [showThemeModal, setShowThemeModal] = useState(false);
+  const [lastSync, setLastSync] = useState<string>("Never");
+  const [syncing, setSyncing] = useState(false);
+
+  const { promptAsync, response, uploadBackup } = useBackupEngine();
+
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { authentication } = response;
+      if (authentication?.accessToken) {
+        setSyncing(true);
+        uploadBackup(authentication.accessToken).then(success => {
+            if (success) {
+                setLastSync(new Date().toLocaleString());
+                Alert.alert("Backup Successful", "Your DayLog has been safely uploaded to Google Drive.");
+            } else {
+                Alert.alert("Backup Failed", "We couldn't reach Google Drive. Please check your connection.");
+            }
+            setSyncing(false);
+        });
+      }
+    }
+  }, [response]);
 
   const handleSetTheme = (theme: "light" | "dark" | "system") => {
     setColorScheme(theme);
     setShowThemeModal(false);
+  };
+
+  const handleBackup = () => {
+    promptAsync();
   };
 
   const fetchStats = async () => {
@@ -65,59 +92,78 @@ export default function SettingsScreen() {
   );
 
   return (
-    <ScrollView className="flex-1 bg-neutral-100 dark:bg-neutral-950">
-      <View className="px-6 pt-14 pb-8 flex-row items-center">
-        <TouchableOpacity 
-          onPress={() => navigation.goBack()}
-          className="bg-white dark:bg-neutral-900 w-11 h-11 rounded-full items-center justify-center border border-neutral-200 dark:border-neutral-800 mr-5 shadow-sm"
-        >
-          <Ionicons name="arrow-back" size={22} color={colorScheme === 'dark' ? "#a3a3a3" : "#404040"} />
-        </TouchableOpacity>
-        <View>
-          <Text className="text-neutral-900 dark:text-neutral-50 text-[32px] font-extrabold tracking-tight">Settings</Text>
-          <Text className="text-neutral-500 font-medium mt-1">Configure your DayLog</Text>
+    <View className="flex-1 bg-neutral-100 dark:bg-neutral-950">
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        <View className="px-6 pt-14 pb-8 flex-row items-center">
+            <TouchableOpacity 
+            onPress={() => navigation.goBack()}
+            className="bg-white dark:bg-neutral-900 w-11 h-11 rounded-full items-center justify-center border border-neutral-200 dark:border-neutral-800 mr-5 shadow-sm"
+            >
+            <Ionicons name="arrow-back" size={22} color={colorScheme === 'dark' ? "#a3a3a3" : "#404040"} />
+            </TouchableOpacity>
+            <View>
+            <Text className="text-neutral-900 dark:text-neutral-50 text-[32px] font-extrabold tracking-tight">Settings</Text>
+            <Text className="text-neutral-500 font-medium mt-1">Configure your DayLog</Text>
+            </View>
         </View>
-      </View>
 
-      <Section title="Statistics">
-         <View className="flex-row px-4 py-6 justify-around bg-white dark:bg-neutral-900">
-            <View className="items-center">
-                <Text className="text-indigo-600 dark:text-indigo-400 text-2xl font-black">{stats.entries}</Text>
-                <Text className="text-neutral-500 text-[10px] uppercase font-bold tracking-widest mt-1">Entries</Text>
+        <Section title="Statistics">
+            <View className="flex-row px-4 py-6 justify-around bg-white dark:bg-neutral-900">
+                <View className="items-center">
+                    <Text className="text-indigo-600 dark:text-indigo-400 text-2xl font-black">{stats.entries}</Text>
+                    <Text className="text-neutral-500 text-[10px] uppercase font-bold tracking-widest mt-1">Entries</Text>
+                </View>
+                <View className="w-[1px] h-10 bg-neutral-200 dark:bg-neutral-800" />
+                <View className="items-center">
+                    <Text className="text-indigo-600 dark:text-indigo-400 text-2xl font-black">{stats.photos}</Text>
+                    <Text className="text-neutral-500 text-[10px] uppercase font-bold tracking-widest mt-1">Photos</Text>
+                </View>
             </View>
-            <View className="w-[1px] h-10 bg-neutral-200 dark:bg-neutral-800" />
-            <View className="items-center">
-                <Text className="text-indigo-600 dark:text-indigo-400 text-2xl font-black">{stats.photos}</Text>
-                <Text className="text-neutral-500 text-[10px] uppercase font-bold tracking-widest mt-1">Photos</Text>
-            </View>
-         </View>
-      </Section>
+        </Section>
 
-      <Section title="Appearance">
-        <SettingItem 
-            icon={colorScheme === 'dark' ? "moon" : "sunny"} 
-            label="Theme" 
-            value={colorScheme === 'dark' ? "Dark Mode" : "Light Mode"} 
-            onPress={() => setShowThemeModal(true)} 
-        />
-        <SettingItem icon="text" label="Editor Font" value="System Default" onPress={() => {}} last />
-      </Section>
+        <Section title="Appearance">
+            <SettingItem 
+                icon={colorScheme === 'dark' ? "moon" : "sunny"} 
+                label="Theme" 
+                value={colorScheme === 'dark' ? "Dark Mode" : "Light Mode"} 
+                onPress={() => setShowThemeModal(true)} 
+            />
+            <SettingItem icon="text" label="Editor Font" value="System Default" onPress={() => {}} last />
+        </Section>
 
-      <Section title="Preferences">
-        <SettingItem icon="notifications-outline" label="Reminders" value="Off" onPress={() => {}} />
-        <SettingItem icon="cloud-upload-outline" label="Sync to Drive" value="Coming Soon" onPress={() => {}} last />
-      </Section>
+        <Section title="Cloud Sync">
+            <SettingItem 
+                icon="cloud-done-outline" 
+                label={syncing ? "Backing up..." : "Google Drive Backup"} 
+                value={response?.type === 'success' ? "Connected" : "Connect"} 
+                onPress={handleBackup} 
+                color={syncing ? "#6366f1" : undefined}
+            />
+            <SettingItem 
+                icon="refresh-outline" 
+                label="Last Synchronized" 
+                value={lastSync} 
+                onPress={() => {}} 
+                last 
+            />
+        </Section>
 
-      <Section title="App">
-        <SettingItem icon="share-outline" label="Tell a Friend" onPress={onShare} />
-        <SettingItem icon="star-outline" label="Rate DayLog" onPress={() => {}} />
-        <SettingItem icon="help-circle-outline" label="Support" onPress={() => {}} />
-        <SettingItem icon="information-circle-outline" label="About DayLog" value="v1.0.0" onPress={() => {}} last />
-      </Section>
+        <Section title="Preferences">
+            <SettingItem icon="notifications-outline" label="Reminders" value="Off" onPress={() => {}} />
+            <SettingItem icon="cloud-upload-outline" label="Automated Sync" value="Coming Soon" onPress={() => {}} last />
+        </Section>
 
-      <View className="items-center pb-12 mt-4">
-        <Text className="text-neutral-700 text-[12px] font-medium tracking-tight">Made with minimalism in mind.</Text>
-      </View>
+        <Section title="App">
+            <SettingItem icon="share-outline" label="Tell a Friend" onPress={onShare} />
+            <SettingItem icon="star-outline" label="Rate DayLog" onPress={() => {}} />
+            <SettingItem icon="help-circle-outline" label="Support" onPress={() => {}} />
+            <SettingItem icon="information-circle-outline" label="About DayLog" value="v1.0.0" onPress={() => {}} last />
+        </Section>
+
+        <View className="items-center pb-12 mt-4">
+            <Text className="text-neutral-700 text-[12px] font-medium tracking-tight">Made with minimalism in mind.</Text>
+        </View>
+      </ScrollView>
 
       <Modal
         visible={showThemeModal}
@@ -177,6 +223,6 @@ export default function SettingsScreen() {
             </View>
         </Pressable>
       </Modal>
-    </ScrollView>
+    </View>
   );
 }

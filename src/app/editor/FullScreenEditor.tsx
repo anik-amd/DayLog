@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, TextInput, KeyboardAvoidingView, Platform, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, TextInput, KeyboardAvoidingView, Platform, TouchableOpacity, ScrollView } from 'react-native';
+import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { getEntry, updateEntry } from '../../database/entries';
 import { deleteMedia } from '../../database/media';
@@ -87,6 +88,8 @@ export default function FullScreenEditor({ route, navigation }: any) {
                   <Image 
                     source={{ uri: m.path }} 
                     className="w-24 h-24 rounded-2xl bg-neutral-900 border border-neutral-800" 
+                    contentFit="cover"
+                    transition={300}
                   />
                   {!isViewing && (
                     <TouchableOpacity 

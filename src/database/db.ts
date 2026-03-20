@@ -19,6 +19,7 @@ export const initDb = async () => {
       updatedAt INTEGER,
       date TEXT
     );
+    CREATE INDEX IF NOT EXISTS idx_entries_date ON entries(date);
     CREATE TABLE IF NOT EXISTS media (
       id TEXT PRIMARY KEY NOT NULL,
       entryId TEXT,
