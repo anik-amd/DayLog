@@ -1,62 +1,61 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import { Text, View, StyleSheet } from 'react-native';
+import { useColorScheme } from "nativewind";
 
 interface MarkdownProps {
   content: string;
 }
 
-// Minimalistic native markdown parser tailored specifically for performance (no massive 3rd party parser libraries).
-// Understands: Headings, Unordered Lists, Bold tags, Line breaks
 export default function MarkdownRenderer({ content }: MarkdownProps) {
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
   const lines = content.split('\n');
+
+  const textColor = isDark ? '#d4d4d8' : '#3f3f46';
+  const headingColor = isDark ? '#fafafa' : '#27272a';
+  const subheadingColor = isDark ? '#e4e4e7' : '#3f3f46';
 
   return (
     <View>
       {lines.map((line, index) => {
-        // H1
         if (line.startsWith('# ')) {
           return (
-            <Text key={index} className="text-neutral-900 dark:text-white text-[22px] leading-8 font-bold mt-3 mb-1">
-              {parseInline(line.substring(2))}
+            <Text key={index} style={[localStyles.h1, { color: headingColor }]}>
+              {parseInline(line.substring(2), isDark)}
             </Text>
           );
         }
-        // H2
         if (line.startsWith('## ')) {
           return (
-            <Text key={index} className="text-neutral-900 dark:text-white text-[18px] leading-7 font-bold mt-2 mb-1">
-              {parseInline(line.substring(3))}
+            <Text key={index} style={[localStyles.h2, { color: headingColor }]}>
+              {parseInline(line.substring(3), isDark)}
             </Text>
           );
         }
-        // H3
         if (line.startsWith('### ')) {
           return (
-            <Text key={index} className="text-neutral-800 dark:text-neutral-100 text-[16px] leading-6 font-bold mt-1 mb-1">
-              {parseInline(line.substring(4))}
+            <Text key={index} style={[localStyles.h3, { color: subheadingColor }]}>
+              {parseInline(line.substring(4), isDark)}
             </Text>
           );
         }
-        // Bullet List
         if (line.startsWith('- ') || line.startsWith('* ')) {
           return (
-            <View key={index} className="flex-row items-start mt-0.5 mb-1 pl-2 pr-2">
-              <Text className="text-neutral-400 dark:text-neutral-500 mr-2.5 text-[18px]">•</Text>
-              <Text className="text-neutral-800 dark:text-neutral-200 text-[16px] leading-7 font-medium flex-1 break-words">
-                {parseInline(line.substring(2))}
+            <View key={index} style={localStyles.bulletRow}>
+              <Text style={[localStyles.bullet]}>•</Text>
+              <Text style={[localStyles.bulletText, { color: textColor }]}>
+                {parseInline(line.substring(2), isDark)}
               </Text>
             </View>
           );
         }
-        // Blank line (line break equivalent spacing)
         if (line.trim() === '') {
-          return <View key={index} className="h-3" />;
+          return <View key={index} style={localStyles.blankLine} />;
         }
         
-        // Standard Paragraph Text
         return (
-          <Text key={index} className="text-neutral-800 dark:text-neutral-200 text-[16px] leading-7 font-medium break-words mt-0.5">
-            {parseInline(line)}
+          <Text key={index} style={[localStyles.paragraph, { color: textColor }]}>
+            {parseInline(line, isDark)}
           </Text>
         );
       })}
@@ -64,46 +63,102 @@ export default function MarkdownRenderer({ content }: MarkdownProps) {
   );
 }
 
-function parseInline(text: string) {
+const localStyles = StyleSheet.create({
+  h1: {
+    fontFamily: 'Outfit-SemiBold',
+    fontSize: 22,
+    lineHeight: 32,
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  h2: {
+    fontFamily: 'Outfit-SemiBold',
+    fontSize: 18,
+    lineHeight: 28,
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  h3: {
+    fontFamily: 'Outfit-Medium',
+    fontSize: 16,
+    lineHeight: 24,
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  bulletRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: 2,
+    marginBottom: 4,
+    paddingHorizontal: 8,
+    paddingRight: 16,
+  },
+  bullet: {
+    fontFamily: 'Outfit-Regular',
+    fontSize: 18,
+    color: '#a1a1aa',
+    marginRight: 10,
+  },
+  bulletText: {
+    fontFamily: 'Outfit-Medium',
+    fontSize: 16,
+    lineHeight: 28,
+    flex: 1,
+    flexWrap: 'wrap',
+  },
+  blankLine: {
+    height: 12,
+  },
+  paragraph: {
+    fontFamily: 'Outfit-Regular',
+    fontSize: 16,
+    lineHeight: 28,
+    marginTop: 2,
+    flexWrap: 'wrap',
+  },
+});
+
+function parseInline(text: string, isDark: boolean) {
   const parts: any[] = [];
+  const textColor = isDark ? '#d4d4d8' : '#3f3f46';
+  const headingColor = isDark ? '#fafafa' : '#27272a';
   
-  // Pass 1: Split explicitly around **bold** tags first so they aren't confused with single *italics*
   const boldSegments = text.split(/(\*\*.*?\*\*)/g);
   
   boldSegments.forEach((segment, i) => {
     if (segment.startsWith('**') && segment.endsWith('**')) {
       const innerText = segment.slice(2, -2);
       parts.push(
-        <Text key={`bold-${i}`} className="font-extrabold text-neutral-900 dark:text-white">
-          {parseItalics(innerText)}
+        <Text key={`bold-${i}`} style={[{ fontFamily: 'Outfit-SemiBold', color: headingColor }]}>
+          {parseItalics(innerText, isDark)}
         </Text>
       );
     } else if (segment) {
-      // Pass 2: Send remaining flat text chunks sequentially through the italics parser
-      parts.push(<React.Fragment key={`frag-${i}`}>{parseItalics(segment)}</React.Fragment>);
+      parts.push(<React.Fragment key={`frag-${i}`}>{parseItalics(segment, isDark)}</React.Fragment>);
     }
   });
 
   return parts.length > 0 ? parts : text;
 }
 
-function parseItalics(text: string) {
+function parseItalics(text: string, isDark: boolean) {
   if (!text) return [];
   const parts: any[] = [];
+  const italicColor = isDark ? '#a1a1aa' : '#52525b';
+  const textColor = isDark ? '#d4d4d8' : '#3f3f46';
   
-  // Safe italic splitter that catches *italic* or _italic_ safely avoiding newlines
   const italicSegments = text.split(/(\*[^*\n]+\*|_[^_\n]+_)/g);
   
   italicSegments.forEach((seg, i) => {
     if ((seg.startsWith('*') && seg.endsWith('*')) || (seg.startsWith('_') && seg.endsWith('_'))) {
       const innerText = seg.substring(1, seg.length - 1);
       parts.push(
-        <Text key={`italic-${i}`} className="italic text-neutral-700 dark:text-neutral-100">
+        <Text key={`italic-${i}`} style={[{ fontFamily: 'Outfit-Regular', fontStyle: 'italic', color: italicColor }]}>
           {innerText}
         </Text>
       );
     } else if (seg) {
-      parts.push(<Text key={`text-${i}`}>{seg}</Text>);
+      parts.push(<Text key={`text-${i}`} style={{ fontFamily: 'Outfit-Regular', color: textColor }}>{seg}</Text>);
     }
   });
   

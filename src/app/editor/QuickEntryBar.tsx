@@ -526,6 +526,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                 color: colorScheme === 'dark' ? '#e4e4e7' : '#27272a',
                 fontSize: showMetadata ? 15 : 13,
                 lineHeight: showMetadata ? 22 : 18,
+                fontFamily: 'Outfit-Regular',
                 backgroundColor: 'transparent',
               }}
               multiline={true}

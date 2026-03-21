@@ -177,7 +177,8 @@ export default function FullScreenEditor({ route, navigation }: any) {
                     ref={inputRef}
                     placeholder="Capture your thoughts..."
                     placeholderTextColor="#a3a3a3"
-                    className="text-neutral-900 dark:text-neutral-100 text-[20px] leading-10 font-medium min-h-[500px]"
+                    className="text-neutral-900 dark:text-neutral-100 text-[20px] leading-10 min-h-[500px]"
+                    style={{ fontFamily: 'Outfit-Regular' }}
                     multiline={true}
                     value={markdown}
                     onChangeText={setMarkdown}

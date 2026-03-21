@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { View, Text, TouchableWithoutFeedback, Animated } from 'react-native';
+import { View, Text, TouchableWithoutFeedback, Animated, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -21,6 +21,25 @@ const stripMarkdown = (text: string) => {
     .replace(/\n+/g, ' ') // strip line breaks into spaces
     .trim();
 };
+
+const localStyles = StyleSheet.create({
+  time: {
+    fontFamily: 'Outfit-Medium',
+    fontSize: 12,
+    marginRight: 12,
+    marginTop: 2,
+  },
+  content: {
+    fontFamily: 'Outfit-Regular',
+    fontSize: 15,
+    lineHeight: 24,
+  },
+  meta: {
+    fontFamily: 'Outfit-Regular',
+    fontSize: 10,
+    marginLeft: 4,
+  },
+});
 
 function EntryCardComponent({ entry, showBorder = false }: EntryCardProps) {
   const { colorScheme } = useColorScheme();
@@ -77,12 +96,12 @@ function EntryCardComponent({ entry, showBorder = false }: EntryCardProps) {
       <Animated.View style={{ opacity: opacityAnim, transform: [{ scale: scaleAnim }] }}>
         <View className={`px-5 py-4 ${showBorder ? 'border-t border-neutral-100 dark:border-neutral-800' : ''}`}>
           <View className="flex-row items-start">
-            <Text className="text-neutral-400 dark:text-neutral-500 text-[12px] font-medium mr-3 mt-0.5">
+            <Text style={[localStyles.time, { color: colorScheme === 'dark' ? '#71717a' : '#a1a1aa' }]}>
               {formattedTime}
             </Text>
             <View className="flex-1">
               <Text 
-                className="text-neutral-700 dark:text-neutral-300 text-[15px] leading-6"
+                style={[localStyles.content, { color: colorScheme === 'dark' ? '#d4d4d8' : '#52525b' }]}
                 numberOfLines={3}
                 ellipsizeMode="tail"
               >
@@ -95,7 +114,7 @@ function EntryCardComponent({ entry, showBorder = false }: EntryCardProps) {
                   {entry.location && (
                     <View className="flex-row items-center mr-3">
                       <Ionicons name="location-outline" size={11} color={colorScheme === 'dark' ? '#a3a3a3' : '#737373'} />
-                      <Text className="text-neutral-400 dark:text-neutral-500 text-[10px] ml-1">
+                      <Text style={[localStyles.meta, { color: colorScheme === 'dark' ? '#71717a' : '#a1a1aa' }]}>
                         {entry.location}
                       </Text>
                     </View>
@@ -103,7 +122,7 @@ function EntryCardComponent({ entry, showBorder = false }: EntryCardProps) {
                   {entry.weather && (
                     <View className="flex-row items-center">
                       <Ionicons name="sunny-outline" size={11} color={colorScheme === 'dark' ? '#a3a3a3' : '#737373'} />
-                      <Text className="text-neutral-400 dark:text-neutral-500 text-[10px] ml-1">
+                      <Text style={[localStyles.meta, { color: colorScheme === 'dark' ? '#71717a' : '#a1a1aa' }]}>
                         {entry.weather}
                       </Text>
                     </View>
@@ -124,7 +143,7 @@ function EntryCardComponent({ entry, showBorder = false }: EntryCardProps) {
                   ))}
                   {entry.media.length > 3 && (
                     <View className="w-14 h-14 rounded-lg bg-neutral-100 dark:bg-neutral-800/80 items-center justify-center">
-                      <Text className="text-neutral-500 dark:text-neutral-400 font-medium text-[12px]">+{entry.media.length - 3}</Text>
+                      <Text style={[localStyles.meta, { color: colorScheme === 'dark' ? '#a1a1aa' : '#71717a' }]}>+{entry.media.length - 3}</Text>
                     </View>
                   )}
                 </View>
