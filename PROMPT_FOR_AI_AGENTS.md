@@ -238,3 +238,18 @@ The goal is not to build a complex app.
 The goal is to build a **fast, minimal diary tool** that people can use every day without effort.
 
 If the app becomes complicated, the implementation has failed.
+
+---
+
+# 15. User Alert Protocol
+
+When the agent needs to alert the user (e.g., when tasks are complete or user attention is required), run this PowerShell command to play an audible alert:
+
+```
+powershell -Command "[System.Media.SystemSounds]::Hand.Play()"
+```
+
+This must be used when:
+- All assigned tasks are completed
+- The agent needs user input or confirmation before proceeding
+- Significant work milestones are reached
