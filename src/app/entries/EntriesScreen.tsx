@@ -26,6 +26,7 @@ export default function EntriesScreen({ navigation }: any) {
   const [pickerVisible, setPickerVisible] = useState(false);
   const [pickerType, setPickerType] = useState<'date' | 'time'>('date');
   const [entryDate, setEntryDate] = useState(new Date());
+  const [inputFocused, setInputFocused] = useState(false);
 
   // Animation values for scroll-driven UI hiding
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -279,13 +280,18 @@ export default function EntriesScreen({ navigation }: any) {
             }}
         >
             <View 
-                className="bg-white dark:bg-neutral-900 rounded-[40px] shadow-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden"
-                style={{ backgroundColor: colorScheme === 'dark' ? '#171717' : '#ffffff' }}
+                className="rounded-[40px] overflow-hidden"
+                style={{ 
+                    backgroundColor: colorScheme === 'dark' ? '#1e1b4b' : '#ffffff',
+                    borderWidth: inputFocused ? 2 : 1,
+                    borderColor: colorScheme === 'dark' ? '#4c1d95' : '#ddd6fe',
+                }}
             >
                 <QuickEntryBar 
                   onEntrySaved={fetchEntries}
                   entryDate={entryDate}
                   onEntryDateChange={setEntryDate}
+                  onFocusChange={setInputFocused}
                   onDatePress={() => {
                     setPickerType('date');
                     setPickerDate(entryDate);

@@ -22,9 +22,10 @@ interface QuickEntryBarProps {
   onEntryDateChange?: (date: Date) => void;
   onDatePress?: () => void;
   onTimePress?: () => void;
+  onFocusChange?: (focused: boolean) => void;
 }
 
-export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, onEntryDateChange, onDatePress, onTimePress }: QuickEntryBarProps) {
+export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, onEntryDateChange, onDatePress, onTimePress, onFocusChange }: QuickEntryBarProps) {
   const { colorScheme } = useColorScheme();
   const inputRef = useRef<RNTextInput>(null);
   const [content, setContent] = useState('');
@@ -176,6 +177,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
 
   const handleFocus = () => {
     setIsFocused(true);
+    onFocusChange?.(true);
   };
 
   const handleBlur = () => {
@@ -183,6 +185,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
     setTimeout(() => {
       if (!content.trim() && !pillPressedRef.current) {
         setIsFocused(false);
+        onFocusChange?.(false);
         hasScrolledRef.current = false;
       }
     }, 500);
@@ -380,75 +383,86 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   }) => (
     <View className="flex-row items-center">
       {icon}
-      <Text className={`text-[12px] ml-1.5 ${isError ? 'text-red-500' : 'text-neutral-600 dark:text-neutral-400'}`}>
+      <Text className={`text-[11px] ml-1.5 ${isError ? 'text-red-500' : 'text-pink-600 dark:text-pink-400'}`}>
         {children}
       </Text>
-      {onPress && (
-        <Ionicons name="chevron-down" size={12} color={isError ? "#ef4444" : "#a3a3a3"} className="ml-1" />
-      )}
     </View>
   );
+
+  const handleCardPress = () => {
+    if (!isFocused) {
+      inputRef.current?.focus();
+    }
+  };
 
   return (
       <View 
         key={colorScheme}
         className="px-4 pt-3"
       >
-        {/* Single Card - pills and input together */}
-        <View className="rounded-2xl bg-white dark:bg-neutral-900 py-3" pointerEvents="box-none">
+        {/* Single Card - clickable when not focused */}
+        <TouchableOpacity 
+          activeOpacity={isFocused ? 1 : 0.7}
+          onPress={!isFocused ? handleCardPress : undefined}
+          className="rounded-2xl overflow-hidden"
+          style={{
+            backgroundColor: colorScheme === 'dark' ? '#1e1b4b' : '#ffffff',
+            paddingVertical: showMetadata ? 12 : 8,
+          }}
+        >
           {/* Pills Row */}
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 8, paddingRight: 16 }}
-          >
-            {/* Date Pill */}
-            {showMetadata && (
+          {showMetadata && (
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 8, paddingRight: 16 }}
+            >
+              {/* Date Pill */}
               <TouchableOpacity 
                 onPress={() => {
                   pillPressedRef.current = true;
                   setShowDatePicker(true);
                 }}
                 hitSlop={{ top: 10, bottom: 10, left: 5, right: 5 }}
-                className="flex-row items-center rounded-full bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5 mr-2"
+                className="flex-row items-center rounded-full px-2.5 py-1 mr-2"
+                style={{ backgroundColor: '#ede9fe' }}
               >
-                <Ionicons name="calendar-outline" size={14} color="#6366f1" />
-                <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">
+                <Ionicons name="calendar-outline" size={12} color="#7c3aed" />
+                <Text className="text-[11px] ml-1.5" style={{ color: '#7c3aed' }}>
                   {formatDate(entryDate)}
                 </Text>
-                <Ionicons name="chevron-down" size={12} color="#a3a3a3" className="ml-1" />
+                <Ionicons name="chevron-down" size={10} color="#a78bfa" className="ml-1" />
               </TouchableOpacity>
-            )}
 
-            {/* Time Pill */}
-            {showMetadata && (
+              {/* Time Pill */}
               <TouchableOpacity 
                 onPress={() => {
                   pillPressedRef.current = true;
                   setShowTimePicker(true);
                 }}
                 hitSlop={{ top: 10, bottom: 10, left: 5, right: 5 }}
-                className="flex-row items-center rounded-full bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5 mr-2"
+                className="flex-row items-center rounded-full px-2.5 py-1 mr-2"
+                style={{ backgroundColor: '#ede9fe' }}
               >
-                <Ionicons name="time-outline" size={14} color="#6366f1" />
-                <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">
+                <Ionicons name="time-outline" size={12} color="#7c3aed" />
+                <Text className="text-[11px] ml-1.5" style={{ color: '#7c3aed' }}>
                   {formatTime(entryDate)}
                 </Text>
-                <Ionicons name="chevron-down" size={12} color="#a3a3a3" className="ml-1" />
+                <Ionicons name="chevron-down" size={10} color="#a78bfa" className="ml-1" />
               </TouchableOpacity>
-            )}
 
-            {/* Weather Pill */}
-            {showMetadata && (
-              <View className="flex-row items-center rounded-full bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5 mr-2">
+              {/* Weather Pill */}
+              <View className="flex-row items-center rounded-full px-2.5 py-1 mr-2"
+                style={{ backgroundColor: '#fdf4ff' }}
+              >
                 <PillItem 
                   icon={
                     weatherLoading ? (
-                      <Ionicons name="cloudy-outline" size={14} color="#a3a3a3" />
+                      <Ionicons name="cloudy-outline" size={12} color="#d946ef" />
                     ) : weatherError ? (
-                      <Ionicons name="cloud-offline-outline" size={14} color="#ef4444" />
+                      <Ionicons name="cloud-offline-outline" size={12} color="#ef4444" />
                     ) : (
-                      <Ionicons name="sunny-outline" size={14} color="#f59e0b" />
+                      <Ionicons name="sunny-outline" size={12} color="#f59e0b" />
                     )
                   }
                   isError={weatherError}
@@ -457,19 +471,19 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                   {weatherError ? 'N/A' : weather || '...'}
                 </PillItem>
               </View>
-            )}
 
-            {/* Location Pill */}
-            {showMetadata && (
-              <View className="flex-row items-center rounded-full bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5 mr-2">
+              {/* Location Pill */}
+              <View className="flex-row items-center rounded-full px-2.5 py-1 mr-2"
+                style={{ backgroundColor: '#fef3c7' }}
+              >
                 <PillItem 
                   icon={
                     locationLoading ? (
-                      <Ionicons name="location-outline" size={14} color="#a3a3a3" />
+                      <Ionicons name="location-outline" size={12} color="#d97706" />
                     ) : locationError ? (
-                      <Ionicons name="location-outline" size={14} color="#ef4444" />
+                      <Ionicons name="location-outline" size={12} color="#ef4444" />
                     ) : (
-                      <Ionicons name="location-outline" size={14} color="#6366f1" />
+                      <Ionicons name="location-outline" size={12} color="#d97706" />
                     )
                   }
                   isError={locationError}
@@ -478,22 +492,21 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                   {locationError ? 'Unavailable' : location || '...'}
                 </PillItem>
               </View>
-            )}
 
-            {/* Photo Pill */}
-            {showMetadata && (
+              {/* Photo Pill */}
               <TouchableOpacity 
                 onPress={pickImage}
-                className="flex-row items-center rounded-full bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5"
+                className="flex-row items-center rounded-full px-2.5 py-1"
+                style={{ backgroundColor: '#e0f2fe' }}
               >
-                <Ionicons name="image" size={14} color="#6366f1" />
-                <Text className="text-neutral-600 dark:text-neutral-400 text-[12px] ml-1.5">Photo</Text>
+                <Ionicons name="image" size={12} color="#0284c7" />
+                <Text className="text-[11px] ml-1.5" style={{ color: '#0284c7' }}>Photo</Text>
               </TouchableOpacity>
-            )}
-          </ScrollView>
+            </ScrollView>
+          )}
 
           {/* Input Row */}
-          <View className={`flex-row items-center px-4 pt-3 ${showMetadata ? '' : 'pb-3'}`}>
+          <View className={`flex-row items-center px-4 ${showMetadata ? 'pt-2' : ''}`}>
             {/* Images preview */}
             {images.length > 0 && (
               <View className="flex-row mr-2">
@@ -504,22 +517,26 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
             )}
 
             {/* Text input */}
-            <View className="flex-1">
-              <RNTextInput
-                ref={inputRef}
-                placeholder="What's on your mind?"
-                placeholderTextColor="#737373"
-                className="text-neutral-900 dark:text-neutral-100 text-[14px] leading-4 font-normal p-0"
-                multiline={true}
-                value={content}
-                onChangeText={onChangeText}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
-                blurOnSubmit={false}
-                textAlignVertical="center"
-                underlineColorAndroid="transparent"
-              />
-            </View>
+            <RNTextInput
+              ref={inputRef}
+              placeholder="What's on your mind?"
+              placeholderTextColor={colorScheme === 'dark' ? '#a78bfa' : '#a1a1aa'}
+              className="flex-1 p-0"
+              style={{ 
+                color: colorScheme === 'dark' ? '#e4e4e7' : '#27272a',
+                fontSize: showMetadata ? 15 : 13,
+                lineHeight: showMetadata ? 22 : 18,
+                backgroundColor: 'transparent',
+              }}
+              multiline={true}
+              value={content}
+              onChangeText={onChangeText}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              blurOnSubmit={false}
+              textAlignVertical="center"
+              underlineColorAndroid="transparent"
+            />
 
             {/* Expand icon */}
             {shouldShowIcons && (
@@ -529,9 +546,10 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               >
                 <TouchableOpacity 
                     onPress={handleExpand}
-                    className="p-1.5 ml-2"
+                    className="p-1.5 ml-2 rounded-full"
+                    style={{ backgroundColor: '#ede9fe' }}
                 >
-                    <Ionicons name="expand-outline" size={16} color="#a3a3a3" />
+                    <Ionicons name="expand-outline" size={14} color="#7c3aed" />
                 </TouchableOpacity>
               </Animated.View>
             )}
@@ -544,14 +562,15 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               >
                 <TouchableOpacity 
                     onPress={handleSubmit}
-                    className="ml-2 p-2 bg-indigo-500 rounded-full"
+                    className="ml-2 p-2 rounded-full"
+                    style={{ backgroundColor: '#818cf8' }}
                 >
-                    <Ionicons name="checkmark" size={18} color="white" />
+                    <Ionicons name="checkmark" size={16} color="white" />
                 </TouchableOpacity>
               </Animated.View>
             )}
           </View>
-        </View>
+        </TouchableOpacity>
 
         {/* Bottom padding */}
       <View className="h-1" />
