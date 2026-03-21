@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, KeyboardAvoidingView, Platform, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import { View, Text, KeyboardAvoidingView, Platform, TouchableOpacity, ScrollView, TextInput, Pressable } from 'react-native';
 import { useColorScheme } from "nativewind";
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import Picker from './Picker';
 import { getEntry, updateEntry } from '../../database/entries';
 import { addMediaToEntry, deleteMedia } from '../../database/media';
 import { useAutoSave } from '../../hooks/useAutoSave';
@@ -33,6 +35,11 @@ export default function FullScreenEditor({ route, navigation }: any) {
   const [location, setLocation] = useState<string>('');
   const [weather, setWeather] = useState<string>('');
   const [tags, setTags] = useState<string>('');
+  
+  // Date/Time objects for pickers
+  const [entryDateObj, setEntryDateObj] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
 
   const loadEntry = useCallback(async () => {
     if (entryId) {
@@ -45,6 +52,14 @@ export default function FullScreenEditor({ route, navigation }: any) {
         setLocation(data.location || '');
         setWeather(data.weather || '');
         setTags(data.tags || '');
+        
+        // Parse date for pickers
+        if (data.date) {
+            const parsedDate = new Date(data.date);
+            if (!isNaN(parsedDate.getTime())) {
+                setEntryDateObj(parsedDate);
+            }
+        }
       }
     }
   }, [entryId, markdown]);
@@ -91,18 +106,6 @@ export default function FullScreenEditor({ route, navigation }: any) {
     navigation.goBack();
   };
 
-  const insertMarkdown = (prefix: string, suffix: string = '') => {
-    const { start, end } = selection;
-    const selectedText = markdown.substring(start, end);
-    const newText = 
-      markdown.substring(0, start) + 
-      prefix + selectedText + suffix + 
-      markdown.substring(end);
-    
-    setMarkdown(newText);
-    setTimeout(() => inputRef.current?.focus(), 50);
-  };
-
   const moveMediaToLocal = async (uri: string) => {
     if (Platform.OS === 'web') return uri;
     const filename = uri.split('/').pop();
@@ -135,7 +138,6 @@ export default function FullScreenEditor({ route, navigation }: any) {
       };
       
       await addMediaToEntry(newMedia);
-      insertMarkdown(`\n![Image](${persistentPath})\n`, '');
       loadEntry();
     }
   };
@@ -143,6 +145,39 @@ export default function FullScreenEditor({ route, navigation }: any) {
   const handleRemoveMedia = async (mediaId: string) => {
     await deleteMedia(mediaId);
     loadEntry();
+  };
+
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setEntryDateObj(selectedDate);
+      const dateStr = selectedDate.toISOString().split('T')[0];
+      setDate(dateStr);
+    }
+  };
+
+  const handleTimeChange = (event: any, selectedTime?: Date) => {
+    setShowTimePicker(false);
+    if (selectedTime) {
+      setEntryDateObj(selectedTime);
+      const timeStr = selectedTime.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+      setTime(timeStr);
+    }
+  };
+
+  const formatDate = (date: Date) => {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const dateStr = date.toISOString().split('T')[0];
+    if (dateStr === today.toISOString().split('T')[0]) {
+      return 'Today';
+    } else if (dateStr === yesterday.toISOString().split('T')[0]) {
+      return 'Yesterday';
+    } else {
+      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
   };
 
   return (
@@ -201,13 +236,78 @@ export default function FullScreenEditor({ route, navigation }: any) {
 
             {isEditing ? (
                 <View>
-                    <View className="flex-row flex-wrap mb-4">
-                        <MetadataInput icon="pricetag-outline" value={tags} onChangeText={setTags} placeholder="Tags" />
-                        <MetadataInput icon="calendar-outline" value={date} onChangeText={setDate} placeholder="Date" />
-                        <MetadataInput icon="time-outline" value={time} onChangeText={setTime} placeholder="Time" />
-                        <MetadataInput icon="location-outline" value={location} onChangeText={setLocation} placeholder="Location" />
-                        <MetadataInput icon="sunny-outline" value={weather} onChangeText={setWeather} placeholder="Weather" />
-                    </View>
+                    <ScrollView 
+                        horizontal 
+                        showsHorizontalScrollIndicator={false}
+                        className="mb-6"
+                        contentContainerStyle={{ flexDirection: 'row', alignItems: 'center' }}
+                    >
+                        {/* Tag Pill */}
+                        <View className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-900/30">
+                            <Ionicons name="pricetag-outline" size={15} color="#16a34a" />
+                            <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-green-600 dark:text-green-400">
+                                {tags || 'Tags'}
+                            </Text>
+                        </View>
+
+                        {/* Date Pill */}
+                        <Pressable 
+                            onPress={() => setShowDatePicker(true)}
+                            className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-900/30"
+                        >
+                            <Ionicons name="calendar-outline" size={15} color="#7c3aed" />
+                            <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-purple-600 dark:text-purple-400">
+                                {formatDate(entryDateObj)}
+                            </Text>
+                        </Pressable>
+
+                        {/* Time Pill */}
+                        <Pressable 
+                            onPress={() => setShowTimePicker(true)}
+                            className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-900/30"
+                        >
+                            <Ionicons name="time-outline" size={15} color="#7c3aed" />
+                            <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-purple-600 dark:text-purple-400">
+                                {time || 'Time'}
+                            </Text>
+                        </Pressable>
+
+                        {/* Location Pill */}
+                        <View className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30">
+                            <Ionicons name="location-outline" size={15} color="#d97706" />
+                            <TextInput 
+                                value={location}
+                                onChangeText={setLocation}
+                                placeholder="Location"
+                                placeholderTextColor="#d9770680"
+                                className="text-[14px] ml-2 text-amber-600 dark:text-amber-400 p-0 min-w-[60px]"
+                                style={{ fontFamily: 'Outfit-Medium' }}
+                            />
+                        </View>
+
+                        {/* Weather Pill */}
+                        <View className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-pink-50 dark:bg-pink-900/20 border border-pink-100 dark:bg-pink-900/30">
+                            <Ionicons name="sunny-outline" size={15} color="#d946ef" />
+                            <TextInput 
+                                value={weather}
+                                onChangeText={setWeather}
+                                placeholder="Weather"
+                                placeholderTextColor="#d946ef80"
+                                className="text-[14px] ml-2 text-pink-600 dark:text-pink-400 p-0 min-w-[60px]"
+                                style={{ fontFamily: 'Outfit-Medium' }}
+                            />
+                        </View>
+
+                        {/* Photo Action */}
+                        <TouchableOpacity 
+                            onPress={pickImage}
+                            className="flex-row items-center rounded-full px-4 py-2 bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-900/30"
+                        >
+                            <Ionicons name="image-outline" size={15} color="#0284c7" />
+                            <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-sky-600 dark:text-sky-400">Photo</Text>
+                        </TouchableOpacity>
+                    </ScrollView>
+
                     <TextInput
                         ref={inputRef}
                         placeholder="Capture your thoughts..."
@@ -230,69 +330,69 @@ export default function FullScreenEditor({ route, navigation }: any) {
                         <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-neutral-400 dark:text-neutral-500 text-xs uppercase tracking-widest">
                             {new Date(entry?.createdAt || Date.now()).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                         </Text>
-                        <View className="flex-row flex-wrap mt-2">
-                            {tags && <ReadMeta icon="pricetag-outline" value={tags} />}
-                            {time && <ReadMeta icon="time-outline" value={time} />}
-                            {location && <ReadMeta icon="location-outline" value={location} />}
-                            {weather && <ReadMeta icon="sunny-outline" value={weather} />}
+                        <View className="flex-row flex-wrap mt-3">
+                            {tags && <ReadMeta icon="pricetag-outline" value={tags} color="#16a34a" bgColor="bg-green-50 dark:bg-green-900/20" textColor="text-green-600 dark:text-green-400" />}
+                            {time && <ReadMeta icon="time-outline" value={time} color="#7c3aed" bgColor="bg-purple-50 dark:bg-purple-900/20" textColor="text-purple-600 dark:text-purple-400" />}
+                            {location && <ReadMeta icon="location-outline" value={location} color="#d97706" bgColor="bg-amber-50 dark:bg-amber-900/20" textColor="text-amber-600 dark:text-amber-400" />}
+                            {weather && <ReadMeta icon="sunny-outline" value={weather} color="#d946ef" bgColor="bg-pink-50 dark:bg-pink-900/20" textColor="text-pink-600 dark:text-pink-400" />}
                         </View>
                     </View>
                     <MarkdownRenderer content={markdown} />
                 </View>
             )}
         </ScrollView>
-
-        {isEditing && (
-            <View className="flex-row items-center justify-around px-4 py-4 bg-white dark:bg-neutral-950 border-t border-neutral-100 dark:border-neutral-900 shadow-2xl">
-                <ToolbarButton icon="text" onPress={() => insertMarkdown('# ', '')} label="H1" />
-                <ToolbarButton icon="list" onPress={() => insertMarkdown('- ', '')} />
-                <ToolbarButton icon="link" onPress={() => insertMarkdown('[', '](url)')} />
-                <ToolbarButton icon="image" onPress={pickImage} />
-                <ToolbarButton icon="code" onPress={() => insertMarkdown('`', '`')} />
-                <ToolbarButton icon="happy-outline" onPress={() => insertMarkdown('😊', '')} />
-            </View>
-        )}
       </KeyboardAvoidingView>
+
+      {/* Date/Time Pickers */}
+      {showDatePicker && (
+        Platform.OS === 'ios' ? (
+          <DateTimePicker
+            value={entryDateObj}
+            mode="date"
+            display="default"
+            onChange={handleDateChange}
+          />
+        ) : (
+          <Picker
+            visible={showDatePicker}
+            type="date"
+            value={entryDateObj}
+            onClose={() => setShowDatePicker(false)}
+            onSelect={(date) => {
+              handleDateChange({ type: 'set' }, date);
+            }}
+          />
+        )
+      )}
+      {showTimePicker && (
+        Platform.OS === 'ios' ? (
+          <DateTimePicker
+            value={entryDateObj}
+            mode="time"
+            display="default"
+            onChange={handleTimeChange}
+          />
+        ) : (
+          <Picker
+            visible={showTimePicker}
+            type="time"
+            value={entryDateObj}
+            onClose={() => setShowTimePicker(false)}
+            onSelect={(date) => {
+              handleTimeChange({ type: 'set' }, date);
+            }}
+          />
+        )
+      )}
     </View>
   );
 }
 
-function MetadataInput({ icon, value, onChangeText, placeholder }: { icon: any, value: string, onChangeText: (t: string) => void, placeholder: string }) {
+function ReadMeta({ icon, value, color, bgColor, textColor }: { icon: any, value: string, color: string, bgColor: string, textColor: string }) {
     return (
-        <View className="flex-row items-center bg-neutral-50 dark:bg-neutral-900 px-3 py-1.5 rounded-full mr-2 mb-2 border border-neutral-100 dark:border-neutral-800">
-            <Ionicons name={icon} size={14} color="#737373" />
-            <TextInput 
-                value={value}
-                onChangeText={onChangeText}
-                placeholder={placeholder}
-                placeholderTextColor="#a3a3a3"
-                className="text-neutral-700 dark:text-neutral-300 text-[12px] ml-1.5 min-w-[60px]"
-                style={{ fontFamily: 'Outfit-Medium' }}
-            />
+        <View className={`flex-row items-center px-3 py-1 rounded-full mr-2 mb-2 ${bgColor}`}>
+            <Ionicons name={icon} size={13} color={color} />
+            <Text style={{ fontFamily: 'Outfit-Medium' }} className={`text-[12px] ml-1.5 ${textColor}`}>{value}</Text>
         </View>
-    );
-}
-
-function ReadMeta({ icon, value }: { icon: any, value: string }) {
-    return (
-        <View className="flex-row items-center mr-4 mb-2">
-            <Ionicons name={icon} size={14} color="#a3a3a3" />
-            <Text style={{ fontFamily: 'Outfit-Regular' }} className="text-neutral-500 dark:text-neutral-400 text-sm ml-1.5">{value}</Text>
-        </View>
-    );
-}
-
-function ToolbarButton({ icon, onPress, label }: { icon: any, onPress: () => void, label?: string }) {
-    return (
-        <TouchableOpacity 
-            onPress={onPress} 
-            className="w-11 h-11 items-center justify-center rounded-2xl bg-neutral-50 dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800"
-        >
-            {label ? (
-                <Text className="text-neutral-700 dark:text-neutral-300 text-[11px] font-black">{label}</Text>
-            ) : (
-                <Ionicons name={icon} size={20} color="#737373" />
-            )}
-        </TouchableOpacity>
     );
 }
