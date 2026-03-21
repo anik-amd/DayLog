@@ -28,6 +28,7 @@ export default function FullScreenEditor({ route, navigation }: any) {
   const isSaving = useRef(false);
   const inputRef = useRef<TextInput>(null);
   const [selection, setSelection] = useState({ start: 0, end: 0 });
+  const isInitialLoad = useRef(true);
 
   // Metadata state
   const [date, setDate] = useState<string>('');
@@ -55,12 +56,14 @@ export default function FullScreenEditor({ route, navigation }: any) {
       const data = await getEntry(entryId);
       if (data) {
         setEntry(data);
-        if (!markdown) setMarkdown(data.content);
+        const content = data.content || '';
+        setMarkdown(content);
         setDate(data.date || '');
         setTime(data.time || '');
         setLocation(data.location || '');
         setWeather(data.weather || '');
-        setTags(data.tags || '');
+        // Extract tags from content instead of using stored comma-separated tags
+        setTags(extractTags(content));
         
         if (data.date) {
             const parsedDate = new Date(data.date);
@@ -70,7 +73,7 @@ export default function FullScreenEditor({ route, navigation }: any) {
         }
       }
     }
-  }, [entryId, markdown]);
+  }, [entryId]);
 
   useEffect(() => {
     loadEntry();
@@ -82,8 +85,12 @@ export default function FullScreenEditor({ route, navigation }: any) {
     })();
   }, [loadEntry]);
 
-  // Real-time tag extraction
+  // Real-time tag extraction (only after initial load)
   useEffect(() => {
+    if (isInitialLoad.current) {
+      isInitialLoad.current = false;
+      return;
+    }
     const extracted = extractTags(markdown);
     setTags(extracted);
   }, [markdown]);
@@ -286,12 +293,21 @@ export default function FullScreenEditor({ route, navigation }: any) {
                     className="mb-6"
                     contentContainerStyle={{ flexDirection: 'row', alignItems: 'center' }}
                 >
-                    <View className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-900/30">
-                        <Ionicons name="pricetag-outline" size={15} color="#16a34a" />
-                        <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-green-600 dark:text-green-400">
-                            {tags || 'Tags'}
-                        </Text>
-                    </View>
+                    {tags ? tags.split(',').filter(t => t.trim()).map((tag, index) => (
+                        <View key={index} className="flex-row items-center rounded-full px-3 py-1.5 mr-2 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-900/30">
+                            <Ionicons name="pricetag-outline" size={14} color="#16a34a" />
+                            <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[13px] ml-1.5 text-green-600 dark:text-green-400">
+                                {tag.trim()}
+                            </Text>
+                        </View>
+                    )) : (
+                        <View className="flex-row items-center rounded-full px-3 py-1.5 mr-2 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-900/30">
+                            <Ionicons name="pricetag-outline" size={14} color="#16a34a" />
+                            <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[13px] ml-1.5 text-green-600 dark:text-green-400">
+                                Tags
+                            </Text>
+                        </View>
+                    )}
 
                     <Pressable 
                         onPress={() => setShowDatePicker(true)}
