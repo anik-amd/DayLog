@@ -25,6 +25,12 @@ interface QuickEntryBarProps {
   onFocusChange?: (focused: boolean) => void;
 }
 
+const extractTags = (text: string): string => {
+  const matches = text.match(/#(\w+)/g);
+  if (!matches) return '';
+  return matches.map(tag => tag.substring(1)).join(', ');
+};
+
 export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, onEntryDateChange, onDatePress, onTimePress, onFocusChange }: QuickEntryBarProps) {
   const { colorScheme } = useColorScheme();
   const inputRef = useRef<RNTextInput>(null);
@@ -34,6 +40,9 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   const [isFocused, setIsFocused] = useState(false);
   const [showMetadata, setShowMetadata] = useState(false);
   const pillPressedRef = useRef(false);
+  
+  // Tags state
+  const [tags, setTags] = useState('');
   
   // Date/time state - use prop if provided, otherwise local state
   const [localEntryDate, setLocalEntryDate] = useState(new Date());
@@ -71,6 +80,12 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
       setShowMetadata(false);
     }
   }, [isFocused, content]);
+
+  // Real-time tag extraction
+  useEffect(() => {
+    const extracted = extractTags(content);
+    setTags(extracted);
+  }, [content]);
 
   const fetchLocationAndWeather = async () => {
     if (IS_WEB) {
@@ -138,6 +153,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
       const now = entryDate.getTime();
       const dateStr = entryDate.toISOString().split('T')[0];
       const timeStr = formatTime(entryDate);
+      const extractedTags = extractTags(textToSave);
       
       if (!currentEntryId) {
         console.log('Creating new entry...');
@@ -150,7 +166,8 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
           date: dateStr,
           time: timeStr,
           location: location || undefined,
-          weather: weatherError ? undefined : weather || undefined
+          weather: weatherError ? undefined : weather || undefined,
+          tags: extractedTags || undefined
         };
         await createEntry(newEntry);
         setCurrentEntryId(newId);
@@ -158,7 +175,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
         if (finalizeAndRefresh) onEntrySaved();
       } else {
         console.log('Updating existing entry...');
-        await updateEntry(currentEntryId, textToSave, now, dateStr, timeStr, location || undefined, weatherError ? undefined : weather || undefined);
+        await updateEntry(currentEntryId, textToSave, now, dateStr, timeStr, location || undefined, weatherError ? undefined : weather || undefined, extractedTags || undefined);
         if (finalizeAndRefresh) onEntrySaved();
       }
     } finally {
@@ -212,7 +229,15 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
     if (!currentEntryId && content.trim()) {
         const now = entryDate.getTime();
         const newId = now.toString();
-        const newEntry: Omit<Entry, 'media'> = { id: newId, content, createdAt: now, updatedAt: now, date: entryDate.toISOString().split('T')[0] };
+        const currentTags = extractTags(content);
+        const newEntry: Omit<Entry, 'media'> = { 
+          id: newId, 
+          content, 
+          createdAt: now, 
+          updatedAt: now, 
+          date: entryDate.toISOString().split('T')[0],
+          tags: currentTags || undefined
+        };
         await createEntry(newEntry);
         setCurrentEntryId(newId);
         onEntrySaved();
@@ -268,7 +293,15 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
       
       if (!activeEntryId) {
         activeEntryId = now.toString();
-        const newEntry: Omit<Entry, 'media'> = { id: activeEntryId, content: content || '', createdAt: now, updatedAt: now, date: entryDate.toISOString().split('T')[0] };
+        const currentTags = extractTags(content);
+        const newEntry: Omit<Entry, 'media'> = { 
+          id: activeEntryId, 
+          content: content || '', 
+          createdAt: now, 
+          updatedAt: now, 
+          date: entryDate.toISOString().split('T')[0],
+          tags: currentTags || undefined
+        };
         await createEntry(newEntry);
         setCurrentEntryId(activeEntryId);
       }
@@ -340,50 +373,17 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
 
   const shouldShowIcons = isFocused || content.trim().length > 0;
 
-  // Calendar helpers
-  const getDaysInMonth = (date: Date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startingDay = firstDay.getDay();
-    
-    const days = [];
-    // Add empty slots for days before the first day of the month
-    for (let i = 0; i < startingDay; i++) {
-      days.push(null);
-    }
-    // Add all days of the month
-    for (let i = 1; i <= daysInMonth; i++) {
-      days.push(new Date(year, month, i));
-    }
-    return days;
-  };
-
-  const isSameDay = (d1: Date | null, d2: Date) => {
-    if (!d1) return false;
-    return d1.getDate() === d2.getDate() && 
-           d1.getMonth() === d2.getMonth() && 
-           d1.getFullYear() === d2.getFullYear();
-  };
-
-  const isToday = (date: Date | null) => {
-    if (!date) return false;
-    const today = new Date();
-    return isSameDay(date, today);
-  };
-
-  const PillItem = ({ icon, children, onPress, isError, isLoading }: { 
+  const PillItem = ({ icon, children, onPress, isError, isLoading, color = 'text-pink-600 dark:text-pink-400' }: { 
     icon: React.ReactNode; 
     children: React.ReactNode; 
     onPress?: () => void;
     isError?: boolean;
     isLoading?: boolean;
+    color?: string;
   }) => (
     <View className="flex-row items-center">
       {icon}
-      <Text className={`text-[14px] ml-1.5 ${isError ? 'text-red-500' : 'text-pink-600 dark:text-pink-400'}`}>
+      <Text className={`text-[14px] ml-1.5 ${isError ? 'text-red-500' : color}`}>
         {children}
       </Text>
     </View>
@@ -422,6 +422,18 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               nestedScrollEnabled={true}
               canCancelContentTouches={true}
             >
+              {/* Tag Pill */}
+              <View className="flex-row items-center rounded-full px-3 py-1.5 mr-2"
+                style={{ backgroundColor: '#f0fdf4' }}
+              >
+                <PillItem 
+                  icon={<Ionicons name="pricetag-outline" size={15} color="#16a34a" />}
+                  color="text-green-600 dark:text-green-400"
+                >
+                  {tags || 'Tags'}
+                </PillItem>
+              </View>
+
               {/* Date Pill */}
               <Pressable 
                 onPress={() => {
@@ -647,5 +659,3 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
     </View>
   );
 }
-
-const styles = StyleSheet.create({});

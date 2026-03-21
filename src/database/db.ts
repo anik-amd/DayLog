@@ -20,7 +20,8 @@ export const initDb = async () => {
       date TEXT,
       time TEXT,
       location TEXT,
-      weather TEXT
+      weather TEXT,
+      tags TEXT
     );
     CREATE INDEX IF NOT EXISTS idx_entries_date ON entries(date);
     CREATE TABLE IF NOT EXISTS media (
@@ -45,6 +46,11 @@ export const initDb = async () => {
   }
   try {
     await database.runAsync('ALTER TABLE entries ADD COLUMN weather TEXT');
+  } catch (e) {
+    // Column might already exist, ignore error
+  }
+  try {
+    await database.runAsync('ALTER TABLE entries ADD COLUMN tags TEXT');
   } catch (e) {
     // Column might already exist, ignore error
   }

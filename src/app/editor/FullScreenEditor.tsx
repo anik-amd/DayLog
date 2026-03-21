@@ -11,6 +11,12 @@ import { useAutoSave } from '../../hooks/useAutoSave';
 import MarkdownRenderer from '../../markdown/MarkdownRenderer';
 import { Entry } from '../../types/Entry';
 
+const extractTags = (text: string): string => {
+  const matches = text.match(/#(\w+)/g);
+  if (!matches) return '';
+  return matches.map(tag => tag.substring(1)).join(', ');
+};
+
 export default function FullScreenEditor({ route, navigation }: any) {
   const { colorScheme } = useColorScheme();
   const { entryId, initialContent } = route.params;
@@ -26,6 +32,7 @@ export default function FullScreenEditor({ route, navigation }: any) {
   const [time, setTime] = useState<string>('');
   const [location, setLocation] = useState<string>('');
   const [weather, setWeather] = useState<string>('');
+  const [tags, setTags] = useState<string>('');
 
   const loadEntry = useCallback(async () => {
     if (entryId) {
@@ -37,6 +44,7 @@ export default function FullScreenEditor({ route, navigation }: any) {
         setTime(data.time || '');
         setLocation(data.location || '');
         setWeather(data.weather || '');
+        setTags(data.tags || '');
       }
     }
   }, [entryId, markdown]);
@@ -45,7 +53,15 @@ export default function FullScreenEditor({ route, navigation }: any) {
     loadEntry();
   }, [loadEntry]);
 
-  const handleSave = useCallback(async (textToSave: string, currentMetadata: { date: string, time: string, location: string, weather: string }) => {
+  // Real-time tag extraction
+  useEffect(() => {
+    if (isEditing) {
+      const extracted = extractTags(markdown);
+      setTags(extracted);
+    }
+  }, [markdown, isEditing]);
+
+  const handleSave = useCallback(async (textToSave: string, currentMetadata: { date: string, time: string, location: string, weather: string, tags: string }) => {
     if (isSaving.current || !entryId) return;
     isSaving.current = true;
     try {
@@ -56,18 +72,19 @@ export default function FullScreenEditor({ route, navigation }: any) {
         currentMetadata.date, 
         currentMetadata.time, 
         currentMetadata.location, 
-        currentMetadata.weather
+        currentMetadata.weather,
+        currentMetadata.tags
       );
     } finally {
       isSaving.current = false;
     }
   }, [entryId]);
 
-  useAutoSave(markdown, (t) => handleSave(t, { date, time, location, weather }), 1000);
+  useAutoSave(markdown, (t) => handleSave(t, { date, time, location, weather, tags }), 1000);
 
   const handleBack = async () => {
     try {
-      await handleSave(markdown, { date, time, location, weather });
+      await handleSave(markdown, { date, time, location, weather, tags });
     } catch (e) {
       console.error('handleBack error:', e);
     }
@@ -185,6 +202,7 @@ export default function FullScreenEditor({ route, navigation }: any) {
             {isEditing ? (
                 <View>
                     <View className="flex-row flex-wrap mb-4">
+                        <MetadataInput icon="pricetag-outline" value={tags} onChangeText={setTags} placeholder="Tags" />
                         <MetadataInput icon="calendar-outline" value={date} onChangeText={setDate} placeholder="Date" />
                         <MetadataInput icon="time-outline" value={time} onChangeText={setTime} placeholder="Time" />
                         <MetadataInput icon="location-outline" value={location} onChangeText={setLocation} placeholder="Location" />
@@ -213,6 +231,7 @@ export default function FullScreenEditor({ route, navigation }: any) {
                             {new Date(entry?.createdAt || Date.now()).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                         </Text>
                         <View className="flex-row flex-wrap mt-2">
+                            {tags && <ReadMeta icon="pricetag-outline" value={tags} />}
                             {time && <ReadMeta icon="time-outline" value={time} />}
                             {location && <ReadMeta icon="location-outline" value={location} />}
                             {weather && <ReadMeta icon="sunny-outline" value={weather} />}

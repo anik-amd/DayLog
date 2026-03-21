@@ -103,14 +103,23 @@ export default function ReadEntryScreen({ route, navigation }: any) {
           <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-neutral-400 dark:text-neutral-500 text-sm uppercase tracking-widest">
             {formattedDate}
           </Text>
-          <View className="flex-row items-center mt-2">
+          <View className="flex-row flex-wrap items-center mt-2">
             <Ionicons name="time-outline" size={14} color="#a3a3a3" />
-            <Text style={{ fontFamily: 'Outfit-Regular' }} className="text-neutral-500 dark:text-neutral-400 text-base ml-1.5">
+            <Text style={{ fontFamily: 'Outfit-Regular' }} className="text-neutral-500 dark:text-neutral-400 text-base ml-1.5 mr-4">
               {formattedTime}
             </Text>
             
+            {entry.tags && (
+              <View className="flex-row items-center mr-4">
+                <Ionicons name="pricetag-outline" size={14} color="#16a34a" />
+                <Text style={{ fontFamily: 'Outfit-Regular' }} className="text-green-600 dark:text-green-400 text-base ml-1.5">
+                  {entry.tags}
+                </Text>
+              </View>
+            )}
+
             {(entry.location || entry.weather) && (
-              <View className="flex-row items-center ml-4">
+              <View className="flex-row items-center">
                 {entry.location && (
                   <View className="flex-row items-center mr-3">
                     <Ionicons name="location-outline" size={14} color="#a3a3a3" />

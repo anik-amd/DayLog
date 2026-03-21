@@ -9,5 +9,6 @@ export interface Entry {
   time?: string;
   location?: string;
   weather?: string;
+  tags?: string;
   media?: Media[];
 }
