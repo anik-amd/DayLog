@@ -4,14 +4,16 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useColorScheme } from "nativewind";
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { getEntry } from '../../database/entries';
+import { getEntry, deleteEntry } from '../../database/entries';
 import MarkdownRenderer from '../../markdown/MarkdownRenderer';
 import { Entry } from '../../types/Entry';
+import ConfirmationModal from '../../components/ui/ConfirmationModal';
 
 export default function ReadEntryScreen({ route, navigation }: any) {
   const { entryId } = route.params;
   const { colorScheme } = useColorScheme();
   const [entry, setEntry] = useState<Entry | null>(null);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
   const loadEntry = useCallback(async () => {
     if (entryId) {
@@ -38,6 +40,14 @@ export default function ReadEntryScreen({ route, navigation }: any) {
         entryId: entry.id, 
         initialContent: entry.content 
       });
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (entry) {
+      await deleteEntry(entry.id);
+      setIsDeleteModalVisible(false);
+      navigation.navigate('Entries');
     }
   };
 
@@ -70,16 +80,21 @@ export default function ReadEntryScreen({ route, navigation }: any) {
           <Ionicons name="arrow-back" size={20} color="#737373" />
         </TouchableOpacity>
 
-        <Text style={{ fontFamily: 'Outfit-Bold' }} className="text-neutral-900 dark:text-neutral-100 text-lg">
-          Entry
-        </Text>
+        <View className="flex-row items-center">
+          <TouchableOpacity 
+            onPress={() => setIsDeleteModalVisible(true)}
+            className="bg-red-50 dark:bg-red-900/20 w-10 h-10 rounded-full items-center justify-center border border-red-100 dark:border-red-900/30 mr-3"
+          >
+            <Ionicons name="trash-outline" size={18} color="#ef4444" />
+          </TouchableOpacity>
 
-        <TouchableOpacity 
-          onPress={handleEdit}
-          className="bg-neutral-900 dark:bg-white w-10 h-10 rounded-full items-center justify-center"
-        >
-          <Ionicons name="create-outline" size={20} color={colorScheme === 'dark' ? '#171717' : '#fff'} />
-        </TouchableOpacity>
+          <TouchableOpacity 
+            onPress={handleEdit}
+            className="bg-neutral-900 dark:bg-white w-10 h-10 rounded-full items-center justify-center"
+          >
+            <Ionicons name="create-outline" size={20} color={colorScheme === 'dark' ? '#171717' : '#fff'} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView className="flex-1 px-8 pt-8" showsVerticalScrollIndicator={false}>
@@ -139,6 +154,16 @@ export default function ReadEntryScreen({ route, navigation }: any) {
           <MarkdownRenderer content={entry.content} />
         </View>
       </ScrollView>
+
+      <ConfirmationModal
+        visible={isDeleteModalVisible}
+        title="Delete Entry"
+        message="Are you sure you want to delete this entry? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setIsDeleteModalVisible(false)}
+        isDestructive={true}
+      />
     </View>
   );
 }
