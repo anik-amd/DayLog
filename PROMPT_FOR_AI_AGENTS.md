@@ -150,6 +150,7 @@ The agent must:
 
 - Use functional components only
 - Use TypeScript for all files
+- AI agents MUST always run type checking after updating code to ensure type safety.
 - Avoid class components
 - Avoid unnecessary abstraction
 - Avoid very long files

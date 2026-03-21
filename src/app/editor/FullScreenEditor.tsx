@@ -21,12 +21,22 @@ export default function FullScreenEditor({ route, navigation }: any) {
   const inputRef = useRef<TextInput>(null);
   const [selection, setSelection] = useState({ start: 0, end: 0 });
 
+  // Metadata state
+  const [date, setDate] = useState<string>('');
+  const [time, setTime] = useState<string>('');
+  const [location, setLocation] = useState<string>('');
+  const [weather, setWeather] = useState<string>('');
+
   const loadEntry = useCallback(async () => {
     if (entryId) {
       const data = await getEntry(entryId);
       if (data) {
         setEntry(data);
         if (!markdown) setMarkdown(data.content);
+        setDate(data.date || '');
+        setTime(data.time || '');
+        setLocation(data.location || '');
+        setWeather(data.weather || '');
       }
     }
   }, [entryId, markdown]);
@@ -35,23 +45,29 @@ export default function FullScreenEditor({ route, navigation }: any) {
     loadEntry();
   }, [loadEntry]);
 
-  const handleSave = useCallback(async (textToSave: string) => {
+  const handleSave = useCallback(async (textToSave: string, currentMetadata: { date: string, time: string, location: string, weather: string }) => {
     if (isSaving.current || !entryId) return;
     isSaving.current = true;
     try {
-      await updateEntry(entryId, textToSave, Date.now());
+      await updateEntry(
+        entryId, 
+        textToSave, 
+        Date.now(), 
+        currentMetadata.date, 
+        currentMetadata.time, 
+        currentMetadata.location, 
+        currentMetadata.weather
+      );
     } finally {
       isSaving.current = false;
     }
   }, [entryId]);
 
-  useAutoSave(markdown, (t) => handleSave(t), 1000);
+  useAutoSave(markdown, (t) => handleSave(t, { date, time, location, weather }), 1000);
 
   const handleBack = async () => {
-    console.log('handleBack called');
     try {
-      await handleSave(markdown);
-      console.log('handleBack save complete, going back');
+      await handleSave(markdown, { date, time, location, weather });
     } catch (e) {
       console.error('handleBack error:', e);
     }
@@ -102,11 +118,7 @@ export default function FullScreenEditor({ route, navigation }: any) {
       };
       
       await addMediaToEntry(newMedia);
-      
-      // Auto-insert markdown link
       insertMarkdown(`\n![Image](${persistentPath})\n`, '');
-      
-      // Refresh local entry data to show in gallery
       loadEntry();
     }
   };
@@ -122,7 +134,6 @@ export default function FullScreenEditor({ route, navigation }: any) {
         className="flex-1" 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        {/* Distraction-Free Universal Header */}
         <View className="flex-row items-center justify-between px-6 pb-4 pt-12 border-b border-neutral-100 dark:border-neutral-900/40">
             <TouchableOpacity onPress={handleBack} className="bg-neutral-50 dark:bg-neutral-900 w-10 h-10 rounded-full items-center justify-center border border-neutral-200 dark:border-neutral-800">
                 <Ionicons name="arrow-back" size={20} color="#737373" />
@@ -149,7 +160,6 @@ export default function FullScreenEditor({ route, navigation }: any) {
         </View>
 
         <ScrollView className="flex-1 px-8 pt-8" showsVerticalScrollIndicator={false}>
-            {/* Gallery (Scrollable Header) */}
             {entry?.media && entry.media.length > 0 && (
                 <View className="mb-8">
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
@@ -173,29 +183,46 @@ export default function FullScreenEditor({ route, navigation }: any) {
             )}
 
             {isEditing ? (
-                <TextInput
-                    ref={inputRef}
-                    placeholder="Capture your thoughts..."
-                    placeholderTextColor="#a3a3a3"
-                    className="text-neutral-900 dark:text-neutral-100 text-[20px] leading-10 min-h-[500px]"
-                    style={{ fontFamily: 'Outfit-Regular' }}
-                    multiline={true}
-                    value={markdown}
-                    onChangeText={setMarkdown}
-                    onSelectionChange={(e) => setSelection(e.nativeEvent.selection)}
-                    autoFocus={true}
-                    scrollEnabled={false} // Handled by parent ScrollView
-                    underlineColorAndroid="transparent"
-                    textAlignVertical="top"
-                />
+                <View>
+                    <View className="flex-row flex-wrap mb-4">
+                        <MetadataInput icon="calendar-outline" value={date} onChangeText={setDate} placeholder="Date" />
+                        <MetadataInput icon="time-outline" value={time} onChangeText={setTime} placeholder="Time" />
+                        <MetadataInput icon="location-outline" value={location} onChangeText={setLocation} placeholder="Location" />
+                        <MetadataInput icon="sunny-outline" value={weather} onChangeText={setWeather} placeholder="Weather" />
+                    </View>
+                    <TextInput
+                        ref={inputRef}
+                        placeholder="Capture your thoughts..."
+                        placeholderTextColor="#a3a3a3"
+                        className="text-neutral-900 dark:text-neutral-100 text-[20px] leading-10 min-h-[500px]"
+                        style={{ fontFamily: 'Outfit-Regular' }}
+                        multiline={true}
+                        value={markdown}
+                        onChangeText={setMarkdown}
+                        onSelectionChange={(e) => setSelection(e.nativeEvent.selection)}
+                        autoFocus={true}
+                        scrollEnabled={false}
+                        underlineColorAndroid="transparent"
+                        textAlignVertical="top"
+                    />
+                </View>
             ) : (
                 <View className="pb-20">
+                    <View className="mb-6">
+                        <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-neutral-400 dark:text-neutral-500 text-xs uppercase tracking-widest">
+                            {new Date(entry?.createdAt || Date.now()).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                        </Text>
+                        <View className="flex-row flex-wrap mt-2">
+                            {time && <ReadMeta icon="time-outline" value={time} />}
+                            {location && <ReadMeta icon="location-outline" value={location} />}
+                            {weather && <ReadMeta icon="sunny-outline" value={weather} />}
+                        </View>
+                    </View>
                     <MarkdownRenderer content={markdown} />
                 </View>
             )}
         </ScrollView>
 
-        {/* NATIVE Writing Toolbar (Only shown in Edit mode) */}
         {isEditing && (
             <View className="flex-row items-center justify-around px-4 py-4 bg-white dark:bg-neutral-950 border-t border-neutral-100 dark:border-neutral-900 shadow-2xl">
                 <ToolbarButton icon="text" onPress={() => insertMarkdown('# ', '')} label="H1" />
@@ -209,6 +236,31 @@ export default function FullScreenEditor({ route, navigation }: any) {
       </KeyboardAvoidingView>
     </View>
   );
+}
+
+function MetadataInput({ icon, value, onChangeText, placeholder }: { icon: any, value: string, onChangeText: (t: string) => void, placeholder: string }) {
+    return (
+        <View className="flex-row items-center bg-neutral-50 dark:bg-neutral-900 px-3 py-1.5 rounded-full mr-2 mb-2 border border-neutral-100 dark:border-neutral-800">
+            <Ionicons name={icon} size={14} color="#737373" />
+            <TextInput 
+                value={value}
+                onChangeText={onChangeText}
+                placeholder={placeholder}
+                placeholderTextColor="#a3a3a3"
+                className="text-neutral-700 dark:text-neutral-300 text-[12px] ml-1.5 min-w-[60px]"
+                style={{ fontFamily: 'Outfit-Medium' }}
+            />
+        </View>
+    );
+}
+
+function ReadMeta({ icon, value }: { icon: any, value: string }) {
+    return (
+        <View className="flex-row items-center mr-4 mb-2">
+            <Ionicons name={icon} size={14} color="#a3a3a3" />
+            <Text style={{ fontFamily: 'Outfit-Regular' }} className="text-neutral-500 dark:text-neutral-400 text-sm ml-1.5">{value}</Text>
+        </View>
+    );
 }
 
 function ToolbarButton({ icon, onPress, label }: { icon: any, onPress: () => void, label?: string }) {

@@ -301,8 +301,9 @@ AI agents working on this project must follow these rules:
 3. Keep everything minimal
 4. Focus on performance and speed
 5. Prefer simple logic over complex logic
-6. Avoid large UI libraries
-7. Always prioritize the quick-entry experience
+6. AI agents MUST always run type checking after updating code to ensure type safety.
+7. Avoid large UI libraries
+8. Always prioritize the quick-entry experience
 
 ---
 

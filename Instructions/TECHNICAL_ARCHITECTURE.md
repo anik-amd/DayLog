@@ -309,6 +309,7 @@ AI agents must follow these rules:
 
 - Use functional components only
 - Use TypeScript everywhere
+- AI agents MUST always run type checking (e.g., `npx tsc --noEmit`) after updating code to ensure type safety.
 - Avoid class components
 - Avoid unnecessary libraries
 - Avoid large UI frameworks
