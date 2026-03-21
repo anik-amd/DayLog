@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { View, Text, TouchableWithoutFeedback, Animated, StyleSheet } from 'react-native';
+import { View, Text, TouchableWithoutFeedback, Animated, StyleSheet, Pressable } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -9,6 +9,7 @@ import { Entry } from '../../types/Entry';
 interface EntryCardProps {
   entry: Entry;
   showBorder?: boolean;
+  onTagPress?: (tag: string) => void;
 }
 
 const stripMarkdown = (text: string) => {
@@ -41,7 +42,7 @@ const localStyles = StyleSheet.create({
   },
 });
 
-function EntryCardComponent({ entry, showBorder = false }: EntryCardProps) {
+function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCardProps) {
   const { colorScheme } = useColorScheme();
   const plainTextPreview = stripMarkdown(entry.content);
 
@@ -107,6 +108,32 @@ function EntryCardComponent({ entry, showBorder = false }: EntryCardProps) {
               >
                 {plainTextPreview}
               </Text>
+
+              {/* Tags */}
+              {entry.tags && (
+                <View className="flex-row items-center mt-1.5">
+                  <View className="flex-row items-center mr-2">
+                    <Ionicons name="pricetag-outline" size={11} color={colorScheme === 'dark' ? '#a1a1aa' : '#737373'} />
+                  </View>
+                  {entry.tags.split(',').map((tag, index) => (
+                    <Pressable
+                      key={index}
+                      onPress={() => onTagPress?.(tag.trim())}
+                      className="mr-1.5"
+                    >
+                      <Text 
+                        style={{ 
+                          fontFamily: 'Outfit-Medium',
+                          fontSize: 10,
+                          color: colorScheme === 'dark' ? '#71717a' : '#a1a1aa',
+                        }}
+                      >
+                        {index > 0 ? '' : '#'}{tag.trim()}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              )}
 
               {/* Location & Weather Pills */}
               {(entry.location || entry.weather) && (

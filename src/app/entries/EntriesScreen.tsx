@@ -20,6 +20,7 @@ export default function EntriesScreen({ navigation }: any) {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   
   // Date/time picker state (managed at screen level for web)
   const [pickerDate, setPickerDate] = useState(new Date());
@@ -136,10 +137,23 @@ export default function EntriesScreen({ navigation }: any) {
     setupDatabase();
   }, []);
 
-  // Filter entries based on the selected calendar date
-  const filteredEntries = selectedDate 
-    ? entries.filter((e: Entry) => e.date === selectedDate)
-    : entries;
+  // Filter entries based on the selected calendar date and tag
+  const filteredEntries = entries.filter((e: Entry) => {
+    const dateMatch = !selectedDate || e.date === selectedDate;
+    const tagMatch = !selectedTag || (e.tags && e.tags.includes(selectedTag));
+    return dateMatch && tagMatch;
+  });
+
+  // Handle tag press to filter by tag
+  const handleTagPress = (tag: string) => {
+    setSelectedTag(tag);
+    setSelectedDate(null); // Clear date filter when filtering by tag
+  };
+
+  // Clear tag filter
+  const clearTagFilter = () => {
+    setSelectedTag(null);
+  };
 
   // Group entries by date
   const groupedEntries = filteredEntries.reduce((groups: { [key: string]: Entry[] }, entry) => {
@@ -198,7 +212,9 @@ export default function EntriesScreen({ navigation }: any) {
             {filteredEntries.length === 0 ? (
               <View className="mt-40 items-center opacity-60">
                 <Ionicons name="journal-outline" size={48} color="#d4d4d4" />
-                <Text style={{ fontFamily: 'Outfit-Regular' }} className="text-neutral-400 dark:text-zinc-500 text-lg mt-4">No entries for this day.</Text>
+                <Text style={{ fontFamily: 'Outfit-Regular' }} className="text-neutral-400 dark:text-zinc-500 text-lg mt-4">
+                  {selectedTag ? `No entries with #${selectedTag}` : 'No entries for this day.'}
+                </Text>
               </View>
             ) : (
               sortedDates.map((dateStr) => (
@@ -215,6 +231,7 @@ export default function EntriesScreen({ navigation }: any) {
                         key={entry.id} 
                         entry={entry} 
                         showBorder={index > 0}
+                        onTagPress={handleTagPress}
                       />
                     ))}
                   </View>
@@ -239,6 +256,23 @@ export default function EntriesScreen({ navigation }: any) {
                 </TouchableOpacity>
             </View>
         </View>
+
+        {/* Tag Filter Indicator */}
+        {selectedTag && (
+          <View 
+            className="absolute left-16 right-16 z-40"
+            style={{ top: 80 }}
+          >
+            <View className="flex-row items-center justify-center bg-indigo-100 dark:bg-indigo-900/30 rounded-full px-4 py-2">
+              <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-indigo-600 dark:text-indigo-400 text-sm">
+                #{selectedTag}
+              </Text>
+              <TouchableOpacity onPress={clearTagFilter} className="ml-2">
+                <Ionicons name="close-circle" size={18} color={colorScheme === 'dark' ? '#818cf8' : '#6366f1'} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 
         {/* HIDABLE Top Section: Calendar (Solid Floating Card) */}
         <Animated.View 
