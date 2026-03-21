@@ -27,29 +27,12 @@ export default function EntriesScreen({ navigation }: any) {
   const [pickerType, setPickerType] = useState<'date' | 'time'>('date');
   const [entryDate, setEntryDate] = useState(new Date());
 
-  // Keyboard handling
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-
   // Animation values for scroll-driven UI hiding
   const scrollY = useRef(new Animated.Value(0)).current;
   const lastScrollY = useRef(0);
   const uiPosition = useRef(new Animated.Value(0)).current; 
   const headerHideDistance = 120; // Distance the calendar slides up
   const footerHeight = 120; // QuickEntryBar height
-
-  useEffect(() => {
-    const showListener = Keyboard.addListener('keyboardDidShow', (e) => {
-      setKeyboardHeight(e.endCoordinates.height);
-    });
-    const hideListener = Keyboard.addListener('keyboardDidHide', () => {
-      setKeyboardHeight(0);
-    });
-    return () => {
-      showListener.remove();
-      hideListener.remove();
-    };
-  }, []);
-
   const handleScroll = Animated.event(
     [{ nativeEvent: { contentOffset: { y: scrollY } } }],
     { 
@@ -89,7 +72,7 @@ export default function EntriesScreen({ navigation }: any) {
 
   const footerTranslate = uiPosition.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, footerHeight + 40], // Slider DOWN out of view
+    outputRange: [0, footerHeight + 40], // Slide DOWN out of view
     extrapolate: 'clamp'
   });
 
@@ -191,8 +174,9 @@ export default function EntriesScreen({ navigation }: any) {
 
   return (
     <KeyboardAvoidingView 
+      key={colorScheme}
       className="flex-1 bg-neutral-100 dark:bg-neutral-950"
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
       <View className="flex-1">
@@ -290,7 +274,6 @@ export default function EntriesScreen({ navigation }: any) {
                 left: 16, 
                 right: 16, 
                 zIndex: 10,
-                marginBottom: Platform.OS === 'android' ? keyboardHeight : 0,
                 transform: [{ translateY: footerTranslate }],
                 opacity: uiOpacity
             }}
