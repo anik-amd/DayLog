@@ -46,6 +46,11 @@ export default function FullScreenEditor({ route, navigation }: any) {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
 
+  // Handle tag press to navigate to timeline with tag filter
+  const handleTagPress = (tag: string) => {
+    navigation.navigate('Entries', { selectedTag: tag });
+  };
+
   const loadEntry = useCallback(async () => {
     if (entryId) {
       const data = await getEntry(entryId);
@@ -384,7 +389,18 @@ export default function FullScreenEditor({ route, navigation }: any) {
                             {new Date(entry?.createdAt || Date.now()).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                         </Text>
                         <View className="flex-row flex-wrap mt-3">
-                            {tags && <ReadMeta icon="pricetag-outline" value={tags} color="#16a34a" bgColor="bg-green-50 dark:bg-green-900/20" textColor="text-green-600 dark:text-green-400" />}
+                            {tags && tags.split(',').map((tag, index) => (
+                                <Pressable
+                                    key={index}
+                                    onPress={() => handleTagPress(tag.trim())}
+                                    className="flex-row items-center mr-2 mb-1"
+                                >
+                                    <Ionicons name="pricetag-outline" size={14} color="#16a34a" />
+                                    <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-green-600 dark:text-green-400 text-sm ml-1">
+                                        {tag.trim()}
+                                    </Text>
+                                </Pressable>
+                            ))}
                             {time && <ReadMeta icon="time-outline" value={time} color="#7c3aed" bgColor="bg-purple-50 dark:bg-purple-900/20" textColor="text-purple-600 dark:text-purple-400" />}
                             {location && <ReadMeta icon="location-outline" value={location} color="#d97706" bgColor="bg-amber-50 dark:bg-amber-900/20" textColor="text-amber-600 dark:text-amber-400" />}
                             {weather && <ReadMeta icon="sunny-outline" value={weather} color="#d946ef" bgColor="bg-pink-50 dark:bg-pink-900/20" textColor="text-pink-600 dark:text-pink-400" />}

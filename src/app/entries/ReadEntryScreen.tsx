@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Platform, SafeAreaView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Platform, SafeAreaView, Pressable } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useColorScheme } from "nativewind";
 import { Ionicons } from '@expo/vector-icons';
@@ -14,6 +14,11 @@ export default function ReadEntryScreen({ route, navigation }: any) {
   const { colorScheme } = useColorScheme();
   const [entry, setEntry] = useState<Entry | null>(null);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+
+  // Handle tag press to navigate to timeline with tag filter
+  const handleTagPress = (tag: string) => {
+    navigation.navigate('Entries', { selectedTag: tag });
+  };
 
   const loadEntry = useCallback(async () => {
     if (entryId) {
@@ -109,14 +114,18 @@ export default function ReadEntryScreen({ route, navigation }: any) {
               {formattedTime}
             </Text>
             
-            {entry.tags && (
-              <View className="flex-row items-center mr-4">
+            {entry.tags && entry.tags.split(',').map((tag, index) => (
+              <Pressable
+                key={index}
+                onPress={() => handleTagPress(tag.trim())}
+                className="flex-row items-center mr-3"
+              >
                 <Ionicons name="pricetag-outline" size={14} color="#16a34a" />
                 <Text style={{ fontFamily: 'Outfit-Regular' }} className="text-green-600 dark:text-green-400 text-base ml-1.5">
-                  {entry.tags}
+                  {tag.trim()}
                 </Text>
-              </View>
-            )}
+              </Pressable>
+            ))}
 
             {(entry.location || entry.weather) && (
               <View className="flex-row items-center">

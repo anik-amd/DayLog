@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { View, Text, ActivityIndicator, KeyboardAvoidingView, Platform, LayoutAnimation, UIManager, TouchableOpacity, Animated, ScrollView, Keyboard } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useRoute } from '@react-navigation/native';
 import { useColorScheme } from "nativewind";
 import { Ionicons } from '@expo/vector-icons';
 
@@ -15,12 +15,13 @@ import CalendarStrip from './CalendarStrip';
 import QuickEntryBar from '../editor/QuickEntryBar';
 import Picker from '../editor/Picker';
 
-export default function EntriesScreen({ navigation }: any) {
+export default function EntriesScreen({ navigation, route }: any) {
   const { colorScheme } = useColorScheme();
+  const routeParams = route.params || {};
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string | null>(routeParams.selectedTag || null);
   
   // Date/time picker state (managed at screen level for web)
   const [pickerDate, setPickerDate] = useState(new Date());
