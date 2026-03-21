@@ -11,7 +11,7 @@ import { initDb } from '../../database/db';
 import { createEntry, getAllEntries } from '../../database/entries';
 import { Entry } from '../../types/Entry';
 import EntryCard from './EntryCard';
-import CalendarStrip from './CalendarStrip';
+import CalendarStrip, { CalendarStripRef } from './CalendarStrip';
 import QuickEntryBar from '../editor/QuickEntryBar';
 import Picker from '../editor/Picker';
 
@@ -29,53 +29,56 @@ export default function EntriesScreen({ navigation, route }: any) {
   const [pickerType, setPickerType] = useState<'date' | 'time'>('date');
   const [entryDate, setEntryDate] = useState(new Date());
   const [inputFocused, setInputFocused] = useState(false);
-
-  // Animation values for scroll-driven UI hiding
-  const scrollY = useRef(new Animated.Value(0)).current;
-  const lastScrollY = useRef(0);
+  const [highlightedDate, setHighlightedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const calendarRef = useRef<CalendarStripRef>(null);
+  const datePositionsRef = useRef<{ [date: string]: number }>({});
+  const scrollViewRef = useRef<ScrollView>(null);
   const uiPosition = useRef(new Animated.Value(0)).current; 
-  const headerHideDistance = 120; // Distance the calendar slides up
-  const footerHeight = 120; // QuickEntryBar height
-  const handleScroll = Animated.event(
-    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-    { 
-      useNativeDriver: true,
-      listener: (event: any) => {
-        const currentY = event.nativeEvent.contentOffset.y;
-        const delta = currentY - lastScrollY.current;
-        
-        if (currentY < 40) {
-            // Near top: Always show
-            Animated.timing(uiPosition, { toValue: 0, duration: 200, useNativeDriver: true }).start();
-        } else if (delta > 0) {
-            // SCROLL DOWN: Hidden progressively
-            const currentHide = (uiPosition as any)._value || 0;
-            const newHide = Math.min(1, currentHide + (delta / 80)); 
-            uiPosition.setValue(newHide);
-            
-            // Dismiss keyboard on significant scroll down
-            if (delta > 20) {
-              Keyboard.dismiss();
-            }
-        } else if (delta < -10) {
-            // SCROLL UP: Show instantly/fast
-            Animated.timing(uiPosition, { toValue: 0, duration: 200, useNativeDriver: true }).start();
-        }
-        
-        lastScrollY.current = currentY;
+  const footerHeight = 120;
+  const highlightedDateRef = useRef(highlightedDate);
+  const allSortedDatesRef = useRef<string[]>([]);
+
+  useEffect(() => {
+    highlightedDateRef.current = highlightedDate;
+  }, [highlightedDate]);
+
+  useEffect(() => {
+    const allGroupedEntries = entries.reduce((groups: { [key: string]: Entry[] }, entry) => {
+      const date = entry.date;
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(entry);
+      return groups;
+    }, {});
+    allSortedDatesRef.current = Object.keys(allGroupedEntries).sort((a, b) => b.localeCompare(a));
+  }, [entries]);
+
+  const handleScroll = (event: any) => {
+    const currentY = event.nativeEvent.contentOffset.y;
+    const positions = datePositionsRef.current;
+    const dates = allSortedDatesRef.current;
+
+    const viewportTop = currentY + 95;
+
+    let visibleDate: string | null = null;
+    for (const date of dates) {
+      if (positions[date] !== undefined && positions[date] >= viewportTop - 30) {
+        visibleDate = date;
+        break;
       }
     }
-  );
 
-  const calendarTranslate = uiPosition.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, -headerHideDistance], // Calendar slides UP under the logo plane
-    extrapolate: 'clamp'
-  });
+    if (visibleDate && visibleDate !== highlightedDateRef.current) {
+      highlightedDateRef.current = visibleDate;
+      setHighlightedDate(visibleDate);
+      calendarRef.current?.scrollToDate(visibleDate);
+    }
+  };
 
   const footerTranslate = uiPosition.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, footerHeight + 40], // Slide DOWN out of view
+    outputRange: [0, footerHeight + 40],
     extrapolate: 'clamp'
   });
 
@@ -128,6 +131,15 @@ export default function EntriesScreen({ navigation, route }: any) {
         }
         
         setEntries(currentEntries);
+        
+        if (currentEntries.length > 0) {
+          const today = new Date().toISOString().split('T')[0];
+          highlightedDateRef.current = today;
+          setHighlightedDate(today);
+          setTimeout(() => {
+            calendarRef.current?.scrollToDate(today);
+          }, 100);
+        }
       } catch (error) {
         console.error("Database initialization failed:", error);
       } finally {
@@ -155,6 +167,16 @@ export default function EntriesScreen({ navigation, route }: any) {
   const clearTagFilter = () => {
     setSelectedTag(null);
   };
+
+  // When selectedDate is cleared, reset highlightedDate to today
+  useEffect(() => {
+    if (!selectedDate && entries.length > 0) {
+      const today = new Date().toISOString().split('T')[0];
+      highlightedDateRef.current = today;
+      setHighlightedDate(today);
+      calendarRef.current?.scrollToDate(today);
+    }
+  }, [selectedDate]);
 
   // Group entries by date
   const groupedEntries = filteredEntries.reduce((groups: { [key: string]: Entry[] }, entry) => {
@@ -200,10 +222,11 @@ export default function EntriesScreen({ navigation, route }: any) {
         {loading ? (
             <ActivityIndicator size="large" color="#a1a1aa" className="mt-40" />
         ) : (
-          <Animated.ScrollView
+           <ScrollView
+            ref={scrollViewRef as any}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ 
-                paddingTop: 280,
+                paddingTop: 250,
                 paddingBottom: 150, 
                 paddingHorizontal: 15 
             }}
@@ -221,7 +244,10 @@ export default function EntriesScreen({ navigation, route }: any) {
               <>
                 {/* Tag Filter Indicator */}
                 {selectedTag && (
-                  <View className="flex-row items-center mb-4 self-start">
+                  <View 
+                    className="flex-row items-center mb-4 mt-2 self-start px-3 py-1.5 rounded-full"
+                    style={{ backgroundColor: colorScheme === 'dark' ? 'rgba(74, 222, 128, 0.15)' : 'rgba(22, 163, 74, 0.1)' }}
+                  >
                     <Ionicons name="pricetag-outline" size={14} color={colorScheme === 'dark' ? '#4ade80' : '#16a34a'} />
                     <Text style={{ fontFamily: 'Outfit-Medium', color: colorScheme === 'dark' ? '#4ade80' : '#16a34a' }} className="text-sm ml-1.5">
                       {selectedTag}
@@ -232,7 +258,31 @@ export default function EntriesScreen({ navigation, route }: any) {
                   </View>
                 )}
                 {sortedDates.map((dateStr) => (
-                <View key={dateStr} className="mb-4">
+                <View
+                  key={dateStr}
+                  className="mb-4"
+                  onLayout={(e) => {
+                    const newY = e.nativeEvent.layout.y;
+                    datePositionsRef.current[dateStr] = newY;
+
+                    const count = Object.keys(datePositionsRef.current).length;
+                    const positions = datePositionsRef.current;
+                    const dates = allSortedDatesRef.current;
+
+                    const viewportTop = 95;
+                    let visibleDate: string | null = null;
+                    for (const date of dates) {
+                      if (positions[date] !== undefined && positions[date] < viewportTop + 250) {
+                        visibleDate = date;
+                        break;
+                      }
+                    }
+                    if (visibleDate && visibleDate !== highlightedDateRef.current) {
+                      highlightedDateRef.current = visibleDate;
+                      setHighlightedDate(visibleDate);
+                    }
+                  }}
+                >
                   {/* Date Header */}
                   <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-neutral-500 dark:text-neutral-400 text-[12px] uppercase tracking-wider mb-2 px-1">
                     {formatDateHeader(dateStr)}
@@ -253,7 +303,7 @@ export default function EntriesScreen({ navigation, route }: any) {
               ))}
               </>
             )}
-          </Animated.ScrollView>
+          </ScrollView>
         )}
 
         {/* FIXED Top Logo Bar (Pinned to top) */}
@@ -272,31 +322,43 @@ export default function EntriesScreen({ navigation, route }: any) {
             </View>
         </View>
 
-        {/* HIDABLE Top Section: Calendar (Solid Floating Card) */}
-        <Animated.View 
+        {/* FIXED Top Section: Calendar (Solid Floating Card) */}
+        <View 
             style={{ 
                 position: 'absolute', 
                 top: 95, 
                 left: 15, 
                 right: 15, 
                 zIndex: 30,
-                transform: [{ translateY: calendarTranslate }],
-                opacity: uiOpacity
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.12,
+                shadowRadius: 12,
+                elevation: 4,
             }}
         >
             <View 
-                className="bg-white dark:bg-neutral-900 rounded-[32px] shadow-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden"
+                className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden"
                 style={{ backgroundColor: colorScheme === 'dark' ? '#171717' : '#ffffff' }}
             >
-                <View className="px-5 py-4">
-                    <CalendarStrip 
-                        selectedDate={selectedDate} 
-                        onDateSelect={setSelectedDate} 
+                <View className="px-4 py-2">
+                    <CalendarStrip
+                        ref={calendarRef}
+                        selectedDate={selectedDate}
+                        onDateSelect={(date) => {
+                          setSelectedDate(date);
+                          if (date) {
+                            highlightedDateRef.current = date;
+                            setHighlightedDate(date);
+                            calendarRef.current?.scrollToDate(date);
+                          }
+                        }}
                         entries={entries}
+                        highlightedDate={highlightedDate}
                     />
                 </View>
             </View>
-        </Animated.View>
+        </View>
 
         {/* HIDABLE Bottom Section: Quick Entry Bar (Solid Floating Card) */}
         <Animated.View 

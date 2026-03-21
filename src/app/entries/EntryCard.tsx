@@ -56,7 +56,7 @@ function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCard
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.parallel([
+    const animation = Animated.parallel([
       Animated.timing(opacityAnim, {
         toValue: 1,
         duration: 300,
@@ -68,7 +68,13 @@ function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCard
         friction: 8,
         tension: 40,
       }),
-    ]).start();
+    ]);
+    animation.start();
+    return () => {
+      animation.stop();
+      opacityAnim.setValue(1);
+      scaleAnim.setValue(1);
+    };
   }, []);
 
   const handlePressIn = () => {
@@ -85,7 +91,9 @@ function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCard
       useNativeDriver: true,
       speed: 20,
       bounciness: 8,
-    }).start();
+    }).start(() => {
+      scaleAnim.setValue(1);
+    });
   };
 
   return (
