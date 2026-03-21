@@ -111,24 +111,23 @@ function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCard
 
               {/* Tags */}
               {entry.tags && (
-                <View className="flex-row items-center mt-1.5">
-                  <View className="flex-row items-center mr-2">
-                    <Ionicons name="pricetag-outline" size={11} color={colorScheme === 'dark' ? '#a1a1aa' : '#737373'} />
-                  </View>
+                <View className="flex-row flex-wrap mt-1.5">
                   {entry.tags.split(',').map((tag, index) => (
                     <Pressable
                       key={index}
                       onPress={() => onTagPress?.(tag.trim())}
-                      className="mr-1.5"
+                      className="flex-row items-center mr-2 mb-1"
                     >
+                      <Ionicons name="pricetag-outline" size={12} color={colorScheme === 'dark' ? '#4ade80' : '#16a34a'} />
                       <Text 
                         style={{ 
                           fontFamily: 'Outfit-Medium',
-                          fontSize: 10,
-                          color: colorScheme === 'dark' ? '#71717a' : '#a1a1aa',
+                          fontSize: 12,
+                          marginLeft: 4,
+                          color: colorScheme === 'dark' ? '#4ade80' : '#16a34a',
                         }}
                       >
-                        {index > 0 ? '' : '#'}{tag.trim()}
+                        {tag.trim()}
                       </Text>
                     </Pressable>
                   ))}

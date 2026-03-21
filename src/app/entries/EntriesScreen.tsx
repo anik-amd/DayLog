@@ -217,7 +217,20 @@ export default function EntriesScreen({ navigation }: any) {
                 </Text>
               </View>
             ) : (
-              sortedDates.map((dateStr) => (
+              <>
+                {/* Tag Filter Indicator */}
+                {selectedTag && (
+                  <View className="flex-row items-center mb-4 self-start">
+                    <Ionicons name="pricetag-outline" size={14} color={colorScheme === 'dark' ? '#4ade80' : '#16a34a'} />
+                    <Text style={{ fontFamily: 'Outfit-Medium', color: colorScheme === 'dark' ? '#4ade80' : '#16a34a' }} className="text-sm ml-1.5">
+                      {selectedTag}
+                    </Text>
+                    <TouchableOpacity onPress={clearTagFilter} className="ml-2">
+                      <Ionicons name="close-circle" size={16} color={colorScheme === 'dark' ? '#4ade80' : '#16a34a'} />
+                    </TouchableOpacity>
+                  </View>
+                )}
+                {sortedDates.map((dateStr) => (
                 <View key={dateStr} className="mb-4">
                   {/* Date Header */}
                   <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-neutral-500 dark:text-neutral-400 text-[12px] uppercase tracking-wider mb-2 px-1">
@@ -236,7 +249,8 @@ export default function EntriesScreen({ navigation }: any) {
                     ))}
                   </View>
                 </View>
-              ))
+              ))}
+              </>
             )}
           </Animated.ScrollView>
         )}
@@ -256,23 +270,6 @@ export default function EntriesScreen({ navigation }: any) {
                 </TouchableOpacity>
             </View>
         </View>
-
-        {/* Tag Filter Indicator */}
-        {selectedTag && (
-          <View 
-            className="absolute left-16 right-16 z-40"
-            style={{ top: 80 }}
-          >
-            <View className="flex-row items-center justify-center bg-indigo-100 dark:bg-indigo-900/30 rounded-full px-4 py-2">
-              <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-indigo-600 dark:text-indigo-400 text-sm">
-                #{selectedTag}
-              </Text>
-              <TouchableOpacity onPress={clearTagFilter} className="ml-2">
-                <Ionicons name="close-circle" size={18} color={colorScheme === 'dark' ? '#818cf8' : '#6366f1'} />
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
 
         {/* HIDABLE Top Section: Calendar (Solid Floating Card) */}
         <Animated.View 
