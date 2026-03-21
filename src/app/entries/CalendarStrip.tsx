@@ -1,5 +1,5 @@
-import React, { useMemo, useState, useRef, forwardRef, useImperativeHandle } from 'react';
-import { View, Text, FlatList, TouchableOpacity, LayoutAnimation, Platform, UIManager, StyleSheet, Dimensions, ListRenderItemInfo } from 'react-native';
+import React, { useMemo, useState, useRef, forwardRef, useImperativeHandle, useCallback } from 'react';
+import { View, Text, FlatList, TouchableOpacity, LayoutAnimation, Platform, UIManager, ListRenderItemInfo, useWindowDimensions, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Calendar } from 'react-native-calendars';
 import { useColorScheme } from "nativewind";
@@ -15,6 +15,7 @@ interface CalendarStripProps {
   onDateSelect: (date: string | null) => void;
   entries: Entry[];
   highlightedDate?: string | null;
+  onHighlightChange?: (date: string) => void;
 }
 
 export interface CalendarStripRef {
@@ -34,22 +35,44 @@ interface DayItem {
 }
 
 const CalendarStrip = forwardRef<CalendarStripRef, CalendarStripProps>(
-  function CalendarStrip({ selectedDate, onDateSelect, entries, highlightedDate }, ref) {
+  function CalendarStrip({ selectedDate, onDateSelect, entries, highlightedDate, onHighlightChange }, ref) {
     const [expanded, setExpanded] = useState(false);
     const { colorScheme } = useColorScheme();
     const isDark = colorScheme === "dark";
+    const { width: screenWidth } = useWindowDimensions();
     const scrollRef = useRef<FlatList<DayItem>>(null);
     const datesRef = useRef<DayItem[]>([]);
+    const lastCenterDate = useRef<string | null>(null);
 
     const toggleExpand = () => {
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setExpanded(!expanded);
     };
 
+    const handleFlatListScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (!onHighlightChange) return;
+      const dates = datesRef.current;
+      if (!dates || dates.length === 0) return;
+
+      const offsetX = event.nativeEvent.contentOffset.x;
+      const listLeftPadding = 4;
+      const centerX = offsetX + (screenWidth - 30) / 2 - listLeftPadding;
+      const centerIndex = Math.max(0, Math.floor(centerX / CELL_TOTAL));
+      const clampedIndex = Math.min(centerIndex, dates.length - 1);
+      const centerDate = dates[clampedIndex];
+
+      if (centerDate && centerDate.id !== lastCenterDate.current) {
+        lastCenterDate.current = centerDate.id;
+        onHighlightChange(centerDate.id);
+      }
+    }, [onHighlightChange, screenWidth]);
+
     const scrollToDate = (date: string) => {
       const dates = datesRef.current;
+      if (!dates || dates.length === 0) return;
       const item = dates.find(d => d.id === date);
       if (item && scrollRef.current) {
+        lastCenterDate.current = date;
         scrollRef.current.scrollToItem({ item, animated: true, viewPosition: 0.5 });
       }
     };
@@ -107,7 +130,7 @@ const CalendarStrip = forwardRef<CalendarStripRef, CalendarStripProps>(
       try {
         if (!highlightedDate) return new Date().toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
         const parts = highlightedDate.split('-');
-        const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
         if (isNaN(d.getTime())) return new Date().toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
         return d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
       } catch {
@@ -224,6 +247,7 @@ const CalendarStrip = forwardRef<CalendarStripRef, CalendarStripProps>(
               showsHorizontalScrollIndicator={false}
               getItemLayout={getItemLayout}
               contentContainerStyle={{ paddingLeft: 4, paddingRight: 4, paddingBottom: 4 }}
+              onScroll={handleFlatListScroll}
               scrollEventThrottle={16}
             />
           </>

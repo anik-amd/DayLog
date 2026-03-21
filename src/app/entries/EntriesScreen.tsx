@@ -54,6 +54,28 @@ export default function EntriesScreen({ navigation, route }: any) {
     allSortedDatesRef.current = Object.keys(allGroupedEntries).sort((a, b) => b.localeCompare(a));
   }, [entries]);
 
+  useEffect(() => {
+    if (entries.length === 0) return;
+    const timer = setTimeout(() => {
+      const positions = datePositionsRef.current;
+      const dates = allSortedDatesRef.current;
+      const viewportTop = 95;
+
+      let visibleDate: string | null = null;
+      for (const date of dates) {
+        if (positions[date] !== undefined && positions[date] < viewportTop + 250) {
+          visibleDate = date;
+          break;
+        }
+      }
+      if (visibleDate && visibleDate !== highlightedDateRef.current) {
+        highlightedDateRef.current = visibleDate;
+        setHighlightedDate(visibleDate);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [entries]);
+
   const handleScroll = (event: any) => {
     const currentY = event.nativeEvent.contentOffset.y;
     const positions = datePositionsRef.current;
@@ -338,8 +360,14 @@ export default function EntriesScreen({ navigation, route }: any) {
             }}
         >
             <View 
-                className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden"
-                style={{ backgroundColor: colorScheme === 'dark' ? '#171717' : '#ffffff' }}
+                className="bg-white dark:bg-neutral-900 rounded-2xl overflow-hidden"
+                style={{ 
+                    backgroundColor: colorScheme === 'dark' ? '#171717' : '#ffffff',
+                    borderWidth: 2,
+                    borderColor: (selectedTag || selectedDate) 
+                        ? (colorScheme === 'dark' ? '#4c1d95' : '#ddd6fe')
+                        : (colorScheme === 'dark' ? '#262626' : '#e5e5e5'),
+                }}
             >
                 <View className="px-4 py-2">
                     <CalendarStrip
@@ -355,6 +383,12 @@ export default function EntriesScreen({ navigation, route }: any) {
                         }}
                         entries={entries}
                         highlightedDate={highlightedDate}
+                        onHighlightChange={(date) => {
+                          if (date !== highlightedDateRef.current) {
+                            highlightedDateRef.current = date;
+                            setHighlightedDate(date);
+                          }
+                        }}
                     />
                 </View>
             </View>
