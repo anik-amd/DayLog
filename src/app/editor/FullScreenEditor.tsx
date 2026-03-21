@@ -25,7 +25,6 @@ export default function FullScreenEditor({ route, navigation }: any) {
   const { entryId, initialContent } = route.params;
   const [markdown, setMarkdown] = useState(initialContent || '');
   const [entry, setEntry] = useState<Entry | null>(null);
-  const [isEditing, setIsEditing] = useState(true);
   const isSaving = useRef(false);
   const inputRef = useRef<TextInput>(null);
   const [selection, setSelection] = useState({ start: 0, end: 0 });
@@ -85,11 +84,9 @@ export default function FullScreenEditor({ route, navigation }: any) {
 
   // Real-time tag extraction
   useEffect(() => {
-    if (isEditing) {
-      const extracted = extractTags(markdown);
-      setTags(extracted);
-    }
-  }, [markdown, isEditing]);
+    const extracted = extractTags(markdown);
+    setTags(extracted);
+  }, [markdown]);
 
   const fetchLocationAndWeather = async (onlyIfGranted = false) => {
     if (Platform.OS === 'web') {
@@ -254,21 +251,6 @@ export default function FullScreenEditor({ route, navigation }: any) {
                 <Ionicons name="arrow-back" size={20} color="#737373" />
             </TouchableOpacity>
 
-            <View className="flex-row bg-neutral-100 dark:bg-neutral-900 rounded-full p-1 border border-neutral-200 dark:border-neutral-800">
-                <TouchableOpacity 
-                    onPress={() => setIsEditing(true)}
-                    className={`px-5 py-1.5 rounded-full ${isEditing ? 'bg-white dark:bg-neutral-800 shadow-sm' : ''}`}
-                >
-                    <Text style={{ fontFamily: 'Outfit-Black' }} className={`text-[10px] uppercase tracking-widest ${isEditing ? 'text-neutral-900 dark:text-neutral-50' : 'text-neutral-400'}`}>Write</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                    onPress={() => setIsEditing(false)}
-                    className={`px-5 py-1.5 rounded-full ${!isEditing ? 'bg-white dark:bg-neutral-800 shadow-sm' : ''}`}
-                >
-                    <Text style={{ fontFamily: 'Outfit-Black' }} className={`text-[10px] uppercase tracking-widest ${!isEditing ? 'text-neutral-900 dark:text-neutral-50' : 'text-neutral-400'}`}>Read</Text>
-                </TouchableOpacity>
-            </View>
-
             <TouchableOpacity onPress={handleBack} className="bg-neutral-900 dark:bg-white w-10 h-10 rounded-full items-center justify-center">
                 <Ionicons name="checkmark" size={20} color={colorScheme === 'dark' ? '#171717' : '#fff'} />
             </TouchableOpacity>
@@ -297,118 +279,88 @@ export default function FullScreenEditor({ route, navigation }: any) {
                 </View>
             )}
 
-            {isEditing ? (
-                <View>
-                    <ScrollView 
-                        horizontal 
-                        showsHorizontalScrollIndicator={false}
-                        className="mb-6"
-                        contentContainerStyle={{ flexDirection: 'row', alignItems: 'center' }}
-                    >
-                        <View className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-900/30">
-                            <Ionicons name="pricetag-outline" size={15} color="#16a34a" />
-                            <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-green-600 dark:text-green-400">
-                                {tags || 'Tags'}
-                            </Text>
-                        </View>
-
-                        <Pressable 
-                            onPress={() => setShowDatePicker(true)}
-                            className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-900/30"
-                        >
-                            <Ionicons name="calendar-outline" size={15} color="#7c3aed" />
-                            <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-purple-600 dark:text-purple-400">
-                                {formatDate(entryDateObj)}
-                            </Text>
-                        </Pressable>
-
-                        <Pressable 
-                            onPress={() => setShowTimePicker(true)}
-                            className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-900/30"
-                        >
-                            <Ionicons name="time-outline" size={15} color="#7c3aed" />
-                            <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-purple-600 dark:text-purple-400">
-                                {time || 'Time'}
-                            </Text>
-                        </Pressable>
-
-                        {/* Location Pill */}
-                        <Pressable 
-                            onPress={handleLocationPress}
-                            className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30"
-                        >
-                            {locationLoading ? (
-                                <Ionicons name="location-outline" size={15} color="#d97706" />
-                            ) : (hasLocationPermission === false && !location) ? (
-                                <Ionicons name="location-outline" size={15} color="#ef4444" />
-                            ) : (
-                                <Ionicons name="location-outline" size={15} color="#d97706" />
-                            )}
-                            <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-amber-600 dark:text-amber-400">
-                                {location || 'Location'}
-                            </Text>
-                        </Pressable>
-
-                        {/* Weather Pill */}
-                        <View className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-pink-50 dark:bg-pink-900/20 border border-pink-100 dark:border-pink-900/30">
-                            <Ionicons name="sunny-outline" size={15} color="#d946ef" />
-                            <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-pink-600 dark:text-pink-400">
-                                {weather || 'Weather'}
-                            </Text>
-                        </View>
-
-                        <TouchableOpacity 
-                            onPress={pickImage}
-                            className="flex-row items-center rounded-full px-4 py-2 bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-900/30"
-                        >
-                            <Ionicons name="image-outline" size={15} color="#0284c7" />
-                            <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-sky-600 dark:text-sky-400">Photo</Text>
-                        </TouchableOpacity>
-                    </ScrollView>
-
-                    <TextInput
-                        ref={inputRef}
-                        placeholder="Capture your thoughts..."
-                        placeholderTextColor="#a3a3a3"
-                        className="text-neutral-900 dark:text-neutral-100 text-[20px] leading-10 min-h-[500px]"
-                        style={{ fontFamily: 'Outfit-Regular' }}
-                        multiline={true}
-                        value={markdown}
-                        onChangeText={setMarkdown}
-                        onSelectionChange={(e) => setSelection(e.nativeEvent.selection)}
-                        autoFocus={true}
-                        scrollEnabled={false}
-                        underlineColorAndroid="transparent"
-                        textAlignVertical="top"
-                    />
-                </View>
-            ) : (
-                <View className="pb-20">
-                    <View className="mb-6">
-                        <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-neutral-400 dark:text-neutral-500 text-xs uppercase tracking-widest">
-                            {new Date(entry?.createdAt || Date.now()).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            <View>
+                <ScrollView 
+                    horizontal 
+                    showsHorizontalScrollIndicator={false}
+                    className="mb-6"
+                    contentContainerStyle={{ flexDirection: 'row', alignItems: 'center' }}
+                >
+                    <View className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-900/30">
+                        <Ionicons name="pricetag-outline" size={15} color="#16a34a" />
+                        <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-green-600 dark:text-green-400">
+                            {tags || 'Tags'}
                         </Text>
-                        <View className="flex-row flex-wrap mt-3">
-                            {tags && tags.split(',').map((tag, index) => (
-                                <Pressable
-                                    key={index}
-                                    onPress={() => handleTagPress(tag.trim())}
-                                    className="flex-row items-center mr-2 mb-1"
-                                >
-                                    <Ionicons name="pricetag-outline" size={14} color="#16a34a" />
-                                    <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-green-600 dark:text-green-400 text-sm ml-1">
-                                        {tag.trim()}
-                                    </Text>
-                                </Pressable>
-                            ))}
-                            {time && <ReadMeta icon="time-outline" value={time} color="#7c3aed" bgColor="bg-purple-50 dark:bg-purple-900/20" textColor="text-purple-600 dark:text-purple-400" />}
-                            {location && <ReadMeta icon="location-outline" value={location} color="#d97706" bgColor="bg-amber-50 dark:bg-amber-900/20" textColor="text-amber-600 dark:text-amber-400" />}
-                            {weather && <ReadMeta icon="sunny-outline" value={weather} color="#d946ef" bgColor="bg-pink-50 dark:bg-pink-900/20" textColor="text-pink-600 dark:text-pink-400" />}
-                        </View>
                     </View>
-                    <MarkdownRenderer content={markdown} />
-                </View>
-            )}
+
+                    <Pressable 
+                        onPress={() => setShowDatePicker(true)}
+                        className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-900/30"
+                    >
+                        <Ionicons name="calendar-outline" size={15} color="#7c3aed" />
+                        <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-purple-600 dark:text-purple-400">
+                            {formatDate(entryDateObj)}
+                        </Text>
+                    </Pressable>
+
+                    <Pressable 
+                        onPress={() => setShowTimePicker(true)}
+                        className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-900/30"
+                    >
+                        <Ionicons name="time-outline" size={15} color="#7c3aed" />
+                        <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-purple-600 dark:text-purple-400">
+                            {time || 'Time'}
+                        </Text>
+                    </Pressable>
+
+                    <Pressable 
+                        onPress={handleLocationPress}
+                        className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30"
+                    >
+                        {locationLoading ? (
+                            <Ionicons name="location-outline" size={15} color="#d97706" />
+                        ) : (hasLocationPermission === false && !location) ? (
+                            <Ionicons name="location-outline" size={15} color="#ef4444" />
+                        ) : (
+                            <Ionicons name="location-outline" size={15} color="#d97706" />
+                        )}
+                        <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-amber-600 dark:text-amber-400">
+                            {location || 'Location'}
+                        </Text>
+                    </Pressable>
+
+                    <View className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-pink-50 dark:bg-pink-900/20 border border-pink-100 dark:border-pink-900/30">
+                        <Ionicons name="sunny-outline" size={15} color="#d946ef" />
+                        <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-pink-600 dark:text-pink-400">
+                            {weather || 'Weather'}
+                        </Text>
+                    </View>
+
+                    <TouchableOpacity 
+                        onPress={pickImage}
+                        className="flex-row items-center rounded-full px-4 py-2 bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-900/30"
+                    >
+                        <Ionicons name="image-outline" size={15} color="#0284c7" />
+                        <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-sky-600 dark:text-sky-400">Photo</Text>
+                    </TouchableOpacity>
+                </ScrollView>
+
+                <TextInput
+                    ref={inputRef}
+                    placeholder="Capture your thoughts..."
+                    placeholderTextColor="#a3a3a3"
+                    className="text-neutral-900 dark:text-neutral-100 text-[20px] leading-10 min-h-[500px]"
+                    style={{ fontFamily: 'Outfit-Regular' }}
+                    multiline={true}
+                    value={markdown}
+                    onChangeText={setMarkdown}
+                    onSelectionChange={(e) => setSelection(e.nativeEvent.selection)}
+                    autoFocus={true}
+                    scrollEnabled={false}
+                    underlineColorAndroid="transparent"
+                    textAlignVertical="top"
+                />
+            </View>
         </ScrollView>
       </KeyboardAvoidingView>
 
@@ -454,13 +406,4 @@ export default function FullScreenEditor({ route, navigation }: any) {
       )}
     </View>
   );
-}
-
-function ReadMeta({ icon, value, color, bgColor, textColor }: { icon: any, value: string, color: string, bgColor: string, textColor: string }) {
-    return (
-        <View className={`flex-row items-center px-3 py-1 rounded-full mr-2 mb-2 ${bgColor}`}>
-            <Ionicons name={icon} size={13} color={color} />
-            <Text style={{ fontFamily: 'Outfit-Medium' }} className={`text-[12px] ml-1.5 ${textColor}`}>{value}</Text>
-        </View>
-    );
 }
