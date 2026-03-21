@@ -5,6 +5,7 @@ import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
+import * as Location from 'expo-location';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Picker from './Picker';
 import { getEntry, updateEntry } from '../../database/entries';
@@ -36,6 +37,10 @@ export default function FullScreenEditor({ route, navigation }: any) {
   const [weather, setWeather] = useState<string>('');
   const [tags, setTags] = useState<string>('');
   
+  // Location/Weather states
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [hasLocationPermission, setHasLocationPermission] = useState<boolean | null>(null);
+  
   // Date/Time objects for pickers
   const [entryDateObj, setEntryDateObj] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -53,7 +58,6 @@ export default function FullScreenEditor({ route, navigation }: any) {
         setWeather(data.weather || '');
         setTags(data.tags || '');
         
-        // Parse date for pickers
         if (data.date) {
             const parsedDate = new Date(data.date);
             if (!isNaN(parsedDate.getTime())) {
@@ -66,6 +70,12 @@ export default function FullScreenEditor({ route, navigation }: any) {
 
   useEffect(() => {
     loadEntry();
+    
+    // Check permission silently on mount
+    (async () => {
+      const { status } = await Location.getForegroundPermissionsAsync();
+      setHasLocationPermission(status === 'granted');
+    })();
   }, [loadEntry]);
 
   // Real-time tag extraction
@@ -75,6 +85,54 @@ export default function FullScreenEditor({ route, navigation }: any) {
       setTags(extracted);
     }
   }, [markdown, isEditing]);
+
+  const fetchLocationAndWeather = async (onlyIfGranted = false) => {
+    if (Platform.OS === 'web') {
+      setLocation('San Francisco, CA');
+      setWeather('72°F Sunny');
+      setHasLocationPermission(true);
+      return;
+    }
+
+    if (onlyIfGranted) {
+        const { status } = await Location.getForegroundPermissionsAsync();
+        if (status !== 'granted') return;
+    }
+
+    setLocationLoading(true);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      setHasLocationPermission(status === 'granted');
+      if (status !== 'granted') {
+        setLocationLoading(false);
+        return;
+      }
+
+      const loc = await Location.getCurrentPositionAsync({});
+      const [address] = await Location.reverseGeocodeAsync({
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude
+      });
+
+      if (address) {
+        const locationStr = address.city 
+          ? `${address.city}, ${address.region}` 
+          : address.subregion || 'Unknown';
+        setLocation(locationStr);
+      }
+      
+      // Mock weather for consistency
+      setWeather('72°F Sunny');
+    } catch (error) {
+      console.error('Location error:', error);
+    } finally {
+      setLocationLoading(false);
+    }
+  };
+
+  const handleLocationPress = () => {
+    fetchLocationAndWeather(false);
+  };
 
   const handleSave = useCallback(async (textToSave: string, currentMetadata: { date: string, time: string, location: string, weather: string, tags: string }) => {
     if (isSaving.current || !entryId) return;
@@ -242,7 +300,6 @@ export default function FullScreenEditor({ route, navigation }: any) {
                         className="mb-6"
                         contentContainerStyle={{ flexDirection: 'row', alignItems: 'center' }}
                     >
-                        {/* Tag Pill */}
                         <View className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-900/30">
                             <Ionicons name="pricetag-outline" size={15} color="#16a34a" />
                             <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-green-600 dark:text-green-400">
@@ -250,7 +307,6 @@ export default function FullScreenEditor({ route, navigation }: any) {
                             </Text>
                         </View>
 
-                        {/* Date Pill */}
                         <Pressable 
                             onPress={() => setShowDatePicker(true)}
                             className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-900/30"
@@ -261,7 +317,6 @@ export default function FullScreenEditor({ route, navigation }: any) {
                             </Text>
                         </Pressable>
 
-                        {/* Time Pill */}
                         <Pressable 
                             onPress={() => setShowTimePicker(true)}
                             className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-900/30"
@@ -273,32 +328,30 @@ export default function FullScreenEditor({ route, navigation }: any) {
                         </Pressable>
 
                         {/* Location Pill */}
-                        <View className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30">
-                            <Ionicons name="location-outline" size={15} color="#d97706" />
-                            <TextInput 
-                                value={location}
-                                onChangeText={setLocation}
-                                placeholder="Location"
-                                placeholderTextColor="#d9770680"
-                                className="text-[14px] ml-2 text-amber-600 dark:text-amber-400 p-0 min-w-[60px]"
-                                style={{ fontFamily: 'Outfit-Medium' }}
-                            />
-                        </View>
+                        <Pressable 
+                            onPress={handleLocationPress}
+                            className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30"
+                        >
+                            {locationLoading ? (
+                                <Ionicons name="location-outline" size={15} color="#d97706" />
+                            ) : (hasLocationPermission === false && !location) ? (
+                                <Ionicons name="location-off-outline" size={15} color="#d97706" />
+                            ) : (
+                                <Ionicons name="location-outline" size={15} color="#d97706" />
+                            )}
+                            <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-amber-600 dark:text-amber-400">
+                                {location || 'Location'}
+                            </Text>
+                        </Pressable>
 
                         {/* Weather Pill */}
-                        <View className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-pink-50 dark:bg-pink-900/20 border border-pink-100 dark:bg-pink-900/30">
+                        <View className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-pink-50 dark:bg-pink-900/20 border border-pink-100 dark:border-pink-900/30">
                             <Ionicons name="sunny-outline" size={15} color="#d946ef" />
-                            <TextInput 
-                                value={weather}
-                                onChangeText={setWeather}
-                                placeholder="Weather"
-                                placeholderTextColor="#d946ef80"
-                                className="text-[14px] ml-2 text-pink-600 dark:text-pink-400 p-0 min-w-[60px]"
-                                style={{ fontFamily: 'Outfit-Medium' }}
-                            />
+                            <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-pink-600 dark:text-pink-400">
+                                {weather || 'Weather'}
+                            </Text>
                         </View>
 
-                        {/* Photo Action */}
                         <TouchableOpacity 
                             onPress={pickImage}
                             className="flex-row items-center rounded-full px-4 py-2 bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-900/30"
@@ -343,7 +396,6 @@ export default function FullScreenEditor({ route, navigation }: any) {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* Date/Time Pickers */}
       {showDatePicker && (
         Platform.OS === 'ios' ? (
           <DateTimePicker

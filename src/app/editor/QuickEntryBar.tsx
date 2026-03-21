@@ -60,6 +60,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   const [location, setLocation] = useState<string | null>(null);
   const [locationError, setLocationError] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
+  const [hasLocationPermission, setHasLocationPermission] = useState<boolean | null>(null);
   
   // Weather state
   const [weather, setWeather] = useState<string | null>(null);
@@ -71,11 +72,19 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   const hasScrolledRef = useRef(false);
 
   useEffect(() => {
+    // Check permission silently on mount
+    (async () => {
+      const { status } = await Location.getForegroundPermissionsAsync();
+      setHasLocationPermission(status === 'granted');
+      if (status === 'granted') {
+        fetchLocationAndWeather(true);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
     if (content.trim().length > 0 || (isFocused && !hasScrolledRef.current) || pillPressedRef.current) {
       setShowMetadata(true);
-      if (content.trim().length > 0) {
-        fetchLocationAndWeather();
-      }
     } else if (!pillPressedRef.current) {
       setShowMetadata(false);
     }
@@ -87,11 +96,17 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
     setTags(extracted);
   }, [content]);
 
-  const fetchLocationAndWeather = async () => {
+  const fetchLocationAndWeather = async (onlyIfGranted = false) => {
     if (IS_WEB) {
       setLocation('San Francisco, CA');
       setWeather('72°F Sunny');
+      setHasLocationPermission(true);
       return;
+    }
+
+    if (onlyIfGranted) {
+        const { status } = await Location.getForegroundPermissionsAsync();
+        if (status !== 'granted') return;
     }
 
     setLocationLoading(true);
@@ -101,9 +116,8 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
 
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
+      setHasLocationPermission(status === 'granted');
       if (status !== 'granted') {
-        setLocationError(true);
-        setWeatherError(true);
         setLocationLoading(false);
         setWeatherLoading(false);
         return;
@@ -140,6 +154,11 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
     } finally {
       setWeatherLoading(false);
     }
+  };
+
+  const handleLocationPress = () => {
+    pillPressedRef.current = true;
+    fetchLocationAndWeather(false);
   };
 
   const handleSave = useCallback(async (textToSave: string, finalizeAndRefresh: boolean = false, forceSave: boolean = false) => {
@@ -488,15 +507,17 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               </View>
 
               {/* Location Pill */}
-              <View className="flex-row items-center rounded-full px-3 py-1.5 mr-2"
+              <Pressable 
+                onPress={handleLocationPress}
+                className="flex-row items-center rounded-full px-3 py-1.5 mr-2"
                 style={{ backgroundColor: '#fef3c7' }}
               >
                 <PillItem 
                   icon={
                     locationLoading ? (
                       <Ionicons name="location-outline" size={15} color="#d97706" />
-                    ) : locationError ? (
-                      <Ionicons name="location-outline" size={15} color="#ef4444" />
+                    ) : (hasLocationPermission === false && !location) ? (
+                      <Ionicons name="location-off-outline" size={15} color="#d97706" />
                     ) : (
                       <Ionicons name="location-outline" size={15} color="#d97706" />
                     )
@@ -504,9 +525,9 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                   isError={locationError}
                   isLoading={locationLoading}
                 >
-                  {locationError ? 'Unavailable' : location || '...'}
+                  {location || 'Location'}
                 </PillItem>
-              </View>
+              </Pressable>
 
               {/* Photo Pill */}
               <Pressable 
@@ -659,3 +680,5 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
     </View>
   );
 }
+
+const styles = StyleSheet.create({});
