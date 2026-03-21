@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { View, TextInput as RNTextInput, TouchableOpacity, Platform, UIManager, Image, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, TextInput as RNTextInput, TouchableOpacity, Pressable, Platform, UIManager, Image, Text, StyleSheet, ScrollView } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useColorScheme } from "nativewind";
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -383,7 +383,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   }) => (
     <View className="flex-row items-center">
       {icon}
-      <Text className={`text-[11px] ml-1.5 ${isError ? 'text-red-500' : 'text-pink-600 dark:text-pink-400'}`}>
+      <Text className={`text-[14px] ml-1.5 ${isError ? 'text-red-500' : 'text-pink-600 dark:text-pink-400'}`}>
         {children}
       </Text>
     </View>
@@ -407,7 +407,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
           className="rounded-2xl overflow-hidden"
           style={{
             backgroundColor: colorScheme === 'dark' ? '#1e1b4b' : '#ffffff',
-            paddingVertical: showMetadata ? 12 : 8,
+            paddingVertical: 8,
           }}
         >
           {/* Pills Row */}
@@ -415,54 +415,57 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
             <ScrollView 
               horizontal 
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 8, paddingRight: 16 }}
+              style={{ height: 36, paddingTop: 2 }}
+              contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 8, paddingRight: 16, flexWrap: 'nowrap' }}
+              scrollEventThrottle={16}
+              keyboardShouldPersistTaps="handled"
+              nestedScrollEnabled={true}
+              canCancelContentTouches={true}
             >
               {/* Date Pill */}
-              <TouchableOpacity 
+              <Pressable 
                 onPress={() => {
                   pillPressedRef.current = true;
                   setShowDatePicker(true);
                 }}
-                hitSlop={{ top: 10, bottom: 10, left: 5, right: 5 }}
-                className="flex-row items-center rounded-full px-2.5 py-1 mr-2"
+                className="flex-row items-center rounded-full px-3 py-1.5 mr-2"
                 style={{ backgroundColor: '#ede9fe' }}
               >
-                <Ionicons name="calendar-outline" size={12} color="#7c3aed" />
-                <Text className="text-[11px] ml-1.5" style={{ color: '#7c3aed' }}>
+                <Ionicons name="calendar-outline" size={15} color="#7c3aed" />
+                <Text className="text-[14px] ml-1.5" style={{ color: '#7c3aed' }}>
                   {formatDate(entryDate)}
                 </Text>
-                <Ionicons name="chevron-down" size={10} color="#a78bfa" className="ml-1" />
-              </TouchableOpacity>
+                <Ionicons name="chevron-down" size={12} color="#a78bfa" className="ml-1" />
+              </Pressable>
 
               {/* Time Pill */}
-              <TouchableOpacity 
+              <Pressable 
                 onPress={() => {
                   pillPressedRef.current = true;
                   setShowTimePicker(true);
                 }}
-                hitSlop={{ top: 10, bottom: 10, left: 5, right: 5 }}
-                className="flex-row items-center rounded-full px-2.5 py-1 mr-2"
+                className="flex-row items-center rounded-full px-3 py-1.5 mr-2"
                 style={{ backgroundColor: '#ede9fe' }}
               >
-                <Ionicons name="time-outline" size={12} color="#7c3aed" />
-                <Text className="text-[11px] ml-1.5" style={{ color: '#7c3aed' }}>
+                <Ionicons name="time-outline" size={15} color="#7c3aed" />
+                <Text className="text-[14px] ml-1.5" style={{ color: '#7c3aed' }}>
                   {formatTime(entryDate)}
                 </Text>
-                <Ionicons name="chevron-down" size={10} color="#a78bfa" className="ml-1" />
-              </TouchableOpacity>
+                <Ionicons name="chevron-down" size={12} color="#a78bfa" className="ml-1" />
+              </Pressable>
 
               {/* Weather Pill */}
-              <View className="flex-row items-center rounded-full px-2.5 py-1 mr-2"
+              <View className="flex-row items-center rounded-full px-3 py-1.5 mr-2"
                 style={{ backgroundColor: '#fdf4ff' }}
               >
                 <PillItem 
                   icon={
                     weatherLoading ? (
-                      <Ionicons name="cloudy-outline" size={12} color="#d946ef" />
+                      <Ionicons name="cloudy-outline" size={15} color="#d946ef" />
                     ) : weatherError ? (
-                      <Ionicons name="cloud-offline-outline" size={12} color="#ef4444" />
+                      <Ionicons name="cloud-offline-outline" size={15} color="#ef4444" />
                     ) : (
-                      <Ionicons name="sunny-outline" size={12} color="#f59e0b" />
+                      <Ionicons name="sunny-outline" size={15} color="#f59e0b" />
                     )
                   }
                   isError={weatherError}
@@ -473,17 +476,17 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               </View>
 
               {/* Location Pill */}
-              <View className="flex-row items-center rounded-full px-2.5 py-1 mr-2"
+              <View className="flex-row items-center rounded-full px-3 py-1.5 mr-2"
                 style={{ backgroundColor: '#fef3c7' }}
               >
                 <PillItem 
                   icon={
                     locationLoading ? (
-                      <Ionicons name="location-outline" size={12} color="#d97706" />
+                      <Ionicons name="location-outline" size={15} color="#d97706" />
                     ) : locationError ? (
-                      <Ionicons name="location-outline" size={12} color="#ef4444" />
+                      <Ionicons name="location-outline" size={15} color="#ef4444" />
                     ) : (
-                      <Ionicons name="location-outline" size={12} color="#d97706" />
+                      <Ionicons name="location-outline" size={15} color="#d97706" />
                     )
                   }
                   isError={locationError}
@@ -494,19 +497,19 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               </View>
 
               {/* Photo Pill */}
-              <TouchableOpacity 
+              <Pressable 
                 onPress={pickImage}
-                className="flex-row items-center rounded-full px-2.5 py-1"
+                className="flex-row items-center rounded-full px-3 py-1.5"
                 style={{ backgroundColor: '#e0f2fe' }}
               >
-                <Ionicons name="image" size={12} color="#0284c7" />
-                <Text className="text-[11px] ml-1.5" style={{ color: '#0284c7' }}>Photo</Text>
-              </TouchableOpacity>
+                <Ionicons name="image" size={15} color="#0284c7" />
+                <Text className="text-[14px] ml-1.5" style={{ color: '#0284c7' }}>Photo</Text>
+              </Pressable>
             </ScrollView>
           )}
 
           {/* Input Row */}
-          <View className={`flex-row items-center px-4 ${showMetadata ? 'pt-2' : ''}`}>
+          <View className={`flex-row items-center px-4 ${showMetadata ? 'pt-3' : ''}`}>
             {/* Images preview */}
             {images.length > 0 && (
               <View className="flex-row mr-2">
