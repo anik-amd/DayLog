@@ -198,13 +198,13 @@ export default function EntriesScreen({ navigation }: any) {
             {filteredEntries.length === 0 ? (
               <View className="mt-40 items-center opacity-60">
                 <Ionicons name="journal-outline" size={48} color="#d4d4d4" />
-                <Text className="text-neutral-400 dark:text-zinc-500 text-lg font-medium mt-4">No entries for this day.</Text>
+                <Text style={{ fontFamily: 'Outfit-Regular' }} className="text-neutral-400 dark:text-zinc-500 text-lg mt-4">No entries for this day.</Text>
               </View>
             ) : (
               sortedDates.map((dateStr) => (
                 <View key={dateStr} className="mb-4">
                   {/* Date Header */}
-                  <Text className="text-neutral-500 dark:text-neutral-400 text-[12px] font-semibold uppercase tracking-wider mb-2 px-1">
+                  <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-neutral-500 dark:text-neutral-400 text-[12px] uppercase tracking-wider mb-2 px-1">
                     {formatDateHeader(dateStr)}
                   </Text>
                   
@@ -230,7 +230,7 @@ export default function EntriesScreen({ navigation }: any) {
             className="pt-12 pb-3 px-6 bg-neutral-100/95 dark:bg-neutral-950/95 border-b border-neutral-200/50 dark:border-neutral-800/50"
         >
             <View className="flex-row items-center justify-between">
-                <Text className="text-neutral-900 dark:text-neutral-50 text-[24px] font-black tracking-tighter">DayLog</Text>
+                <Text style={{ fontFamily: 'Outfit-Black' }} className="text-neutral-900 dark:text-neutral-50 text-[24px] tracking-tighter">DayLog</Text>
                 <TouchableOpacity 
                     onPress={() => navigation.navigate('Settings')}
                     className="bg-white/80 dark:bg-neutral-900 w-9 h-9 rounded-full items-center justify-center border border-neutral-200 dark:border-neutral-800 shadow-sm"

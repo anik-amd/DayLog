@@ -254,13 +254,13 @@ export default function FullScreenEditor({ route, navigation }: any) {
                     onPress={() => setIsEditing(true)}
                     className={`px-5 py-1.5 rounded-full ${isEditing ? 'bg-white dark:bg-neutral-800 shadow-sm' : ''}`}
                 >
-                    <Text className={`text-[10px] font-black uppercase tracking-widest ${isEditing ? 'text-neutral-900 dark:text-neutral-50' : 'text-neutral-400'}`}>Write</Text>
+                    <Text style={{ fontFamily: 'Outfit-Black' }} className={`text-[10px] uppercase tracking-widest ${isEditing ? 'text-neutral-900 dark:text-neutral-50' : 'text-neutral-400'}`}>Write</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
                     onPress={() => setIsEditing(false)}
                     className={`px-5 py-1.5 rounded-full ${!isEditing ? 'bg-white dark:bg-neutral-800 shadow-sm' : ''}`}
                 >
-                    <Text className={`text-[10px] font-black uppercase tracking-widest ${!isEditing ? 'text-neutral-900 dark:text-neutral-50' : 'text-neutral-400'}`}>Read</Text>
+                    <Text style={{ fontFamily: 'Outfit-Black' }} className={`text-[10px] uppercase tracking-widest ${!isEditing ? 'text-neutral-900 dark:text-neutral-50' : 'text-neutral-400'}`}>Read</Text>
                 </TouchableOpacity>
             </View>
 
@@ -335,7 +335,7 @@ export default function FullScreenEditor({ route, navigation }: any) {
                             {locationLoading ? (
                                 <Ionicons name="location-outline" size={15} color="#d97706" />
                             ) : (hasLocationPermission === false && !location) ? (
-                                <Ionicons name="location-off-outline" size={15} color="#d97706" />
+                                <Ionicons name="location-outline" size={15} color="#ef4444" />
                             ) : (
                                 <Ionicons name="location-outline" size={15} color="#d97706" />
                             )}

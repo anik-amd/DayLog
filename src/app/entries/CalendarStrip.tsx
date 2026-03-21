@@ -91,7 +91,7 @@ export default function CalendarStrip({ selectedDate, onDateSelect, entries }: C
           onPress={() => selectedDate && onDateSelect(null)}
           className="flex-row items-center"
         >
-          <Text className="text-neutral-400 dark:text-neutral-500 text-[10px] font-black uppercase tracking-[2px]">
+          <Text style={{ fontFamily: 'Outfit-Black' }} className="text-neutral-400 dark:text-neutral-500 text-[10px] uppercase tracking-[2px]">
             {selectedDate ? 'Filtered' : expanded ? 'Full Calendar' : 'All Entries'}
           </Text>
           {selectedDate && (
@@ -153,12 +153,12 @@ export default function CalendarStrip({ selectedDate, onDateSelect, entries }: C
                     : 'bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-800/80 shadow-sm'
                 }`}
               >
-                <Text className={`text-[9px] uppercase font-black tracking-tighter mb-0.5 ${
+                <Text style={{ fontFamily: 'Outfit-Black' }} className={`text-[9px] uppercase tracking-tighter mb-0.5 ${
                   isSelected ? 'text-indigo-100' : isToday ? 'text-indigo-600 dark:text-indigo-400' : 'text-neutral-400 dark:text-neutral-500'
                 }`}>
                   {date.dayName}
                 </Text>
-                <Text className={`text-[16px] font-black ${
+                <Text style={{ fontFamily: 'Outfit-Black' }} className={`text-[16px] ${
                   isSelected ? 'text-white' : isToday ? 'text-neutral-900 dark:text-white' : 'text-neutral-800 dark:text-neutral-200'
                 }`}>
                   {date.dayNum}

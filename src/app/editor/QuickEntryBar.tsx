@@ -392,7 +392,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
 
   const shouldShowIcons = isFocused || content.trim().length > 0;
 
-  const PillItem = ({ icon, children, onPress, isError, isLoading, color = 'text-pink-600 dark:text-pink-400' }: { 
+  const PillItem = ({ icon, children, onPress, isError, isLoading, color = '#db2777' }: { 
     icon: React.ReactNode; 
     children: React.ReactNode; 
     onPress?: () => void;
@@ -402,7 +402,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   }) => (
     <View className="flex-row items-center">
       {icon}
-      <Text className={`text-[14px] ml-1.5 ${isError ? 'text-red-500' : color}`}>
+      <Text style={{ fontFamily: 'Outfit-Medium', color: isError ? '#ef4444' : color }} className="text-[14px] ml-1.5">
         {children}
       </Text>
     </View>
@@ -517,7 +517,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                     locationLoading ? (
                       <Ionicons name="location-outline" size={15} color="#d97706" />
                     ) : (hasLocationPermission === false && !location) ? (
-                      <Ionicons name="location-off-outline" size={15} color="#d97706" />
+                      <Ionicons name="location-outline" size={15} color="#ef4444" />
                     ) : (
                       <Ionicons name="location-outline" size={15} color="#d97706" />
                     )
@@ -536,7 +536,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                 style={{ backgroundColor: '#e0f2fe' }}
               >
                 <Ionicons name="image" size={15} color="#0284c7" />
-                <Text className="text-[14px] ml-1.5" style={{ color: '#0284c7' }}>Photo</Text>
+                <Text style={{ fontFamily: 'Outfit-Medium', color: '#0284c7' }} className="text-[14px] ml-1.5">Photo</Text>
               </Pressable>
             </ScrollView>
           )}

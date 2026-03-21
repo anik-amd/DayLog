@@ -53,7 +53,7 @@ export default function ReadEntryScreen({ route, navigation }: any) {
 
   if (!entry) return (
     <View className="flex-1 bg-white dark:bg-neutral-950 items-center justify-center">
-      <Text className="text-neutral-500">Loading...</Text>
+      <Text style={{ fontFamily: 'Outfit-Regular' }} className="text-neutral-500">Loading...</Text>
     </View>
   );
 
