@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import EntriesScreen from '../entries/EntriesScreen';
 import SettingsScreen from '../settings/SettingsScreen';
 import FullScreenEditor from '../editor/FullScreenEditor';
+import ReadEntryScreen from '../entries/ReadEntryScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -18,6 +19,11 @@ export default function RootNavigator() {
     >
       <Stack.Screen name="Entries" component={EntriesScreen} options={{ headerShown: false }}/>
       <Stack.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />
+      <Stack.Screen 
+        name="ReadEntry" 
+        component={ReadEntryScreen} 
+        options={{ headerShown: false, presentation: 'fullScreenModal' }}
+      />
       <Stack.Screen 
         name="FullScreenEditor" 
         component={FullScreenEditor} 

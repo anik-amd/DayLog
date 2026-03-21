@@ -91,7 +91,7 @@ function EntryCardComponent({ entry, showBorder = false }: EntryCardProps) {
     <TouchableWithoutFeedback
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      onPress={() => navigation.navigate('FullScreenEditor', { entryId: entry.id, initialContent: entry.content, viewMode: true })}
+      onPress={() => navigation.navigate('ReadEntry', { entryId: entry.id })}
     >
       <Animated.View style={{ opacity: opacityAnim, transform: [{ scale: scaleAnim }] }}>
         <View className={`px-5 py-4 ${showBorder ? 'border-t border-neutral-100 dark:border-neutral-800' : ''}`}>
