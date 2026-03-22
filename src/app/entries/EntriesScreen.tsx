@@ -248,7 +248,7 @@ export default function EntriesScreen({ navigation, route }: any) {
             ref={scrollViewRef as any}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ 
-                paddingTop: 180,
+                paddingTop: 220,
                 paddingBottom: 150, 
                 paddingHorizontal: 15 
             }}
