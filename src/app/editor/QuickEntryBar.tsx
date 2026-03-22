@@ -197,6 +197,16 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
         await updateEntry(currentEntryId, textToSave, now, dateStr, timeStr, location || undefined, weatherError ? undefined : weather || undefined, extractedTags || undefined);
         if (finalizeAndRefresh) onEntrySaved();
       }
+
+      if (finalizeAndRefresh) {
+        setContent('');
+        setImages([]);
+        setCurrentEntryId(null);
+        setEntryDate(new Date());
+        setIsFocused(false);
+        hasScrolledRef.current = false;
+        inputRef.current?.blur();
+      }
     } finally {
       isSaving.current = false;
     }
@@ -232,13 +242,6 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
     
     try {
       await handleSave(content, true, true);
-      setContent('');
-      setImages([]);
-      setCurrentEntryId(null);
-      setEntryDate(new Date());
-      setIsFocused(false);
-      hasScrolledRef.current = false;
-      inputRef.current?.blur();
     } catch (error) {
       console.error('Failed to save entry:', error);
     }
