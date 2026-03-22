@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text, ActivityIndicator, KeyboardAvoidingView, Platform, LayoutAnimation, UIManager, TouchableOpacity, Animated, ScrollView, Keyboard } from 'react-native';
 import { useFocusEffect, useRoute } from '@react-navigation/native';
 import { useColorScheme } from "nativewind";
@@ -17,6 +18,7 @@ import Picker from '../editor/Picker';
 
 export default function EntriesScreen({ navigation, route }: any) {
   const { colorScheme } = useColorScheme();
+  const insets = useSafeAreaInsets();
   const routeParams = route.params || {};
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,10 +35,14 @@ export default function EntriesScreen({ navigation, route }: any) {
   const calendarRef = useRef<CalendarStripRef>(null);
   const datePositionsRef = useRef<{ [date: string]: number }>({});
   const scrollViewRef = useRef<ScrollView>(null);
-  const uiPosition = useRef(new Animated.Value(0)).current; 
+  const uiPosition = useRef(new Animated.Value(0)).current;
+  const headerPosition = useRef(new Animated.Value(0)).current;
+  const calendarTranslate = useRef(new Animated.Value(0)).current;
   const footerHeight = 120;
   const highlightedDateRef = useRef(highlightedDate);
   const allSortedDatesRef = useRef<string[]>([]);
+  const lastScrollY = useRef(0);
+  const headerVisible = useRef(true);
 
   useEffect(() => {
     highlightedDateRef.current = highlightedDate;
@@ -78,6 +84,8 @@ export default function EntriesScreen({ navigation, route }: any) {
 
   const handleScroll = (event: any) => {
     const currentY = event.nativeEvent.contentOffset.y;
+    const delta = currentY - lastScrollY.current;
+
     const positions = datePositionsRef.current;
     const dates = allSortedDatesRef.current;
 
@@ -96,6 +104,42 @@ export default function EntriesScreen({ navigation, route }: any) {
       setHighlightedDate(visibleDate);
       calendarRef.current?.scrollToDate(visibleDate);
     }
+
+    if (delta > 8 && headerVisible.current) {
+      headerVisible.current = false;
+      Animated.parallel([
+        Animated.spring(headerPosition, {
+          toValue: -88,
+          useNativeDriver: true,
+          speed: 40,
+          bounciness: 0,
+        }),
+        Animated.spring(calendarTranslate, {
+          toValue: -68,
+          useNativeDriver: true,
+          speed: 40,
+          bounciness: 0,
+        }),
+      ]).start();
+    } else if (delta < -8 && !headerVisible.current) {
+      headerVisible.current = true;
+      Animated.parallel([
+        Animated.spring(headerPosition, {
+          toValue: 0,
+          useNativeDriver: true,
+          speed: 30,
+          bounciness: 4,
+        }),
+        Animated.spring(calendarTranslate, {
+          toValue: 0,
+          useNativeDriver: true,
+          speed: 30,
+          bounciness: 4,
+        }),
+      ]).start();
+    }
+
+    lastScrollY.current = currentY;
   };
 
   const footerTranslate = uiPosition.interpolate({
@@ -329,7 +373,7 @@ export default function EntriesScreen({ navigation, route }: any) {
         )}
 
         {/* FIXED Top Logo Bar (Pinned to top) */}
-        <View 
+        <Animated.View
             style={{ 
                 position: 'absolute', 
                 top: 0, 
@@ -344,6 +388,7 @@ export default function EntriesScreen({ navigation, route }: any) {
                 shadowOpacity: colorScheme === 'dark' ? 0.3 : 0.08,
                 shadowRadius: 3,
                 elevation: 2,
+                transform: [{ translateY: headerPosition }],
             }}
         >
             <View className="flex-1 flex-row items-center justify-between">
@@ -364,15 +409,15 @@ export default function EntriesScreen({ navigation, route }: any) {
                     <Ionicons name="settings-outline" size={16} color="#737373" />
                 </TouchableOpacity>
             </View>
-        </View>
+        </Animated.View>
 
         {/* FIXED Top Section: Calendar (Solid Floating Card) */}
-        <View 
+        <Animated.View 
             style={{ 
                 position: 'absolute', 
-                top: 78, 
-                left: 15, 
-                right: 15, 
+                top: 78,
+                left: 15,
+                right: 15,
                 zIndex: 30,
                 borderRadius: 16,
                 overflow: 'hidden',
@@ -381,6 +426,7 @@ export default function EntriesScreen({ navigation, route }: any) {
                 shadowOpacity: 0.12,
                 shadowRadius: 12,
                 elevation: 4,
+                transform: [{ translateY: calendarTranslate }],
             }}
         >
             <View 
@@ -416,7 +462,7 @@ export default function EntriesScreen({ navigation, route }: any) {
                     />
                 </View>
             </View>
-        </View>
+        </Animated.View>
 
         {/* HIDABLE Bottom Section: Quick Entry Bar (Solid Floating Card) */}
         <Animated.View 
