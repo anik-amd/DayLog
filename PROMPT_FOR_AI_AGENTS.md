@@ -159,6 +159,49 @@ The agent must:
 
 ---
 
+## Coding Rules & Testing Strategy (Strict Instructions for Agents)
+
+### Coding Rules
+
+* Write **small and safe code**, not large rewrites.
+* Modify only the **minimum required part** of the code.
+* Never refactor unrelated files while adding a feature.
+* One feature per response. Do not implement multiple features at once.
+* Keep files under **250 lines** whenever possible.
+* UI must not contain business logic. Business logic must stay in separate files.
+* Each function must do **one clear task only**.
+* Do not change variable names, database structure, or existing logic unless necessary.
+* Always assume the code will be modified later, so keep it simple and readable.
+* Stability is more important than speed.
+
+---
+
+### Testing Strategy
+
+* Do **not write tests for everything**.
+
+* Write tests only when:
+
+  1. A bug is found and fixed (always write a test after fixing a bug).
+  2. A core feature becomes stable (database, auto-save, media, entry logic).
+  3. The feature involves **data safety** (saving, editing, deleting entries).
+
+* Do NOT write tests for:
+
+  * UI
+  * styling
+  * layout
+  * small components
+  * experimental features
+
+* Testing must be added **in phases**, not all at once.
+
+* Prefer **small and focused tests** (5–10 important tests are enough).
+
+* The goal of testing is to **prevent data loss and recurring bugs**, not to reach 100% coverage.
+
+---
+
 # 9. Performance Rules
 
 The agent must:
