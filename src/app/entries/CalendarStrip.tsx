@@ -188,7 +188,7 @@ const CalendarStrip = forwardRef<CalendarStripRef, CalendarStripProps>(
     };
 
     return (
-      <View className="overflow-hidden">
+      <View>
         <View className="flex-row items-center justify-between px-0 pt-0 pb-2">
           <TouchableOpacity
             onPress={() => selectedDate && onDateSelect(null)}
@@ -207,8 +207,10 @@ const CalendarStrip = forwardRef<CalendarStripRef, CalendarStripProps>(
         </View>
 
         {expanded ? (
-          <View className="px-0 pb-2">
+          <View className="pb-2">
             <Calendar
+              // Disabled: swipe requires React Navigation context, causes "Couldn't find a navigation context" error on Android
+              enableSwipeMonths={false}
               theme={{
                 backgroundColor: 'transparent',
                 calendarBackground: 'transparent',
