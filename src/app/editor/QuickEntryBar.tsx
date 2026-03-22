@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { View, TextInput as RNTextInput, TouchableOpacity, Pressable, Platform, UIManager, Image, Text, StyleSheet, ScrollView } from 'react-native';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useColorScheme } from "nativewind";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Picker from './Picker';
@@ -37,9 +36,6 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   const [content, setContent] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [currentEntryId, setCurrentEntryId] = useState<string | null>(null);
-  const [isFocused, setIsFocused] = useState(false);
-  const [showMetadata, setShowMetadata] = useState(false);
-  const pillPressedRef = useRef(false);
   
   // Tags state
   const [tags, setTags] = useState('');
@@ -69,7 +65,6 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   
   const isSaving = useRef(false);
   const navigation = useNavigation<any>();
-  const hasScrolledRef = useRef(false);
 
   useEffect(() => {
     // Check permission silently on mount
@@ -81,14 +76,6 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
       }
     })();
   }, []);
-
-  useEffect(() => {
-    if (content.trim().length > 0 || (isFocused && !hasScrolledRef.current) || pillPressedRef.current) {
-      setShowMetadata(true);
-    } else if (!pillPressedRef.current) {
-      setShowMetadata(false);
-    }
-  }, [isFocused, content]);
 
   // Real-time tag extraction
   useEffect(() => {
@@ -157,7 +144,6 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   };
 
   const handleLocationPress = () => {
-    pillPressedRef.current = true;
     fetchLocationAndWeather(false);
   };
 
@@ -203,8 +189,6 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
         setImages([]);
         setCurrentEntryId(null);
         setEntryDate(new Date());
-        setIsFocused(false);
-        hasScrolledRef.current = false;
         inputRef.current?.blur();
       }
     } finally {
@@ -219,22 +203,6 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
     if (text === '') {
       setCurrentEntryId(null);
     }
-  };
-
-  const handleFocus = () => {
-    setIsFocused(true);
-    onFocusChange?.(true);
-  };
-
-  const handleBlur = () => {
-    // Delay hiding to allow for interaction with metadata or pickers
-    setTimeout(() => {
-      if (!content.trim() && !pillPressedRef.current) {
-        setIsFocused(false);
-        onFocusChange?.(false);
-        hasScrolledRef.current = false;
-      }
-    }, 500);
   };
 
   const handleSubmit = async () => {
@@ -393,8 +361,6 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
     return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
   };
 
-  const shouldShowIcons = isFocused || content.trim().length > 0;
-
   const PillItem = ({ icon, children, onPress, isError, isLoading, color = '#db2777' }: { 
     icon: React.ReactNode; 
     children: React.ReactNode; 
@@ -412,9 +378,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   );
 
   const handleCardPress = () => {
-    if (!isFocused) {
-      inputRef.current?.focus();
-    }
+    inputRef.current?.focus();
   };
 
   return (
@@ -422,25 +386,22 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
         key={colorScheme}
         className="px-4 pt-3"
       >
-        {/* Single Card - clickable when not focused */}
         <TouchableOpacity 
-          activeOpacity={isFocused ? 1 : 0.7}
-          onPress={!isFocused ? handleCardPress : undefined}
+          activeOpacity={0.7}
+          onPress={handleCardPress}
           className="rounded-2xl overflow-hidden"
           style={{
             backgroundColor: colorScheme === 'dark' ? '#1e1b4b' : '#ffffff',
             paddingVertical: 8,
           }}
         >
-          {/* Pills Row */}
-          {showMetadata && (
-          <Animated.View entering={FadeIn.duration(80)} exiting={FadeOut.duration(60)}>
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              style={{ height: 36, paddingTop: 2 }}
-              contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 8, paddingRight: 16, flexWrap: 'nowrap' }}
-              scrollEventThrottle={16}
+          {/* Pills Row - always visible */}
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            style={{ height: 36, paddingTop: 2 }}
+            contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 8, paddingRight: 16, flexWrap: 'nowrap' }}
+            scrollEventThrottle={16}
               keyboardShouldPersistTaps="handled"
               nestedScrollEnabled={true}
               canCancelContentTouches={true}
@@ -460,7 +421,6 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               {/* Date Pill */}
               <Pressable 
                 onPress={() => {
-                  pillPressedRef.current = true;
                   setShowDatePicker(true);
                 }}
                 className="flex-row items-center rounded-full px-3 py-1.5 mr-2"
@@ -476,7 +436,6 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               {/* Time Pill */}
               <Pressable 
                 onPress={() => {
-                  pillPressedRef.current = true;
                   setShowTimePicker(true);
                 }}
                 className="flex-row items-center rounded-full px-3 py-1.5 mr-2"
@@ -543,11 +502,9 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                 <Text style={{ fontFamily: 'Outfit-Medium', color: '#0284c7' }} className="text-[14px] ml-1.5">Photo</Text>
               </Pressable>
             </ScrollView>
-          </Animated.View>
-          )}
 
           {/* Input Row */}
-          <View className={`px-4 ${showMetadata ? 'pt-3' : ''}`}>
+          <View className="px-4 pt-3">
             {/* Images + Input Row */}
             <View className="flex-row items-end">
               {/* Images preview */}
@@ -567,16 +524,14 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                 className="flex-1 p-0"
                 style={{ 
                   color: colorScheme === 'dark' ? '#e4e4e7' : '#27272a',
-                  fontSize: showMetadata ? 15 : 13,
-                  lineHeight: showMetadata ? 22 : 18,
+                  fontSize: 15,
+                  lineHeight: 22,
                   fontFamily: 'Outfit-Regular',
                   backgroundColor: 'transparent',
                 }}
                 multiline={true}
                 value={content}
                 onChangeText={onChangeText}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
                 blurOnSubmit={false}
                 textAlignVertical="top"
                 underlineColorAndroid="transparent"
@@ -586,35 +541,23 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
             {/* Icons row - always at bottom of the input area */}
             <View className="flex-row justify-end mt-1 pb-0.5">
               {/* Expand icon */}
-              {shouldShowIcons && (
-                <Animated.View
-                  entering={FadeIn.duration(120)}
-                  exiting={FadeOut.duration(100)}
-                >
-                  <TouchableOpacity 
-                      onPress={handleExpand}
-                      className="p-1.5 rounded-full"
-                      style={{ backgroundColor: '#ede9fe' }}
-                  >
-                      <Ionicons name="expand-outline" size={14} color="#7c3aed" />
-                  </TouchableOpacity>
-                </Animated.View>
-              )}
+              <TouchableOpacity 
+                  onPress={handleExpand}
+                  className="p-1.5 rounded-full"
+                  style={{ backgroundColor: '#ede9fe' }}
+              >
+                  <Ionicons name="expand-outline" size={14} color="#7c3aed" />
+              </TouchableOpacity>
 
               {/* Submit icon */}
               {content.trim().length > 0 && (
-                <Animated.View
-                  entering={FadeIn.duration(120)}
-                  exiting={FadeOut.duration(100)}
+                <TouchableOpacity 
+                    onPress={handleSubmit}
+                    className="ml-2 p-2 rounded-full"
+                    style={{ backgroundColor: '#818cf8' }}
                 >
-                  <TouchableOpacity 
-                      onPress={handleSubmit}
-                      className="ml-2 p-2 rounded-full"
-                      style={{ backgroundColor: '#818cf8' }}
-                  >
-                      <Ionicons name="checkmark" size={16} color="white" />
-                  </TouchableOpacity>
-                </Animated.View>
+                    <Ionicons name="checkmark" size={16} color="white" />
+                </TouchableOpacity>
               )}
             </View>
           </View>
@@ -644,13 +587,11 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
             value={entryDate}
             onClose={() => {
               setShowDatePicker(false);
-              pillPressedRef.current = false;
               setTimeout(() => inputRef.current?.focus(), 100);
             }}
             onSelect={(date) => {
               handleDateChange({ type: 'set' }, date);
               setShowDatePicker(false);
-              pillPressedRef.current = false;
               setTimeout(() => inputRef.current?.focus(), 100);
             }}
           />
@@ -676,13 +617,11 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
             value={entryDate}
             onClose={() => {
               setShowTimePicker(false);
-              pillPressedRef.current = false;
               setTimeout(() => inputRef.current?.focus(), 100);
             }}
             onSelect={(date) => {
               handleTimeChange({ type: 'set' }, date);
               setShowTimePicker(false);
-              pillPressedRef.current = false;
               setTimeout(() => inputRef.current?.focus(), 100);
             }}
           />
