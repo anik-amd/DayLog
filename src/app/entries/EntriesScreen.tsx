@@ -181,7 +181,7 @@ export default function EntriesScreen({ navigation, route }: any) {
         
         if (currentEntries.length === 0) {
           const testEntry: Omit<Entry, 'media'> = {
-            id: Date.now().toString(),
+            id: `test-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
             content: "Welcome to DayLog! This is your first test entry, created automatically.",
             createdAt: Date.now(),
             updatedAt: Date.now(),

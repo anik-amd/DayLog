@@ -176,7 +176,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
       
       if (!currentEntryId) {
         console.log('Creating new entry...');
-        const newId = now.toString();
+        const newId = `${now}-${Math.random().toString(36).substring(2, 9)}`;
         const newEntry: Omit<Entry, 'media'> = {
           id: newId,
           content: textToSave,
@@ -247,7 +247,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   const handleExpand = async () => {
     if (!currentEntryId && content.trim()) {
         const now = entryDate.getTime();
-        const newId = now.toString();
+        const newId = `${now}-${Math.random().toString(36).substring(2, 9)}`;
         const currentTags = extractTags(content);
         const newEntry: Omit<Entry, 'media'> = { 
           id: newId, 
@@ -311,7 +311,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
       let activeEntryId = currentEntryId;
       
       if (!activeEntryId) {
-        activeEntryId = now.toString();
+        activeEntryId = `${now}-${Math.random().toString(36).substring(2, 9)}`;
         const currentTags = extractTags(content);
         const newEntry: Omit<Entry, 'media'> = { 
           id: activeEntryId, 
@@ -326,7 +326,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
       }
       
       const newMedia = {
-        id: Date.now().toString(),
+        id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         entryId: activeEntryId,
         type: "image" as const,
         path: persistentLocalPath,
@@ -544,75 +544,81 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
           )}
 
           {/* Input Row */}
-          <View className={`flex-row items-center px-4 ${showMetadata ? 'pt-3' : ''}`}>
-            {/* Images preview */}
-            {images.length > 0 && (
-              <View className="flex-row mr-2">
-                {images.map((uri, i) => (
-                  <Image key={i} source={{ uri }} className="w-6 h-6 rounded" />
-                ))}
-              </View>
-            )}
+          <View className={`px-4 ${showMetadata ? 'pt-3' : ''}`}>
+            {/* Images + Input Row */}
+            <View className="flex-row items-end">
+              {/* Images preview */}
+              {images.length > 0 && (
+                <View className="flex-row mr-2 mb-0.5">
+                  {images.map((uri, i) => (
+                    <Image key={i} source={{ uri }} className="w-6 h-6 rounded" />
+                  ))}
+                </View>
+              )}
 
-            {/* Text input */}
-            <RNTextInput
-              ref={inputRef}
-              placeholder="What's on your mind?"
-              placeholderTextColor={colorScheme === 'dark' ? '#a78bfa' : '#a1a1aa'}
-              className="flex-1 p-0"
-              style={{ 
-                color: colorScheme === 'dark' ? '#e4e4e7' : '#27272a',
-                fontSize: showMetadata ? 15 : 13,
-                lineHeight: showMetadata ? 22 : 18,
-                fontFamily: 'Outfit-Regular',
-                backgroundColor: 'transparent',
-              }}
-              multiline={true}
-              value={content}
-              onChangeText={onChangeText}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
-              blurOnSubmit={false}
-              textAlignVertical="center"
-              underlineColorAndroid="transparent"
-            />
+              {/* Text input */}
+              <RNTextInput
+                ref={inputRef}
+                placeholder="What's on your mind?"
+                placeholderTextColor={colorScheme === 'dark' ? '#a78bfa' : '#a1a1aa'}
+                className="flex-1 p-0"
+                style={{ 
+                  color: colorScheme === 'dark' ? '#e4e4e7' : '#27272a',
+                  fontSize: showMetadata ? 15 : 13,
+                  lineHeight: showMetadata ? 22 : 18,
+                  fontFamily: 'Outfit-Regular',
+                  backgroundColor: 'transparent',
+                }}
+                multiline={true}
+                value={content}
+                onChangeText={onChangeText}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                blurOnSubmit={false}
+                textAlignVertical="top"
+                underlineColorAndroid="transparent"
+              />
+            </View>
 
-            {/* Expand icon */}
-            {shouldShowIcons && (
-              <Animated.View
-                entering={FadeIn.springify().damping(15).stiffness(120)}
-                exiting={FadeOut.springify().duration(150)}
-              >
-                <TouchableOpacity 
-                    onPress={handleExpand}
-                    className="p-1.5 ml-2 rounded-full"
-                    style={{ backgroundColor: '#ede9fe' }}
+            {/* Icons row - always at bottom of the input area */}
+            <View className="flex-row justify-end mt-1 pb-0.5">
+              {/* Expand icon */}
+              {shouldShowIcons && (
+                <Animated.View
+                  entering={FadeIn.springify().damping(15).stiffness(120)}
+                  exiting={FadeOut.springify().duration(150)}
                 >
-                    <Ionicons name="expand-outline" size={14} color="#7c3aed" />
-                </TouchableOpacity>
-              </Animated.View>
-            )}
+                  <TouchableOpacity 
+                      onPress={handleExpand}
+                      className="p-1.5 rounded-full"
+                      style={{ backgroundColor: '#ede9fe' }}
+                  >
+                      <Ionicons name="expand-outline" size={14} color="#7c3aed" />
+                  </TouchableOpacity>
+                </Animated.View>
+              )}
 
-            {/* Submit icon */}
-            {content.trim().length > 0 && (
-              <Animated.View
-                entering={FadeIn.springify().damping(15).stiffness(120)}
-                exiting={FadeOut.springify().duration(150)}
-              >
-                <TouchableOpacity 
-                    onPress={handleSubmit}
-                    className="ml-2 p-2 rounded-full"
-                    style={{ backgroundColor: '#818cf8' }}
+              {/* Submit icon */}
+              {content.trim().length > 0 && (
+                <Animated.View
+                  entering={FadeIn.springify().damping(15).stiffness(120)}
+                  exiting={FadeOut.springify().duration(150)}
                 >
-                    <Ionicons name="checkmark" size={16} color="white" />
-                </TouchableOpacity>
-              </Animated.View>
-            )}
+                  <TouchableOpacity 
+                      onPress={handleSubmit}
+                      className="ml-2 p-2 rounded-full"
+                      style={{ backgroundColor: '#818cf8' }}
+                  >
+                      <Ionicons name="checkmark" size={16} color="white" />
+                  </TouchableOpacity>
+                </Animated.View>
+              )}
+            </View>
           </View>
         </TouchableOpacity>
 
         {/* Bottom padding */}
-      <View className="h-1" />
+        <View className="h-1" />
 
       {/* Native Date/Time Pickers - iOS uses native, Android uses custom picker */}
       {showDatePicker && (

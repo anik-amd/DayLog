@@ -197,7 +197,7 @@ export default function FullScreenEditor({ route, navigation }: any) {
       const persistentPath = await moveMediaToLocal(selectedImage);
       
       const newMedia = {
-        id: Date.now().toString(),
+        id: `media-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         entryId: entryId,
         type: "image" as const,
         path: persistentPath,
