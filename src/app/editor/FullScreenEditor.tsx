@@ -8,7 +8,7 @@ import * as FileSystem from 'expo-file-system';
 import * as Location from 'expo-location';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Picker from './Picker';
-import { getEntry, updateEntry } from '../../database/entries';
+import { getEntry, updateEntry, createEntry } from '../../database/entries';
 import { addMediaToEntry, deleteMedia } from '../../database/media';
 import { useAutoSave } from '../../hooks/useAutoSave';
 import MarkdownRenderer from '../../markdown/MarkdownRenderer';
@@ -144,19 +144,40 @@ export default function FullScreenEditor({ route, navigation }: any) {
   };
 
   const handleSave = useCallback(async (textToSave: string, currentMetadata: { date: string, time: string, location: string, weather: string, tags: string }) => {
-    if (isSaving.current || !entryId) return;
+    if (isSaving.current) return;
+    if (!textToSave.trim()) return;
+    
     isSaving.current = true;
     try {
-      await updateEntry(
-        entryId, 
-        textToSave, 
-        Date.now(), 
-        currentMetadata.date, 
-        currentMetadata.time, 
-        currentMetadata.location, 
-        currentMetadata.weather,
-        currentMetadata.tags
-      );
+      if (!entryId) {
+        // Create new entry
+        const newId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+        const now = Date.now();
+        const newEntry: Omit<Entry, 'media'> = {
+          id: newId,
+          content: textToSave,
+          createdAt: now,
+          updatedAt: now,
+          date: currentMetadata.date || new Date().toISOString().split('T')[0],
+          time: currentMetadata.time || '',
+          location: currentMetadata.location || undefined,
+          weather: currentMetadata.weather || undefined,
+          tags: currentMetadata.tags || undefined
+        };
+        await createEntry(newEntry);
+      } else {
+        // Update existing entry
+        await updateEntry(
+          entryId, 
+          textToSave, 
+          Date.now(), 
+          currentMetadata.date, 
+          currentMetadata.time, 
+          currentMetadata.location, 
+          currentMetadata.weather,
+          currentMetadata.tags
+        );
+      }
     } finally {
       isSaving.current = false;
     }
