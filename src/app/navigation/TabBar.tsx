@@ -38,7 +38,7 @@ export default function TabBar({ state, descriptors, navigation }: BottomTabBarP
         shadowOpacity: isDark ? 0.3 : 0.1,
         shadowRadius: 8,
         elevation: 8,
-        zIndex: 100,
+        zIndex: 50,
         flexDirection: 'row',
       }}
     >

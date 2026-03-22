@@ -374,6 +374,8 @@ export default function EntriesScreen({ navigation, route }: any) {
                 left: 15, 
                 right: 15, 
                 zIndex: 30,
+                borderRadius: 16,
+                overflow: 'hidden',
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.12,
@@ -421,10 +423,10 @@ export default function EntriesScreen({ navigation, route }: any) {
             key={colorScheme}
             style={{ 
                 position: 'absolute', 
-                bottom: 30,
+                bottom: 90,
                 left: 16, 
                 right: 16, 
-                zIndex: 10,
+                zIndex: 999,
                 transform: [{ translateY: footerTranslate }],
                 opacity: uiOpacity
             }}
