@@ -169,7 +169,7 @@ export default function ReadEntryScreen({ route, navigation }: any) {
 
         {/* Content */}
         <View className="pb-32">
-          <MarkdownRenderer content={entry.content} />
+          <MarkdownRenderer content={entry.content} onTagPress={handleTagPress} />
         </View>
       </ScrollView>
 

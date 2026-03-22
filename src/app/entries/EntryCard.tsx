@@ -12,6 +12,22 @@ interface EntryCardProps {
   onTagPress?: (tag: string) => void;
 }
 
+function renderTags(text: string, isDark: boolean) {
+  if (!text) return null;
+  const textColor = isDark ? '#d4d4d8' : '#52525b';
+  const tagColor = isDark ? '#4ade80' : '#16a34a';
+
+  const tagPattern = /(#\w+)/g;
+  const parts = text.split(tagPattern);
+
+  return parts.map((part, i) => {
+    if (part.match(tagPattern)) {
+      return <Text key={i} style={[{ fontFamily: 'Outfit-Medium', color: tagColor }]}>{part}</Text>;
+    }
+    return <Text key={i} style={[localStyles.content, { color: textColor }]}>{part}</Text>;
+  });
+}
+
 const stripMarkdown = (text: string) => {
   if (!text) return '';
   return text
@@ -110,11 +126,10 @@ function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCard
             </Text>
             <View className="flex-1">
               <Text 
-                style={[localStyles.content, { color: colorScheme === 'dark' ? '#d4d4d8' : '#52525b' }]}
                 numberOfLines={3}
                 ellipsizeMode="tail"
               >
-                {plainTextPreview}
+                {renderTags(plainTextPreview, colorScheme === 'dark')}
               </Text>
 
               {/* Tags */}
