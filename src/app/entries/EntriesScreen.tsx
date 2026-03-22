@@ -10,6 +10,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 import { initDb } from '../../database/db';
 import { createEntry, getAllEntries } from '../../database/entries';
+import { getAllTags } from '../../database/tags';
 import { Entry } from '../../types/Entry';
 import EntryCard from './EntryCard';
 import CalendarStrip, { CalendarStripRef } from './CalendarStrip';
@@ -24,6 +25,7 @@ export default function EntriesScreen({ navigation, route }: any) {
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTag, setSelectedTag] = useState<string | null>(routeParams.selectedTag || null);
+  const [tagCounts, setTagCounts] = useState<Record<string, number>>({});
   
   // Date/time picker state (managed at screen level for web)
   const [pickerDate, setPickerDate] = useState(new Date());
@@ -163,11 +165,25 @@ export default function EntriesScreen({ navigation, route }: any) {
     }
   };
 
+  const loadTagCounts = async () => {
+    try {
+      const tags = await getAllTags();
+      const counts: Record<string, number> = {};
+      for (const tag of tags) {
+        counts[tag.name] = tag.count;
+      }
+      setTagCounts(counts);
+    } catch (error) {
+      console.error("Failed to load tag counts:", error);
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
       // Whenever this screen comes into focus (e.g. returning from full screen editor), refresh the timeline!
       if (!loading) {
         fetchEntries();
+        loadTagCounts();
       }
     }, [loading])
   );
@@ -193,6 +209,7 @@ export default function EntriesScreen({ navigation, route }: any) {
         }
         
         setEntries(currentEntries);
+        await loadTagCounts();
         
         if (currentEntries.length > 0) {
           const today = new Date().toISOString().split('T')[0];
@@ -312,7 +329,7 @@ export default function EntriesScreen({ navigation, route }: any) {
                   >
                     <Ionicons name="pricetag-outline" size={14} color={colorScheme === 'dark' ? '#4ade80' : '#16a34a'} />
                     <Text style={{ fontFamily: 'Outfit-Medium', color: colorScheme === 'dark' ? '#4ade80' : '#16a34a' }} className="text-sm ml-1.5">
-                      {selectedTag}
+                      #{selectedTag} {tagCounts[selectedTag] !== undefined && `(${tagCounts[selectedTag]})`}
                     </Text>
                     <TouchableOpacity onPress={clearTagFilter} className="ml-2">
                       <Ionicons name="close-circle" size={16} color={colorScheme === 'dark' ? '#4ade80' : '#16a34a'} />
