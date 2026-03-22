@@ -121,7 +121,7 @@ export default function EntriesScreen({ navigation, route }: any) {
           bounciness: 0,
         }),
         Animated.spring(quickBarTranslate, {
-          toValue: 120,
+          toValue: 200,
           useNativeDriver: true,
           speed: 40,
           bounciness: 0,
