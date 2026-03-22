@@ -504,8 +504,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
             </ScrollView>
 
           {/* Input Row */}
-          <View className="px-4 pt-3">
-            {/* Images + Input Row */}
+          <View className="px-4 pt-3 pb-2">
             <View className="flex-row items-end">
               {/* Images preview */}
               {images.length > 0 && (
@@ -536,14 +535,11 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                 textAlignVertical="top"
                 underlineColorAndroid="transparent"
               />
-            </View>
 
-            {/* Icons row - always at bottom of the input area */}
-            <View className="flex-row justify-end mt-1 pb-0.5">
               {/* Expand icon */}
               <TouchableOpacity 
                   onPress={handleExpand}
-                  className="p-1.5 rounded-full"
+                  className="p-1.5 rounded-full ml-2 mb-0.5"
                   style={{ backgroundColor: '#ede9fe' }}
               >
                   <Ionicons name="expand-outline" size={14} color="#7c3aed" />
@@ -553,7 +549,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               {content.trim().length > 0 && (
                 <TouchableOpacity 
                     onPress={handleSubmit}
-                    className="ml-2 p-2 rounded-full"
+                    className="p-2 rounded-full ml-1 mb-0.5"
                     style={{ backgroundColor: '#818cf8' }}
                 >
                     <Ionicons name="checkmark" size={16} color="white" />
