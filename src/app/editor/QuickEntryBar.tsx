@@ -434,7 +434,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
         >
           {/* Pills Row */}
           {showMetadata && (
-          <Animated.View entering={FadeIn.springify().damping(15).stiffness(120)} exiting={FadeOut.duration(150)}>
+          <Animated.View entering={FadeIn.duration(80)} exiting={FadeOut.duration(60)}>
             <ScrollView 
               horizontal 
               showsHorizontalScrollIndicator={false}
@@ -588,8 +588,8 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               {/* Expand icon */}
               {shouldShowIcons && (
                 <Animated.View
-                  entering={FadeIn.springify().damping(15).stiffness(120)}
-                  exiting={FadeOut.springify().duration(150)}
+                  entering={FadeIn.duration(120)}
+                  exiting={FadeOut.duration(100)}
                 >
                   <TouchableOpacity 
                       onPress={handleExpand}
@@ -604,8 +604,8 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               {/* Submit icon */}
               {content.trim().length > 0 && (
                 <Animated.View
-                  entering={FadeIn.springify().damping(15).stiffness(120)}
-                  exiting={FadeOut.springify().duration(150)}
+                  entering={FadeIn.duration(120)}
+                  exiting={FadeOut.duration(100)}
                 >
                   <TouchableOpacity 
                       onPress={handleSubmit}
