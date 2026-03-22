@@ -75,7 +75,7 @@ export default function ReadEntryScreen({ route, navigation }: any) {
   });
 
   return (
-    <View className="flex-1 bg-white dark:bg-neutral-950">
+    <View className="flex-1 bg-white dark:bg-neutral-900">
       {/* Custom Header */}
       <View className="flex-row items-center justify-between px-6 pb-4 pt-12 border-b border-neutral-100 dark:border-neutral-900/40">
         <TouchableOpacity 

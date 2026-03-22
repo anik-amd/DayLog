@@ -19,7 +19,7 @@ function HomeStack() {
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: colorScheme === 'dark' ? '#09090b' : '#f5f5f4' }
+        contentStyle: { backgroundColor: colorScheme === 'dark' ? '#171717' : '#ffffff' }
       }}
     >
       <Stack.Screen name="Entries" component={EntriesScreen} />

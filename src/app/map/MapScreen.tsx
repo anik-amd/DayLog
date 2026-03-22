@@ -7,7 +7,7 @@ export default function MapScreen() {
   const { colorScheme } = useColorScheme();
 
   return (
-    <SafeAreaView className="flex-1 bg-neutral-100 dark:bg-neutral-950" style={styles.container}>
+    <SafeAreaView className="flex-1 bg-white dark:bg-neutral-900" style={styles.container}>
       <View className="flex-1 items-center justify-center">
         <Text style={{ fontFamily: 'Outfit-Regular' }} className="text-neutral-400 dark:text-neutral-500 text-base">
           Map coming soon

@@ -92,7 +92,7 @@ export default function SettingsScreen() {
   );
 
   return (
-    <View className="flex-1 bg-neutral-100 dark:bg-neutral-950">
+    <View className="flex-1 bg-white dark:bg-neutral-900">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="px-6 pt-14 pb-8 flex-row items-center">
             <TouchableOpacity 

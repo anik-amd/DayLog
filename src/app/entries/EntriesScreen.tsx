@@ -59,7 +59,7 @@ export default function EntriesScreen({ navigation, route }: any) {
     const timer = setTimeout(() => {
       const positions = datePositionsRef.current;
       const dates = allSortedDatesRef.current;
-      const viewportTop = 95;
+      const viewportTop = 78;
 
       let visibleDate: string | null = null;
       for (const date of dates) {
@@ -235,7 +235,7 @@ export default function EntriesScreen({ navigation, route }: any) {
   return (
     <KeyboardAvoidingView 
       key={colorScheme}
-      className="flex-1 bg-neutral-100 dark:bg-neutral-950"
+      className="flex-1 bg-white dark:bg-neutral-900"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
@@ -248,7 +248,7 @@ export default function EntriesScreen({ navigation, route }: any) {
             ref={scrollViewRef as any}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ 
-                paddingTop: 250,
+                paddingTop: 180,
                 paddingBottom: 150, 
                 paddingHorizontal: 15 
             }}
@@ -291,7 +291,7 @@ export default function EntriesScreen({ navigation, route }: any) {
                     const positions = datePositionsRef.current;
                     const dates = allSortedDatesRef.current;
 
-                    const viewportTop = 95;
+                    const viewportTop = 78;
                     let visibleDate: string | null = null;
                     for (const date of dates) {
                       if (positions[date] !== undefined && positions[date] < viewportTop + 250) {
@@ -330,14 +330,36 @@ export default function EntriesScreen({ navigation, route }: any) {
 
         {/* FIXED Top Logo Bar (Pinned to top) */}
         <View 
-            style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 40 }}
-            className="pt-12 pb-3 px-6 bg-neutral-100/95 dark:bg-neutral-950/95 border-b border-neutral-200/50 dark:border-neutral-800/50"
+            style={{ 
+                position: 'absolute', 
+                top: 0, 
+                left: 0, 
+                right: 0, 
+                zIndex: 40,
+                height: 72,
+                paddingHorizontal: 24,
+                backgroundColor: colorScheme === 'dark' ? '#171717' : '#fafafa',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: colorScheme === 'dark' ? 0.3 : 0.08,
+                shadowRadius: 3,
+                elevation: 2,
+            }}
         >
-            <View className="flex-row items-center justify-between">
-                <Text style={{ fontFamily: 'Outfit-Black' }} className="text-neutral-900 dark:text-neutral-50 text-[24px] tracking-tighter">DayLog</Text>
+            <View className="flex-1 flex-row items-center justify-between">
+                <Text style={{ fontFamily: 'Outfit-Black' }} className="text-neutral-900 dark:text-neutral-50 text-[22px] tracking-tighter">DayLog</Text>
                 <TouchableOpacity 
                     onPress={() => navigation.navigate('Settings')}
-                    className="bg-white/80 dark:bg-neutral-900 w-9 h-9 rounded-full items-center justify-center border border-neutral-200 dark:border-neutral-800 shadow-sm"
+                    style={{
+                        backgroundColor: colorScheme === 'dark' ? '#262626' : '#ffffff',
+                        width: 32,
+                        height: 32,
+                        borderRadius: 999,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderWidth: 1,
+                        borderColor: colorScheme === 'dark' ? '#404040' : '#e5e5e5',
+                    }}
                 >
                     <Ionicons name="settings-outline" size={16} color="#737373" />
                 </TouchableOpacity>
@@ -348,7 +370,7 @@ export default function EntriesScreen({ navigation, route }: any) {
         <View 
             style={{ 
                 position: 'absolute', 
-                top: 95, 
+                top: 78, 
                 left: 15, 
                 right: 15, 
                 zIndex: 30,
