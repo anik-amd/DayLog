@@ -1,34 +1,59 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useColorScheme } from "nativewind";
 import EntriesScreen from '../entries/EntriesScreen';
 import SettingsScreen from '../settings/SettingsScreen';
 import FullScreenEditor from '../editor/FullScreenEditor';
 import ReadEntryScreen from '../entries/ReadEntryScreen';
+import MapScreen from '../map/MapScreen';
+import SearchScreen from '../search/SearchScreen';
+import TabBar from './TabBar';
 
 const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
 
-export default function RootNavigator() {
+function HomeStack() {
+  const { colorScheme } = useColorScheme();
   return (
     <Stack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: '#18181b' }, // zinc-900
-        headerTintColor: '#fff',
-        headerTitleStyle: { fontWeight: 'bold' },
-        contentStyle: { backgroundColor: '#18181b' } // ensure dark mode default background is consistent
+        headerShown: false,
+        contentStyle: { backgroundColor: colorScheme === 'dark' ? '#09090b' : '#f5f5f4' }
       }}
     >
-      <Stack.Screen name="Entries" component={EntriesScreen} options={{ headerShown: false }}/>
-      <Stack.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />
-      <Stack.Screen 
-        name="ReadEntry" 
-        component={ReadEntryScreen} 
-        options={{ headerShown: false, presentation: 'fullScreenModal' }}
+      <Stack.Screen name="Entries" component={EntriesScreen} />
+      <Stack.Screen
+        name="ReadEntry"
+        component={ReadEntryScreen}
+        options={{ presentation: 'fullScreenModal' }}
       />
-      <Stack.Screen 
-        name="FullScreenEditor" 
-        component={FullScreenEditor} 
-        options={{ headerShown: false, presentation: 'fullScreenModal' }}
+      <Stack.Screen
+        name="FullScreenEditor"
+        component={FullScreenEditor}
+        options={{ presentation: 'fullScreenModal' }}
+      />
+      <Stack.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{ presentation: 'modal' }}
       />
     </Stack.Navigator>
+  );
+}
+
+export default function RootNavigator() {
+  return (
+    <Tab.Navigator
+      tabBar={(props) => <TabBar {...props} />}
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: { display: 'none' },
+      }}
+    >
+      <Tab.Screen name="Home" component={HomeStack} />
+      <Tab.Screen name="Map" component={MapScreen} />
+      <Tab.Screen name="Search" component={SearchScreen} />
+    </Tab.Navigator>
   );
 }
