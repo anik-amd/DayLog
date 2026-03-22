@@ -39,19 +39,24 @@ export const deleteTag = async (tagName: string) => {
 
 export const recalculateAllTagCounts = async () => {
   const db = await getDb();
-  const entries = await db.getAllAsync<{ id: string; tags: string | null }>('SELECT id, tags FROM entries WHERE tags IS NOT NULL AND tags != ""');
+  
+  const entries = await db.getAllAsync<{ id: string; tags: string | null }>(
+    "SELECT id, tags FROM entries WHERE tags IS NOT NULL AND length(tags) > 0"
+  );
 
   await db.runAsync('DELETE FROM tags');
 
   const counts: Record<string, number> = {};
   for (const entry of entries) {
-    const parts = entry.tags!.split(',').map(t => t.trim()).filter(Boolean);
-    for (const tag of parts) {
-      counts[tag] = (counts[tag] || 0) + 1;
+    if (entry.tags && entry.tags.trim().length > 0) {
+      const parts = entry.tags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+      for (const tag of parts) {
+        counts[tag] = (counts[tag] || 0) + 1;
+      }
     }
   }
 
   for (const [name, count] of Object.entries(counts)) {
-    await db.runAsync('INSERT INTO tags (name, count) VALUES (?, ?)', [name, count]);
+    await db.runAsync('INSERT OR REPLACE INTO tags (name, count) VALUES (?, ?)', [name, count]);
   }
 };

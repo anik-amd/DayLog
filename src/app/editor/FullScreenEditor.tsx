@@ -22,9 +22,10 @@ const extractTags = (text: string): string => {
 
 export default function FullScreenEditor({ route, navigation }: any) {
   const { colorScheme } = useColorScheme();
-  const { entryId, initialContent } = route.params;
+  const { entryId: initialEntryId, initialContent } = route.params;
   const [markdown, setMarkdown] = useState(initialContent || '');
   const [entry, setEntry] = useState<Entry | null>(null);
+  const [currentEntryId, setCurrentEntryId] = useState<string | null>(initialEntryId || null);
   const isSaving = useRef(false);
   const inputRef = useRef<TextInput>(null);
   const [selection, setSelection] = useState({ start: 0, end: 0 });
@@ -52,8 +53,8 @@ export default function FullScreenEditor({ route, navigation }: any) {
   };
 
   const loadEntry = useCallback(async () => {
-    if (entryId) {
-      const data = await getEntry(entryId);
+    if (currentEntryId) {
+      const data = await getEntry(currentEntryId);
       if (data) {
         setEntry(data);
         const content = data.content || '';
@@ -73,7 +74,7 @@ export default function FullScreenEditor({ route, navigation }: any) {
         }
       }
     }
-  }, [entryId]);
+  }, [currentEntryId]);
 
   useEffect(() => {
     loadEntry();
@@ -149,7 +150,7 @@ export default function FullScreenEditor({ route, navigation }: any) {
     
     isSaving.current = true;
     try {
-      if (!entryId) {
+      if (!currentEntryId) {
         // Create new entry
         const newId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
         const now = Date.now();
@@ -165,10 +166,11 @@ export default function FullScreenEditor({ route, navigation }: any) {
           tags: currentMetadata.tags || undefined
         };
         await createEntry(newEntry);
+        setCurrentEntryId(newId); // Update state so subsequent saves update this entry
       } else {
         // Update existing entry
         await updateEntry(
-          entryId, 
+          currentEntryId, 
           textToSave, 
           Date.now(), 
           currentMetadata.date, 
@@ -181,7 +183,7 @@ export default function FullScreenEditor({ route, navigation }: any) {
     } finally {
       isSaving.current = false;
     }
-  }, [entryId]);
+  }, [currentEntryId]);
 
   useAutoSave(markdown, (t) => handleSave(t, { date, time, location, weather, tags }), 1000);
 
@@ -213,13 +215,13 @@ export default function FullScreenEditor({ route, navigation }: any) {
       quality: 0.8,
     });
 
-    if (!result.canceled && entryId) {
+    if (!result.canceled && currentEntryId) {
       const selectedImage = result.assets[0].uri;
       const persistentPath = await moveMediaToLocal(selectedImage);
       
       const newMedia = {
         id: `media-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-        entryId: entryId,
+        entryId: currentEntryId,
         type: "image" as const,
         path: persistentPath,
         createdAt: Date.now()

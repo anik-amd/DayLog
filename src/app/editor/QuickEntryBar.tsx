@@ -25,9 +25,10 @@ interface QuickEntryBarProps {
 }
 
 const extractTags = (text: string): string => {
+  if (!text || typeof text !== 'string') return '';
   const matches = text.match(/#(\w+)/g);
-  if (!matches) return '';
-  return matches.map(tag => tag.substring(1)).join(', ');
+  if (!matches || matches.length === 0) return '';
+  return matches.map(tag => tag.substring(1)).join(',');
 };
 
 export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, onEntryDateChange, onDatePress, onTimePress, onFocusChange }: QuickEntryBarProps) {
@@ -161,7 +162,6 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
       const extractedTags = extractTags(textToSave);
       
       if (!currentEntryId) {
-        console.log('Creating new entry...');
         const newId = `${now}-${Math.random().toString(36).substring(2, 9)}`;
         const newEntry: Omit<Entry, 'media'> = {
           id: newId,
@@ -176,7 +176,6 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
         };
         await createEntry(newEntry);
         setCurrentEntryId(newId);
-        console.log('Entry created, calling onEntrySaved');
         if (finalizeAndRefresh) onEntrySaved();
       } else {
         console.log('Updating existing entry...');

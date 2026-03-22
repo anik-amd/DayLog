@@ -10,20 +10,13 @@ const extractTags = (content: string): string[] => {
 };
 
 export const createEntry = async (entry: Omit<Entry, 'media'>) => {
-  console.log('createEntry called with:', entry);
+  const tags = entry.tags || '';
   const db = await getDb();
   try {
     await db.runAsync(
       'INSERT INTO entries (id, content, createdAt, updatedAt, date, time, location, weather, tags) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [entry.id, entry.content, entry.createdAt, entry.updatedAt, entry.date, entry.time || null, entry.location || null, entry.weather || null, entry.tags || null]
+      [entry.id, entry.content, entry.createdAt, entry.updatedAt, entry.date, entry.time || null, entry.location || null, entry.weather || null, tags || null]
     );
-    console.log('createEntry completed');
-
-    // Sync tag counts
-    const tags = extractTags(entry.content);
-    for (const tag of tags) {
-      updateTagCount(tag, 1).catch(() => {});
-    }
   } catch (error) {
     console.error('createEntry error:', error);
     throw error;
@@ -33,37 +26,16 @@ export const createEntry = async (entry: Omit<Entry, 'media'>) => {
 export const updateEntry = async (id: string, content: string, updatedAt: number, date?: string, time?: string, location?: string, weather?: string, tags?: string) => {
   const db = await getDb();
 
-  // Get old tags before updating
-  const old = await db.getFirstAsync<{ tags: string | null }>('SELECT tags FROM entries WHERE id = ?', [id]);
-  const oldTags = old?.tags ? extractTags(old.tags) : [];
-  const newTags = extractTags(content);
-
-  // Calculate tag differences
-  const added = newTags.filter(t => !oldTags.includes(t));
-  const removed = oldTags.filter(t => !newTags.includes(t));
-
   await db.runAsync(
     'UPDATE entries SET content = ?, updatedAt = ?, date = ?, time = ?, location = ?, weather = ?, tags = ? WHERE id = ?',
     [content, updatedAt, date || null, time || null, location || null, weather || null, tags || null, id]
   );
-
-  // Sync tag counts
-  for (const tag of added) updateTagCount(tag, 1).catch(() => {});
-  for (const tag of removed) updateTagCount(tag, -1).catch(() => {});
 };
 
 export const deleteEntry = async (id: string) => {
   const db = await getDb();
-  
-  // Get tags before deleting
-  const entry = await db.getFirstAsync<{ tags: string | null }>('SELECT tags FROM entries WHERE id = ?', [id]);
-  const tags = entry?.tags ? extractTags(entry.tags) : [];
-
   await db.runAsync('DELETE FROM entries WHERE id = ?', [id]);
-  await db.runAsync('DELETE FROM media WHERE entryId = ?', [id]); // Cascade manually for absolute safety
-
-  // Sync tag counts
-  for (const tag of tags) updateTagCount(tag, -1).catch(() => {});
+  await db.runAsync('DELETE FROM media WHERE entryId = ?', [id]);
 };
 
 export const getEntry = async (id: string): Promise<Entry | null> => {

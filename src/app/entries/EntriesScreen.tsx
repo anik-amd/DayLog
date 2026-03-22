@@ -10,7 +10,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 import { initDb } from '../../database/db';
 import { createEntry, getAllEntries } from '../../database/entries';
-import { getAllTags } from '../../database/tags';
+import { getAllTags, recalculateAllTagCounts } from '../../database/tags';
 import { Entry } from '../../types/Entry';
 import EntryCard from './EntryCard';
 import CalendarStrip, { CalendarStripRef } from './CalendarStrip';
@@ -167,6 +167,7 @@ export default function EntriesScreen({ navigation, route }: any) {
 
   const loadTagCounts = async () => {
     try {
+      await recalculateAllTagCounts();
       const tags = await getAllTags();
       const counts: Record<string, number> = {};
       for (const tag of tags) {
@@ -500,7 +501,10 @@ export default function EntriesScreen({ navigation, route }: any) {
                 }}
             >
                 <QuickEntryBar 
-                  onEntrySaved={fetchEntries}
+                  onEntrySaved={() => {
+                    fetchEntries();
+                    loadTagCounts();
+                  }}
                   entryDate={entryDate}
                   onEntryDateChange={setEntryDate}
                   onFocusChange={setInputFocused}
