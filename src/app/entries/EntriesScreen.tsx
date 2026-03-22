@@ -35,9 +35,9 @@ export default function EntriesScreen({ navigation, route }: any) {
   const calendarRef = useRef<CalendarStripRef>(null);
   const datePositionsRef = useRef<{ [date: string]: number }>({});
   const scrollViewRef = useRef<ScrollView>(null);
-  const uiPosition = useRef(new Animated.Value(0)).current;
   const headerPosition = useRef(new Animated.Value(0)).current;
   const calendarTranslate = useRef(new Animated.Value(0)).current;
+  const quickBarTranslate = useRef(new Animated.Value(0)).current;
   const footerHeight = 120;
   const highlightedDateRef = useRef(highlightedDate);
   const allSortedDatesRef = useRef<string[]>([]);
@@ -120,6 +120,12 @@ export default function EntriesScreen({ navigation, route }: any) {
           speed: 40,
           bounciness: 0,
         }),
+        Animated.spring(quickBarTranslate, {
+          toValue: 120,
+          useNativeDriver: true,
+          speed: 40,
+          bounciness: 0,
+        }),
       ]).start();
     } else if (delta < -8 && !headerVisible.current) {
       headerVisible.current = true;
@@ -136,23 +142,17 @@ export default function EntriesScreen({ navigation, route }: any) {
           speed: 30,
           bounciness: 4,
         }),
+        Animated.spring(quickBarTranslate, {
+          toValue: 0,
+          useNativeDriver: true,
+          speed: 30,
+          bounciness: 4,
+        }),
       ]).start();
     }
 
     lastScrollY.current = currentY;
   };
-
-  const footerTranslate = uiPosition.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, footerHeight + 40],
-    extrapolate: 'clamp'
-  });
-
-  const uiOpacity = uiPosition.interpolate({
-    inputRange: [0, 0.7],
-    outputRange: [1, 0],
-    extrapolate: 'clamp'
-  });
 
   const fetchEntries = async () => {
     try {
@@ -473,8 +473,9 @@ export default function EntriesScreen({ navigation, route }: any) {
                 left: 16, 
                 right: 16, 
                 zIndex: 999,
-                transform: [{ translateY: footerTranslate }],
-                opacity: uiOpacity
+                transform: [
+                    { translateY: quickBarTranslate },
+                ],
             }}
         >
             <View 
