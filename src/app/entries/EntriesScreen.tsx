@@ -157,10 +157,6 @@ export default function EntriesScreen({ navigation, route }: any) {
   const fetchEntries = async () => {
     try {
       const currentEntries = await getAllEntries();
-      
-      // Trigger a smooth layout animation when entries change
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      
       setEntries(currentEntries);
     } catch (error) {
       console.error("Failed to fetch entries:", error);

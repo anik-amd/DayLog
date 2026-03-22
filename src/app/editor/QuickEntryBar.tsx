@@ -431,6 +431,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
         >
           {/* Pills Row */}
           {showMetadata && (
+          <Animated.View entering={FadeIn.springify().damping(15).stiffness(120)} exiting={FadeOut.duration(150)}>
             <ScrollView 
               horizontal 
               showsHorizontalScrollIndicator={false}
@@ -539,6 +540,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                 <Text style={{ fontFamily: 'Outfit-Medium', color: '#0284c7' }} className="text-[14px] ml-1.5">Photo</Text>
               </Pressable>
             </ScrollView>
+          </Animated.View>
           )}
 
           {/* Input Row */}
