@@ -261,6 +261,35 @@ If a feature is not in the roadmap, do not implement it.
 
 ---
 
+## Git Branch Workflow
+
+This project uses a **two-branch workflow**:
+
+### Branches
+- **master**: Production-ready code, auto-builds APK on push
+- **dev**: Active development and testing
+
+### Workflow Steps (After Completing Work on dev)
+When the user says "commit and merge to master":
+
+1. Commit changes to dev branch with descriptive message
+2. Merge dev to master: `git checkout master && git merge dev && git push`
+3. Switch back to dev: `git checkout dev`
+
+### Example Commands
+```bash
+git add .
+git commit -m "feat: add new feature"
+git checkout master
+git merge dev
+git push
+git checkout dev
+```
+
+---
+
+
+
 # 13. How the Agent Should Work
 
 The agent must:
