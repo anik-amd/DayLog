@@ -87,6 +87,11 @@ jobs:
         with:
           name: DayLog.apk
 
+      - name: Configure git identity
+        run: |
+          git config user.name "DayLog CI"
+          git config user.email "ci@daylog.app"
+
       - name: Create git tag
         run: |
           git tag -a v${{ github.run_number }} -m "Release v${{ github.run_number }}"
