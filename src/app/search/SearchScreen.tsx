@@ -193,13 +193,13 @@ export default function SearchScreen() {
                     key={name}
                     onPress={() => navigation.navigate('Home', { screen: 'Entries', params: { selectedTag: name } })}
                     className="flex-row items-center rounded-full px-3 py-1.5 mr-2 mb-2"
-                    style={{ backgroundColor: '#f0fdf4' }}
+                    style={{ backgroundColor: '#dcfce7' }}
                   >
-                    <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-green-600 text-sm">
+                    <Text style={{ fontFamily: 'Outfit-Medium', color: isDark ? '#4ade80' : '#16a34a' }} className="text-sm">
                       #{name}
                     </Text>
-                    <View className="ml-1.5 bg-green-100 dark:bg-green-900/30 rounded-full px-1.5 py-0.5">
-                      <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-green-600 dark:text-green-400 text-xs">
+                    <View className="ml-1.5 bg-green-200 dark:bg-green-800/50 rounded-full px-1.5 py-0.5">
+                      <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 12, color: isDark ? '#4ade80' : '#16a34a' }}>
                         {count}
                       </Text>
                     </View>

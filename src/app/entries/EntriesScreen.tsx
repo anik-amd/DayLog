@@ -335,9 +335,18 @@ export default function EntriesScreen({ navigation, route }: any) {
                     style={{ backgroundColor: colorScheme === 'dark' ? 'rgba(74, 222, 128, 0.15)' : 'rgba(22, 163, 74, 0.1)' }}
                   >
                     <Ionicons name="pricetag-outline" size={14} color={colorScheme === 'dark' ? '#4ade80' : '#16a34a'} />
-                    <Text style={{ fontFamily: 'Outfit-Medium', color: colorScheme === 'dark' ? '#4ade80' : '#16a34a' }} className="text-sm ml-1.5">
-                      #{selectedTag} {tagCounts[selectedTag] !== undefined && `(${tagCounts[selectedTag]})`}
-                    </Text>
+                    <View className="flex-row items-center ml-1.5">
+                      <Text style={{ fontFamily: 'Outfit-Medium', color: colorScheme === 'dark' ? '#4ade80' : '#16a34a' }} className="text-sm">
+                        #{selectedTag}
+                      </Text>
+                      {tagCounts[selectedTag] !== undefined && (
+                        <View className="ml-1.5 bg-green-200 dark:bg-green-800/50 rounded-full px-1.5 py-0.5">
+                          <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 12, color: colorScheme === 'dark' ? '#4ade80' : '#16a34a' }}>
+                            {tagCounts[selectedTag]}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
                     <TouchableOpacity onPress={clearTagFilter} className="ml-2">
                       <Ionicons name="close-circle" size={16} color={colorScheme === 'dark' ? '#4ade80' : '#16a34a'} />
                     </TouchableOpacity>
