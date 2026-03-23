@@ -432,7 +432,6 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                 label={formatDate(entryDate)}
                 backgroundColor="#ede9fe"
                 iconColor="#7c3aed"
-                showChevron
               />
 
               {/* Time Pill */}
@@ -442,7 +441,6 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                 label={formatTime(entryDate)}
                 backgroundColor="#ede9fe"
                 iconColor="#7c3aed"
-                showChevron
               />
 
               {/* Location Pill */}
@@ -472,12 +470,13 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                   ) : weatherError ? (
                     <Ionicons name="cloud-offline-outline" size={15} color="#ef4444" />
                   ) : (
-                    <Ionicons name="sunny-outline" size={15} color="#f59e0b" />
+                    <Ionicons name="sunny-outline" size={15} color="#d946ef" />
                   )
                 }
-                label={weatherError ? 'N/A' : weather || '...'}
+                label={weatherError ? 'N/A' : weather || 'Weather'}
                 backgroundColor="#fdf4ff"
-                iconColor="#f59e0b"
+                iconColor="#d946ef"
+                textColor="#d946ef"
                 isError={weatherError}
                 isLoading={weatherLoading}
               />

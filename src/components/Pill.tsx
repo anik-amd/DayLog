@@ -10,7 +10,6 @@ interface PillProps {
   textColor?: string;
   isLoading?: boolean;
   isError?: boolean;
-  showChevron?: boolean;
 }
 
 export default function Pill({ 
@@ -21,11 +20,9 @@ export default function Pill({
   iconColor, 
   textColor,
   isLoading, 
-  isError,
-  showChevron 
+  isError
 }: PillProps) {
   const displayColor = isError && !textColor ? '#ef4444' : (textColor || iconColor);
-  const showLabel = isError ? 'N/A' : label;
 
   const content = (
     <View style={{ backgroundColor }} className="flex-row items-center rounded-full px-3 py-1.5">
@@ -38,13 +35,8 @@ export default function Pill({
         }} 
         numberOfLines={1}
       >
-        {showLabel}
+        {label}
       </Text>
-      {showChevron && (
-        <View className="ml-1">
-          <Text style={{ color: iconColor, fontSize: 12 }}>▼</Text>
-        </View>
-      )}
     </View>
   );
 

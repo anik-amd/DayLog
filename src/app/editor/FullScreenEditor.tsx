@@ -378,7 +378,7 @@ export default function FullScreenEditor({ route, navigation }: any) {
                                 <Ionicons name="location-outline" size={15} color="#d97706" />
                             )
                         }
-                        label={location}
+                        label={location || 'Location'}
                         backgroundColor="#fef3c7"
                         iconColor="#d97706"
                         textColor="#d97706"
@@ -387,7 +387,7 @@ export default function FullScreenEditor({ route, navigation }: any) {
 
                     <Pill 
                         icon={<Ionicons name="sunny-outline" size={15} color="#d946ef" />}
-                        label={weather}
+                        label={weather || 'Weather'}
                         backgroundColor="#fdf4ff"
                         iconColor="#d946ef"
                         textColor="#d946ef"
