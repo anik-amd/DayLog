@@ -22,7 +22,16 @@ const extractTags = (text: string): string => {
 
 export default function FullScreenEditor({ route, navigation }: any) {
   const { colorScheme } = useColorScheme();
-  const { entryId: initialEntryId, initialContent } = route.params;
+  const { 
+    entryId: initialEntryId, 
+    initialContent,
+    initialDate,
+    initialTime,
+    initialLocation,
+    initialWeather,
+    initialTags
+  } = route.params;
+  
   const [markdown, setMarkdown] = useState(initialContent || '');
   const [entry, setEntry] = useState<Entry | null>(null);
   const [currentEntryId, setCurrentEntryId] = useState<string | null>(initialEntryId || null);
@@ -31,19 +40,25 @@ export default function FullScreenEditor({ route, navigation }: any) {
   const [selection, setSelection] = useState({ start: 0, end: 0 });
   const isInitialLoad = useRef(true);
 
-  // Metadata state
-  const [date, setDate] = useState<string>('');
-  const [time, setTime] = useState<string>('');
-  const [location, setLocation] = useState<string>('');
-  const [weather, setWeather] = useState<string>('');
-  const [tags, setTags] = useState<string>('');
+  // Metadata state - initialize with passed values
+  const [date, setDate] = useState<string>(initialDate || '');
+  const [time, setTime] = useState<string>(initialTime || '');
+  const [location, setLocation] = useState<string>(initialLocation || '');
+  const [weather, setWeather] = useState<string>(initialWeather || '');
+  const [tags, setTags] = useState<string>(initialTags || '');
   
   // Location/Weather states
   const [locationLoading, setLocationLoading] = useState(false);
   const [hasLocationPermission, setHasLocationPermission] = useState<boolean | null>(null);
   
   // Date/Time objects for pickers
-  const [entryDateObj, setEntryDateObj] = useState(new Date());
+  const [entryDateObj, setEntryDateObj] = useState(() => {
+    if (initialDate) {
+      const parsed = new Date(initialDate);
+      if (!isNaN(parsed.getTime())) return parsed;
+    }
+    return new Date();
+  });
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
 
@@ -349,7 +364,7 @@ export default function FullScreenEditor({ route, navigation }: any) {
                     >
                         <Ionicons name="time-outline" size={15} color="#7c3aed" />
                         <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-purple-600 dark:text-purple-400">
-                            {time || 'Time'}
+                            {time}
                         </Text>
                     </Pressable>
 
@@ -365,14 +380,14 @@ export default function FullScreenEditor({ route, navigation }: any) {
                             <Ionicons name="location-outline" size={15} color="#d97706" />
                         )}
                         <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-amber-600 dark:text-amber-400">
-                            {location || 'Location'}
+                            {location}
                         </Text>
                     </Pressable>
 
                     <View className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-pink-50 dark:bg-pink-900/20 border border-pink-100 dark:border-pink-900/30">
                         <Ionicons name="sunny-outline" size={15} color="#d946ef" />
                         <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-pink-600 dark:text-pink-400">
-                            {weather || 'Weather'}
+                            {weather}
                         </Text>
                     </View>
 

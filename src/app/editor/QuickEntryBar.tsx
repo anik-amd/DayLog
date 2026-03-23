@@ -12,6 +12,7 @@ import { createEntry, updateEntry } from '../../database/entries';
 import { addMediaToEntry } from '../../database/media';
 import { useAutoSave } from '../../hooks/useAutoSave';
 import { Entry } from '../../types/Entry';
+import Pill from '../../components/Pill';
 
 const IS_WEB = Platform.OS === 'web';
 
@@ -230,12 +231,39 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
         await createEntry(newEntry);
         setCurrentEntryId(newId);
         onEntrySaved();
-        navigation.navigate('FullScreenEditor', { entryId: newId, initialContent: content, viewMode: false });
+        navigation.navigate('FullScreenEditor', { 
+          entryId: newId, 
+          initialContent: content, 
+          initialDate: entryDate.toISOString(),
+          initialTime: formatTime(entryDate),
+          initialLocation: location,
+          initialWeather: weather,
+          initialTags: tags,
+          viewMode: false 
+        });
     } else if (currentEntryId) {
         await handleSave(content, true);
-        navigation.navigate('FullScreenEditor', { entryId: currentEntryId, initialContent: content, viewMode: false });
+        navigation.navigate('FullScreenEditor', { 
+          entryId: currentEntryId, 
+          initialContent: content, 
+          initialDate: entryDate.toISOString(),
+          initialTime: formatTime(entryDate),
+          initialLocation: location,
+          initialWeather: weather,
+          initialTags: tags,
+          viewMode: false 
+        });
     } else {
-        navigation.navigate('FullScreenEditor', { entryId: null, initialContent: '', viewMode: false });
+        navigation.navigate('FullScreenEditor', { 
+          entryId: null, 
+          initialContent: '', 
+          initialDate: entryDate.toISOString(),
+          initialTime: formatTime(entryDate),
+          initialLocation: location,
+          initialWeather: weather,
+          initialTags: tags,
+          viewMode: false 
+        });
     }
   };
 
@@ -426,7 +454,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                 style={{ backgroundColor: '#ede9fe' }}
               >
                 <Ionicons name="calendar-outline" size={15} color="#7c3aed" />
-                <Text className="text-[14px] ml-1.5" style={{ color: '#7c3aed' }}>
+                <Text className="text-[14px] ml-1.5" style={{ fontFamily: 'Outfit-Medium', color: '#7c3aed' }}>
                   {formatDate(entryDate)}
                 </Text>
                 <Ionicons name="chevron-down" size={12} color="#a78bfa" className="ml-1" />
@@ -441,32 +469,11 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                 style={{ backgroundColor: '#ede9fe' }}
               >
                 <Ionicons name="time-outline" size={15} color="#7c3aed" />
-                <Text className="text-[14px] ml-1.5" style={{ color: '#7c3aed' }}>
+                <Text className="text-[14px] ml-1.5" style={{ fontFamily: 'Outfit-Medium', color: '#7c3aed' }}>
                   {formatTime(entryDate)}
                 </Text>
                 <Ionicons name="chevron-down" size={12} color="#a78bfa" className="ml-1" />
               </Pressable>
-
-              {/* Weather Pill */}
-              <View className="flex-row items-center rounded-full px-3 py-1.5 mr-2"
-                style={{ backgroundColor: '#fdf4ff' }}
-              >
-                <PillItem 
-                  icon={
-                    weatherLoading ? (
-                      <Ionicons name="cloudy-outline" size={15} color="#d946ef" />
-                    ) : weatherError ? (
-                      <Ionicons name="cloud-offline-outline" size={15} color="#ef4444" />
-                    ) : (
-                      <Ionicons name="sunny-outline" size={15} color="#f59e0b" />
-                    )
-                  }
-                  isError={weatherError}
-                  isLoading={weatherLoading}
-                >
-                  {weatherError ? 'N/A' : weather || '...'}
-                </PillItem>
-              </View>
 
               {/* Location Pill */}
               <Pressable 
@@ -490,6 +497,27 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                   {location || 'Location'}
                 </PillItem>
               </Pressable>
+
+              {/* Weather Pill */}
+              <View className="flex-row items-center rounded-full px-3 py-1.5 mr-2"
+                style={{ backgroundColor: '#fdf4ff' }}
+              >
+                <PillItem 
+                  icon={
+                    weatherLoading ? (
+                      <Ionicons name="cloudy-outline" size={15} color="#d946ef" />
+                    ) : weatherError ? (
+                      <Ionicons name="cloud-offline-outline" size={15} color="#ef4444" />
+                    ) : (
+                      <Ionicons name="sunny-outline" size={15} color="#f59e0b" />
+                    )
+                  }
+                  isError={weatherError}
+                  isLoading={weatherLoading}
+                >
+                  {weatherError ? 'N/A' : weather || '...'}
+                </PillItem>
+              </View>
 
               {/* Photo Pill */}
               <Pressable 
