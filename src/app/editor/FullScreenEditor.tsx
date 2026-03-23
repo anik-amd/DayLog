@@ -65,7 +65,7 @@ export default function FullScreenEditor({ route, navigation }: any) {
 
   // Handle tag press to navigate to timeline with tag filter
   const handleTagPress = (tag: string) => {
-    navigation.navigate('Entries', { selectedTag: tag });
+    navigation.navigate('Entries', { selectedTags: [tag] });
   };
 
   const loadEntry = useCallback(async () => {

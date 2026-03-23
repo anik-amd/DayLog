@@ -8,7 +8,7 @@ import { getAllEntries } from '../../database/entries';
 import { getAllTags, TagEntry } from '../../database/tags';
 import { Entry } from '../../types/Entry';
 
-const MAX_VISIBLE_TAGS = 6;
+const MAX_VISIBLE_TAGS = 10;
 
 export default function SearchScreen() {
   const { colorScheme } = useColorScheme();
@@ -191,15 +191,15 @@ export default function SearchScreen() {
                 {(showAllTags ? popularTags : popularTags.slice(0, MAX_VISIBLE_TAGS)).map(({ name, count }) => (
                   <TouchableOpacity
                     key={name}
-                    onPress={() => navigation.navigate('Home', { screen: 'Entries', params: { selectedTag: name } })}
+                    onPress={() => navigation.navigate('Home', { screen: 'Entries', params: { selectedTags: [name] } })}
                     className="flex-row items-center rounded-full px-3 py-1.5 mr-2 mb-2"
-                    style={{ backgroundColor: '#dcfce7' }}
+                    style={{ backgroundColor: isDark ? '#262626' : '#f4f4f5' }}
                   >
-                    <Text style={{ fontFamily: 'Outfit-Medium', color: isDark ? '#4ade80' : '#16a34a' }} className="text-sm">
+                    <Text style={{ fontFamily: 'Outfit-Medium' }} className={`text-sm ${isDark ? 'text-neutral-400' : 'text-neutral-500'}`}>
                       #{name}
                     </Text>
-                    <View className="ml-1.5 bg-green-200 dark:bg-green-800/50 rounded-full px-1.5 py-0.5">
-                      <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 12, color: isDark ? '#4ade80' : '#16a34a' }}>
+                    <View className={`ml-1.5 rounded-full px-1.5 py-0.5 ${isDark ? 'bg-neutral-700' : 'bg-neutral-200'}`}>
+                      <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 12 }} className={isDark ? 'text-neutral-400' : 'text-neutral-500'}>
                         {count}
                       </Text>
                     </View>

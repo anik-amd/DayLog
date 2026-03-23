@@ -64,6 +64,33 @@ export const getAllEntries = async (): Promise<Entry[]> => {
   }));
 };
 
+export const getEntriesByTags = async (tags: string[]): Promise<Entry[]> => {
+  if (tags.length === 0) {
+    return getAllEntries();
+  }
+  
+  const db = await getDb();
+  const conditions = tags.map(() => `tags LIKE ?`).join(' AND ');
+  const params = tags.map(tag => `%${tag}%`);
+  
+  const allRows = await db.getAllAsync<Entry>(
+    `SELECT * FROM entries WHERE ${conditions} ORDER BY date DESC, createdAt DESC`,
+    params
+  );
+  const allMedia = await db.getAllAsync<Media>('SELECT * FROM media ORDER BY createdAt ASC');
+  
+  const mediaMap = allMedia.reduce((acc, mediaItem) => {
+    if (!acc[mediaItem.entryId]) acc[mediaItem.entryId] = [];
+    acc[mediaItem.entryId].push(mediaItem);
+    return acc;
+  }, {} as Record<string, Media[]>);
+
+  return allRows.map(entry => ({
+    ...entry,
+    media: mediaMap[entry.id] || []
+  }));
+};
+
 export const getAppStats = async () => {
     const db = await getDb();
     const entryCount = await db.getFirstAsync<{ count: number }>('SELECT COUNT(*) as count FROM entries');

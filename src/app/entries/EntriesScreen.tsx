@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text, ActivityIndicator, KeyboardAvoidingView, Platform, LayoutAnimation, UIManager, TouchableOpacity, Animated, ScrollView, Keyboard } from 'react-native';
 import { useFocusEffect, useRoute } from '@react-navigation/native';
@@ -16,6 +16,8 @@ import EntryCard from './EntryCard';
 import CalendarStrip, { CalendarStripRef } from './CalendarStrip';
 import QuickEntryBar from '../editor/QuickEntryBar';
 import Picker from '../editor/Picker';
+import TagStrip from '../../components/TagStrip';
+import TagSelectorModal from '../../components/TagSelectorModal';
 
 export default function EntriesScreen({ navigation, route }: any) {
   const { colorScheme } = useColorScheme();
@@ -24,8 +26,20 @@ export default function EntriesScreen({ navigation, route }: any) {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [selectedTag, setSelectedTag] = useState<string | null>(routeParams.selectedTag || null);
+  const [selectedTags, setSelectedTags] = useState<string[]>(
+    routeParams.selectedTags || routeParams.selectedTag ? [routeParams.selectedTag || routeParams.selectedTags[0]] : []
+  );
   const [tagCounts, setTagCounts] = useState<Record<string, number>>({});
+  const [popularTags, setPopularTags] = useState<{ name: string; count: number }[]>([]);
+  const [tagModalVisible, setTagModalVisible] = useState(false);
+  
+  const orderedTags = useMemo(() => {
+    const selected = selectedTags
+      .filter(st => popularTags.some(pt => pt.name === st))
+      .map(st => popularTags.find(pt => pt.name === st)!);
+    const others = popularTags.filter(pt => !selectedTags.includes(pt.name));
+    return [...selected, ...others];
+  }, [popularTags, selectedTags]);
   
   // Date/time picker state (managed at screen level for web)
   const [pickerDate, setPickerDate] = useState(new Date());
@@ -51,10 +65,12 @@ export default function EntriesScreen({ navigation, route }: any) {
   }, [highlightedDate]);
 
   useEffect(() => {
-    if (route.params?.selectedTag !== undefined) {
-      setSelectedTag(route.params.selectedTag);
+    if (route.params?.selectedTags !== undefined) {
+      setSelectedTags(route.params.selectedTags);
+    } else if (route.params?.selectedTag !== undefined) {
+      setSelectedTags([route.params.selectedTag]);
     }
-  }, [route.params?.selectedTag]);
+  }, [route.params?.selectedTags, route.params?.selectedTag]);
 
   useEffect(() => {
     const allGroupedEntries = entries.reduce((groups: { [key: string]: Entry[] }, entry) => {
@@ -180,6 +196,7 @@ export default function EntriesScreen({ navigation, route }: any) {
         counts[tag.name] = tag.count;
       }
       setTagCounts(counts);
+      setPopularTags(tags);
     } catch (error) {
       console.error("Failed to load tag counts:", error);
     }
@@ -236,22 +253,29 @@ export default function EntriesScreen({ navigation, route }: any) {
     setupDatabase();
   }, []);
 
-  // Filter entries based on the selected calendar date and tag
+  // Filter entries based on the selected calendar date and tags (AND logic)
   const filteredEntries = entries.filter((e: Entry) => {
     const dateMatch = !selectedDate || e.date === selectedDate;
-    const tagMatch = !selectedTag || (e.tags && e.tags.includes(selectedTag));
+    const tagMatch = selectedTags.length === 0 || 
+      selectedTags.every(tag => e.tags?.includes(tag));
     return dateMatch && tagMatch;
   });
 
-  // Handle tag press to filter by tag
+  // Handle tag press to toggle tag filter
   const handleTagPress = (tag: string) => {
-    setSelectedTag(tag);
-    setSelectedDate(null); // Clear date filter when filtering by tag
+    setSelectedTags(prev => {
+      if (prev.includes(tag)) {
+        return prev.filter(t => t !== tag);
+      } else {
+        return [...prev, tag];
+      }
+    });
+    setSelectedDate(null);
   };
 
-  // Clear tag filter
+  // Clear all tag filters
   const clearTagFilter = () => {
-    setSelectedTag(null);
+    setSelectedTags([]);
   };
 
   // When selectedDate is cleared, reset highlightedDate to today
@@ -319,39 +343,27 @@ export default function EntriesScreen({ navigation, route }: any) {
             onScroll={handleScroll}
             scrollEventThrottle={16}
           >
+            {/* Tag Strip - scrolls with content */}
+            {(selectedTags.length > 0 || orderedTags.length > 0) && (
+              <View className="mb-4">
+                <TagStrip
+                  tags={orderedTags}
+                  selectedTags={selectedTags}
+                  onTagPress={handleTagPress}
+                  onMorePress={() => setTagModalVisible(true)}
+                />
+              </View>
+            )}
+            
             {filteredEntries.length === 0 ? (
               <View className="mt-40 items-center opacity-60">
                 <Ionicons name="journal-outline" size={48} color="#d4d4d4" />
                 <Text style={{ fontFamily: 'Outfit-Regular' }} className="text-neutral-400 dark:text-zinc-500 text-lg mt-4">
-                  {selectedTag ? `No entries with #${selectedTag}` : 'No entries for this day.'}
+                  {selectedTags.length > 0 ? `No entries with #${selectedTags.join(', #')}` : 'No entries for this day.'}
                 </Text>
               </View>
             ) : (
               <>
-                {/* Tag Filter Indicator */}
-                {selectedTag && (
-                  <View 
-                    className="flex-row items-center mb-4 mt-2 self-start px-3 py-1.5 rounded-full"
-                    style={{ backgroundColor: colorScheme === 'dark' ? 'rgba(74, 222, 128, 0.15)' : 'rgba(22, 163, 74, 0.1)' }}
-                  >
-                    <Ionicons name="pricetag-outline" size={14} color={colorScheme === 'dark' ? '#4ade80' : '#16a34a'} />
-                    <View className="flex-row items-center ml-1.5">
-                      <Text style={{ fontFamily: 'Outfit-Medium', color: colorScheme === 'dark' ? '#4ade80' : '#16a34a' }} className="text-sm">
-                        #{selectedTag}
-                      </Text>
-                      {tagCounts[selectedTag] !== undefined && (
-                        <View className="ml-1.5 bg-green-200 dark:bg-green-800/50 rounded-full px-1.5 py-0.5">
-                          <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 12, color: colorScheme === 'dark' ? '#4ade80' : '#16a34a' }}>
-                            {tagCounts[selectedTag]}
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-                    <TouchableOpacity onPress={clearTagFilter} className="ml-2">
-                      <Ionicons name="close-circle" size={16} color={colorScheme === 'dark' ? '#4ade80' : '#16a34a'} />
-                    </TouchableOpacity>
-                  </View>
-                )}
                 {sortedDates.map((dateStr) => (
                 <View
                   key={dateStr}
@@ -463,7 +475,7 @@ export default function EntriesScreen({ navigation, route }: any) {
                 style={{ 
                     backgroundColor: colorScheme === 'dark' ? '#171717' : '#ffffff',
                     borderWidth: 2,
-                    borderColor: (selectedTag || selectedDate) 
+                    borderColor: (selectedTags.length > 0 || selectedDate)
                         ? (colorScheme === 'dark' ? '#4c1d95' : '#ddd6fe')
                         : (colorScheme === 'dark' ? '#262626' : '#e5e5e5'),
                 }}
@@ -556,6 +568,18 @@ export default function EntriesScreen({ navigation, route }: any) {
             }}
           />
         )}
+
+        {/* Tag Selector Modal */}
+        <TagSelectorModal
+          visible={tagModalVisible}
+          tags={orderedTags}
+          selectedTags={selectedTags}
+          onClose={() => setTagModalVisible(false)}
+          onApply={(tags) => {
+            setSelectedTags(tags);
+            setTagModalVisible(false);
+          }}
+        />
       </View>
     </KeyboardAvoidingView>
   );

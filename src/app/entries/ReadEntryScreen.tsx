@@ -17,7 +17,7 @@ export default function ReadEntryScreen({ route, navigation }: any) {
 
   // Handle tag press to navigate to timeline with tag filter
   const handleTagPress = (tag: string) => {
-    navigation.navigate('Entries', { selectedTag: tag });
+    navigation.navigate('Entries', { selectedTags: [tag] });
   };
 
   const loadEntry = useCallback(async () => {
