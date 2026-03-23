@@ -388,22 +388,6 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
     return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
   };
 
-  const PillItem = ({ icon, children, onPress, isError, isLoading, color = '#db2777' }: { 
-    icon: React.ReactNode; 
-    children: React.ReactNode; 
-    onPress?: () => void;
-    isError?: boolean;
-    isLoading?: boolean;
-    color?: string;
-  }) => (
-    <View className="flex-row items-center">
-      {icon}
-      <Text style={{ fontFamily: 'Outfit-Medium', color: isError ? '#ef4444' : color }} className="text-[14px] ml-1.5">
-        {children}
-      </Text>
-    </View>
-  );
-
   const handleCardPress = () => {
     inputRef.current?.focus();
   };
@@ -434,100 +418,78 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               canCancelContentTouches={true}
             >
               {/* Tag Pill */}
-              <View className="flex-row items-center rounded-full px-3 py-1.5 mr-2"
-                style={{ backgroundColor: '#f0fdf4' }}
-              >
-                <PillItem 
-                  icon={<Ionicons name="pricetag-outline" size={15} color="#16a34a" />}
-                  color="text-green-600 dark:text-green-400"
-                >
-                  {tags || 'Tags'}
-                </PillItem>
-              </View>
+              <Pill 
+                icon={<Ionicons name="pricetag-outline" size={15} color="#16a34a" />}
+                label={tags || 'Tags'}
+                backgroundColor="#f0fdf4"
+                iconColor="#16a34a"
+              />
 
               {/* Date Pill */}
-              <Pressable 
-                onPress={() => {
-                  setShowDatePicker(true);
-                }}
-                className="flex-row items-center rounded-full px-3 py-1.5 mr-2"
-                style={{ backgroundColor: '#ede9fe' }}
-              >
-                <Ionicons name="calendar-outline" size={15} color="#7c3aed" />
-                <Text className="text-[14px] ml-1.5" style={{ fontFamily: 'Outfit-Medium', color: '#7c3aed' }}>
-                  {formatDate(entryDate)}
-                </Text>
-                <Ionicons name="chevron-down" size={12} color="#a78bfa" className="ml-1" />
-              </Pressable>
+              <Pill 
+                onPress={() => setShowDatePicker(true)}
+                icon={<Ionicons name="calendar-outline" size={15} color="#7c3aed" />}
+                label={formatDate(entryDate)}
+                backgroundColor="#ede9fe"
+                iconColor="#7c3aed"
+                showChevron
+              />
 
               {/* Time Pill */}
-              <Pressable 
-                onPress={() => {
-                  setShowTimePicker(true);
-                }}
-                className="flex-row items-center rounded-full px-3 py-1.5 mr-2"
-                style={{ backgroundColor: '#ede9fe' }}
-              >
-                <Ionicons name="time-outline" size={15} color="#7c3aed" />
-                <Text className="text-[14px] ml-1.5" style={{ fontFamily: 'Outfit-Medium', color: '#7c3aed' }}>
-                  {formatTime(entryDate)}
-                </Text>
-                <Ionicons name="chevron-down" size={12} color="#a78bfa" className="ml-1" />
-              </Pressable>
+              <Pill 
+                onPress={() => setShowTimePicker(true)}
+                icon={<Ionicons name="time-outline" size={15} color="#7c3aed" />}
+                label={formatTime(entryDate)}
+                backgroundColor="#ede9fe"
+                iconColor="#7c3aed"
+                showChevron
+              />
 
               {/* Location Pill */}
-              <Pressable 
+              <Pill 
                 onPress={handleLocationPress}
-                className="flex-row items-center rounded-full px-3 py-1.5 mr-2"
-                style={{ backgroundColor: '#fef3c7' }}
-              >
-                <PillItem 
-                  icon={
-                    locationLoading ? (
-                      <Ionicons name="location-outline" size={15} color="#d97706" />
-                    ) : (hasLocationPermission === false && !location) ? (
-                      <Ionicons name="location-outline" size={15} color="#ef4444" />
-                    ) : (
-                      <Ionicons name="location-outline" size={15} color="#d97706" />
-                    )
-                  }
-                  isError={locationError}
-                  isLoading={locationLoading}
-                >
-                  {location || 'Location'}
-                </PillItem>
-              </Pressable>
+                icon={
+                  locationLoading ? (
+                    <Ionicons name="location-outline" size={15} color="#d97706" />
+                  ) : (hasLocationPermission === false && !location) ? (
+                    <Ionicons name="location-outline" size={15} color="#ef4444" />
+                  ) : (
+                    <Ionicons name="location-outline" size={15} color="#d97706" />
+                  )
+                }
+                label={location || 'Location'}
+                backgroundColor="#fef3c7"
+                iconColor="#d97706"
+                isError={locationError}
+                isLoading={locationLoading}
+              />
 
               {/* Weather Pill */}
-              <View className="flex-row items-center rounded-full px-3 py-1.5 mr-2"
-                style={{ backgroundColor: '#fdf4ff' }}
-              >
-                <PillItem 
-                  icon={
-                    weatherLoading ? (
-                      <Ionicons name="cloudy-outline" size={15} color="#d946ef" />
-                    ) : weatherError ? (
-                      <Ionicons name="cloud-offline-outline" size={15} color="#ef4444" />
-                    ) : (
-                      <Ionicons name="sunny-outline" size={15} color="#f59e0b" />
-                    )
-                  }
-                  isError={weatherError}
-                  isLoading={weatherLoading}
-                >
-                  {weatherError ? 'N/A' : weather || '...'}
-                </PillItem>
-              </View>
+              <Pill 
+                icon={
+                  weatherLoading ? (
+                    <Ionicons name="cloudy-outline" size={15} color="#d946ef" />
+                  ) : weatherError ? (
+                    <Ionicons name="cloud-offline-outline" size={15} color="#ef4444" />
+                  ) : (
+                    <Ionicons name="sunny-outline" size={15} color="#f59e0b" />
+                  )
+                }
+                label={weatherError ? 'N/A' : weather || '...'}
+                backgroundColor="#fdf4ff"
+                iconColor="#f59e0b"
+                isError={weatherError}
+                isLoading={weatherLoading}
+              />
 
               {/* Photo Pill */}
-              <Pressable 
+              <Pill 
                 onPress={pickImage}
-                className="flex-row items-center rounded-full px-3 py-1.5"
-                style={{ backgroundColor: '#e0f2fe' }}
-              >
-                <Ionicons name="image" size={15} color="#0284c7" />
-                <Text style={{ fontFamily: 'Outfit-Medium', color: '#0284c7' }} className="text-[14px] ml-1.5">Photo</Text>
-              </Pressable>
+                icon={<Ionicons name="image" size={15} color="#0284c7" />}
+                label="Photo"
+                backgroundColor="#e0f2fe"
+                iconColor="#0284c7"
+              />
             </ScrollView>
 
           {/* Input Row */}

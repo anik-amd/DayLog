@@ -13,6 +13,7 @@ import { addMediaToEntry, deleteMedia } from '../../database/media';
 import { useAutoSave } from '../../hooks/useAutoSave';
 import MarkdownRenderer from '../../markdown/MarkdownRenderer';
 import { Entry } from '../../types/Entry';
+import Pill from '../../components/Pill';
 
 const extractTags = (text: string): string => {
   const matches = text.match(/#(\w+)/g);
@@ -348,56 +349,58 @@ export default function FullScreenEditor({ route, navigation }: any) {
                         </View>
                     )}
 
-                    <Pressable 
+                    <Pill 
                         onPress={() => setShowDatePicker(true)}
-                        className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-900/30"
-                    >
-                        <Ionicons name="calendar-outline" size={15} color="#7c3aed" />
-                        <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-purple-600 dark:text-purple-400">
-                            {formatDate(entryDateObj)}
-                        </Text>
-                    </Pressable>
+                        icon={<Ionicons name="calendar-outline" size={15} color="#7c3aed" />}
+                        label={formatDate(entryDateObj)}
+                        backgroundColor="#f3e8ff"
+                        iconColor="#7c3aed"
+                        textColor="#7c3aed"
+                    />
 
-                    <Pressable 
+                    <Pill 
                         onPress={() => setShowTimePicker(true)}
-                        className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-900/30"
-                    >
-                        <Ionicons name="time-outline" size={15} color="#7c3aed" />
-                        <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-purple-600 dark:text-purple-400">
-                            {time}
-                        </Text>
-                    </Pressable>
+                        icon={<Ionicons name="time-outline" size={15} color="#7c3aed" />}
+                        label={time}
+                        backgroundColor="#f3e8ff"
+                        iconColor="#7c3aed"
+                        textColor="#7c3aed"
+                    />
 
-                    <Pressable 
+                    <Pill 
                         onPress={handleLocationPress}
-                        className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30"
-                    >
-                        {locationLoading ? (
-                            <Ionicons name="location-outline" size={15} color="#d97706" />
-                        ) : (hasLocationPermission === false && !location) ? (
-                            <Ionicons name="location-outline" size={15} color="#ef4444" />
-                        ) : (
-                            <Ionicons name="location-outline" size={15} color="#d97706" />
-                        )}
-                        <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-amber-600 dark:text-amber-400">
-                            {location}
-                        </Text>
-                    </Pressable>
+                        icon={
+                            locationLoading ? (
+                                <Ionicons name="location-outline" size={15} color="#d97706" />
+                            ) : (hasLocationPermission === false && !location) ? (
+                                <Ionicons name="location-outline" size={15} color="#ef4444" />
+                            ) : (
+                                <Ionicons name="location-outline" size={15} color="#d97706" />
+                            )
+                        }
+                        label={location}
+                        backgroundColor="#fef3c7"
+                        iconColor="#d97706"
+                        textColor="#d97706"
+                        isLoading={locationLoading}
+                    />
 
-                    <View className="flex-row items-center rounded-full px-4 py-2 mr-2 bg-pink-50 dark:bg-pink-900/20 border border-pink-100 dark:border-pink-900/30">
-                        <Ionicons name="sunny-outline" size={15} color="#d946ef" />
-                        <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-pink-600 dark:text-pink-400">
-                            {weather}
-                        </Text>
-                    </View>
+                    <Pill 
+                        icon={<Ionicons name="sunny-outline" size={15} color="#d946ef" />}
+                        label={weather}
+                        backgroundColor="#fdf4ff"
+                        iconColor="#d946ef"
+                        textColor="#d946ef"
+                    />
 
-                    <TouchableOpacity 
+                    <Pill 
                         onPress={pickImage}
-                        className="flex-row items-center rounded-full px-4 py-2 bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-900/30"
-                    >
-                        <Ionicons name="image-outline" size={15} color="#0284c7" />
-                        <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[14px] ml-2 text-sky-600 dark:text-sky-400">Photo</Text>
-                    </TouchableOpacity>
+                        icon={<Ionicons name="image-outline" size={15} color="#0284c7" />}
+                        label="Photo"
+                        backgroundColor="#e0f2fe"
+                        iconColor="#0284c7"
+                        textColor="#0284c7"
+                    />
                 </ScrollView>
 
                 <TextInput

@@ -1,6 +1,5 @@
 import React from 'react';
-import { View, Text, Pressable, ViewStyle, TextStyle } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, Pressable } from 'react-native';
 
 interface PillProps {
   icon?: React.ReactNode;
@@ -11,6 +10,7 @@ interface PillProps {
   textColor?: string;
   isLoading?: boolean;
   isError?: boolean;
+  showChevron?: boolean;
 }
 
 export default function Pill({ 
@@ -21,21 +21,30 @@ export default function Pill({
   iconColor, 
   textColor,
   isLoading, 
-  isError 
+  isError,
+  showChevron 
 }: PillProps) {
+  const displayColor = isError && !textColor ? '#ef4444' : (textColor || iconColor);
+  const showLabel = isError ? 'N/A' : label;
+
   const content = (
     <View style={{ backgroundColor }} className="flex-row items-center rounded-full px-3 py-1.5">
       {icon && <View className="mr-1.5">{icon}</View>}
       <Text 
         style={{ 
-          fontFamily: 'Outfit-Bold',
-          color: textColor || iconColor,
+          fontFamily: 'Outfit-Medium',
+          color: displayColor,
           fontSize: 14
         }} 
         numberOfLines={1}
       >
-        {label}
+        {showLabel}
       </Text>
+      {showChevron && (
+        <View className="ml-1">
+          <Text style={{ color: iconColor, fontSize: 12 }}>▼</Text>
+        </View>
+      )}
     </View>
   );
 
