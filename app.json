@@ -32,11 +32,6 @@
       "expo-web-browser",
       "expo-image"
     ],
-    "extra": {
-      "eas": {
-        "projectId": "51ccb2de-4911-4785-8d49-59bb17516db7"
-      }
-    },
     "owner": "anik_amd"
   }
 }
