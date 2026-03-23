@@ -274,7 +274,8 @@ export default function FullScreenEditor({ route, navigation }: any) {
     <View className="flex-1 bg-white dark:bg-neutral-900">
       <KeyboardAvoidingView 
         className="flex-1" 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior="padding"
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
         <View className="flex-row items-center justify-between px-6 pb-4 pt-12 border-b border-neutral-100 dark:border-neutral-900/40">
             <TouchableOpacity onPress={handleBack} className="bg-neutral-50 dark:bg-neutral-900 w-10 h-10 rounded-full items-center justify-center border border-neutral-200 dark:border-neutral-800">

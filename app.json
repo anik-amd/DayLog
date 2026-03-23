@@ -20,7 +20,8 @@
         "foregroundImage": "./assets/icon.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anik_amd.daylog"
+      "package": "com.anik_amd.daylog",
+      "softwareKeyboardLayoutMode": "pan"
     },
     "web": {
       "favicon": "./assets/favicon.png"

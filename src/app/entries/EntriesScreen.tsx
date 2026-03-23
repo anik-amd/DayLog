@@ -294,7 +294,7 @@ export default function EntriesScreen({ navigation, route }: any) {
     <KeyboardAvoidingView 
       key={colorScheme}
       className="flex-1 bg-white dark:bg-neutral-900"
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior="padding"
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
       <View className="flex-1">
