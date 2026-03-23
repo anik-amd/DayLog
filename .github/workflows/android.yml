@@ -79,10 +79,18 @@ jobs:
       contents: write
     
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Download APK
         uses: actions/download-artifact@v4
         with:
           name: DayLog.apk
+
+      - name: Create git tag
+        run: |
+          git tag -a v${{ github.run_number }} -m "Release v${{ github.run_number }}"
+          git push origin v${{ github.run_number }}
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
