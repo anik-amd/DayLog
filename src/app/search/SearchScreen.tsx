@@ -5,7 +5,10 @@ import { useColorScheme } from 'nativewind';
 import { Ionicons } from '@expo/vector-icons';
 import Fuse from 'fuse.js';
 import { getAllEntries } from '../../database/entries';
+import { getAllTags, TagEntry } from '../../database/tags';
 import { Entry } from '../../types/Entry';
+
+const MAX_VISIBLE_TAGS = 6;
 
 export default function SearchScreen() {
   const { colorScheme } = useColorScheme();
@@ -16,13 +19,25 @@ export default function SearchScreen() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Entry[]>([]);
   const [allEntries, setAllEntries] = useState<Entry[]>([]);
+  const [popularTags, setPopularTags] = useState<TagEntry[]>([]);
+  const [showAllTags, setShowAllTags] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
   const [searchMode, setSearchMode] = useState<'content' | 'tag'>('content');
 
   useEffect(() => {
     loadEntries();
+    loadTags();
   }, []);
+
+  const loadTags = async () => {
+    try {
+      const tags = await getAllTags();
+      setPopularTags(tags);
+    } catch (error) {
+      console.error('Failed to load tags:', error);
+    }
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -157,14 +172,53 @@ export default function SearchScreen() {
           <ActivityIndicator size="large" color="#6366f1" />
         </View>
       ) : query.trim() === '' ? (
-        <View className="flex-1 items-center justify-center opacity-50">
-          <Ionicons name="search" size={48} color={isDark ? '#52525b' : '#a1a1aa'} />
-          <Text 
-            style={{ fontFamily: 'Outfit-Regular' }}
-            className="text-neutral-400 dark:text-neutral-500 mt-4"
-          >
-            Start typing to search
-          </Text>
+        <View className="flex-1">
+          {popularTags.length > 0 && (
+            <View className="px-4 pt-4">
+              <View className="flex-row items-center justify-between mb-3">
+                <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-neutral-500 dark:text-neutral-400 text-xs uppercase tracking-wider">
+                  Most used tags
+                </Text>
+                {popularTags.length > MAX_VISIBLE_TAGS && (
+                  <TouchableOpacity onPress={() => setShowAllTags(!showAllTags)}>
+                    <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-indigo-500 text-xs">
+                      {showAllTags ? 'Show less' : `Show all (${popularTags.length})`}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              <View className="flex-row flex-wrap">
+                {(showAllTags ? popularTags : popularTags.slice(0, MAX_VISIBLE_TAGS)).map(({ name, count }) => (
+                  <TouchableOpacity
+                    key={name}
+                    onPress={() => navigation.navigate('Home', { screen: 'Entries', params: { selectedTag: name } })}
+                    className="flex-row items-center rounded-full px-3 py-1.5 mr-2 mb-2"
+                    style={{ backgroundColor: '#f0fdf4' }}
+                  >
+                    <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-green-600 text-sm">
+                      #{name}
+                    </Text>
+                    <View className="ml-1.5 bg-green-100 dark:bg-green-900/30 rounded-full px-1.5 py-0.5">
+                      <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-green-600 dark:text-green-400 text-xs">
+                        {count}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          )}
+          {!showAllTags && (
+            <View className="flex-1 items-center justify-center opacity-50 px-4">
+              <Ionicons name="search" size={48} color={isDark ? '#52525b' : '#a1a1aa'} />
+              <Text 
+                style={{ fontFamily: 'Outfit-Regular' }}
+                className="text-neutral-400 dark:text-neutral-500 mt-4"
+              >
+                Start typing to search
+              </Text>
+            </View>
+          )}
         </View>
       ) : searching ? (
         <View className="flex-1 items-center justify-center">

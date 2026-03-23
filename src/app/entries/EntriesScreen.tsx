@@ -51,6 +51,12 @@ export default function EntriesScreen({ navigation, route }: any) {
   }, [highlightedDate]);
 
   useEffect(() => {
+    if (route.params?.selectedTag !== undefined) {
+      setSelectedTag(route.params.selectedTag);
+    }
+  }, [route.params?.selectedTag]);
+
+  useEffect(() => {
     const allGroupedEntries = entries.reduce((groups: { [key: string]: Entry[] }, entry) => {
       const date = entry.date;
       if (!groups[date]) {
