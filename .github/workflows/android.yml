@@ -25,32 +25,30 @@ jobs:
       - name: Generate Android native project
         run: npx expo prebuild --platform android --clean
 
-      - name: Generate release signing key
+      - name: Create keystore from secrets
         run: |
-          mkdir -p android/app/release
-          keytool -genkeypair -v -storetype PKCS12 -keystore android/app/release/upload.keystore \
-            -alias upload -keyalg RSA -keysize 2048 -validity 10000 \
-            -storepass android -keypass android \
-            -dname "CN=DayLog, OU=Development, O=DayLog, L=Unknown, ST=Unknown, C=US"
+          mkdir -p android/app
+          echo "${{ secrets.SIGNING_KEY }}" | base64 -d > android/app/upload.keystore
 
       - name: Configure signing for release build
         run: |
           cat >> android/app/build.gradle << 'EOF'
           
-          signingConfigs {
-              release {
-                  storeFile file('release/upload.keystore')
-                  storePassword 'android'
-                  keyAlias 'upload'
-                  keyPassword 'android'
+          android {
+              signingConfigs {
+                  release {
+                      storeFile file('upload.keystore')
+                      storePassword '${{ secrets.SIGNING_KEY_STORE_PASSWORD }}'
+                      keyAlias 'upload'
+                      keyPassword '${{ secrets.SIGNING_KEY_KEY_PASSWORD }}'
+                  }
               }
-          }
-          
-          buildTypes {
-              release {
-                  signingConfig signingConfigs.release
-                  minifyEnabled false
-                  shrinkResources false
+              buildTypes {
+                  release {
+                      signingConfig signingConfigs.release
+                      minifyEnabled false
+                      shrinkResources false
+                  }
               }
           }
           EOF
