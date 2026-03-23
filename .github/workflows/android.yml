@@ -25,15 +25,53 @@ jobs:
       - name: Generate Android native project
         run: npx expo prebuild --platform android --clean
 
-      - name: Build debug APK
+      - name: Generate release signing key
+        run: |
+          mkdir -p android/app/release
+          keytool -genkeypair -v -storetype PKCS12 -keystore android/app/release/upload.keystore \
+            -alias upload -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass android -keypass android \
+            -dname "CN=DayLog, OU=Development, O=DayLog, L=Unknown, ST=Unknown, C=US"
+
+      - name: Configure signing for release build
+        run: |
+          cat >> android/app/build.gradle << 'EOF'
+          
+          signingConfigs {
+              release {
+                  storeFile file('release/upload.keystore')
+                  storePassword 'android'
+                  keyAlias 'upload'
+                  keyPassword 'android'
+              }
+          }
+          
+          buildTypes {
+              release {
+                  signingConfig signingConfigs.release
+                  minifyEnabled false
+                  shrinkResources false
+              }
+          }
+          EOF
+
+      - name: Bundle JS for Android
+        run: npx expo export --platform android --output-dir ./dist
+
+      - name: Copy bundle to assets
+        run: |
+          mkdir -p android/app/src/main/assets
+          cp -r dist/* android/app/src/main/assets/
+
+      - name: Build release APK
         working-directory: android
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleRelease
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DayLog-debug.apk
-          path: android/app/build/outputs/apk/debug/*.apk
+          name: DayLog.apk
+          path: android/app/build/outputs/apk/release/*.apk
           retention-days: 7
 
   release:
@@ -46,7 +84,7 @@ jobs:
       - name: Download APK
         uses: actions/download-artifact@v4
         with:
-          name: DayLog-debug.apk
+          name: DayLog.apk
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -54,6 +92,8 @@ jobs:
           files: "*.apk"
           body: |
             ## DayLog Android APK
+            
+            Standalone APK with bundled JS - works without Metro bundler.
             
             Built from commit: ${{ github.sha }}
         env:
