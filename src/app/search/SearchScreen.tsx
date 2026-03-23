@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, TextInput, ScrollView, Text, ActivityIndicator, Keyboard, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useColorScheme } from 'nativewind';
@@ -18,6 +18,7 @@ export default function SearchScreen() {
   const [allEntries, setAllEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
+  const [searchMode, setSearchMode] = useState<'content' | 'tag'>('content');
 
   useEffect(() => {
     loadEntries();
@@ -55,22 +56,49 @@ export default function SearchScreen() {
     }
   };
 
-  const fuse = useMemo(() => new Fuse(allEntries, {
-    keys: ['content'],
-    threshold: 0.3,
-    distance: 100,
-    ignoreLocation: true,
-    includeMatches: true,
-    minMatchCharLength: 2,
-  }), [allEntries]);
-
   const performSearch = useCallback((searchQuery: string) => {
     setSearching(true);
-    const searchResults = fuse.search(searchQuery);
-    const matchedEntries = searchResults.map(result => result.item);
-    setResults(matchedEntries);
+    
+    let processedQuery = searchQuery.trim();
+    let searchKeys: string[];
+    
+    // Detect tag search (starts with #)
+    if (processedQuery.startsWith('#')) {
+      searchKeys = ['tags'];
+      processedQuery = processedQuery.substring(1); // Remove #
+      setSearchMode('tag');
+    } else {
+      searchKeys = ['content', 'tags', 'location'];
+      setSearchMode('content');
+    }
+    
+    if (processedQuery.length < 1) {
+      setResults([]);
+      setSearching(false);
+      return;
+    }
+    
+    const searchFuse = new Fuse(allEntries, {
+      keys: searchKeys,
+      threshold: 0.3,
+      distance: 100,
+      ignoreLocation: true,
+      includeMatches: true,
+      minMatchCharLength: 1,
+    });
+    
+    const searchResults = searchFuse.search(processedQuery);
+    // Deduplicate entries (same entry may match multiple fields)
+    const uniqueEntries = searchResults.reduce((acc, result) => {
+      if (!acc.find(e => e.id === result.item.id)) {
+        acc.push(result.item);
+      }
+      return acc;
+    }, [] as Entry[]);
+    
+    setResults(uniqueEntries);
     setSearching(false);
-  }, [fuse]);
+  }, [allEntries]);
 
   const handleEntryPress = (entry: Entry) => {
     navigation.navigate('Home', {
@@ -98,7 +126,7 @@ export default function SearchScreen() {
               ref={inputRef}
               value={query}
               onChangeText={setQuery}
-              placeholder="Search entries..."
+              placeholder={searchMode === 'tag' ? 'Search tags...' : 'Search entries, tags, locations...'}
               placeholderTextColor={isDark ? '#737373' : '#a1a1aa'}
               className="flex-1 text-base ml-2"
               style={{ 
