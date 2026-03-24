@@ -325,3 +325,39 @@ This must be used when:
 - All assigned tasks are completed
 - The agent needs user input or confirmation before proceeding
 - Significant work milestones are reached
+
+---
+
+# 16. Version Control Workflow
+
+### Version Location
+- App version is stored in `package.json` (version field)
+- Current version: `0.0.1` (pre-release)
+
+### Version Bumping
+Before merging to master, run one of these commands to bump the version:
+
+| Command | Example | When to Use |
+|---------|---------|-------------|
+| `npm version patch` | 0.0.1 → 0.0.2 | Bug fixes, small changes |
+| `npm version minor` | 0.0.1 → 0.1.0 | New features (backward compatible) |
+| `npm version major` | 0.0.1 → 1.0.0 | Breaking changes |
+
+**Recommended:** Use `npm version patch` for most releases until the app reaches stable state (1.0.0).
+
+### Release Process
+
+1. Work on dev branch
+2. Run `npm version patch` locally to bump version
+3. Commit and push changes (includes package.json update)
+4. Merge dev to master
+5. GitHub Actions workflow:
+   - Extracts version from package.json
+   - Creates git tag (e.g., v0.0.2)
+   - Builds APK
+   - Creates GitHub release with tag
+
+### Important Notes
+- Version bump happens in dev branch BEFORE merging to master
+- Both dev and master will have the same version after merge
+- The workflow automatically uses the version from package.json for tagging
