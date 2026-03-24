@@ -13,7 +13,8 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from 'nativewind';
 import { Ionicons } from '@expo/vector-icons';
-import { TagEntry, SortOption } from '../database/tags';
+import { TagEntry, SortOption, SortDirection } from '../database/tags';
+import { getSetting, setSetting } from '../storage/settings';
 
 interface TagSelectorModalProps {
   visible: boolean;
@@ -27,12 +28,9 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const MAX_HEIGHT = SCREEN_HEIGHT * 0.7;
 
 const SORT_OPTIONS: { key: SortOption; label: string }[] = [
-  { key: 'mostUsed', label: 'Most used' },
-  { key: 'leastUsed', label: 'Least used' },
-  { key: 'az', label: 'A → Z' },
-  { key: 'za', label: 'Z → A' },
-  { key: 'newToOld', label: 'New to old' },
-  { key: 'oldToNew', label: 'Old to new' },
+  { key: 'usage', label: 'Usage' },
+  { key: 'alphabetical', label: 'A-Z' },
+  { key: 'date', label: 'Date' },
 ];
 
 export default function TagSelectorModal({ 
@@ -48,9 +46,33 @@ export default function TagSelectorModal({
   
   const [localSelected, setLocalSelected] = useState<string[]>(selectedTags);
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortOption, setSortOption] = useState<SortOption>('mostUsed');
+  const [sortOption, setSortOption] = useState<SortOption>('usage');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const slideAnim = useRef(new Animated.Value(MAX_HEIGHT)).current;
   const backdropAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const loadPreferences = async () => {
+      const savedSort = await getSetting('tagSortOption');
+      const savedDir = await getSetting('tagSortDirection');
+      if (savedSort) setSortOption(savedSort as SortOption);
+      if (savedDir) setSortDirection(savedDir as SortDirection);
+    };
+    loadPreferences();
+  }, []);
+
+  const handleSortToggle = async (option: SortOption) => {
+    if (sortOption === option) {
+      const newDir = sortDirection === 'asc' ? 'desc' : 'asc';
+      setSortDirection(newDir);
+      await setSetting('tagSortDirection', newDir);
+    } else {
+      setSortOption(option);
+      setSortDirection('desc');
+      await setSetting('tagSortOption', option);
+      await setSetting('tagSortDirection', 'desc');
+    }
+  };
 
   useEffect(() => {
     if (visible) {
@@ -104,24 +126,19 @@ const filteredTags = useMemo(() => {
   }
   
   return [...base].sort((a, b) => {
+    const dir = sortDirection === 'asc' ? 1 : -1;
     switch (sortOption) {
-      case 'mostUsed':
-        return (b.count || 0) - (a.count || 0);
-      case 'leastUsed':
-        return (a.count || 0) - (b.count || 0);
-      case 'az':
-        return (a.name || '').localeCompare(b.name || '');
-      case 'za':
-        return (b.name || '').localeCompare(a.name || '');
-      case 'newToOld':
-        return (b.createdAt || 0) - (a.createdAt || 0);
-      case 'oldToNew':
-        return (a.createdAt || 0) - (b.createdAt || 0);
+      case 'usage':
+        return ((b.count || 0) - (a.count || 0)) * dir;
+      case 'alphabetical':
+        return (a.name || '').localeCompare(b.name || '') * dir;
+      case 'date':
+        return ((b.createdAt || 0) - (a.createdAt || 0)) * dir;
       default:
         return 0;
     }
   });
-}, [orderedTags, searchQuery, sortOption]);
+}, [orderedTags, searchQuery, sortOption, sortDirection]);
 
   const toggleTag = (tagName: string) => {
     setLocalSelected(prev => {
@@ -159,7 +176,7 @@ const filteredTags = useMemo(() => {
     });
   };
 
-  const currentSortLabel = SORT_OPTIONS.find(o => o.key === sortOption)?.label || 'Most used';
+  const currentSortLabel = SORT_OPTIONS.find(o => o.key === sortOption)?.label || 'Usage';
 
   return (
     <Modal
@@ -240,16 +257,13 @@ const filteredTags = useMemo(() => {
               <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 13 }} className="text-neutral-500 mr-3 ml-1">
                 Sort:
               </Text>
-              <ScrollView 
-                horizontal 
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ flexDirection: 'row', alignItems: 'center' }}
-              >
+              <View className="flex-row items-center flex-1">
                 {SORT_OPTIONS.map((option, index) => (
                   <React.Fragment key={option.key}>
                     <TouchableOpacity
-                      onPress={() => setSortOption(option.key)}
+                      onPress={() => handleSortToggle(option.key)}
                       style={{ paddingHorizontal: 10, paddingVertical: 4 }}
+                      className="flex-row items-center"
                     >
                       <Text 
                         style={{ fontFamily: 'Outfit-Medium', fontSize: 12 }}
@@ -259,13 +273,18 @@ const filteredTags = useMemo(() => {
                       >
                         {option.label}
                       </Text>
+                      {sortOption === option.key && (
+                        <Text className="text-indigo-500 ml-1 text-xs">
+                          {sortDirection === 'asc' ? '↑' : '↓'}
+                        </Text>
+                      )}
                     </TouchableOpacity>
                     {index < SORT_OPTIONS.length - 1 && (
                       <View style={{ height: 16, width: 1, backgroundColor: isDark ? '#404040' : '#e5e5e5' }} />
                     )}
                   </React.Fragment>
                 ))}
-              </ScrollView>
+              </View>
             </View>
           </View>
 

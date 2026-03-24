@@ -6,7 +6,9 @@ export interface TagEntry {
   createdAt?: number;
 }
 
-export type SortOption = 'mostUsed' | 'leastUsed' | 'az' | 'za' | 'newToOld' | 'oldToNew';
+export type SortOption = 'usage' | 'alphabetical' | 'date';
+
+export type SortDirection = 'asc' | 'desc';
 
 export const initTagsDb = async () => {
   const db = await getDb();
@@ -36,31 +38,23 @@ export const updateTagCount = async (tagName: string, delta: number) => {
   );
 };
 
-export const getAllTags = async (sortBy: SortOption = 'mostUsed'): Promise<TagEntry[]> => {
+export const getAllTags = async (sortBy: SortOption = 'usage', direction: SortDirection = 'desc'): Promise<TagEntry[]> => {
   const db = await getDb();
   
+  const dir = direction === 'asc' ? 'ASC' : 'DESC';
   let orderBy: string;
   switch (sortBy) {
-    case 'mostUsed':
-      orderBy = 'count DESC';
+    case 'usage':
+      orderBy = `count ${dir}`;
       break;
-    case 'leastUsed':
-      orderBy = 'count ASC';
+    case 'alphabetical':
+      orderBy = `name ${dir}`;
       break;
-    case 'az':
-      orderBy = 'name ASC';
-      break;
-    case 'za':
-      orderBy = 'name DESC';
-      break;
-    case 'newToOld':
-      orderBy = 'CASE WHEN createdAt IS NULL THEN 1 ELSE 0 END, createdAt DESC';
-      break;
-    case 'oldToNew':
-      orderBy = 'CASE WHEN createdAt IS NULL THEN 1 ELSE 0 END, createdAt ASC';
+    case 'date':
+      orderBy = `CASE WHEN createdAt IS NULL THEN 1 ELSE 0 END, createdAt ${dir}`;
       break;
     default:
-      orderBy = 'count DESC';
+      orderBy = `count ${dir}`;
   }
   
   const result = await db.getAllAsync<TagEntry>(
