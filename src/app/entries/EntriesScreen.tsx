@@ -541,9 +541,9 @@ export default function EntriesScreen({ navigation, route }: any) {
             <View 
                 className="rounded-[40px] overflow-hidden"
                 style={{ 
-                    backgroundColor: colorScheme === 'dark' ? '#1e1b4b' : '#ffffff',
+                    backgroundColor: colorScheme === 'dark' ? '#1e293b' : '#ffffff',
                     borderWidth: inputFocused ? 2 : 1,
-                    borderColor: colorScheme === 'dark' ? '#4c1d95' : '#ddd6fe',
+                    borderColor: colorScheme === 'dark' ? '#4f46e5' : '#ddd6fe',
                 }}
             >
                 <QuickEntryBar 

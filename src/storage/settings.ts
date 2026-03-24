@@ -35,3 +35,12 @@ export const getTemperatureUnit = async (): Promise<'c' | 'f'> => {
 export const setTemperatureUnit = async (unit: 'c' | 'f') => {
   await setSetting('temperatureUnit', unit);
 };
+
+export const getTheme = async (): Promise<'light' | 'dark' | 'system'> => {
+  const theme = await getSetting('theme');
+  return (theme as 'light' | 'dark' | 'system') || 'system';
+};
+
+export const setTheme = async (theme: 'light' | 'dark' | 'system') => {
+  await setSetting('theme', theme);
+};

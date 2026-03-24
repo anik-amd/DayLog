@@ -472,7 +472,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
           onPress={handleCardPress}
           className="rounded-2xl overflow-hidden"
           style={{
-            backgroundColor: colorScheme === 'dark' ? '#1e1b4b' : '#ffffff',
+            backgroundColor: colorScheme === 'dark' ? '#1e293b' : '#ffffff',
             paddingVertical: 8,
           }}
         >
@@ -489,28 +489,28 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
             >
               {/* Tag Pill */}
               <Pill 
-                icon={<Ionicons name="pricetag-outline" size={15} color="#16a34a" />}
+                icon={<Ionicons name="pricetag-outline" size={15} color={colorScheme === 'dark' ? '#22c55e' : '#16a34a'} />}
                 label={tags || 'Tags'}
-                backgroundColor="#f0fdf4"
-                iconColor="#16a34a"
+                backgroundColor={colorScheme === 'dark' ? '#166534' : '#f0fdf4'}
+                iconColor={colorScheme === 'dark' ? '#22c55e' : '#16a34a'}
               />
 
               {/* Date Pill */}
               <Pill 
                 onPress={() => setShowDatePicker(true)}
-                icon={<Ionicons name="calendar-outline" size={15} color="#7c3aed" />}
+                icon={<Ionicons name="calendar-outline" size={15} color={colorScheme === 'dark' ? '#a78bfa' : '#7c3aed'} />}
                 label={formatDate(entryDate)}
-                backgroundColor="#ede9fe"
-                iconColor="#7c3aed"
+                backgroundColor={colorScheme === 'dark' ? '#2e1065' : '#ede9fe'}
+                iconColor={colorScheme === 'dark' ? '#a78bfa' : '#7c3aed'}
               />
 
               {/* Time Pill */}
               <Pill 
                 onPress={() => setShowTimePicker(true)}
-                icon={<Ionicons name="time-outline" size={15} color="#7c3aed" />}
+                icon={<Ionicons name="time-outline" size={15} color={colorScheme === 'dark' ? '#a78bfa' : '#7c3aed'} />}
                 label={formatTime(entryDate)}
-                backgroundColor="#ede9fe"
-                iconColor="#7c3aed"
+                backgroundColor={colorScheme === 'dark' ? '#2e1065' : '#ede9fe'}
+                iconColor={colorScheme === 'dark' ? '#a78bfa' : '#7c3aed'}
               />
 
               {/* Location Pill */}
@@ -518,16 +518,16 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                 onPress={handleLocationPress}
                 icon={
                   locationLoading ? (
-                    <Ionicons name="location-outline" size={15} color="#d97706" />
+                    <Ionicons name="location-outline" size={15} color={colorScheme === 'dark' ? '#fbbf24' : '#d97706'} />
                   ) : (hasLocationPermission === false && !locationDisplay) ? (
                     <Ionicons name="location-outline" size={15} color="#ef4444" />
                   ) : (
-                    <Ionicons name="location-outline" size={15} color="#d97706" />
+                    <Ionicons name="location-outline" size={15} color={colorScheme === 'dark' ? '#fbbf24' : '#d97706'} />
                   )
                 }
                 label={locationDisplay || 'Location'}
-                backgroundColor="#fef3c7"
-                iconColor="#d97706"
+                backgroundColor={colorScheme === 'dark' ? '#451a03' : '#fef3c7'}
+                iconColor={colorScheme === 'dark' ? '#fbbf24' : '#d97706'}
                 isError={locationError}
                 isLoading={locationLoading}
               />
@@ -538,15 +538,15 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                   weatherLoading ? null : weatherError ? (
                     <Ionicons name="cloud-offline-outline" size={15} color="#ef4444" />
                   ) : weatherCode ? (
-                    <Ionicons name={getWeatherIconName(weatherCode) as any} size={15} color="#d946ef" />
+                    <Ionicons name={getWeatherIconName(weatherCode) as any} size={15} color={colorScheme === 'dark' ? '#e879f9' : '#d946ef'} />
                   ) : (
-                    <Ionicons name="sunny-outline" size={15} color="#d946ef" />
+                    <Ionicons name="sunny-outline" size={15} color={colorScheme === 'dark' ? '#e879f9' : '#d946ef'} />
                   )
                 }
                 label={weatherError ? 'N/A' : weather || 'Weather'}
-                backgroundColor="#fdf4ff"
-                iconColor="#d946ef"
-                textColor="#d946ef"
+                backgroundColor={colorScheme === 'dark' ? '#4a044e' : '#fdf4ff'}
+                iconColor={colorScheme === 'dark' ? '#e879f9' : '#d946ef'}
+                textColor={colorScheme === 'dark' ? '#e879f9' : '#d946ef'}
                 isError={weatherError}
                 isLoading={weatherLoading}
                 onPress={handleWeatherPress}
@@ -555,10 +555,10 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               {/* Photo Pill */}
               <Pill 
                 onPress={pickImage}
-                icon={<Ionicons name="image" size={15} color="#0284c7" />}
+                icon={<Ionicons name="image" size={15} color={colorScheme === 'dark' ? '#38bdf8' : '#0284c7'} />}
                 label="Photo"
-                backgroundColor="#e0f2fe"
-                iconColor="#0284c7"
+                backgroundColor={colorScheme === 'dark' ? '#0c4a6e' : '#e0f2fe'}
+                iconColor={colorScheme === 'dark' ? '#38bdf8' : '#0284c7'}
               />
             </ScrollView>
 
@@ -599,9 +599,9 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               <TouchableOpacity 
                   onPress={handleExpand}
                   className="p-1.5 rounded-full ml-2 mb-0.5"
-                  style={{ backgroundColor: '#ede9fe' }}
+                  style={{ backgroundColor: colorScheme === 'dark' ? '#2e1065' : '#ede9fe' }}
               >
-                  <Ionicons name="expand-outline" size={14} color="#7c3aed" />
+                  <Ionicons name="expand-outline" size={14} color={colorScheme === 'dark' ? '#a78bfa' : '#7c3aed'} />
               </TouchableOpacity>
 
               {/* Submit icon */}
@@ -609,7 +609,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                 <TouchableOpacity 
                     onPress={handleSubmit}
                     className="p-2 rounded-full ml-1 mb-0.5"
-                    style={{ backgroundColor: '#818cf8' }}
+                    style={{ backgroundColor: colorScheme === 'dark' ? '#6366f1' : '#818cf8' }}
                 >
                     <Ionicons name="checkmark" size={16} color="white" />
                 </TouchableOpacity>

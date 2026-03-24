@@ -29,9 +29,9 @@ export default function TagStrip({ tags, selectedTags, onTagPress, onMorePress }
           <TouchableOpacity
             onPress={onMorePress}
             className="flex-row items-center rounded-full px-3 py-1.5 mr-2"
-            style={{ backgroundColor: isDark ? '#1e1b4b' : '#eef2ff' }}
+            style={{ backgroundColor: isDark ? '#2e1065' : '#eef2ff' }}
           >
-            <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 14, color: isDark ? '#a5b4fc' : '#6366f1' }}>
+            <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 14, color: isDark ? '#a78bfa' : '#6366f1' }}>
               All
             </Text>
           </TouchableOpacity>
@@ -45,34 +45,34 @@ export default function TagStrip({ tags, selectedTags, onTagPress, onMorePress }
               className="flex-row items-center rounded-full px-3 py-1.5 mr-2"
               style={[
                 isSelected 
-                  ? { backgroundColor: '#dcfce7' }
+                  ? { backgroundColor: isDark ? '#166534' : '#dcfce7' }
                   : { backgroundColor: isDark ? '#404040' : '#f4f4f5' }
               ]}
             >
               <Text
                 style={{ fontFamily: 'Outfit-Medium' }}
-                className={`text-sm ${isSelected ? 'text-green-600' : 'text-neutral-500'}`}
+                className={`text-sm ${isSelected ? (isDark ? 'text-green-400' : 'text-green-600') : 'text-neutral-500'}`}
               >
                 #{tag.name}
               </Text>
               <View
                 className={`ml-1.5 rounded-full px-1.5 py-0.5 ${
-                  isSelected ? 'bg-green-200' : isDark ? 'bg-neutral-700' : 'bg-neutral-300'
+                  isSelected ? (isDark ? 'bg-green-900' : 'bg-green-200') : isDark ? 'bg-neutral-700' : 'bg-neutral-300'
                 }`}
               >
                 <Text
                   style={{ fontFamily: 'Outfit-Medium', fontSize: 12 }}
-                  className={isSelected ? 'text-green-600' : isDark ? 'text-neutral-400' : 'text-neutral-600'}
+                  className={isSelected ? (isDark ? 'text-green-400' : 'text-green-600') : isDark ? 'text-neutral-400' : 'text-neutral-600'}
                 >
                   {tag.count}
                 </Text>
               </View>
-              {isSelected && (
+               {isSelected && (
                 <TouchableOpacity
                   onPress={() => onTagPress(tag.name)}
                   className="ml-1"
                 >
-                  <Ionicons name="close-circle" size={14} color="#16a34a" />
+                  <Ionicons name="close-circle" size={14} color={isDark ? '#22c55e' : '#16a34a'} />
                 </TouchableOpacity>
               )}
             </TouchableOpacity>

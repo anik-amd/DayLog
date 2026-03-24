@@ -95,6 +95,7 @@ export default function ClockPicker({ value, onChange }: ClockPickerProps) {
           style={[
             styles.amPmButton,
             !isPM && { backgroundColor: accentColor },
+            !isPM ? {} : { backgroundColor: bgColor }
           ]}
         >
           <RNText style={[styles.amPmText, { color: !isPM ? '#fff' : textColor }]}>AM</RNText>
@@ -104,6 +105,7 @@ export default function ClockPicker({ value, onChange }: ClockPickerProps) {
           style={[
             styles.amPmButton,
             isPM && { backgroundColor: accentColor },
+            isPM ? {} : { backgroundColor: bgColor }
           ]}
         >
           <RNText style={[styles.amPmText, { color: isPM ? '#fff' : textColor }]}>PM</RNText>
@@ -240,12 +242,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: 16,
   },
-  amPmButton: {
+   amPmButton: {
     paddingHorizontal: 20,
     paddingVertical: 8,
     borderRadius: 20,
     marginHorizontal: 8,
-    backgroundColor: '#f4f4f5',
   },
   amPmText: {
     fontSize: 14,

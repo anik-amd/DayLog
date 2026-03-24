@@ -5,7 +5,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useColorScheme } from "nativewind";
 import { getAppStats } from '../../database/entries';
 import { useBackupEngine } from '../../services/BackupEngine';
-import { getTemperatureUnit, setTemperatureUnit } from '../../storage/settings';
+import { getTemperatureUnit, setTemperatureUnit, getTheme, setTheme } from '../../storage/settings';
 
 export default function SettingsScreen() {
   const navigation = useNavigation();
@@ -14,6 +14,7 @@ export default function SettingsScreen() {
   const [showThemeModal, setShowThemeModal] = useState(false);
   const [showTempModal, setShowTempModal] = useState(false);
   const [temperatureUnit, setTemperatureUnitState] = useState<'c' | 'f'>('c');
+  const [savedTheme, setSavedTheme] = useState<'light' | 'dark' | 'system'>('system');
   const [lastSync, setLastSync] = useState<string>("Never");
   const [syncing, setSyncing] = useState(false);
 
@@ -41,11 +42,15 @@ export default function SettingsScreen() {
     (async () => {
       const unit = await getTemperatureUnit();
       setTemperatureUnitState(unit);
+      const theme = await getTheme();
+      setSavedTheme(theme);
     })();
   }, []);
 
-  const handleSetTheme = (theme: "light" | "dark" | "system") => {
+  const handleSetTheme = async (theme: "light" | "dark" | "system") => {
     setColorScheme(theme);
+    setSavedTheme(theme);
+    await setTheme(theme);
     setShowThemeModal(false);
   };
 
@@ -137,13 +142,13 @@ export default function SettingsScreen() {
             </View>
         </Section>
 
-        <Section title="Appearance">
-            <SettingItem 
-                icon={colorScheme === 'dark' ? "moon" : "sunny"} 
-                label="Theme" 
-                value={colorScheme === 'dark' ? "Dark Mode" : "Light Mode"} 
-                onPress={() => setShowThemeModal(true)} 
-            />
+         <Section title="Appearance">
+             <SettingItem 
+                 icon={colorScheme === 'dark' ? "moon" : "sunny"} 
+                 label="Theme" 
+                 value={savedTheme === 'system' ? "System Default" : (colorScheme === 'dark' ? "Dark Mode" : "Light Mode")} 
+                 onPress={() => setShowThemeModal(true)} 
+             />
             <SettingItem icon="text" label="Editor Font" value="System Default" onPress={() => {}} last />
         </Section>
 
@@ -273,7 +278,7 @@ export default function SettingsScreen() {
                     >
                         <View className="flex-row items-center">
                             <Ionicons name="thermometer" size={20} color={temperatureUnit === 'c' ? "#4f46e5" : "#a3a3a3"} className="mr-4" />
-                            <Text style={{ fontFamily: 'Outfit-SemiBold' }} className={`text-[16px] ml-3 ${temperatureUnit === 'c' ? 'text-indigo-600' : 'text-neutral-500'}`}>Celsius (°C)</Text>
+                            <Text style={{ fontFamily: 'Outfit-SemiBold' }} className={`text-[16px] ml-3 ${temperatureUnit === 'c' ? 'text-indigo-600 dark:text-indigo-400' : 'text-neutral-500'}`}>Celsius (°C)</Text>
                         </View>
                         {temperatureUnit === 'c' && <Ionicons name="checkmark-circle" size={20} color="#4f46e5" />}
                     </TouchableOpacity>
@@ -286,7 +291,7 @@ export default function SettingsScreen() {
                     >
                         <View className="flex-row items-center">
                             <Ionicons name="thermometer" size={20} color={temperatureUnit === 'f' ? "#4f46e5" : "#a3a3a3"} className="mr-4" />
-                            <Text style={{ fontFamily: 'Outfit-SemiBold' }} className={`text-[16px] ml-3 ${temperatureUnit === 'f' ? 'text-indigo-600' : 'text-neutral-500'}`}>Fahrenheit (°F)</Text>
+                            <Text style={{ fontFamily: 'Outfit-SemiBold' }} className={`text-[16px] ml-3 ${temperatureUnit === 'f' ? 'text-indigo-600 dark:text-indigo-400' : 'text-neutral-500'}`}>Fahrenheit (°F)</Text>
                         </View>
                         {temperatureUnit === 'f' && <Ionicons name="checkmark-circle" size={20} color="#4f46e5" />}
                     </TouchableOpacity>

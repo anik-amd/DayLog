@@ -46,6 +46,7 @@ const getFullAddress = (address: Location.LocationGeocodedAddress): string => {
 
 export default function FullScreenEditor({ route, navigation }: any) {
   const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
   const { 
     entryId: initialEntryId, 
     initialContent,
@@ -438,16 +439,22 @@ export default function FullScreenEditor({ route, navigation }: any) {
                     contentContainerStyle={{ flexDirection: 'row', alignItems: 'center' }}
                 >
                     {tags ? tags.split(',').filter(t => t.trim()).map((tag, index) => (
-                        <View key={index} className="flex-row items-center rounded-full px-3 py-1.5 mr-2 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-900/30">
-                            <Ionicons name="pricetag-outline" size={14} color="#16a34a" />
-                            <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[13px] ml-1.5 text-green-600 dark:text-green-400">
+                        <View key={index} className="flex-row items-center rounded-full px-3 py-1.5 mr-2 border" style={{ 
+                          backgroundColor: isDark ? '#166534' : '#dcfce7',
+                          borderColor: isDark ? '#166534' : '#dcfce7'
+                        }}>
+                            <Ionicons name="pricetag-outline" size={14} color={isDark ? '#22c55e' : '#16a34a'} />
+                            <Text style={{ fontFamily: 'Outfit-Medium' }} className={`text-[13px] ml-1.5 ${isDark ? 'text-green-400' : 'text-green-600'}`}>
                                 {tag.trim()}
                             </Text>
                         </View>
                     )) : (
-                        <View className="flex-row items-center rounded-full px-3 py-1.5 mr-2 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-900/30">
-                            <Ionicons name="pricetag-outline" size={14} color="#16a34a" />
-                            <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-[13px] ml-1.5 text-green-600 dark:text-green-400">
+                        <View className="flex-row items-center rounded-full px-3 py-1.5 mr-2 border" style={{ 
+                          backgroundColor: isDark ? '#166534' : '#dcfce7',
+                          borderColor: isDark ? '#166534' : '#dcfce7'
+                        }}>
+                            <Ionicons name="pricetag-outline" size={14} color={isDark ? '#22c55e' : '#16a34a'} />
+                            <Text style={{ fontFamily: 'Outfit-Medium' }} className={`text-[13px] ml-1.5 ${isDark ? 'text-green-400' : 'text-green-600'}`}>
                                 Tags
                             </Text>
                         </View>
@@ -455,37 +462,37 @@ export default function FullScreenEditor({ route, navigation }: any) {
 
                     <Pill 
                         onPress={() => setShowDatePicker(true)}
-                        icon={<Ionicons name="calendar-outline" size={15} color="#7c3aed" />}
+                        icon={<Ionicons name="calendar-outline" size={15} color={isDark ? '#a78bfa' : '#7c3aed'} />}
                         label={formatDate(entryDateObj)}
-                        backgroundColor="#f3e8ff"
-                        iconColor="#7c3aed"
-                        textColor="#7c3aed"
+                        backgroundColor={isDark ? '#2e1065' : '#f3e8ff'}
+                        iconColor={isDark ? '#a78bfa' : '#7c3aed'}
+                        textColor={isDark ? '#a78bfa' : '#7c3aed'}
                     />
 
                     <Pill 
                         onPress={() => setShowTimePicker(true)}
-                        icon={<Ionicons name="time-outline" size={15} color="#7c3aed" />}
+                        icon={<Ionicons name="time-outline" size={15} color={isDark ? '#a78bfa' : '#7c3aed'} />}
                         label={time}
-                        backgroundColor="#f3e8ff"
-                        iconColor="#7c3aed"
-                        textColor="#7c3aed"
+                        backgroundColor={isDark ? '#2e1065' : '#f3e8ff'}
+                        iconColor={isDark ? '#a78bfa' : '#7c3aed'}
+                        textColor={isDark ? '#a78bfa' : '#7c3aed'}
                     />
 
                     <Pill 
                         onPress={handleLocationPress}
                         icon={
                             locationLoading ? (
-                                <Ionicons name="location-outline" size={15} color="#d97706" />
+                                <Ionicons name="location-outline" size={15} color={isDark ? '#fbbf24' : '#d97706'} />
                             ) : (hasLocationPermission === false && !locationDisplay) ? (
                                 <Ionicons name="location-outline" size={15} color="#ef4444" />
                             ) : (
-                                <Ionicons name="location-outline" size={15} color="#d97706" />
+                                <Ionicons name="location-outline" size={15} color={isDark ? '#fbbf24' : '#d97706'} />
                             )
                         }
                         label={locationDisplay || 'Location'}
-                        backgroundColor="#fef3c7"
-                        iconColor="#d97706"
-                        textColor="#d97706"
+                        backgroundColor={isDark ? '#451a03' : '#fef3c7'}
+                        iconColor={isDark ? '#fbbf24' : '#d97706'}
+                        textColor={isDark ? '#fbbf24' : '#d97706'}
                         isLoading={locationLoading}
                     />
 
@@ -495,26 +502,26 @@ export default function FullScreenEditor({ route, navigation }: any) {
                           weatherLoading ? null : weatherError ? (
                             <Ionicons name="cloud-offline-outline" size={15} color="#ef4444" />
                           ) : weatherCode ? (
-                            <Ionicons name={getWeatherIconName(weatherCode) as any} size={15} color="#d946ef" />
+                            <Ionicons name={getWeatherIconName(weatherCode) as any} size={15} color={isDark ? '#e879f9' : '#d946ef'} />
                           ) : (
-                            <Ionicons name="sunny-outline" size={15} color="#d946ef" />
+                            <Ionicons name="sunny-outline" size={15} color={isDark ? '#e879f9' : '#d946ef'} />
                           )
                         }
                         label={weatherError ? 'N/A' : weather || 'Weather'}
-                        backgroundColor="#fdf4ff"
-                        iconColor="#d946ef"
-                        textColor="#d946ef"
+                        backgroundColor={isDark ? '#4a044e' : '#fdf4ff'}
+                        iconColor={isDark ? '#e879f9' : '#d946ef'}
+                        textColor={isDark ? '#e879f9' : '#d946ef'}
                         isError={weatherError}
                         isLoading={weatherLoading}
                     />
 
                     <Pill 
                         onPress={pickImage}
-                        icon={<Ionicons name="image-outline" size={15} color="#0284c7" />}
+                        icon={<Ionicons name="image-outline" size={15} color={isDark ? '#38bdf8' : '#0284c7'} />}
                         label="Photo"
-                        backgroundColor="#e0f2fe"
-                        iconColor="#0284c7"
-                        textColor="#0284c7"
+                        backgroundColor={isDark ? '#0c4a6e' : '#e0f2fe'}
+                        iconColor={isDark ? '#38bdf8' : '#0284c7'}
+                        textColor={isDark ? '#38bdf8' : '#0284c7'}
                     />
                 </ScrollView>
 

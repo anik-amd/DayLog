@@ -302,31 +302,31 @@ const filteredTags = useMemo(() => {
                   className="flex-row items-center rounded-full px-3 py-2 mr-2 mb-2"
                   style={[
                     isSelected 
-                      ? { backgroundColor: '#dcfce7' }
+                      ? { backgroundColor: isDark ? '#166534' : '#dcfce7' }
                       : { backgroundColor: isDark ? '#262626' : '#f4f4f5' }
                   ]}
                 >
                   <Text
                     style={{ fontFamily: 'Outfit-Medium' }}
-                    className={`text-sm ${isSelected ? 'text-green-600' : 'text-neutral-500'}`}
+                    className={`text-sm ${isSelected ? (isDark ? 'text-green-400' : 'text-green-600') : 'text-neutral-500'}`}
                   >
                     #{tag.name}
                   </Text>
                   <View
                     className={`ml-1.5 rounded-full px-1.5 py-0.5 ${
-                      isSelected ? 'bg-green-200' : isDark ? 'bg-neutral-700' : 'bg-neutral-200'
+                      isSelected ? (isDark ? 'bg-green-900' : 'bg-green-200') : isDark ? 'bg-neutral-700' : 'bg-neutral-200'
                     }`}
                   >
                     <Text
                       style={{ fontFamily: 'Outfit-Medium', fontSize: 12 }}
-                      className={isSelected ? 'text-green-600' : isDark ? 'text-neutral-400' : 'text-neutral-600'}
+                      className={isSelected ? (isDark ? 'text-green-400' : 'text-green-600') : isDark ? 'text-neutral-400' : 'text-neutral-600'}
                     >
                       {tag.count}
                     </Text>
                   </View>
                   {isSelected && (
                     <View className="ml-auto">
-                      <Ionicons name="checkmark-circle" size={18} color="#16a34a" />
+                      <Ionicons name="checkmark-circle" size={18} color={isDark ? '#22c55e' : '#16a34a'} />
                     </View>
                   )}
                 </TouchableOpacity>
