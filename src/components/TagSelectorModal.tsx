@@ -13,7 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from 'nativewind';
 import { Ionicons } from '@expo/vector-icons';
-import { TagEntry, SortOption, SortDirection } from '../database/tags';
+import { TagEntry, SortOption, SortDirection, getAllTags } from '../database/tags';
 import { getSetting, setSetting } from '../storage/settings';
 import { useThemeColors } from '../hooks/useThemeColors';
 
@@ -50,6 +50,7 @@ export default function TagSelectorModal({
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOption, setSortOption] = useState<SortOption>('usage');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [allTags, setAllTags] = useState<TagEntry[]>(tags);
   const slideAnim = useRef(new Animated.Value(MAX_HEIGHT)).current;
   const backdropAnim = useRef(new Animated.Value(0)).current;
 
@@ -62,6 +63,20 @@ export default function TagSelectorModal({
     };
     loadPreferences();
   }, []);
+
+  useEffect(() => {
+    const loadTags = async () => {
+      try {
+        const fetchedTags = await getAllTags();
+        setAllTags(fetchedTags);
+      } catch (error) {
+        console.error('Failed to load tags:', error);
+      }
+    };
+    if (visible) {
+      loadTags();
+    }
+  }, [visible]);
 
   const handleSortToggle = async (option: SortOption) => {
     if (sortOption === option) {
@@ -112,11 +127,11 @@ export default function TagSelectorModal({
 
   const orderedTags = useMemo(() => {
     const selected = localSelected
-      .filter(st => tags.some(pt => pt.name === st))
-      .map(st => tags.find(pt => pt.name === st)!);
-    const others = tags.filter(pt => !localSelected.includes(pt.name));
+      .filter(st => allTags.some(pt => pt.name === st))
+      .map(st => allTags.find(pt => pt.name === st)!);
+    const others = allTags.filter(pt => !localSelected.includes(pt.name));
     return [...selected, ...others];
-  }, [tags, localSelected]);
+  }, [allTags, localSelected]);
 
 const filteredTags = useMemo(() => {
   let base = orderedTags;
@@ -221,7 +236,7 @@ const filteredTags = useMemo(() => {
             style={{ borderBottomWidth: 1, borderBottomColor: colors.border }}
           >
             <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 16, color: colors.text }}>
-              Filter by Tags ({tags.length})
+              Filter by Tags ({allTags.length})
             </Text>
             <TouchableOpacity onPress={handleClose}>
               <Ionicons name="close" size={24} color={colors.textSecondary} />

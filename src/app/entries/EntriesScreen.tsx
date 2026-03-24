@@ -10,7 +10,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 import { initDb } from '../../database/db';
 import { createEntry, getAllEntries } from '../../database/entries';
-import { getAllTags, recalculateAllTagCounts } from '../../database/tags';
+import { getAllTags } from '../../database/tags';
 import { Entry } from '../../types/Entry';
 import EntryCard from './EntryCard';
 import CalendarStrip, { CalendarStripRef } from './CalendarStrip';
@@ -191,7 +191,6 @@ export default function EntriesScreen({ navigation, route }: any) {
 
   const loadTagCounts = async () => {
     try {
-      await recalculateAllTagCounts();
       const tags = await getAllTags();
       const counts: Record<string, number> = {};
       for (const tag of tags) {
@@ -348,7 +347,7 @@ export default function EntriesScreen({ navigation, route }: any) {
             scrollEventThrottle={16}
           >
             {/* Tag Strip - scrolls with content */}
-            {(selectedTags.length > 0 || orderedTags.length > 0) && (
+            {popularTags.length > 0 && (
               <View className="mb-4">
                 <TagStrip
                   tags={orderedTags}
