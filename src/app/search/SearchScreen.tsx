@@ -8,11 +8,13 @@ import { getAllEntries } from '../../database/entries';
 import { getAllTags, TagEntry } from '../../database/tags';
 import { Entry } from '../../types/Entry';
 import TagSelectorModal from '../../components/TagSelectorModal';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 const MAX_VISIBLE_TAGS = 10;
 
 export default function SearchScreen() {
   const { colorScheme } = useColorScheme();
+  const colors = useThemeColors();
   const isDark = colorScheme === 'dark';
   const navigation = useNavigation<any>();
   const inputRef = useRef<TextInput>(null);
@@ -164,14 +166,14 @@ export default function SearchScreen() {
             onPress={() => navigation.goBack()}
             className="ml-3"
           >
-            <Text style={{ fontFamily: 'Outfit-Medium', color: '#6366f1' }}>Cancel</Text>
+            <Text style={{ fontFamily: 'Outfit-Medium', color: colors.accent }}>Cancel</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       {loading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#6366f1" />
+          <ActivityIndicator size="large" color={colors.accent} />
         </View>
       ) : query.trim() === '' ? (
         <View className="flex-1">
@@ -224,7 +226,7 @@ export default function SearchScreen() {
         </View>
       ) : searching ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#6366f1" />
+          <ActivityIndicator size="large" color={colors.accent} />
         </View>
       ) : results.length === 0 ? (
         <View className="flex-1 items-center justify-center opacity-50">

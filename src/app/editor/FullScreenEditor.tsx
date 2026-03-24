@@ -451,21 +451,21 @@ export default function FullScreenEditor({ route, navigation }: any) {
                 >
                     {tags ? tags.split(',').filter(t => t.trim()).map((tag, index) => (
                         <View key={index} className="flex-row items-center rounded-full px-3 py-1.5 mr-2 border" style={{ 
-                          backgroundColor: isDark ? '#166534' : '#dcfce7',
-                          borderColor: isDark ? '#166534' : '#dcfce7'
+                          backgroundColor: colors.pills.tags.background,
+                          borderColor: colors.pills.tags.background
                         }}>
-                            <Ionicons name="pricetag-outline" size={14} color={isDark ? '#22c55e' : '#16a34a'} />
-                            <Text style={{ fontFamily: 'Outfit-Medium' }} className={`text-[13px] ml-1.5 ${isDark ? 'text-green-400' : 'text-green-600'}`}>
+                            <Ionicons name="pricetag-outline" size={14} color={colors.pills.tags.icon} />
+                            <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 13, marginLeft: 6, color: colors.pills.tags.text }}>
                                 {tag.trim()}
                             </Text>
                         </View>
                     )) : (
                         <View className="flex-row items-center rounded-full px-3 py-1.5 mr-2 border" style={{ 
-                          backgroundColor: isDark ? '#166534' : '#dcfce7',
-                          borderColor: isDark ? '#166534' : '#dcfce7'
+                          backgroundColor: colors.pills.tags.background,
+                          borderColor: colors.pills.tags.background
                         }}>
-                            <Ionicons name="pricetag-outline" size={14} color={isDark ? '#22c55e' : '#16a34a'} />
-                            <Text style={{ fontFamily: 'Outfit-Medium' }} className={`text-[13px] ml-1.5 ${isDark ? 'text-green-400' : 'text-green-600'}`}>
+                            <Ionicons name="pricetag-outline" size={14} color={colors.pills.tags.icon} />
+                            <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 13, marginLeft: 6, color: colors.pills.tags.text }}>
                                 Tags
                             </Text>
                         </View>
@@ -473,20 +473,20 @@ export default function FullScreenEditor({ route, navigation }: any) {
 
                     <Pill 
                         onPress={() => setShowDatePicker(true)}
-                        icon={<Ionicons name="calendar-outline" size={15} color={colors.accent} />}
+                        icon={<Ionicons name="calendar-outline" size={15} color={colors.pills.date.icon} />}
                         label={formatDate(entryDateObj)}
-                        backgroundColor={colors.accentLight}
-                        iconColor={colors.accent}
-                        textColor={colors.accent}
+                        backgroundColor={colors.pills.date.background}
+                        iconColor={colors.pills.date.icon}
+                        textColor={colors.pills.date.text}
                     />
 
                     <Pill 
                         onPress={() => setShowTimePicker(true)}
-                        icon={<Ionicons name="time-outline" size={15} color={colors.accent} />}
+                        icon={<Ionicons name="time-outline" size={15} color={colors.pills.time.icon} />}
                         label={time}
-                        backgroundColor={colors.accentLight}
-                        iconColor={colors.accent}
-                        textColor={colors.accent}
+                        backgroundColor={colors.pills.time.background}
+                        iconColor={colors.pills.time.icon}
+                        textColor={colors.pills.time.text}
                     />
 
                     <Pill 
@@ -497,13 +497,13 @@ export default function FullScreenEditor({ route, navigation }: any) {
                             ) : (hasLocationPermission === false && !locationDisplay) ? (
                                 <Ionicons name="location-outline" size={15} color={colors.error} />
                             ) : (
-                                <Ionicons name="location-outline" size={15} color={colors.warning} />
+                                <Ionicons name="location-outline" size={15} color={colors.pills.location.icon} />
                             )
                         }
                         label={locationDisplay || 'Location'}
-                        backgroundColor={colorScheme === 'dark' ? '#451a03' : '#fef3c7'}
-                        iconColor={colors.warning}
-                        textColor={colors.warning}
+                        backgroundColor={colors.pills.location.background}
+                        iconColor={colors.pills.location.icon}
+                        textColor={colors.pills.location.text}
                         isLoading={locationLoading}
                     />
 
@@ -513,26 +513,26 @@ export default function FullScreenEditor({ route, navigation }: any) {
                           weatherLoading ? null : weatherError ? (
                             <Ionicons name="cloud-offline-outline" size={15} color={colors.error} />
                           ) : weatherCode ? (
-                            <Ionicons name={getWeatherIconName(weatherCode) as any} size={15} color={colors.accent} />
+                            <Ionicons name={getWeatherIconName(weatherCode) as any} size={15} color={colors.pills.weather.icon} />
                           ) : (
-                            <Ionicons name="sunny-outline" size={15} color={colors.accent} />
+                            <Ionicons name="sunny-outline" size={15} color={colors.pills.weather.icon} />
                           )
                         }
                         label={weatherError ? 'N/A' : weather || 'Weather'}
-                        backgroundColor={colorScheme === 'dark' ? '#4a044e' : '#fdf4ff'}
-                        iconColor={colors.accent}
-                        textColor={colors.accent}
+                        backgroundColor={colors.pills.weather.background}
+                        iconColor={colors.pills.weather.icon}
+                        textColor={colors.pills.weather.text}
                         isError={weatherError}
                         isLoading={weatherLoading}
                     />
 
                     <Pill 
                         onPress={pickImage}
-                        icon={<Ionicons name="image-outline" size={15} color={colors.accent} />}
+                        icon={<Ionicons name="image-outline" size={15} color={colors.pills.photo.icon} />}
                         label="Photo"
-                        backgroundColor={colors.accentLight}
-                        iconColor={colors.accent}
-                        textColor={colors.accent}
+                        backgroundColor={colors.pills.photo.background}
+                        iconColor={colors.pills.photo.icon}
+                        textColor={colors.pills.photo.text}
                     />
                 </ScrollView>
 

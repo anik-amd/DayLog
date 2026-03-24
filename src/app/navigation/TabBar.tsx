@@ -4,6 +4,7 @@ import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from "nativewind";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 type TabRoute = {
   name: string;
@@ -19,6 +20,7 @@ const tabs: TabRoute[] = [
 
 export default function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const { colorScheme } = useColorScheme();
+  const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const isDark = colorScheme === "dark";
 
@@ -83,14 +85,14 @@ export default function TabBar({ state, descriptors, navigation }: BottomTabBarP
             <Ionicons
               name={Icon}
               size={20}
-              color={isFocused ? '#6366f1' : isDark ? '#52525b' : '#a1a1aa'}
+              color={isFocused ? colors.accent : isDark ? '#52525b' : '#a1a1aa'}
             />
             <Text
               style={{
                 fontFamily: 'Outfit-Medium',
                 fontSize: 10,
                 marginTop: 2,
-                color: isFocused ? '#6366f1' : isDark ? '#52525b' : '#a1a1aa',
+                color: isFocused ? colors.accent : isDark ? '#52525b' : '#a1a1aa',
               }}
             >
               {label}

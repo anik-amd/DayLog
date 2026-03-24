@@ -498,28 +498,31 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
             >
               {/* Tag Pill */}
               <Pill 
-                icon={<Ionicons name="pricetag-outline" size={15} color={colorScheme === 'dark' ? '#22c55e' : '#16a34a'} />}
+                icon={<Ionicons name="pricetag-outline" size={15} color={colors.pills.tags.icon} />}
                 label={tags || 'Tags'}
-                backgroundColor={colorScheme === 'dark' ? '#166534' : '#f0fdf4'}
-                iconColor={colorScheme === 'dark' ? '#22c55e' : '#16a34a'}
+                backgroundColor={colors.pills.tags.background}
+                iconColor={colors.pills.tags.icon}
+                textColor={colors.pills.tags.text}
               />
 
               {/* Date Pill */}
               <Pill 
                 onPress={() => setShowDatePicker(true)}
-                icon={<Ionicons name="calendar-outline" size={15} color={colors.accent} />}
+                icon={<Ionicons name="calendar-outline" size={15} color={colors.pills.date.icon} />}
                 label={formatDate(entryDate)}
-                backgroundColor={colors.accentLight}
-                iconColor={colors.accent}
+                backgroundColor={colors.pills.date.background}
+                iconColor={colors.pills.date.icon}
+                textColor={colors.pills.date.text}
               />
 
               {/* Time Pill */}
               <Pill 
                 onPress={() => setShowTimePicker(true)}
-                icon={<Ionicons name="time-outline" size={15} color={colors.accent} />}
+                icon={<Ionicons name="time-outline" size={15} color={colors.pills.time.icon} />}
                 label={formatTime(entryDate)}
-                backgroundColor={colors.accentLight}
-                iconColor={colors.accent}
+                backgroundColor={colors.pills.time.background}
+                iconColor={colors.pills.time.icon}
+                textColor={colors.pills.time.text}
               />
 
               {/* Location Pill */}
@@ -531,12 +534,13 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                   ) : (hasLocationPermission === false && !locationDisplay) ? (
                     <Ionicons name="location-outline" size={15} color={colors.error} />
                   ) : (
-                    <Ionicons name="location-outline" size={15} color={colors.warning} />
+                    <Ionicons name="location-outline" size={15} color={colors.pills.location.icon} />
                   )
                 }
                 label={locationDisplay || 'Location'}
-                backgroundColor={colorScheme === 'dark' ? '#451a03' : '#fef3c7'}
-                iconColor={colors.warning}
+                backgroundColor={colors.pills.location.background}
+                iconColor={colors.pills.location.icon}
+                textColor={colors.pills.location.text}
                 isError={locationError}
                 isLoading={locationLoading}
               />
@@ -547,15 +551,15 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                   weatherLoading ? null : weatherError ? (
                     <Ionicons name="cloud-offline-outline" size={15} color={colors.error} />
                   ) : weatherCode ? (
-                    <Ionicons name={getWeatherIconName(weatherCode) as any} size={15} color={colors.accent} />
+                    <Ionicons name={getWeatherIconName(weatherCode) as any} size={15} color={colors.pills.weather.icon} />
                   ) : (
-                    <Ionicons name="sunny-outline" size={15} color={colors.accent} />
+                    <Ionicons name="sunny-outline" size={15} color={colors.pills.weather.icon} />
                   )
                 }
                 label={weatherError ? 'N/A' : weather || 'Weather'}
-                backgroundColor={colorScheme === 'dark' ? '#4a044e' : '#fdf4ff'}
-                iconColor={colors.accent}
-                textColor={colors.accent}
+                backgroundColor={colors.pills.weather.background}
+                iconColor={colors.pills.weather.icon}
+                textColor={colors.pills.weather.text}
                 isError={weatherError}
                 isLoading={weatherLoading}
                 onPress={handleWeatherPress}
@@ -564,10 +568,11 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               {/* Photo Pill */}
               <Pill 
                 onPress={pickImage}
-                icon={<Ionicons name="image" size={15} color={colors.accent} />}
+                icon={<Ionicons name="image" size={15} color={colors.pills.photo.icon} />}
                 label="Photo"
-                backgroundColor={colors.accentLight}
-                iconColor={colors.accent}
+                backgroundColor={colors.pills.photo.background}
+                iconColor={colors.pills.photo.icon}
+                textColor={colors.pills.photo.text}
               />
             </ScrollView>
           </View>

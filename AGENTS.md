@@ -393,3 +393,63 @@ Before merging to master, run one of these commands to bump the version:
 ### Fixed
 - Loading spinner
 ```
+
+---
+
+# 18. Color Scheme System
+
+## Overview
+DayLog supports multiple color schemes (themes) that define colors for all UI elements across the app. Each color scheme has both light and dark variants.
+
+## Files Structure
+- `src/themes/colors.ts` - Color scheme definitions
+- `src/hooks/useThemeColors.ts` - Hook to access current theme colors
+- `src/contexts/ColorSchemeContext.tsx` - Global state for color scheme (enables reactive updates)
+- `src/storage/settings.ts` - Storage for persisting selected scheme
+
+## How Color Schemes Work
+
+### Theme Interface
+Each color scheme contains:
+- **Base colors**: background, surface, surfaceElevated, text, textSecondary, textTertiary
+- **Accent colors**: accent, accentLight
+- **Border colors**: border, borderSubtle
+- **Semantic colors**: success, warning, error
+- **Pill colors**: Dedicated colors for each pill type (tags, date, time, location, weather, photo)
+
+### Using Theme Colors in Components
+```typescript
+import { useThemeColors } from '../../hooks/useThemeColors';
+
+function MyComponent() {
+  const colors = useThemeColors();
+  
+  // Use in styles
+  <View style={{ backgroundColor: colors.surface }}>
+    <Text style={{ color: colors.text }}>
+    <View style={{ backgroundColor: colors.pills.tags.background }}>
+  </View>
+}
+```
+
+### Pill Colors Structure
+Each pill type has:
+- `background` - Background color of the pill
+- `icon` - Color for the icon
+- `text` - Color for the label text
+
+## Creating New Color Schemes
+
+When adding a new color scheme, read `THEME_CREATION.md` for detailed step-by-step instructions.
+
+Key steps:
+1. Add new scheme entry in `src/themes/colors.ts`
+2. Define light and dark variants for all color fields
+3. Test in both light and dark modes
+4. Ensure pills are readable in both modes
+
+---
+
+# 19. Theme Creation Guide
+
+For detailed instructions on creating new color schemes, see `THEME_CREATION.md` in the project root.

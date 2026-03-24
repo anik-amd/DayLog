@@ -8,10 +8,12 @@ import { useBackupEngine } from '../../services/BackupEngine';
 import { getTemperatureUnit, setTemperatureUnit, getTheme, setTheme, getColorScheme } from '../../storage/settings';
 import { colorSchemes } from '../../themes/colors';
 import { useColorSchemeContext } from '../../contexts/ColorSchemeContext';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 export default function SettingsScreen() {
   const navigation = useNavigation();
   const { colorScheme, setColorScheme } = useColorScheme();
+  const colors = useThemeColors();
   const { setSchemeName } = useColorSchemeContext();
   const [stats, setStats] = useState({ entries: 0, photos: 0 });
   const [showThemeModal, setShowThemeModal] = useState(false);
@@ -330,11 +332,11 @@ export default function SettingsScreen() {
             className="flex-1 bg-black/60 items-center justify-end"
             onPress={() => setShowColorSchemeModal(false)}
         >
-            <View className="bg-white dark:bg-neutral-900 w-full rounded-t-[40px] px-8 pt-10 pb-16 shadow-2xl">
+            <View className="w-full rounded-t-[40px] px-8 pt-10 pb-16 shadow-2xl" style={{ backgroundColor: colors.surface }}>
                 <View className="flex-row items-center justify-between mb-8">
-                    <Text style={{ fontFamily: 'Outfit-Black' }} className="text-neutral-900 dark:text-neutral-50 text-2xl">Color Scheme</Text>
+                    <Text style={{ fontFamily: 'Outfit-Black', fontSize: 24, color: colors.text }}>Color Scheme</Text>
                     <TouchableOpacity onPress={() => setShowColorSchemeModal(false)}>
-                        <Ionicons name="close" size={24} color="#737373" />
+                        <Ionicons name="close" size={24} color={colors.textSecondary} />
                     </TouchableOpacity>
                 </View>
 
@@ -343,18 +345,20 @@ export default function SettingsScreen() {
                         <TouchableOpacity 
                             key={key}
                             onPress={() => handleSetColorScheme(key)}
-                            className={`flex-row items-center justify-between p-5 rounded-2xl border-2 ${
-                                savedColorScheme === key ? 'bg-indigo-50 border-indigo-500' : 'bg-neutral-50 dark:bg-neutral-800 border-transparent'
-                            }`}
+                            className="flex-row items-center justify-between p-5 rounded-2xl border-2"
+                            style={{
+                                backgroundColor: savedColorScheme === key ? colors.accentLight : colors.surface,
+                                borderColor: savedColorScheme === key ? colors.accent : 'transparent'
+                            }}
                         >
                             <View className="flex-row items-center">
                                 <View className="flex-row mr-3">
                                     <View style={{ width: 20, height: 20, borderRadius: 4, backgroundColor: scheme.light.accent, marginRight: 4 }} />
                                     <View style={{ width: 20, height: 20, borderRadius: 4, backgroundColor: scheme.dark.accent }} />
                                 </View>
-                                <Text style={{ fontFamily: 'Outfit-SemiBold' }} className={`text-[16px] ${savedColorScheme === key ? 'text-indigo-600 dark:text-indigo-400' : 'text-neutral-500'}`}>{scheme.name}</Text>
+                                <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: 16, color: savedColorScheme === key ? colors.accent : colors.textSecondary }}>{scheme.name}</Text>
                             </View>
-                            {savedColorScheme === key && <Ionicons name="checkmark-circle" size={20} color="#4f46e5" />}
+                            {savedColorScheme === key && <Ionicons name="checkmark-circle" size={20} color={colors.accent} />}
                         </TouchableOpacity>
                     ))}
                 </View>

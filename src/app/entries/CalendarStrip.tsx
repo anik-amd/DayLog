@@ -3,6 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, LayoutAnimation, Platform, UIMa
 import { Ionicons } from '@expo/vector-icons';
 import { Calendar } from 'react-native-calendars';
 import { useColorScheme } from "nativewind";
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -38,6 +39,7 @@ const CalendarStrip = forwardRef<CalendarStripRef, CalendarStripProps>(
   function CalendarStrip({ selectedDate, onDateSelect, entries, highlightedDate, onHighlightChange }, ref) {
     const [expanded, setExpanded] = useState(false);
     const { colorScheme } = useColorScheme();
+    const colors = useThemeColors();
     const isDark = colorScheme === "dark";
     const { width: screenWidth } = useWindowDimensions();
     const scrollRef = useRef<FlatList<DayItem>>(null);
@@ -108,23 +110,23 @@ const CalendarStrip = forwardRef<CalendarStripRef, CalendarStripProps>(
     const markedDates = useMemo(() => {
       const marks: any = {};
       entries.forEach(e => {
-        marks[e.date] = { marked: true, dotColor: '#6366f1' };
+        marks[e.date] = { marked: true, dotColor: colors.accent };
       });
       const todayStr = new Date().toISOString().split('T')[0];
       if (marks[todayStr]) {
-        marks[todayStr].dotColor = '#6366f1';
+        marks[todayStr].dotColor = colors.accent;
       } else {
-        marks[todayStr] = { marked: true, dotColor: '#3f3f46' };
+        marks[todayStr] = { marked: true, dotColor: isDark ? '#3f3f46' : '#d4d4d4' };
       }
       if (selectedDate) {
         marks[selectedDate] = {
           ...marks[selectedDate],
           selected: true,
-          selectedColor: '#6366f1',
+          selectedColor: colors.accent,
         };
       }
       return marks;
-    }, [entries, selectedDate]);
+    }, [entries, selectedDate, colors.accent, isDark]);
 
     const monthLabel = useMemo(() => {
       try {
@@ -155,32 +157,23 @@ const CalendarStrip = forwardRef<CalendarStripRef, CalendarStripProps>(
           activeOpacity={0.8}
         >
           <View
-            className={`flex-1 items-center justify-center rounded-[20px] ${
+            className="flex-1 items-center justify-center rounded-[20px]"
+            style={[
               isSelected
-                ? 'bg-indigo-600'
+                ? { backgroundColor: colors.accent }
                 : isHighlighted
-                  ? 'bg-indigo-200 dark:bg-indigo-900/60 border border-indigo-400 dark:border-indigo-600'
-                  : 'bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/80 shadow-sm'
-            }`}
-            style={!isSelected && !isHighlighted ? {
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.08,
-              shadowRadius: 3,
-            } : {}}
+                  ? { backgroundColor: colors.accentLight, borderWidth: 1, borderColor: colors.accent }
+                  : { backgroundColor: isDark ? '#1e1e1e' : '#ffffff', borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#e5e5e5', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 3 }
+            ]}
           >
-            <Text style={{ fontFamily: 'Outfit-Black' }} className={`text-[8px] uppercase tracking-tighter ${
-              isSelected ? 'text-indigo-200' : isHighlighted ? 'text-indigo-600 dark:text-indigo-300' : item.isToday ? 'text-indigo-600 dark:text-indigo-400' : 'text-neutral-400 dark:text-neutral-500'
-            }`}>
+            <Text style={{ fontFamily: 'Outfit-Black', fontSize: 8, letterSpacing: -0.5, color: isSelected ? '#ffffff' : isHighlighted ? colors.accent : item.isToday ? colors.accent : (isDark ? '#737373' : '#a1a1aa') }}>
               {item.dayName}
             </Text>
-            <Text style={{ fontFamily: 'Outfit-Black' }} className={`text-[14px] ${
-              isSelected ? 'text-white' : isHighlighted ? 'text-indigo-700 dark:text-indigo-200' : item.isToday ? 'text-neutral-900 dark:text-white' : 'text-neutral-800 dark:text-neutral-200'
-            }`}>
+            <Text style={{ fontFamily: 'Outfit-Black', fontSize: 14, color: isSelected ? '#ffffff' : isHighlighted ? colors.accent : item.isToday ? (isDark ? '#ffffff' : '#171717') : (isDark ? '#e4e4e7' : '#404040') }}>
               {item.dayNum}
             </Text>
             {item.hasEntries && !isSelected && (
-              <View className={`absolute bottom-1.5 w-1 h-1 rounded-full ${item.isToday ? 'bg-indigo-400' : 'bg-neutral-300 dark:bg-neutral-600'}`} />
+              <View className="absolute bottom-1.5 w-1 h-1 rounded-full" style={{ backgroundColor: item.isToday ? colors.accent : (isDark ? '#52525b' : '#d4d4d4') }} />
             )}
           </View>
         </TouchableOpacity>
@@ -198,7 +191,7 @@ const CalendarStrip = forwardRef<CalendarStripRef, CalendarStripProps>(
               {selectedDate ? 'Filtered' : expanded ? 'Full Calendar' : 'All Entries'}
             </Text>
             {selectedDate && (
-              <Ionicons name="close-circle" size={12} color="#6366f1" className="ml-1" />
+              <Ionicons name="close-circle" size={12} color={colors.accent} className="ml-1" />
             )}
           </TouchableOpacity>
           <TouchableOpacity onPress={toggleExpand} className="p-1">
@@ -215,14 +208,14 @@ const CalendarStrip = forwardRef<CalendarStripRef, CalendarStripProps>(
                 backgroundColor: 'transparent',
                 calendarBackground: 'transparent',
                 textSectionTitleColor: isDark ? '#737373' : '#a3a3a3',
-                selectedDayBackgroundColor: '#6366f1',
+                selectedDayBackgroundColor: colors.accent,
                 selectedDayTextColor: '#ffffff',
-                todayTextColor: '#6366f1',
+                todayTextColor: colors.accent,
                 dayTextColor: isDark ? '#e5e5e5' : '#404040',
                 textDisabledColor: isDark ? '#3f3f46' : '#d4d4d4',
-                dotColor: '#6366f1',
+                dotColor: colors.accent,
                 selectedDotColor: '#ffffff',
-                arrowColor: '#6366f1',
+                arrowColor: colors.accent,
                 monthTextColor: isDark ? '#ffffff' : '#171717',
                 textMonthFontWeight: 'black',
                 textDayFontWeight: 'bold',

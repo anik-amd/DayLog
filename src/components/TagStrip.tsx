@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-nati
 import { useColorScheme } from 'nativewind';
 import { Ionicons } from '@expo/vector-icons';
 import { TagEntry } from '../database/tags';
+import { useThemeColors } from '../hooks/useThemeColors';
 
 interface TagStripProps {
   tags: TagEntry[];
@@ -13,6 +14,7 @@ interface TagStripProps {
 
 export default function TagStrip({ tags, selectedTags, onTagPress, onMorePress }: TagStripProps) {
   const { colorScheme } = useColorScheme();
+  const colors = useThemeColors();
   const isDark = colorScheme === 'dark';
   
   const displayTags = tags.slice(0, 10);
@@ -31,7 +33,7 @@ export default function TagStrip({ tags, selectedTags, onTagPress, onMorePress }
             className="flex-row items-center rounded-full px-3 py-1.5 mr-2"
             style={{ backgroundColor: isDark ? '#2e1065' : '#eef2ff' }}
           >
-            <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 14, color: isDark ? '#a78bfa' : '#6366f1' }}>
+            <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 14, color: colors.accent }}>
               All
             </Text>
           </TouchableOpacity>
