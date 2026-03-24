@@ -9,17 +9,18 @@ import ReadEntryScreen from '../entries/ReadEntryScreen';
 import MapScreen from '../map/MapScreen';
 import SearchScreen from '../search/SearchScreen';
 import TabBar from './TabBar';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function HomeStack() {
-  const { colorScheme } = useColorScheme();
+  const colors = useThemeColors();
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: colorScheme === 'dark' ? '#171717' : '#ffffff' }
+        contentStyle: { backgroundColor: colors.background }
       }}
     >
       <Stack.Screen name="Entries" component={EntriesScreen} />

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Modal, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from "nativewind";
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface ConfirmationModalProps {
   visible: boolean;
@@ -25,7 +26,7 @@ export default function ConfirmationModal({
   isDestructive = false
 }: ConfirmationModalProps) {
   const { colorScheme } = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
 
   return (
     <Modal
@@ -35,12 +36,13 @@ export default function ConfirmationModal({
       onRequestClose={onCancel}
     >
       <Pressable 
-        className="flex-1 bg-black/60 items-center justify-end"
+        className="flex-1 items-center justify-end"
+        style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
         onPress={onCancel}
       >
-        <Pressable onPress={(e) => e.stopPropagation()} className="bg-white dark:bg-neutral-900 w-full rounded-t-[40px] px-8 pt-10 pb-16 shadow-2xl">
+        <Pressable onPress={(e) => e.stopPropagation()} style={{ backgroundColor: colors.surface, width: '100%', borderTopLeftRadius: 40, borderTopRightRadius: 40, paddingHorizontal: 32, paddingTop: 40, paddingBottom: 64, shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.15, shadowRadius: 12, elevation: 8 }}>
           <View className="mb-8">
-            <Text style={{ fontFamily: 'Outfit-Black' }} className="text-neutral-900 dark:text-neutral-50 text-2xl text-center">
+            <Text style={{ fontFamily: 'Outfit-Black', fontSize: 24, color: colors.text, textAlign: 'center' }}>
               {title}
             </Text>
           </View>
@@ -48,18 +50,18 @@ export default function ConfirmationModal({
           <View className="space-y-3">
             <TouchableOpacity 
               onPress={onConfirm}
-              className="flex-row items-center justify-center p-5 rounded-2xl bg-red-500"
+              style={{ backgroundColor: isDestructive ? colors.error : colors.accent, padding: 20, borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}
             >
-              <Text style={{ fontFamily: 'Outfit-SemiBold' }} className="text-white text-[16px]">
+              <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: 16, color: '#ffffff' }}>
                 {confirmLabel}
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
               onPress={onCancel}
-              className="flex-row items-center justify-center p-5 rounded-2xl border border-neutral-200 dark:border-neutral-700"
+              style={{ padding: 20, borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border }}
             >
-              <Text style={{ fontFamily: 'Outfit-SemiBold' }} className="text-neutral-600 dark:text-neutral-400 text-[16px]">
+              <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: 16, color: colors.textSecondary }}>
                 {cancelLabel}
               </Text>
             </TouchableOpacity>

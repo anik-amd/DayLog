@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useColorScheme } from "nativewind";
+import { useThemeColors } from '../hooks/useThemeColors';
 
 interface MarkdownProps {
   content: string;
@@ -9,43 +10,40 @@ interface MarkdownProps {
 
 export default function MarkdownRenderer({ content, onTagPress }: MarkdownProps) {
   const { colorScheme } = useColorScheme();
+  const colors = useThemeColors();
   const isDark = colorScheme === 'dark';
   const lines = content.split('\n');
-
-  const textColor = isDark ? '#d4d4d8' : '#3f3f46';
-  const headingColor = isDark ? '#fafafa' : '#27272a';
-  const subheadingColor = isDark ? '#e4e4e7' : '#3f3f46';
 
   return (
     <View>
       {lines.map((line, index) => {
         if (line.startsWith('# ')) {
           return (
-            <Text key={index} style={[localStyles.h1, { color: headingColor }]}>
-              {parseInline(line.substring(2), isDark, onTagPress)}
+            <Text key={index} style={[localStyles.h1, { color: colors.text }]}>
+              {parseInline(line.substring(2), colors, isDark, onTagPress)}
             </Text>
           );
         }
         if (line.startsWith('## ')) {
           return (
-            <Text key={index} style={[localStyles.h2, { color: headingColor }]}>
-              {parseInline(line.substring(3), isDark, onTagPress)}
+            <Text key={index} style={[localStyles.h2, { color: colors.text }]}>
+              {parseInline(line.substring(3), colors, isDark, onTagPress)}
             </Text>
           );
         }
         if (line.startsWith('### ')) {
           return (
-            <Text key={index} style={[localStyles.h3, { color: subheadingColor }]}>
-              {parseInline(line.substring(4), isDark, onTagPress)}
+            <Text key={index} style={[localStyles.h3, { color: colors.text }]}>
+              {parseInline(line.substring(4), colors, isDark, onTagPress)}
             </Text>
           );
         }
         if (line.startsWith('- ') || line.startsWith('* ')) {
           return (
             <View key={index} style={localStyles.bulletRow}>
-              <Text style={[localStyles.bullet]}>•</Text>
-              <Text style={[localStyles.bulletText, { color: textColor }]}>
-                {parseInline(line.substring(2), isDark, onTagPress)}
+              <Text style={[localStyles.bullet, { color: colors.textSecondary }]}>•</Text>
+              <Text style={[localStyles.bulletText, { color: colors.text }]}>
+                {parseInline(line.substring(2), colors, isDark, onTagPress)}
               </Text>
             </View>
           );
@@ -55,8 +53,8 @@ export default function MarkdownRenderer({ content, onTagPress }: MarkdownProps)
         }
         
         return (
-          <Text key={index} style={[localStyles.paragraph, { color: textColor }]}>
-            {parseInline(line, isDark, onTagPress)}
+          <Text key={index} style={[localStyles.paragraph, { color: colors.text }]}>
+            {parseInline(line, colors, isDark, onTagPress)}
           </Text>
         );
       })}
@@ -97,7 +95,6 @@ const localStyles = StyleSheet.create({
   bullet: {
     fontFamily: 'Outfit-Regular',
     fontSize: 18,
-    color: '#a1a1aa',
     marginRight: 10,
   },
   bulletText: {
@@ -119,10 +116,8 @@ const localStyles = StyleSheet.create({
   },
 });
 
-function parseInline(text: string, isDark: boolean, onTagPress?: (tag: string) => void) {
+function parseInline(text: string, colors: any, isDark: boolean, onTagPress?: (tag: string) => void) {
   const parts: any[] = [];
-  const textColor = isDark ? '#d4d4d8' : '#3f3f46';
-  const headingColor = isDark ? '#fafafa' : '#27272a';
   
   const boldSegments = text.split(/(\*\*.*?\*\*)/g);
   
@@ -130,24 +125,21 @@ function parseInline(text: string, isDark: boolean, onTagPress?: (tag: string) =
     if (segment.startsWith('**') && segment.endsWith('**')) {
       const innerText = segment.slice(2, -2);
       parts.push(
-        <Text key={`bold-${i}`} style={[{ fontFamily: 'Outfit-SemiBold', color: headingColor }]}>
-          {parseItalics(innerText, isDark, onTagPress)}
+        <Text key={`bold-${i}`} style={[{ fontFamily: 'Outfit-SemiBold', color: colors.text }]}>
+          {parseItalics(innerText, colors, isDark, onTagPress)}
         </Text>
       );
     } else if (segment) {
-      parts.push(<React.Fragment key={`frag-${i}`}>{parseItalics(segment, isDark, onTagPress)}</React.Fragment>);
+      parts.push(<React.Fragment key={`frag-${i}`}>{parseItalics(segment, colors, isDark, onTagPress)}</React.Fragment>);
     }
   });
 
   return parts.length > 0 ? parts : text;
 }
 
-function parseItalics(text: string, isDark: boolean, onTagPress?: (tag: string) => void) {
+function parseItalics(text: string, colors: any, isDark: boolean, onTagPress?: (tag: string) => void) {
   if (!text) return [];
   const parts: any[] = [];
-  const italicColor = isDark ? '#a1a1aa' : '#52525b';
-  const textColor = isDark ? '#d4d4d8' : '#3f3f46';
-  const tagColor = isDark ? '#4ade80' : '#16a34a';
   
   const tagPattern = /(#\w+)/g;
   const segments = text.split(tagPattern);
@@ -156,7 +148,7 @@ function parseItalics(text: string, isDark: boolean, onTagPress?: (tag: string) 
     if (seg.match(tagPattern)) {
       parts.push(
         <TouchableOpacity key={`tag-${i}`} onPress={() => onTagPress?.(seg.substring(1))} activeOpacity={0.7}>
-          <Text style={{ fontFamily: 'Outfit-Medium', color: tagColor, lineHeight: 28 }}>{seg}</Text>
+          <Text style={{ fontFamily: 'Outfit-Medium', color: colors.pills.tags.text, lineHeight: 28 }}>{seg}</Text>
         </TouchableOpacity>
       );
     } else {
@@ -165,12 +157,12 @@ function parseItalics(text: string, isDark: boolean, onTagPress?: (tag: string) 
         if ((s.startsWith('*') && s.endsWith('*')) || (s.startsWith('_') && s.endsWith('_'))) {
           const innerText = s.substring(1, s.length - 1);
           parts.push(
-            <Text key={`italic-${i}-${j}`} style={[{ fontFamily: 'Outfit-Regular', fontStyle: 'italic', color: italicColor }]}>
+            <Text key={`italic-${i}-${j}`} style={[{ fontFamily: 'Outfit-Regular', fontStyle: 'italic', color: colors.textSecondary }]}>
               {innerText}
             </Text>
           );
         } else if (s) {
-          parts.push(<Text key={`text-${i}-${j}`} style={{ fontFamily: 'Outfit-Regular', color: textColor }}>{s}</Text>);
+          parts.push(<Text key={`text-${i}-${j}`} style={{ fontFamily: 'Outfit-Regular', color: colors.text }}>{s}</Text>);
         }
       });
     }
