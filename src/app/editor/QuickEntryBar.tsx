@@ -473,7 +473,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
           onPress={handleCardPress}
           className="rounded-2xl"
           style={{
-            backgroundColor: colors.surfaceElevated,
+            backgroundColor: colors.background,
             paddingHorizontal: 16,
             paddingVertical: 8,
             borderRadius: 16,

@@ -48,7 +48,7 @@ export default function TagStrip({ tags, selectedTags, onTagPress, onMorePress }
               style={[
                 isSelected 
                   ? { backgroundColor: colors.pills.tags.background }
-                  : { backgroundColor: isDark ? '#262626' : '#f4f4f5' }
+                  : { backgroundColor: colors.surface }
               ]}
             >
               <Text

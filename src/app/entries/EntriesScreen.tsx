@@ -399,7 +399,7 @@ export default function EntriesScreen({ navigation, route }: any) {
                   </Text>
                   
                   {/* Entries for this date */}
-                  <View style={{ backgroundColor: colors.surface, borderRadius: 16, overflow: 'hidden' }}>
+                  <View style={{ backgroundColor: colors.background, borderRadius: 16, overflow: 'hidden' }}>
                     {groupedEntries[dateStr].map((entry: Entry, index: number) => (
                       <EntryCard 
                         key={entry.id} 
@@ -543,7 +543,7 @@ export default function EntriesScreen({ navigation, route }: any) {
         >
             <View 
                 style={{ 
-                    backgroundColor: colors.surfaceElevated,
+                    backgroundColor: colors.background,
                     borderRadius: 40,
                     borderWidth: inputFocused ? 2 : 1,
                     borderColor: inputFocused ? colors.accent : colors.border,
