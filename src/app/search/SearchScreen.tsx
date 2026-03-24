@@ -9,6 +9,7 @@ import { getAllTags, TagEntry } from '../../database/tags';
 import { Entry } from '../../types/Entry';
 import TagSelectorModal from '../../components/TagSelectorModal';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import TagPill from '../../components/TagPill';
 
 const MAX_VISIBLE_TAGS = 10;
 
@@ -195,21 +196,12 @@ export default function SearchScreen() {
               </View>
               <View className="flex-row flex-wrap">
                 {(showAllTags ? popularTags : popularTags.slice(0, MAX_VISIBLE_TAGS)).map(({ name, count }) => (
-                  <TouchableOpacity
+                  <TagPill
                     key={name}
+                    name={name}
+                    count={count}
                     onPress={() => navigation.navigate('Home', { screen: 'Entries', params: { selectedTags: [name] } })}
-                    className="flex-row items-center rounded-full px-3 py-1.5 mr-2 mb-2"
-                    style={{ backgroundColor: colors.surfaceElevated }}
-                  >
-                    <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 14, color: colors.textSecondary }}>
-                      #{name}
-                    </Text>
-                    <View style={{ marginLeft: 6, borderRadius: 10, paddingHorizontal: 6, paddingVertical: 2, backgroundColor: colors.surface }}>
-                      <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 12, color: colors.textSecondary }}>
-                        {count}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
+                  />
                 ))}
               </View>
             </View>

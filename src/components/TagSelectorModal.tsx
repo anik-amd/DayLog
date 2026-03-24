@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { TagEntry, SortOption, SortDirection, getAllTags } from '../database/tags';
 import { getSetting, setSetting } from '../storage/settings';
 import { useThemeColors } from '../hooks/useThemeColors';
+import TagPill from './TagPill';
 
 interface TagSelectorModalProps {
   visible: boolean;
@@ -317,47 +318,16 @@ const filteredTags = useMemo(() => {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
-            {filteredTags.map((tag) => {
-              const isSelected = localSelected.includes(tag.name);
-              return (
-                <TouchableOpacity
-                  key={tag.name}
-                  onPress={() => toggleTag(tag.name)}
-                  className="flex-row items-center rounded-full px-3 py-2 mr-2 mb-2"
-                  style={[
-                    isSelected 
-                      ? { backgroundColor: colors.pills.tags.background }
-                      : { backgroundColor: colors.surfaceElevated }
-                  ]}
-                >
-                  <Text
-                    style={{ fontFamily: 'Outfit-Medium', fontSize: 14, color: isSelected ? colors.pills.tags.text : colors.textSecondary }}
-                  >
-                    #{tag.name}
-                  </Text>
-                    <View
-                      style={{
-                        marginLeft: 6,
-                        borderRadius: 10,
-                        paddingHorizontal: 6,
-                        paddingVertical: 2,
-                        backgroundColor: isSelected ? `${colors.pills.tags.icon}20` : colors.surface
-                      }}
-                    >
-                      <Text
-                        style={{ fontFamily: 'Outfit-Medium', fontSize: 12, color: isSelected ? colors.pills.tags.icon : colors.textSecondary }}
-                      >
-                        {tag.count}
-                      </Text>
-                    </View>
-                  {isSelected && (
-                    <View className="ml-auto">
-                      <Ionicons name="checkmark-circle" size={18} color={colors.pills.tags.icon} />
-                    </View>
-                  )}
-                </TouchableOpacity>
-              );
-            })}
+            {filteredTags.map((tag) => (
+              <TagPill
+                key={tag.name}
+                name={tag.name}
+                count={tag.count}
+                isSelected={localSelected.includes(tag.name)}
+                onPress={() => toggleTag(tag.name)}
+                showCheckmark={true}
+              />
+            ))}
             
             {filteredTags.length === 0 && (
               <View className="items-center justify-center py-8">

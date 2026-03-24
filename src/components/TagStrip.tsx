@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { View, ScrollView, StyleSheet } from 'react-native';
 import { useColorScheme } from 'nativewind';
-import { Ionicons } from '@expo/vector-icons';
 import { TagEntry } from '../database/tags';
 import { useThemeColors } from '../hooks/useThemeColors';
+import TagPill from './TagPill';
 
 interface TagStripProps {
   tags: TagEntry[];
@@ -15,7 +15,6 @@ interface TagStripProps {
 export default function TagStrip({ tags, selectedTags, onTagPress, onMorePress }: TagStripProps) {
   const { colorScheme } = useColorScheme();
   const colors = useThemeColors();
-  const isDark = colorScheme === 'dark';
   
   const displayTags = tags.slice(0, 10);
 
@@ -28,60 +27,22 @@ export default function TagStrip({ tags, selectedTags, onTagPress, onMorePress }
         style={styles.scrollView}
       >
         {onMorePress && (
-          <TouchableOpacity
+          <TagPill
+            name="All"
             onPress={onMorePress}
-            className="flex-row items-center rounded-full px-3 py-1.5 mr-2"
-            style={{ backgroundColor: colors.accentLight }}
-          >
-            <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 14, color: colors.accent }}>
-              All
-            </Text>
-          </TouchableOpacity>
+            isSelected={false}
+          />
         )}
-        {displayTags.map((tag) => {
-          const isSelected = selectedTags.includes(tag.name);
-          return (
-            <TouchableOpacity
-              key={tag.name}
-              onPress={() => onTagPress(tag.name)}
-              className="flex-row items-center rounded-full px-3 py-1.5 mr-2"
-              style={[
-                isSelected 
-                  ? { backgroundColor: colors.pills.tags.background }
-                  : { backgroundColor: colors.surface }
-              ]}
-            >
-              <Text
-                style={{ fontFamily: 'Outfit-Medium', fontSize: 14, color: isSelected ? colors.pills.tags.text : colors.textSecondary }}
-              >
-                #{tag.name}
-              </Text>
-              <View
-                style={{
-                  marginLeft: 6,
-                  borderRadius: 10,
-                  paddingHorizontal: 6,
-                  paddingVertical: 2,
-                  backgroundColor: isSelected ? `${colors.pills.tags.icon}20` : colors.surface
-                }}
-              >
-                <Text
-                  style={{ fontFamily: 'Outfit-Medium', fontSize: 12, color: isSelected ? colors.pills.tags.icon : colors.textSecondary }}
-                >
-                  {tag.count}
-                </Text>
-              </View>
-               {isSelected && (
-                <TouchableOpacity
-                  onPress={() => onTagPress(tag.name)}
-                  className="ml-1"
-                >
-                  <Ionicons name="close-circle" size={14} color={colors.pills.tags.icon} />
-                </TouchableOpacity>
-              )}
-            </TouchableOpacity>
-          );
-        })}
+        {displayTags.map((tag) => (
+          <TagPill
+            key={tag.name}
+            name={tag.name}
+            count={tag.count}
+            isSelected={selectedTags.includes(tag.name)}
+            onPress={() => onTagPress(tag.name)}
+            showRemove={true}
+          />
+        ))}
       </ScrollView>
     </View>
   );

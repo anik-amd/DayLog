@@ -119,7 +119,7 @@ function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCard
       onPress={() => navigation.navigate('ReadEntry', { entryId: entry.id })}
     >
       <Animated.View style={{ opacity: opacityAnim, transform: [{ scale: scaleAnim }] }}>
-        <View className="px-5 py-4" style={showBorder ? { borderTopWidth: 1, borderTopColor: colors.border } : {}}>
+        <View className="px-5 py-4" style={showBorder ? { borderTopWidth: 1, borderTopColor: colors.borderSubtle } : {}}>
           <View className="flex-row items-start">
             <Text style={[localStyles.time, { color: colors.textSecondary }]}>
               {formattedTime}

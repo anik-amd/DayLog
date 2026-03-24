@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text, ActivityIndicator, KeyboardAvoidingView, Platform, LayoutAnimation, UIManager, TouchableOpacity, Animated, ScrollView, Keyboard } from 'react-native';
 import { useFocusEffect, useRoute } from '@react-navigation/native';
-import { useColorScheme } from "nativewind";
+import { useColorScheme as useNativeWindColorScheme } from "nativewind";
 import { Ionicons } from '@expo/vector-icons';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -11,6 +11,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 import { initDb } from '../../database/db';
 import { createEntry, getAllEntries } from '../../database/entries';
 import { getAllTags } from '../../database/tags';
+import { getTheme, setTheme } from '../../storage/settings';
 import { Entry } from '../../types/Entry';
 import EntryCard from './EntryCard';
 import CalendarStrip, { CalendarStripRef } from './CalendarStrip';
@@ -21,7 +22,7 @@ import TagSelectorModal from '../../components/TagSelectorModal';
 import { useThemeColors } from '../../hooks/useThemeColors';
 
 export default function EntriesScreen({ navigation, route }: any) {
-  const { colorScheme } = useColorScheme();
+  const { colorScheme, setColorScheme } = useNativeWindColorScheme();
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const routeParams = route.params || {};
@@ -34,7 +35,50 @@ export default function EntriesScreen({ navigation, route }: any) {
   const [tagCounts, setTagCounts] = useState<Record<string, number>>({});
   const [popularTags, setPopularTags] = useState<{ name: string; count: number }[]>([]);
   const [tagModalVisible, setTagModalVisible] = useState(false);
-  
+  const [savedTheme, setSavedTheme] = useState<'light' | 'dark' | 'system'>('system');
+
+  useEffect(() => {
+    (async () => {
+      const theme = await getTheme();
+      setSavedTheme(theme);
+    })();
+  }, []);
+
+  const themeIconRotate = useRef(new Animated.Value(0)).current;
+
+  const handleThemeToggle = async () => {
+    const currentNativeScheme = colorScheme;
+    let newTheme: 'light' | 'dark';
+    
+    if (currentNativeScheme === 'dark') {
+      newTheme = 'light';
+    } else {
+      newTheme = 'dark';
+    }
+    
+    await setTheme(newTheme);
+    setSavedTheme(newTheme);
+    setColorScheme(newTheme);
+
+    Animated.sequence([
+      Animated.timing(themeIconRotate, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(themeIconRotate, {
+        toValue: 0,
+        duration: 0,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const rotateInterpolate = themeIconRotate.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
   const orderedTags = useMemo(() => {
     const selected = selectedTags
       .filter(st => popularTags.some(pt => pt.name === st))
@@ -453,6 +497,24 @@ export default function EntriesScreen({ navigation, route }: any) {
                         }}
                     >
                         <Ionicons name="pricetag-outline" size={16} color={colors.textSecondary} />
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                        onPress={handleThemeToggle}
+                        style={{
+                            backgroundColor: colors.surface,
+                            width: 32,
+                            height: 32,
+                            borderRadius: 999,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderWidth: 1,
+                            borderColor: colors.border,
+                            marginRight: 8,
+                        }}
+                    >
+                        <Animated.View style={{ transform: [{ rotate: rotateInterpolate }] }}>
+                            <Ionicons name={colorScheme === 'dark' ? 'sunny' : 'moon'} size={16} color={colors.textSecondary} />
+                        </Animated.View>
                     </TouchableOpacity>
                     <TouchableOpacity 
                         onPress={() => navigation.navigate('Settings')}
