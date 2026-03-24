@@ -16,7 +16,7 @@ All notable changes to DayLog will be documented in this file.
 - Quick entry bar has lighter background
 - Smooth animations when toggling tags
 
-## [0.0.1] - 2024-01-15
+## [0.0.1] - 2026-03-22
 ### Added
 - Initial release
 - Timeline with calendar strip

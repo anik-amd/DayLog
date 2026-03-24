@@ -440,7 +440,7 @@ Each pill type has:
 
 ## Creating New Color Schemes
 
-When adding a new color scheme, read `THEME_CREATION.md` for detailed step-by-step instructions.
+When adding a new color scheme, read `instructions/THEME_CREATION.md` for detailed step-by-step instructions.
 
 Key steps:
 1. Add new scheme entry in `src/themes/colors.ts`
@@ -452,4 +452,4 @@ Key steps:
 
 # 19. Theme Creation Guide
 
-For detailed instructions on creating new color schemes, see `THEME_CREATION.md` in the project root.
+For detailed instructions on creating new color schemes, see `instructions/THEME_CREATION.md`.
