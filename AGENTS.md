@@ -361,3 +361,35 @@ Before merging to master, run one of these commands to bump the version:
 - Version bump happens in dev branch BEFORE merging to master
 - Both dev and master will have the same version after merge
 - The workflow automatically uses the version from package.json for tagging
+
+---
+
+# 17. Changelog Workflow
+
+### Changelog File
+- Location: `CHANGELOG.md` in project root
+- Maintained manually - agents should NOT auto-generate
+
+### Before Release
+1. User edits CHANGELOG.md
+2. Add new version section at top with:
+   - Version number and date
+   - Added/Changed/Fixed/Removed sections
+3. Include in release notes automatically
+
+### Release Process
+1. Before merging to master: update CHANGELOG.md
+2. Merge to master triggers workflow
+3. Workflow reads CHANGELOG.md and includes in release body
+
+### Example Format
+```markdown
+# Changelog
+
+## [0.0.2] - 2024-01-15
+### Added
+- Multi-tag filtering
+
+### Fixed
+- Loading spinner
+```
