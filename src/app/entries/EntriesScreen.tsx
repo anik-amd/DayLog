@@ -321,11 +321,9 @@ export default function EntriesScreen({ navigation, route }: any) {
   };
 
   return (
-    <KeyboardAvoidingView 
+    <View 
       key={colorScheme}
       className="flex-1 bg-white dark:bg-neutral-900"
-      behavior="padding"
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
       <View className="flex-1">
         {/* Entries rendered under the fixed header */}
@@ -602,6 +600,6 @@ export default function EntriesScreen({ navigation, route }: any) {
           }}
         />
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
