@@ -330,7 +330,10 @@ export default function EntriesScreen({ navigation, route }: any) {
       <View className="flex-1">
         {/* Entries rendered under the fixed header */}
         {loading ? (
-            <ActivityIndicator size="large" color="#a1a1aa" className="mt-40" />
+            <View className="flex-1 items-center justify-center">
+              <ActivityIndicator size="large" color="#a1a1aa" />
+              <Text style={{ fontFamily: 'Outfit-Regular' }} className="text-neutral-400 mt-3">Loading...</Text>
+            </View>
         ) : (
            <ScrollView
             ref={scrollViewRef as any}
