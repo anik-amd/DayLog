@@ -127,30 +127,32 @@ export default function SearchScreen() {
   };
 
   return (
-    <View className="flex-1" style={{ backgroundColor: isDark ? '#171717' : '#ffffff' }}>
+    <View className="flex-1" style={{ backgroundColor: colors.background }}>
       <View 
-        className="pt-12 px-4 pb-4 border-b"
+        className="pt-12 px-4 pb-4"
         style={{ 
-          borderColor: isDark ? '#262626' : '#e5e5e5',
-          backgroundColor: isDark ? '#1c1c1c' : '#f5f5f5'
+          borderBottomWidth: 1,
+          borderColor: colors.border,
+          backgroundColor: colors.surface
         }}
       >
         <View className="flex-row items-center">
           <View 
             className="flex-1 flex-row items-center rounded-full px-4 py-2"
-            style={{ backgroundColor: isDark ? '#262626' : '#ffffff' }}
+            style={{ backgroundColor: colors.surfaceElevated }}
           >
-            <Ionicons name="search" size={20} color={isDark ? '#737373' : '#a1a1aa'} />
+            <Ionicons name="search" size={20} color={colors.textTertiary} />
             <TextInput
               ref={inputRef}
               value={query}
               onChangeText={setQuery}
               placeholder={searchMode === 'tag' ? 'Search tags...' : 'Search entries, tags, locations...'}
-              placeholderTextColor={isDark ? '#737373' : '#a1a1aa'}
-              className="flex-1 text-base ml-2"
+              placeholderTextColor={colors.textTertiary}
+              className="flex-1 ml-2"
               style={{ 
                 fontFamily: 'Outfit-Regular',
-                color: isDark ? '#ffffff' : '#171717'
+                fontSize: 16,
+                color: colors.text
               }}
               autoCapitalize="none"
               autoCorrect={false}
@@ -158,7 +160,7 @@ export default function SearchScreen() {
             />
             {query.length > 0 && (
               <TouchableOpacity onPress={() => setQuery('')}>
-                <Ionicons name="close-circle" size={20} color={isDark ? '#737373' : '#a1a1aa'} />
+                <Ionicons name="close-circle" size={20} color={colors.textTertiary} />
               </TouchableOpacity>
             )}
           </View>
@@ -180,12 +182,12 @@ export default function SearchScreen() {
           {popularTags.length > 0 && (
             <View className="px-4 pt-4">
               <View className="flex-row items-center justify-between mb-3">
-                <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-neutral-500 dark:text-neutral-400 text-xs uppercase tracking-wider">
+                <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 12, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1 }}>
                   Most used tags
                 </Text>
                 {popularTags.length > MAX_VISIBLE_TAGS && (
                   <TouchableOpacity onPress={() => setTagModalVisible(true)}>
-                    <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-indigo-500 text-xs">
+                    <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 12, color: colors.accent }}>
                       Show all
                     </Text>
                   </TouchableOpacity>
@@ -197,13 +199,13 @@ export default function SearchScreen() {
                     key={name}
                     onPress={() => navigation.navigate('Home', { screen: 'Entries', params: { selectedTags: [name] } })}
                     className="flex-row items-center rounded-full px-3 py-1.5 mr-2 mb-2"
-                    style={{ backgroundColor: isDark ? '#262626' : '#f4f4f5' }}
+                    style={{ backgroundColor: colors.surfaceElevated }}
                   >
-                    <Text style={{ fontFamily: 'Outfit-Medium' }} className={`text-sm ${isDark ? 'text-neutral-400' : 'text-neutral-500'}`}>
+                    <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 14, color: colors.textSecondary }}>
                       #{name}
                     </Text>
-                    <View className={`ml-1.5 rounded-full px-1.5 py-0.5 ${isDark ? 'bg-neutral-700' : 'bg-neutral-300'}`}>
-                      <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 12 }} className={isDark ? 'text-neutral-400' : 'text-neutral-600'}>
+                    <View style={{ marginLeft: 6, borderRadius: 10, paddingHorizontal: 6, paddingVertical: 2, backgroundColor: colors.surface }}>
+                      <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 12, color: colors.textTertiary }}>
                         {count}
                       </Text>
                     </View>
@@ -214,10 +216,9 @@ export default function SearchScreen() {
           )}
           {!showAllTags && (
             <View className="flex-1 items-center justify-center opacity-50 px-4">
-              <Ionicons name="search" size={48} color={isDark ? '#52525b' : '#a1a1aa'} />
+              <Ionicons name="search" size={48} color={colors.textTertiary} />
               <Text 
-                style={{ fontFamily: 'Outfit-Regular' }}
-                className="text-neutral-400 dark:text-neutral-500 mt-4"
+                style={{ fontFamily: 'Outfit-Regular', fontSize: 16, color: colors.textTertiary, marginTop: 16 }}
               >
                 Start typing to search
               </Text>
@@ -230,10 +231,9 @@ export default function SearchScreen() {
         </View>
       ) : results.length === 0 ? (
         <View className="flex-1 items-center justify-center opacity-50">
-          <Ionicons name="document-text-outline" size={48} color={isDark ? '#52525b' : '#a1a1aa'} />
+          <Ionicons name="document-text-outline" size={48} color={colors.textTertiary} />
           <Text 
-            style={{ fontFamily: 'Outfit-Regular' }}
-            className="text-neutral-400 dark:text-neutral-500 mt-4"
+            style={{ fontFamily: 'Outfit-Regular', fontSize: 16, color: colors.textTertiary, marginTop: 16 }}
           >
             No entries found
           </Text>
@@ -253,20 +253,18 @@ export default function SearchScreen() {
             >
               <View 
                 className="rounded-xl p-4"
-                style={{ backgroundColor: isDark ? '#262626' : '#ffffff' }}
+                style={{ backgroundColor: colors.surface }}
               >
                 <Text 
                   numberOfLines={3}
-                  style={{ fontFamily: 'Outfit-Regular' }}
-                  className="text-neutral-800 dark:text-neutral-200 text-[15px] leading-6"
+                  style={{ fontFamily: 'Outfit-Regular', fontSize: 15, lineHeight: 24, color: colors.text }}
                 >
                   {entry.content}
                 </Text>
                 <View className="flex-row items-center mt-3">
-                  <Ionicons name="time-outline" size={14} color="#a1a1aa" />
+                  <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
                   <Text 
-                    style={{ fontFamily: 'Outfit-Regular' }}
-                    className="text-neutral-400 text-[12px] ml-1"
+                    style={{ fontFamily: 'Outfit-Regular', fontSize: 12, color: colors.textSecondary, marginLeft: 4 }}
                   >
                     {new Date(entry.createdAt).toLocaleDateString(undefined, { 
                       month: 'short', 

@@ -31,7 +31,7 @@ export default function TagStrip({ tags, selectedTags, onTagPress, onMorePress }
           <TouchableOpacity
             onPress={onMorePress}
             className="flex-row items-center rounded-full px-3 py-1.5 mr-2"
-            style={{ backgroundColor: isDark ? '#2e1065' : '#eef2ff' }}
+            style={{ backgroundColor: colors.accentLight }}
           >
             <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 14, color: colors.accent }}>
               All
@@ -47,24 +47,26 @@ export default function TagStrip({ tags, selectedTags, onTagPress, onMorePress }
               className="flex-row items-center rounded-full px-3 py-1.5 mr-2"
               style={[
                 isSelected 
-                  ? { backgroundColor: isDark ? '#166534' : '#dcfce7' }
+                  ? { backgroundColor: colors.pills.tags.background }
                   : { backgroundColor: isDark ? '#262626' : '#f4f4f5' }
               ]}
             >
               <Text
-                style={{ fontFamily: 'Outfit-Medium' }}
-                className={`text-sm ${isSelected ? (isDark ? 'text-green-400' : 'text-green-600') : 'text-neutral-500'}`}
+                style={{ fontFamily: 'Outfit-Medium', fontSize: 14, color: isSelected ? colors.pills.tags.text : colors.textSecondary }}
               >
                 #{tag.name}
               </Text>
               <View
-                className={`ml-1.5 rounded-full px-1.5 py-0.5 ${
-                  isSelected ? (isDark ? 'bg-green-900' : 'bg-green-200') : isDark ? 'bg-neutral-700' : 'bg-neutral-300'
-                }`}
+                style={{
+                  marginLeft: 6,
+                  borderRadius: 10,
+                  paddingHorizontal: 6,
+                  paddingVertical: 2,
+                  backgroundColor: isSelected ? colors.pills.tags.background : colors.surface
+                }}
               >
                 <Text
-                  style={{ fontFamily: 'Outfit-Medium', fontSize: 12 }}
-                  className={isSelected ? (isDark ? 'text-green-400' : 'text-green-600') : isDark ? 'text-neutral-400' : 'text-neutral-600'}
+                  style={{ fontFamily: 'Outfit-Medium', fontSize: 12, color: isSelected ? colors.pills.tags.text : colors.textTertiary }}
                 >
                   {tag.count}
                 </Text>
@@ -74,7 +76,7 @@ export default function TagStrip({ tags, selectedTags, onTagPress, onMorePress }
                   onPress={() => onTagPress(tag.name)}
                   className="ml-1"
                 >
-                  <Ionicons name="close-circle" size={14} color={isDark ? '#22c55e' : '#16a34a'} />
+                  <Ionicons name="close-circle" size={14} color={colors.pills.tags.icon} />
                 </TouchableOpacity>
               )}
             </TouchableOpacity>
