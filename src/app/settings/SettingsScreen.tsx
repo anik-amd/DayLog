@@ -6,6 +6,8 @@ import { useColorScheme } from "nativewind";
 import { getAppStats } from '../../database/entries';
 import { useBackupEngine } from '../../services/BackupEngine';
 import { getTemperatureUnit, setTemperatureUnit, getTheme, setTheme } from '../../storage/settings';
+import { getColorScheme as getColorSchemeFromStorage, setColorScheme as saveColorSchemeToStorage } from '../../storage/settings';
+import { colorSchemes } from '../../themes/colors';
 
 export default function SettingsScreen() {
   const navigation = useNavigation();
@@ -13,8 +15,10 @@ export default function SettingsScreen() {
   const [stats, setStats] = useState({ entries: 0, photos: 0 });
   const [showThemeModal, setShowThemeModal] = useState(false);
   const [showTempModal, setShowTempModal] = useState(false);
+  const [showColorSchemeModal, setShowColorSchemeModal] = useState(false);
   const [temperatureUnit, setTemperatureUnitState] = useState<'c' | 'f'>('c');
   const [savedTheme, setSavedTheme] = useState<'light' | 'dark' | 'system'>('system');
+  const [savedColorScheme, setSavedColorScheme] = useState<string>('default');
   const [lastSync, setLastSync] = useState<string>("Never");
   const [syncing, setSyncing] = useState(false);
 
@@ -44,6 +48,8 @@ export default function SettingsScreen() {
       setTemperatureUnitState(unit);
       const theme = await getTheme();
       setSavedTheme(theme);
+      const scheme = await getColorSchemeFromStorage();
+      setSavedColorScheme(scheme);
     })();
   }, []);
 
@@ -52,6 +58,12 @@ export default function SettingsScreen() {
     setSavedTheme(theme);
     await setTheme(theme);
     setShowThemeModal(false);
+  };
+
+  const handleSetColorScheme = async (scheme: string) => {
+    await saveColorSchemeToStorage(scheme);
+    setSavedColorScheme(scheme);
+    setShowColorSchemeModal(false);
   };
 
   const handleSetTempUnit = async (unit: 'c' | 'f') => {
@@ -143,12 +155,18 @@ export default function SettingsScreen() {
         </Section>
 
          <Section title="Appearance">
-             <SettingItem 
-                 icon={colorScheme === 'dark' ? "moon" : "sunny"} 
-                 label="Theme" 
-                 value={savedTheme === 'system' ? "System Default" : (colorScheme === 'dark' ? "Dark Mode" : "Light Mode")} 
-                 onPress={() => setShowThemeModal(true)} 
-             />
+              <SettingItem 
+                  icon={colorScheme === 'dark' ? "moon" : "sunny"} 
+                  label="Theme" 
+                  value={savedTheme === 'system' ? "System Default" : (colorScheme === 'dark' ? "Dark Mode" : "Light Mode")} 
+                  onPress={() => setShowThemeModal(true)} 
+              />
+              <SettingItem 
+                  icon="color-palette-outline" 
+                  label="Color Scheme" 
+                  value={colorSchemes[savedColorScheme]?.name || 'Default'} 
+                  onPress={() => setShowColorSchemeModal(true)} 
+              />
             <SettingItem icon="text" label="Editor Font" value="System Default" onPress={() => {}} last />
         </Section>
 
@@ -295,6 +313,49 @@ export default function SettingsScreen() {
                         </View>
                         {temperatureUnit === 'f' && <Ionicons name="checkmark-circle" size={20} color="#4f46e5" />}
                     </TouchableOpacity>
+                </View>
+            </View>
+        </Pressable>
+      </Modal>
+
+      {/* Color Scheme Modal */}
+      <Modal
+        visible={showColorSchemeModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowColorSchemeModal(false)}
+      >
+        <Pressable 
+            className="flex-1 bg-black/60 items-center justify-end"
+            onPress={() => setShowColorSchemeModal(false)}
+        >
+            <View className="bg-white dark:bg-neutral-900 w-full rounded-t-[40px] px-8 pt-10 pb-16 shadow-2xl">
+                <View className="flex-row items-center justify-between mb-8">
+                    <Text style={{ fontFamily: 'Outfit-Black' }} className="text-neutral-900 dark:text-neutral-50 text-2xl">Color Scheme</Text>
+                    <TouchableOpacity onPress={() => setShowColorSchemeModal(false)}>
+                        <Ionicons name="close" size={24} color="#737373" />
+                    </TouchableOpacity>
+                </View>
+
+                <View className="space-y-3">
+                    {Object.entries(colorSchemes).map(([key, scheme]) => (
+                        <TouchableOpacity 
+                            key={key}
+                            onPress={() => handleSetColorScheme(key)}
+                            className={`flex-row items-center justify-between p-5 rounded-2xl border-2 ${
+                                savedColorScheme === key ? 'bg-indigo-50 border-indigo-500' : 'bg-neutral-50 dark:bg-neutral-800 border-transparent'
+                            }`}
+                        >
+                            <View className="flex-row items-center">
+                                <View className="flex-row mr-3">
+                                    <View style={{ width: 20, height: 20, borderRadius: 4, backgroundColor: scheme.light.accent, marginRight: 4 }} />
+                                    <View style={{ width: 20, height: 20, borderRadius: 4, backgroundColor: scheme.dark.accent }} />
+                                </View>
+                                <Text style={{ fontFamily: 'Outfit-SemiBold' }} className={`text-[16px] ${savedColorScheme === key ? 'text-indigo-600 dark:text-indigo-400' : 'text-neutral-500'}`}>{scheme.name}</Text>
+                            </View>
+                            {savedColorScheme === key && <Ionicons name="checkmark-circle" size={20} color="#4f46e5" />}
+                        </TouchableOpacity>
+                    ))}
                 </View>
             </View>
         </Pressable>

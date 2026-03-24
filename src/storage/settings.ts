@@ -44,3 +44,12 @@ export const getTheme = async (): Promise<'light' | 'dark' | 'system'> => {
 export const setTheme = async (theme: 'light' | 'dark' | 'system') => {
   await setSetting('theme', theme);
 };
+
+export const getColorScheme = async (): Promise<string> => {
+  const scheme = await getSetting('colorScheme');
+  return scheme || 'default';
+};
+
+export const setColorScheme = async (scheme: string) => {
+  await setSetting('colorScheme', scheme);
+};
