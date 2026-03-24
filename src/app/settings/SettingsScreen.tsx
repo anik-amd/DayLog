@@ -360,9 +360,9 @@ export default function SettingsScreen() {
                         <TouchableOpacity 
                             key={key}
                             onPress={() => handleSetColorScheme(key)}
-                            className="flex-row items-center justify-between p-5 rounded-2xl border-2"
                             style={{
-                                backgroundColor: savedColorScheme === key ? colors.accentLight : colors.surface,
+                                flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, borderRadius: 16, borderWidth: 2,
+                                backgroundColor: savedColorScheme === key ? colors.accentLight : colors.surfaceElevated,
                                 borderColor: savedColorScheme === key ? colors.accent : 'transparent'
                             }}
                         >
@@ -371,7 +371,7 @@ export default function SettingsScreen() {
                                     <View style={{ width: 20, height: 20, borderRadius: 4, backgroundColor: scheme.light.accent, marginRight: 4 }} />
                                     <View style={{ width: 20, height: 20, borderRadius: 4, backgroundColor: scheme.dark.accent }} />
                                 </View>
-                                <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: 16, color: savedColorScheme === key ? colors.accent : colors.textSecondary }}>{scheme.name}</Text>
+                                <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: 16, color: savedColorScheme === key ? colors.accent : colors.text }}>{scheme.name}</Text>
                             </View>
                             {savedColorScheme === key && <Ionicons name="checkmark-circle" size={20} color={colors.accent} />}
                         </TouchableOpacity>
