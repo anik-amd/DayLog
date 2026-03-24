@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useColorScheme } from "nativewind";
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface WebPickerProps {
   visible: boolean;
@@ -11,6 +13,9 @@ interface WebPickerProps {
 }
 
 export default function WebPicker({ visible, type, value, onClose, onSelect }: WebPickerProps) {
+  const { colorScheme } = useColorScheme();
+  const colors = useThemeColors();
+  const isDark = colorScheme === 'dark';
   const [calendarMonth, setCalendarMonth] = useState(value);
 
   const getDaysInMonth = (date: Date) => {
@@ -53,14 +58,14 @@ export default function WebPicker({ visible, type, value, onClose, onSelect }: W
   if (type === 'date') {
     return (
       <View style={styles.overlay}>
-        <View style={styles.card}>
-          <View style={styles.header}>
+        <View style={[styles.card, { backgroundColor: colors.surface }]}>
+          <View style={[styles.header, { borderBottomWidth: 1, borderBottomColor: colors.border }]}>
             <TouchableOpacity onPress={onClose} style={styles.headerButton}>
-              <Text style={styles.cancelText}>Cancel</Text>
+              <Text style={{ color: colors.textSecondary }}>Cancel</Text>
             </TouchableOpacity>
-            <Text style={styles.title}>Select Date</Text>
+            <Text style={{ color: colors.text, fontSize: 17, fontWeight: '600' }}>Select Date</Text>
             <TouchableOpacity onPress={onClose} style={styles.headerButton}>
-              <Text style={styles.doneText}>Done</Text>
+              <Text style={{ color: colors.accent, fontWeight: '600' }}>Done</Text>
             </TouchableOpacity>
           </View>
           
@@ -71,11 +76,11 @@ export default function WebPicker({ visible, type, value, onClose, onSelect }: W
                 newMonth.setMonth(newMonth.getMonth() - 1);
                 setCalendarMonth(newMonth);
               }}
-              style={styles.navButton}
+              style={[styles.navButton, { backgroundColor: colors.surfaceElevated }]}
             >
-              <Ionicons name="chevron-back" size={20} color="#6366f1" />
+              <Ionicons name="chevron-back" size={20} color={colors.accent} />
             </TouchableOpacity>
-            <Text style={styles.monthTitle}>
+            <Text style={{ color: colors.text, fontSize: 16, fontWeight: '600' }}>
               {calendarMonth.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
             </Text>
             <TouchableOpacity 
@@ -84,15 +89,15 @@ export default function WebPicker({ visible, type, value, onClose, onSelect }: W
                 newMonth.setMonth(newMonth.getMonth() + 1);
                 setCalendarMonth(newMonth);
               }}
-              style={styles.navButton}
+              style={[styles.navButton, { backgroundColor: colors.surfaceElevated }]}
             >
-              <Ionicons name="chevron-forward" size={20} color="#6366f1" />
+              <Ionicons name="chevron-forward" size={20} color={colors.accent} />
             </TouchableOpacity>
           </View>
           
           <View style={styles.dayHeaders}>
             {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
-              <Text key={day} style={styles.dayHeader}>{day}</Text>
+              <Text key={day} style={[styles.dayHeader, { color: colors.textSecondary }]}>{day}</Text>
             ))}
           </View>
           
@@ -102,8 +107,8 @@ export default function WebPicker({ visible, type, value, onClose, onSelect }: W
                 key={index}
                 style={[
                   styles.dayCell,
-                  isSameDay(day, value) && styles.selectedDay,
-                  isToday(day) && !isSameDay(day, value) && styles.todayDay,
+                  isSameDay(day, value) && { backgroundColor: colors.accent, borderRadius: 20 },
+                  isToday(day) && !isSameDay(day, value) && { borderWidth: 1, borderColor: colors.accent, borderRadius: 20 },
                 ]}
                 onPress={() => {
                   if (day) {
@@ -114,9 +119,9 @@ export default function WebPicker({ visible, type, value, onClose, onSelect }: W
               >
                 {day && (
                   <Text style={[
-                    styles.dayText,
-                    isSameDay(day, value) && styles.selectedDayText,
-                    isToday(day) && !isSameDay(day, value) && styles.todayDayText,
+                    { color: colors.text, fontSize: 15, fontWeight: '500' },
+                    isSameDay(day, value) && { color: '#ffffff', fontWeight: '600' },
+                    isToday(day) && !isSameDay(day, value) && { color: colors.accent },
                   ]}>
                     {day.getDate()}
                   </Text>
@@ -131,19 +136,19 @@ export default function WebPicker({ visible, type, value, onClose, onSelect }: W
 
   return (
     <View style={styles.overlay}>
-      <View style={styles.card}>
-        <View style={styles.header}>
+      <View style={[styles.card, { backgroundColor: colors.surface }]}>
+        <View style={[styles.header, { borderBottomWidth: 1, borderBottomColor: colors.border }]}>
           <TouchableOpacity onPress={onClose} style={styles.headerButton}>
-            <Text style={styles.cancelText}>Cancel</Text>
+            <Text style={{ color: colors.textSecondary }}>Cancel</Text>
           </TouchableOpacity>
-          <Text style={styles.title}>Select Time</Text>
+          <Text style={{ color: colors.text, fontSize: 17, fontWeight: '600' }}>Select Time</Text>
           <TouchableOpacity onPress={onClose} style={styles.headerButton}>
-            <Text style={styles.doneText}>Done</Text>
+            <Text style={{ color: colors.accent, fontWeight: '600' }}>Done</Text>
           </TouchableOpacity>
         </View>
         
         <View style={styles.timeDisplay}>
-          <Text style={styles.timeText}>{formatTime(value)}</Text>
+          <Text style={{ color: colors.text, fontSize: 48, fontWeight: '200' }}>{formatTime(value)}</Text>
         </View>
         
         <View style={styles.timePickerGrid}>
@@ -156,9 +161,9 @@ export default function WebPicker({ visible, type, value, onClose, onSelect }: W
               }}
               style={styles.timeButton}
             >
-              <Ionicons name="chevron-up" size={24} color="#6366f1" />
+              <Ionicons name="chevron-up" size={24} color={colors.accent} />
             </TouchableOpacity>
-            <Text style={styles.timeLabel}>Hour</Text>
+            <Text style={{ color: colors.textSecondary, fontSize: 12 }}>Hour</Text>
             <TouchableOpacity 
               onPress={() => {
                 const newDate = new Date(value);
@@ -167,11 +172,11 @@ export default function WebPicker({ visible, type, value, onClose, onSelect }: W
               }}
               style={styles.timeButton}
             >
-              <Ionicons name="chevron-down" size={24} color="#6366f1" />
+              <Ionicons name="chevron-down" size={24} color={colors.accent} />
             </TouchableOpacity>
           </View>
           
-          <Text style={styles.timeSeparator}>:</Text>
+          <Text style={{ color: colors.text, fontSize: 48, fontWeight: '200', marginHorizontal: 16 }}>:</Text>
           
           <View style={styles.timeColumn}>
             <TouchableOpacity 
@@ -182,9 +187,9 @@ export default function WebPicker({ visible, type, value, onClose, onSelect }: W
               }}
               style={styles.timeButton}
             >
-              <Ionicons name="chevron-up" size={24} color="#6366f1" />
+              <Ionicons name="chevron-up" size={24} color={colors.accent} />
             </TouchableOpacity>
-            <Text style={styles.timeLabel}>Min</Text>
+            <Text style={{ color: colors.textSecondary, fontSize: 12 }}>Min</Text>
             <TouchableOpacity 
               onPress={() => {
                 const newDate = new Date(value);
@@ -193,7 +198,7 @@ export default function WebPicker({ visible, type, value, onClose, onSelect }: W
               }}
               style={styles.timeButton}
             >
-              <Ionicons name="chevron-down" size={24} color="#6366f1" />
+              <Ionicons name="chevron-down" size={24} color={colors.accent} />
             </TouchableOpacity>
           </View>
         </View>
@@ -215,7 +220,6 @@ const styles = StyleSheet.create({
     zIndex: 9999,
   },
   card: {
-    backgroundColor: '#ffffff',
     borderRadius: 20,
     width: 340,
     paddingVertical: 16,

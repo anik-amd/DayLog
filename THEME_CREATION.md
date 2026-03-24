@@ -336,7 +336,7 @@ The color scheme implementation is divided into phases to systematically update 
 - EntryCard.tsx
 - ReadEntryScreen.tsx
 
-### Phase 4: Editor Pickers
+### Phase 4: Editor Pickers ✓ DONE
 - ClockPicker.tsx
 - WebPicker.tsx
 

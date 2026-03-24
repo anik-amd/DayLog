@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text as RNText, TouchableOpacity, StyleSheet } from 'react-native';
 import Svg, { Circle, Line } from 'react-native-svg';
 import { useColorScheme } from "nativewind";
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface ClockPickerProps {
   value: Date;
@@ -10,6 +11,7 @@ interface ClockPickerProps {
 
 export default function ClockPicker({ value, onChange }: ClockPickerProps) {
   const { colorScheme } = useColorScheme();
+  const colors = useThemeColors();
   const isDark = colorScheme === 'dark';
   
   const [mode, setMode] = useState<'hour' | 'minute'>('hour');
@@ -66,10 +68,10 @@ export default function ClockPicker({ value, onChange }: ClockPickerProps) {
   const hourHandEnd = getPosition(currentHour + currentMinute / 60, 12, radius * 0.5);
   const minuteHandEnd = getPosition(currentMinute / 15, 4, radius * 0.7);
   
-  const textColor = isDark ? '#ffffff' : '#171717';
-  const subtextColor = isDark ? '#a3a3a3' : '#737373';
-  const accentColor = '#6366f1';
-  const bgColor = isDark ? '#262626' : '#f5f5f5';
+  const textColor = colors.text;
+  const subtextColor = colors.textSecondary;
+  const accentColor = colors.accent;
+  const bgColor = colors.surface;
   
   return (
     <View style={styles.container}>
@@ -120,7 +122,7 @@ export default function ClockPicker({ value, onChange }: ClockPickerProps) {
             cx={center}
             cy={center}
             r={radius}
-            stroke={isDark ? '#404040' : '#e5e5e5'}
+            stroke={colors.border}
             strokeWidth={2}
             fill={bgColor}
           />
