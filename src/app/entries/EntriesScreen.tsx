@@ -18,9 +18,11 @@ import QuickEntryBar from '../editor/QuickEntryBar';
 import Picker from '../editor/Picker';
 import TagStrip from '../../components/TagStrip';
 import TagSelectorModal from '../../components/TagSelectorModal';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 export default function EntriesScreen({ navigation, route }: any) {
   const { colorScheme } = useColorScheme();
+  const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const routeParams = route.params || {};
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -323,14 +325,15 @@ export default function EntriesScreen({ navigation, route }: any) {
   return (
     <View 
       key={colorScheme}
-      className="flex-1 bg-white dark:bg-neutral-900"
+      className="flex-1"
+      style={{ backgroundColor: colors.background }}
     >
       <View className="flex-1">
         {/* Entries rendered under the fixed header */}
         {loading ? (
             <View className="flex-1 items-center justify-center">
-              <ActivityIndicator size="large" color="#a1a1aa" />
-              <Text style={{ fontFamily: 'Outfit-Regular' }} className="text-neutral-400 mt-3">Loading...</Text>
+              <ActivityIndicator size="large" color={colors.textTertiary} />
+              <Text style={{ fontFamily: 'Outfit-Regular', color: colors.textSecondary }} className="mt-3">Loading...</Text>
             </View>
         ) : (
            <ScrollView

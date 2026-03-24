@@ -7,6 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useColorScheme } from "nativewind";
 import { useFonts, Outfit_400Regular, Outfit_500Medium, Outfit_600SemiBold, Outfit_700Bold, Outfit_900Black } from '@expo-google-fonts/outfit';
 import { getTheme } from './src/storage/settings';
+import { ColorSchemeProvider } from './src/contexts/ColorSchemeContext';
 
 function AppContent() {
   const { colorScheme, setColorScheme } = useColorScheme();
@@ -52,9 +53,11 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer theme={DarkTheme}>
-        <AppContent />
-      </NavigationContainer>
+      <ColorSchemeProvider>
+        <NavigationContainer theme={DarkTheme}>
+          <AppContent />
+        </NavigationContainer>
+      </ColorSchemeProvider>
     </SafeAreaProvider>
   );
 }

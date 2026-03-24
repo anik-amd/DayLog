@@ -15,6 +15,7 @@ import { Entry } from '../../types/Entry';
 import Pill from '../../components/Pill';
 import { fetchWeather, getWeatherIconName } from '../../services/WeatherService';
 import { getSetting } from '../../storage/settings';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 const extractTags = (text: string): string => {
   const matches = text.match(/#(\w+)/g);
@@ -46,6 +47,7 @@ const getFullAddress = (address: Location.LocationGeocodedAddress): string => {
 
 export default function FullScreenEditor({ route, navigation }: any) {
   const { colorScheme } = useColorScheme();
+  const colors = useThemeColors();
   const isDark = colorScheme === 'dark';
   const { 
     entryId: initialEntryId, 
@@ -401,19 +403,19 @@ export default function FullScreenEditor({ route, navigation }: any) {
   };
 
   return (
-    <View className="flex-1 bg-white dark:bg-neutral-900">
+    <View className="flex-1" style={{ backgroundColor: colors.background }}>
       <KeyboardAvoidingView 
         className="flex-1" 
         behavior="padding"
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
-        <View className="flex-row items-center justify-between px-6 pb-4 pt-12 border-b border-neutral-100 dark:border-neutral-900/40">
-            <TouchableOpacity onPress={handleBack} className="bg-neutral-50 dark:bg-neutral-900 w-10 h-10 rounded-full items-center justify-center border border-neutral-200 dark:border-neutral-800">
-                <Ionicons name="arrow-back" size={20} color="#737373" />
+        <View className="flex-row items-center justify-between px-6 pb-4 pt-12" style={{ borderBottomWidth: 1, borderBottomColor: colors.border }}>
+            <TouchableOpacity onPress={handleBack} className="w-10 h-10 rounded-full items-center justify-center" style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }}>
+                <Ionicons name="arrow-back" size={20} color={colors.textSecondary} />
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={handleQuickSave} className="bg-neutral-900 dark:bg-white w-10 h-10 rounded-full items-center justify-center">
-                <Ionicons name="checkmark" size={20} color={colorScheme === 'dark' ? '#171717' : '#fff'} />
+            <TouchableOpacity onPress={handleQuickSave} className="w-10 h-10 rounded-full items-center justify-center" style={{ backgroundColor: colors.text }}>
+                <Ionicons name="checkmark" size={20} color={colors.background} />
             </TouchableOpacity>
         </View>
 
@@ -471,37 +473,37 @@ export default function FullScreenEditor({ route, navigation }: any) {
 
                     <Pill 
                         onPress={() => setShowDatePicker(true)}
-                        icon={<Ionicons name="calendar-outline" size={15} color={isDark ? '#a78bfa' : '#7c3aed'} />}
+                        icon={<Ionicons name="calendar-outline" size={15} color={colors.accent} />}
                         label={formatDate(entryDateObj)}
-                        backgroundColor={isDark ? '#2e1065' : '#f3e8ff'}
-                        iconColor={isDark ? '#a78bfa' : '#7c3aed'}
-                        textColor={isDark ? '#a78bfa' : '#7c3aed'}
+                        backgroundColor={colors.accentLight}
+                        iconColor={colors.accent}
+                        textColor={colors.accent}
                     />
 
                     <Pill 
                         onPress={() => setShowTimePicker(true)}
-                        icon={<Ionicons name="time-outline" size={15} color={isDark ? '#a78bfa' : '#7c3aed'} />}
+                        icon={<Ionicons name="time-outline" size={15} color={colors.accent} />}
                         label={time}
-                        backgroundColor={isDark ? '#2e1065' : '#f3e8ff'}
-                        iconColor={isDark ? '#a78bfa' : '#7c3aed'}
-                        textColor={isDark ? '#a78bfa' : '#7c3aed'}
+                        backgroundColor={colors.accentLight}
+                        iconColor={colors.accent}
+                        textColor={colors.accent}
                     />
 
                     <Pill 
                         onPress={handleLocationPress}
                         icon={
                             locationLoading ? (
-                                <Ionicons name="location-outline" size={15} color={isDark ? '#fbbf24' : '#d97706'} />
+                                <Ionicons name="location-outline" size={15} color={colors.warning} />
                             ) : (hasLocationPermission === false && !locationDisplay) ? (
-                                <Ionicons name="location-outline" size={15} color="#ef4444" />
+                                <Ionicons name="location-outline" size={15} color={colors.error} />
                             ) : (
-                                <Ionicons name="location-outline" size={15} color={isDark ? '#fbbf24' : '#d97706'} />
+                                <Ionicons name="location-outline" size={15} color={colors.warning} />
                             )
                         }
                         label={locationDisplay || 'Location'}
-                        backgroundColor={isDark ? '#451a03' : '#fef3c7'}
-                        iconColor={isDark ? '#fbbf24' : '#d97706'}
-                        textColor={isDark ? '#fbbf24' : '#d97706'}
+                        backgroundColor={colorScheme === 'dark' ? '#451a03' : '#fef3c7'}
+                        iconColor={colors.warning}
+                        textColor={colors.warning}
                         isLoading={locationLoading}
                     />
 
@@ -509,37 +511,37 @@ export default function FullScreenEditor({ route, navigation }: any) {
                         onPress={handleWeatherPress}
                         icon={
                           weatherLoading ? null : weatherError ? (
-                            <Ionicons name="cloud-offline-outline" size={15} color="#ef4444" />
+                            <Ionicons name="cloud-offline-outline" size={15} color={colors.error} />
                           ) : weatherCode ? (
-                            <Ionicons name={getWeatherIconName(weatherCode) as any} size={15} color={isDark ? '#e879f9' : '#d946ef'} />
+                            <Ionicons name={getWeatherIconName(weatherCode) as any} size={15} color={colors.accent} />
                           ) : (
-                            <Ionicons name="sunny-outline" size={15} color={isDark ? '#e879f9' : '#d946ef'} />
+                            <Ionicons name="sunny-outline" size={15} color={colors.accent} />
                           )
                         }
                         label={weatherError ? 'N/A' : weather || 'Weather'}
-                        backgroundColor={isDark ? '#4a044e' : '#fdf4ff'}
-                        iconColor={isDark ? '#e879f9' : '#d946ef'}
-                        textColor={isDark ? '#e879f9' : '#d946ef'}
+                        backgroundColor={colorScheme === 'dark' ? '#4a044e' : '#fdf4ff'}
+                        iconColor={colors.accent}
+                        textColor={colors.accent}
                         isError={weatherError}
                         isLoading={weatherLoading}
                     />
 
                     <Pill 
                         onPress={pickImage}
-                        icon={<Ionicons name="image-outline" size={15} color={isDark ? '#38bdf8' : '#0284c7'} />}
+                        icon={<Ionicons name="image-outline" size={15} color={colors.accent} />}
                         label="Photo"
-                        backgroundColor={isDark ? '#0c4a6e' : '#e0f2fe'}
-                        iconColor={isDark ? '#38bdf8' : '#0284c7'}
-                        textColor={isDark ? '#38bdf8' : '#0284c7'}
+                        backgroundColor={colors.accentLight}
+                        iconColor={colors.accent}
+                        textColor={colors.accent}
                     />
                 </ScrollView>
 
                 <TextInput
                     ref={inputRef}
                     placeholder="Capture your thoughts..."
-                    placeholderTextColor="#a3a3a3"
-                    className="text-neutral-900 dark:text-neutral-100 text-[20px] leading-10 min-h-[500px]"
-                    style={{ fontFamily: 'Outfit-Regular' }}
+                    placeholderTextColor={colors.textTertiary}
+                    className="text-[20px] leading-10 min-h-[500px]"
+                    style={{ fontFamily: 'Outfit-Regular', color: colors.text }}
                     multiline={true}
                     value={markdown}
                     onChangeText={setMarkdown}
@@ -605,9 +607,9 @@ export default function FullScreenEditor({ route, navigation }: any) {
           className="flex-1 bg-black/60 items-center justify-end"
           onPress={() => setShowSaveModal(false)}
         >
-          <View className="bg-white dark:bg-neutral-900 w-full rounded-t-[40px] px-8 pt-10 pb-16 shadow-2xl">
+          <View className="w-full rounded-t-[40px] px-8 pt-10 pb-16 shadow-2xl" style={{ backgroundColor: colors.surface }}>
             <View className="mb-8">
-              <Text style={{ fontFamily: 'Outfit-Black' }} className="text-neutral-900 dark:text-neutral-50 text-2xl text-center">
+              <Text style={{ fontFamily: 'Outfit-Black', fontSize: 24, color: colors.text, textAlign: 'center' }}>
                 {currentEntryId ? 'Save Changes?' : 'Save Entry?'}
               </Text>
             </View>
@@ -615,18 +617,18 @@ export default function FullScreenEditor({ route, navigation }: any) {
             <View className="space-y-3">
               <TouchableOpacity 
                 onPress={handleSaveAndExit}
-                className="flex-row items-center justify-center p-5 rounded-2xl bg-indigo-500"
+                style={{ backgroundColor: colors.accent, padding: 20, borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}
               >
-                <Text style={{ fontFamily: 'Outfit-SemiBold' }} className="text-white text-[16px]">
+                <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: 16, color: 'white' }}>
                   {currentEntryId ? 'Save & Exit' : 'Save Entry'}
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity 
                 onPress={handleDiscardAndExit}
-                className="flex-row items-center justify-center p-5 rounded-2xl border border-neutral-200 dark:border-neutral-700"
+                style={{ padding: 20, borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border }}
               >
-                <Text style={{ fontFamily: 'Outfit-SemiBold' }} className="text-neutral-600 dark:text-neutral-400 text-[16px]">
+                <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: 16, color: colors.textSecondary }}>
                   Discard{currentEntryId ? ' Changes' : ''}
                 </Text>
               </TouchableOpacity>

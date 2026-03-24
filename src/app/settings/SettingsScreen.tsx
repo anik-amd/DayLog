@@ -5,13 +5,14 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useColorScheme } from "nativewind";
 import { getAppStats } from '../../database/entries';
 import { useBackupEngine } from '../../services/BackupEngine';
-import { getTemperatureUnit, setTemperatureUnit, getTheme, setTheme } from '../../storage/settings';
-import { getColorScheme as getColorSchemeFromStorage, setColorScheme as saveColorSchemeToStorage } from '../../storage/settings';
+import { getTemperatureUnit, setTemperatureUnit, getTheme, setTheme, getColorScheme } from '../../storage/settings';
 import { colorSchemes } from '../../themes/colors';
+import { useColorSchemeContext } from '../../contexts/ColorSchemeContext';
 
 export default function SettingsScreen() {
   const navigation = useNavigation();
   const { colorScheme, setColorScheme } = useColorScheme();
+  const { setSchemeName } = useColorSchemeContext();
   const [stats, setStats] = useState({ entries: 0, photos: 0 });
   const [showThemeModal, setShowThemeModal] = useState(false);
   const [showTempModal, setShowTempModal] = useState(false);
@@ -48,7 +49,7 @@ export default function SettingsScreen() {
       setTemperatureUnitState(unit);
       const theme = await getTheme();
       setSavedTheme(theme);
-      const scheme = await getColorSchemeFromStorage();
+      const scheme = await getColorScheme();
       setSavedColorScheme(scheme);
     })();
   }, []);
@@ -61,7 +62,7 @@ export default function SettingsScreen() {
   };
 
   const handleSetColorScheme = async (scheme: string) => {
-    await saveColorSchemeToStorage(scheme);
+    await setSchemeName(scheme);
     setSavedColorScheme(scheme);
     setShowColorSchemeModal(false);
   };
