@@ -279,7 +279,13 @@ const filteredTags = useMemo(() => {
                   <React.Fragment key={option.key}>
                     <TouchableOpacity
                       onPress={() => handleSortToggle(option.key)}
-                      style={{ paddingHorizontal: 10, paddingVertical: 4 }}
+                      style={{ 
+                        paddingHorizontal: 10, 
+                        paddingVertical: 4,
+                        marginHorizontal: 4,
+                        backgroundColor: sortOption === option.key ? colors.accentLight : 'transparent',
+                        borderRadius: 12
+                      }}
                       className="flex-row items-center"
                     >
                       <Text 
@@ -329,21 +335,21 @@ const filteredTags = useMemo(() => {
                   >
                     #{tag.name}
                   </Text>
-                  <View
-                    style={{
-                      marginLeft: 6,
-                      borderRadius: 10,
-                      paddingHorizontal: 6,
-                      paddingVertical: 2,
-                      backgroundColor: isSelected ? colors.pills.tags.background : colors.surface
-                    }}
-                  >
-                    <Text
-                      style={{ fontFamily: 'Outfit-Medium', fontSize: 12, color: isSelected ? colors.pills.tags.text : colors.textTertiary }}
+                    <View
+                      style={{
+                        marginLeft: 6,
+                        borderRadius: 10,
+                        paddingHorizontal: 6,
+                        paddingVertical: 2,
+                        backgroundColor: isSelected ? `${colors.pills.tags.icon}20` : colors.surface
+                      }}
                     >
-                      {tag.count}
-                    </Text>
-                  </View>
+                      <Text
+                        style={{ fontFamily: 'Outfit-Medium', fontSize: 12, color: isSelected ? colors.pills.tags.icon : colors.textSecondary }}
+                      >
+                        {tag.count}
+                      </Text>
+                    </View>
                   {isSelected && (
                     <View className="ml-auto">
                       <Ionicons name="checkmark-circle" size={18} color={colors.pills.tags.icon} />

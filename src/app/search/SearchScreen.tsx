@@ -205,7 +205,7 @@ export default function SearchScreen() {
                       #{name}
                     </Text>
                     <View style={{ marginLeft: 6, borderRadius: 10, paddingHorizontal: 6, paddingVertical: 2, backgroundColor: colors.surface }}>
-                      <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 12, color: colors.textTertiary }}>
+                      <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 12, color: colors.textSecondary }}>
                         {count}
                       </Text>
                     </View>

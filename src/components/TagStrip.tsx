@@ -62,11 +62,11 @@ export default function TagStrip({ tags, selectedTags, onTagPress, onMorePress }
                   borderRadius: 10,
                   paddingHorizontal: 6,
                   paddingVertical: 2,
-                  backgroundColor: isSelected ? colors.pills.tags.background : colors.surface
+                  backgroundColor: isSelected ? `${colors.pills.tags.icon}20` : colors.surface
                 }}
               >
                 <Text
-                  style={{ fontFamily: 'Outfit-Medium', fontSize: 12, color: isSelected ? colors.pills.tags.text : colors.textTertiary }}
+                  style={{ fontFamily: 'Outfit-Medium', fontSize: 12, color: isSelected ? colors.pills.tags.icon : colors.textSecondary }}
                 >
                   {tag.count}
                 </Text>
