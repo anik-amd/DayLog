@@ -7,6 +7,7 @@ import Fuse from 'fuse.js';
 import { getAllEntries } from '../../database/entries';
 import { getAllTags, TagEntry } from '../../database/tags';
 import { Entry } from '../../types/Entry';
+import TagSelectorModal from '../../components/TagSelectorModal';
 
 const MAX_VISIBLE_TAGS = 10;
 
@@ -24,6 +25,7 @@ export default function SearchScreen() {
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
   const [searchMode, setSearchMode] = useState<'content' | 'tag'>('content');
+  const [tagModalVisible, setTagModalVisible] = useState(false);
 
   useEffect(() => {
     loadEntries();
@@ -180,9 +182,9 @@ export default function SearchScreen() {
                   Most used tags
                 </Text>
                 {popularTags.length > MAX_VISIBLE_TAGS && (
-                  <TouchableOpacity onPress={() => setShowAllTags(!showAllTags)}>
+                  <TouchableOpacity onPress={() => setTagModalVisible(true)}>
                     <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-indigo-500 text-xs">
-                      {showAllTags ? 'Show less' : `Show all (${popularTags.length})`}
+                      Show all
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -193,13 +195,13 @@ export default function SearchScreen() {
                     key={name}
                     onPress={() => navigation.navigate('Home', { screen: 'Entries', params: { selectedTags: [name] } })}
                     className="flex-row items-center rounded-full px-3 py-1.5 mr-2 mb-2"
-                    style={{ backgroundColor: isDark ? '#262626' : '#f4f4f5' }}
+                    style={{ backgroundColor: isDark ? '#404040' : '#f4f4f5' }}
                   >
                     <Text style={{ fontFamily: 'Outfit-Medium' }} className={`text-sm ${isDark ? 'text-neutral-400' : 'text-neutral-500'}`}>
                       #{name}
                     </Text>
-                    <View className={`ml-1.5 rounded-full px-1.5 py-0.5 ${isDark ? 'bg-neutral-700' : 'bg-neutral-200'}`}>
-                      <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 12 }} className={isDark ? 'text-neutral-400' : 'text-neutral-500'}>
+                    <View className={`ml-1.5 rounded-full px-1.5 py-0.5 ${isDark ? 'bg-neutral-700' : 'bg-neutral-300'}`}>
+                      <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 12 }} className={isDark ? 'text-neutral-400' : 'text-neutral-600'}>
                         {count}
                       </Text>
                     </View>
@@ -276,6 +278,20 @@ export default function SearchScreen() {
           ))}
         </ScrollView>
       )}
-    </View>
-  );
+
+        {/* Tag Selector Modal */}
+        <TagSelectorModal
+          visible={tagModalVisible}
+          tags={popularTags}
+          selectedTags={[]}
+          onClose={() => setTagModalVisible(false)}
+          onApply={(tags) => {
+            if (tags.length > 0) {
+              navigation.navigate('Home', { screen: 'Entries', params: { selectedTags: tags } });
+            }
+            setTagModalVisible(false);
+          }}
+        />
+      </View>
+    );
 }

@@ -434,21 +434,39 @@ export default function EntriesScreen({ navigation, route }: any) {
         >
             <View className="flex-1 flex-row items-center justify-between">
                 <Text style={{ fontFamily: 'Outfit-Black' }} className="text-neutral-900 dark:text-neutral-50 text-[22px] tracking-tighter">DayLog</Text>
-                <TouchableOpacity 
-                    onPress={() => navigation.navigate('Settings')}
-                    style={{
-                        backgroundColor: colorScheme === 'dark' ? '#262626' : '#ffffff',
-                        width: 32,
-                        height: 32,
-                        borderRadius: 999,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderWidth: 1,
-                        borderColor: colorScheme === 'dark' ? '#404040' : '#e5e5e5',
-                    }}
-                >
-                    <Ionicons name="settings-outline" size={16} color="#737373" />
-                </TouchableOpacity>
+                <View className="flex-row items-center">
+                    <TouchableOpacity 
+                        onPress={() => setTagModalVisible(true)}
+                        style={{
+                            backgroundColor: colorScheme === 'dark' ? '#262626' : '#ffffff',
+                            width: 32,
+                            height: 32,
+                            borderRadius: 999,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderWidth: 1,
+                            borderColor: colorScheme === 'dark' ? '#404040' : '#e5e5e5',
+                            marginRight: 8,
+                        }}
+                    >
+                        <Ionicons name="pricetag-outline" size={16} color="#737373" />
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                        onPress={() => navigation.navigate('Settings')}
+                        style={{
+                            backgroundColor: colorScheme === 'dark' ? '#262626' : '#ffffff',
+                            width: 32,
+                            height: 32,
+                            borderRadius: 999,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderWidth: 1,
+                            borderColor: colorScheme === 'dark' ? '#404040' : '#e5e5e5',
+                        }}
+                    >
+                        <Ionicons name="settings-outline" size={16} color="#737373" />
+                    </TouchableOpacity>
+                </View>
             </View>
         </Animated.View>
 

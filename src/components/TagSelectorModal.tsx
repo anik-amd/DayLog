@@ -13,7 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from 'nativewind';
 import { Ionicons } from '@expo/vector-icons';
-import { TagEntry } from '../database/tags';
+import { TagEntry, SortOption } from '../database/tags';
 
 interface TagSelectorModalProps {
   visible: boolean;
@@ -25,6 +25,15 @@ interface TagSelectorModalProps {
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const MAX_HEIGHT = SCREEN_HEIGHT * 0.7;
+
+const SORT_OPTIONS: { key: SortOption; label: string }[] = [
+  { key: 'mostUsed', label: 'Most used' },
+  { key: 'leastUsed', label: 'Least used' },
+  { key: 'az', label: 'A → Z' },
+  { key: 'za', label: 'Z → A' },
+  { key: 'newToOld', label: 'New to old' },
+  { key: 'oldToNew', label: 'Old to new' },
+];
 
 export default function TagSelectorModal({ 
   visible, 
@@ -39,6 +48,7 @@ export default function TagSelectorModal({
   
   const [localSelected, setLocalSelected] = useState<string[]>(selectedTags);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortOption, setSortOption] = useState<SortOption>('mostUsed');
   const slideAnim = useRef(new Animated.Value(MAX_HEIGHT)).current;
   const backdropAnim = useRef(new Animated.Value(0)).current;
 
@@ -84,12 +94,34 @@ export default function TagSelectorModal({
     return [...selected, ...others];
   }, [tags, localSelected]);
 
-  const filteredTags = useMemo(() => {
-    if (!searchQuery.trim()) return orderedTags;
-    return orderedTags.filter(tag => 
+const filteredTags = useMemo(() => {
+  let base = orderedTags;
+  
+  if (searchQuery.trim()) {
+    base = base.filter(tag => 
       tag.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [orderedTags, searchQuery]);
+  }
+  
+  return [...base].sort((a, b) => {
+    switch (sortOption) {
+      case 'mostUsed':
+        return (b.count || 0) - (a.count || 0);
+      case 'leastUsed':
+        return (a.count || 0) - (b.count || 0);
+      case 'az':
+        return (a.name || '').localeCompare(b.name || '');
+      case 'za':
+        return (b.name || '').localeCompare(a.name || '');
+      case 'newToOld':
+        return (b.createdAt || 0) - (a.createdAt || 0);
+      case 'oldToNew':
+        return (a.createdAt || 0) - (b.createdAt || 0);
+      default:
+        return 0;
+    }
+  });
+}, [orderedTags, searchQuery, sortOption]);
 
   const toggleTag = (tagName: string) => {
     setLocalSelected(prev => {
@@ -126,6 +158,8 @@ export default function TagSelectorModal({
       onClose();
     });
   };
+
+  const currentSortLabel = SORT_OPTIONS.find(o => o.key === sortOption)?.label || 'Most used';
 
   return (
     <Modal
@@ -165,6 +199,7 @@ export default function TagSelectorModal({
 
           <View 
             className="flex-row items-center justify-between px-4 py-3"
+            style={{ borderBottomWidth: 1, borderBottomColor: isDark ? '#262626' : '#e5e5e5' }}
           >
             <Text style={{ fontFamily: 'Outfit-Medium' }} className={`text-base ${isDark ? 'text-white' : 'text-neutral-900'}`}>
               Filter by Tags ({tags.length})
@@ -174,7 +209,7 @@ export default function TagSelectorModal({
             </TouchableOpacity>
           </View>
 
-          <View className="px-4 pb-3">
+          <View className="px-4 pt-3">
             <View 
               className="flex-row items-center rounded-lg px-3 py-2"
               style={{ backgroundColor: isDark ? '#262626' : '#f4f4f5' }}
@@ -190,6 +225,47 @@ export default function TagSelectorModal({
                 autoCapitalize="none"
                 autoCorrect={false}
               />
+            </View>
+          </View>
+
+          <View className="px-4 pt-3 pb-2">
+            <View 
+              className="flex-row items-center rounded-full px-2 py-1.5"
+              style={{ 
+                backgroundColor: isDark ? 'transparent' : 'transparent',
+                borderWidth: 1,
+                borderColor: isDark ? '#404040' : '#e5e5e5'
+              }}
+            >
+              <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 13 }} className="text-neutral-500 mr-3 ml-1">
+                Sort:
+              </Text>
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ flexDirection: 'row', alignItems: 'center' }}
+              >
+                {SORT_OPTIONS.map((option, index) => (
+                  <React.Fragment key={option.key}>
+                    <TouchableOpacity
+                      onPress={() => setSortOption(option.key)}
+                      style={{ paddingHorizontal: 10, paddingVertical: 4 }}
+                    >
+                      <Text 
+                        style={{ fontFamily: 'Outfit-Medium', fontSize: 12 }}
+                        className={sortOption === option.key 
+                          ? 'text-indigo-500' 
+                          : (isDark ? 'text-neutral-400' : 'text-neutral-500')}
+                      >
+                        {option.label}
+                      </Text>
+                    </TouchableOpacity>
+                    {index < SORT_OPTIONS.length - 1 && (
+                      <View style={{ height: 16, width: 1, backgroundColor: isDark ? '#404040' : '#e5e5e5' }} />
+                    )}
+                  </React.Fragment>
+                ))}
+              </ScrollView>
             </View>
           </View>
 
@@ -219,12 +295,12 @@ export default function TagSelectorModal({
                   </Text>
                   <View
                     className={`ml-1.5 rounded-full px-1.5 py-0.5 ${
-                      isSelected ? 'bg-green-200' : 'bg-neutral-200'
+                      isSelected ? 'bg-green-200' : isDark ? 'bg-neutral-700' : 'bg-neutral-200'
                     }`}
                   >
                     <Text
                       style={{ fontFamily: 'Outfit-Medium', fontSize: 12 }}
-                      className={isSelected ? 'text-green-600' : 'text-neutral-500'}
+                      className={isSelected ? 'text-green-600' : isDark ? 'text-neutral-400' : 'text-neutral-600'}
                     >
                       {tag.count}
                     </Text>
@@ -294,7 +370,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   scrollView: {
-    maxHeight: MAX_HEIGHT - 200,
+    maxHeight: MAX_HEIGHT - 250,
   },
   scrollContent: {
     paddingHorizontal: 16,
