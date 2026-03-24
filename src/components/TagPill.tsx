@@ -30,7 +30,7 @@ export default function TagPill({ name, count, isSelected = false, onPress, show
         },
         isSelected 
           ? { backgroundColor: colors.pills.tags.background, borderWidth: 2, borderColor: colors.accent }
-          : { backgroundColor: colors.surfaceElevated }
+          : { backgroundColor: colors.surface }
       ]}
     >
       <Text
@@ -49,7 +49,7 @@ export default function TagPill({ name, count, isSelected = false, onPress, show
             borderRadius: 10,
             paddingHorizontal: 6,
             paddingVertical: 2,
-            backgroundColor: isSelected ? `${colors.accent}30` : colors.surface,
+            backgroundColor: isSelected ? `${colors.accent}30` : colors.surfaceElevated,
           }}
         >
           <Text

@@ -8,7 +8,8 @@ import {
   TextInput,
   Animated,
   Dimensions,
-  StyleSheet
+  StyleSheet,
+  LayoutAnimation
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from 'nativewind';
@@ -143,7 +144,10 @@ const filteredTags = useMemo(() => {
     );
   }
   
-  return [...base].sort((a, b) => {
+  const selected = base.filter(tag => localSelected.includes(tag.name));
+  const unselected = base.filter(tag => !localSelected.includes(tag.name));
+  
+  const sortedUnselected = [...unselected].sort((a, b) => {
     const dir = sortDirection === 'asc' ? 1 : -1;
     switch (sortOption) {
       case 'usage':
@@ -156,9 +160,12 @@ const filteredTags = useMemo(() => {
         return 0;
     }
   });
-}, [orderedTags, searchQuery, sortOption, sortDirection]);
+  
+  return [...selected, ...sortedUnselected];
+}, [orderedTags, localSelected, searchQuery, sortOption, sortDirection]);
 
   const toggleTag = (tagName: string) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setLocalSelected(prev => {
       if (prev.includes(tagName)) {
         return prev.filter(t => t !== tagName);

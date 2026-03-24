@@ -308,6 +308,7 @@ export default function EntriesScreen({ navigation, route }: any) {
 
   // Handle tag press to toggle tag filter
   const handleTagPress = (tag: string) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setSelectedTags(prev => {
       if (prev.includes(tag)) {
         return prev.filter(t => t !== tag);
@@ -320,6 +321,7 @@ export default function EntriesScreen({ navigation, route }: any) {
 
   // Clear all tag filters
   const clearTagFilter = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setSelectedTags([]);
   };
 
