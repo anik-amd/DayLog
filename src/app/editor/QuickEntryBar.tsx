@@ -10,9 +10,34 @@ import * as FileSystem from 'expo-file-system';
 import * as Location from 'expo-location';
 import { createEntry, updateEntry } from '../../database/entries';
 import { addMediaToEntry } from '../../database/media';
-import { useAutoSave } from '../../hooks/useAutoSave';
 import { Entry } from '../../types/Entry';
 import Pill from '../../components/Pill';
+import { fetchWeather, getWeatherIconName } from '../../services/WeatherService';
+import { getSetting } from '../../storage/settings';
+
+const trimLocation = (address: Location.LocationGeocodedAddress): string => {
+  const parts: string[] = [];
+  
+  if (address.subregion) parts.push(address.subregion);
+  if (address.city) parts.push(address.city);
+  if (address.region) parts.push(address.region);
+  if (address.country) parts.push(address.country);
+  
+  return parts.filter(Boolean).join(', ');
+};
+
+const getFullAddress = (address: Location.LocationGeocodedAddress): string => {
+  const parts: string[] = [];
+  
+  if (address.name) parts.push(address.name);
+  if (address.subregion) parts.push(address.subregion);
+  if (address.city) parts.push(address.city);
+  if (address.region) parts.push(address.region);
+  if (address.country) parts.push(address.country);
+  if (address.postalCode) parts.push(address.postalCode);
+  
+  return parts.filter(Boolean).join(', ');
+};
 
 const IS_WEB = Platform.OS === 'web';
 
@@ -55,13 +80,17 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   const [showTimePicker, setShowTimePicker] = useState(false);
   
   // Location state
-  const [location, setLocation] = useState<string | null>(null);
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+  const [locationFull, setLocationFull] = useState<string | null>(null);
+  const [locationDisplay, setLocationDisplay] = useState<string | null>(null);
   const [locationError, setLocationError] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
   const [hasLocationPermission, setHasLocationPermission] = useState<boolean | null>(null);
   
   // Weather state
   const [weather, setWeather] = useState<string | null>(null);
+  const [weatherCode, setWeatherCode] = useState<number | null>(null);
   const [weatherError, setWeatherError] = useState(false);
   const [weatherLoading, setWeatherLoading] = useState(false);
   
@@ -74,7 +103,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
       const { status } = await Location.getForegroundPermissionsAsync();
       setHasLocationPermission(status === 'granted');
       if (status === 'granted') {
-        fetchLocationAndWeather(true);
+        fetchLocation(true);
       }
     })();
   }, []);
@@ -85,10 +114,12 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
     setTags(extracted);
   }, [content]);
 
-  const fetchLocationAndWeather = async (onlyIfGranted = false) => {
+  const fetchLocation = async (onlyIfGranted = false) => {
     if (IS_WEB) {
-      setLocation('San Francisco, CA');
-      setWeather('72°F Sunny');
+      setLatitude(37.7749);
+      setLongitude(-122.4194);
+      setLocationFull('San Francisco, CA, USA');
+      setLocationDisplay('San Francisco, CA, USA');
       setHasLocationPermission(true);
       return;
     }
@@ -99,30 +130,33 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
     }
 
     setLocationLoading(true);
-    setWeatherLoading(true);
     setLocationError(false);
-    setWeatherError(false);
 
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       setHasLocationPermission(status === 'granted');
       if (status !== 'granted') {
         setLocationLoading(false);
-        setWeatherLoading(false);
         return;
       }
 
       const loc = await Location.getCurrentPositionAsync({});
+      const lat = loc.coords.latitude;
+      const lng = loc.coords.longitude;
+      
+      setLatitude(lat);
+      setLongitude(lng);
+
       const [address] = await Location.reverseGeocodeAsync({
-        latitude: loc.coords.latitude,
-        longitude: loc.coords.longitude
+        latitude: lat,
+        longitude: lng
       });
 
       if (address) {
-        const locationStr = address.city 
-          ? `${address.city}, ${address.region}` 
-          : address.subregion || 'Unknown';
-        setLocation(locationStr);
+        const fullAddr = getFullAddress(address);
+        const displayAddr = trimLocation(address);
+        setLocationFull(fullAddr);
+        setLocationDisplay(displayAddr || 'Unknown');
       } else {
         setLocationError(true);
       }
@@ -132,13 +166,32 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
     } finally {
       setLocationLoading(false);
     }
+  };
 
-    // Mock weather for now - in production, use a weather API
+  const fetchWeatherData = async () => {
+    if (!latitude || !longitude) {
+      // Need to fetch location first
+      await fetchLocation(false);
+      if (!latitude || !longitude) return;
+    }
+
+    setWeatherLoading(true);
+    setWeatherError(false);
+
     try {
-      // Simulating weather fetch - replace with actual weather API
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setWeather('72°F Sunny');
+      const weatherData = await fetchWeather(latitude, longitude);
+      if (weatherData) {
+        setWeatherCode(weatherData.weatherCode);
+        const tempUnit = await getSetting('temperatureUnit') || 'c';
+        const tempDisplay = tempUnit === 'f' 
+          ? `${Math.round(weatherData.temperature * 9/5 + 32)}°F`
+          : `${weatherData.temperature}°C`;
+        setWeather(`${tempDisplay} ${weatherData.condition}`);
+      } else {
+        setWeatherError(true);
+      }
     } catch (error) {
+      console.error('Weather error:', error);
       setWeatherError(true);
     } finally {
       setWeatherLoading(false);
@@ -146,7 +199,11 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   };
 
   const handleLocationPress = () => {
-    fetchLocationAndWeather(false);
+    fetchLocation(false);
+  };
+
+  const handleWeatherPress = () => {
+    fetchWeatherData();
   };
 
   const handleSave = useCallback(async (textToSave: string, finalizeAndRefresh: boolean = false, forceSave: boolean = false) => {
@@ -171,7 +228,10 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
           updatedAt: now,
           date: dateStr,
           time: timeStr,
-          location: location || undefined,
+          latitude: latitude || undefined,
+          longitude: longitude || undefined,
+          locationFull: locationFull || undefined,
+          locationDisplay: locationDisplay || undefined,
           weather: weatherError ? undefined : weather || undefined,
           tags: extractedTags || undefined
         };
@@ -180,7 +240,19 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
         if (finalizeAndRefresh) onEntrySaved();
       } else {
         console.log('Updating existing entry...');
-        await updateEntry(currentEntryId, textToSave, now, dateStr, timeStr, location || undefined, weatherError ? undefined : weather || undefined, extractedTags || undefined);
+        await updateEntry(
+          currentEntryId, 
+          textToSave, 
+          now, 
+          dateStr, 
+          timeStr, 
+          latitude || undefined, 
+          longitude || undefined,
+          locationFull || undefined,
+          locationDisplay || undefined,
+          weatherError ? undefined : weather || undefined, 
+          extractedTags || undefined
+        );
         if (finalizeAndRefresh) onEntrySaved();
       }
 
@@ -194,9 +266,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
     } finally {
       isSaving.current = false;
     }
-  }, [currentEntryId, onEntrySaved, entryDate, location, weather, weatherError]);
-
-  useAutoSave(content, (text) => handleSave(text, false, false), 1000);
+  }, [currentEntryId, onEntrySaved, entryDate, latitude, longitude, locationFull, locationDisplay, weather, weatherError]);
 
   const onChangeText = (text: string) => {
     setContent(text);
@@ -236,7 +306,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
           initialContent: content, 
           initialDate: entryDate.toISOString(),
           initialTime: formatTime(entryDate),
-          initialLocation: location,
+          initialLocation: locationDisplay,
           initialWeather: weather,
           initialTags: tags,
           viewMode: false 
@@ -248,7 +318,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
           initialContent: content, 
           initialDate: entryDate.toISOString(),
           initialTime: formatTime(entryDate),
-          initialLocation: location,
+          initialLocation: locationDisplay,
           initialWeather: weather,
           initialTags: tags,
           viewMode: false 
@@ -256,10 +326,10 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
     } else {
         navigation.navigate('FullScreenEditor', { 
           entryId: null, 
-          initialContent: '', 
+          initialContent: content, 
           initialDate: entryDate.toISOString(),
           initialTime: formatTime(entryDate),
-          initialLocation: location,
+          initialLocation: locationDisplay,
           initialWeather: weather,
           initialTags: tags,
           viewMode: false 
@@ -449,13 +519,13 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                 icon={
                   locationLoading ? (
                     <Ionicons name="location-outline" size={15} color="#d97706" />
-                  ) : (hasLocationPermission === false && !location) ? (
+                  ) : (hasLocationPermission === false && !locationDisplay) ? (
                     <Ionicons name="location-outline" size={15} color="#ef4444" />
                   ) : (
                     <Ionicons name="location-outline" size={15} color="#d97706" />
                   )
                 }
-                label={location || 'Location'}
+                label={locationDisplay || 'Location'}
                 backgroundColor="#fef3c7"
                 iconColor="#d97706"
                 isError={locationError}
@@ -465,10 +535,10 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               {/* Weather Pill */}
               <Pill 
                 icon={
-                  weatherLoading ? (
-                    <Ionicons name="cloudy-outline" size={15} color="#d946ef" />
-                  ) : weatherError ? (
+                  weatherLoading ? null : weatherError ? (
                     <Ionicons name="cloud-offline-outline" size={15} color="#ef4444" />
+                  ) : weatherCode ? (
+                    <Ionicons name={getWeatherIconName(weatherCode) as any} size={15} color="#d946ef" />
                   ) : (
                     <Ionicons name="sunny-outline" size={15} color="#d946ef" />
                   )
@@ -479,6 +549,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                 textColor="#d946ef"
                 isError={weatherError}
                 isLoading={weatherLoading}
+                onPress={handleWeatherPress}
               />
 
               {/* Photo Pill */}

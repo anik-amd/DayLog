@@ -127,13 +127,13 @@ export default function ReadEntryScreen({ route, navigation }: any) {
               </Pressable>
             ))}
 
-            {(entry.location || entry.weather) && (
+            {(entry.locationDisplay || entry.weather) && (
               <View className="flex-row items-center">
-                {entry.location && (
+                {entry.locationDisplay && (
                   <View className="flex-row items-center mr-3">
                     <Ionicons name="location-outline" size={14} color="#a3a3a3" />
                     <Text style={{ fontFamily: 'Outfit-Regular' }} className="text-neutral-500 dark:text-neutral-400 text-base ml-1.5">
-                      {entry.location}
+                      {entry.locationDisplay}
                     </Text>
                   </View>
                 )}

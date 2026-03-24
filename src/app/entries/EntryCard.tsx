@@ -158,13 +158,13 @@ function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCard
               )}
 
               {/* Location & Weather Pills */}
-              {(entry.location || entry.weather) && (
+              {(entry.locationDisplay || entry.weather) && (
                 <View className="flex-row items-center mt-2">
-                  {entry.location && (
+                  {entry.locationDisplay && (
                     <View className="flex-row items-center mr-3">
                       <Ionicons name="location-outline" size={11} color={colorScheme === 'dark' ? '#a3a3a3' : '#737373'} />
                       <Text style={[localStyles.meta, { color: colorScheme === 'dark' ? '#71717a' : '#a1a1aa' }]}>
-                        {entry.location}
+                        {entry.locationDisplay}
                       </Text>
                     </View>
                   )}

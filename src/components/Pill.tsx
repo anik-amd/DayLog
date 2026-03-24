@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, ActivityIndicator } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 interface PillProps {
   icon?: React.ReactNode;
@@ -26,7 +27,11 @@ export default function Pill({
 
   const content = (
     <View style={{ backgroundColor }} className="flex-row items-center rounded-full px-3 py-1.5">
-      {icon && <View className="mr-1.5">{icon}</View>}
+      {isLoading ? (
+        <ActivityIndicator size="small" color={displayColor} />
+      ) : (
+        icon && <View className="mr-1.5">{icon}</View>
+      )}
       <Text 
         style={{ 
           fontFamily: 'Outfit-Medium',
@@ -35,14 +40,14 @@ export default function Pill({
         }} 
         numberOfLines={1}
       >
-        {label}
+        {isLoading ? (onPress ? 'Loading...' : 'Loading') : label}
       </Text>
     </View>
   );
 
   if (onPress) {
     return (
-      <Pressable onPress={onPress} className="flex-row items-center mr-2">
+      <Pressable onPress={onPress} className="flex-row items-center mr-2" disabled={isLoading}>
         {content}
       </Pressable>
     );

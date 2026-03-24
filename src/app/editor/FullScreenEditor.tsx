@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, KeyboardAvoidingView, Platform, TouchableOpacity, ScrollView, TextInput, Pressable } from 'react-native';
+import { View, Text, KeyboardAvoidingView, Platform, TouchableOpacity, ScrollView, TextInput, Pressable, Modal } from 'react-native';
 import { useColorScheme } from "nativewind";
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,15 +10,38 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import Picker from './Picker';
 import { getEntry, updateEntry, createEntry } from '../../database/entries';
 import { addMediaToEntry, deleteMedia } from '../../database/media';
-import { useAutoSave } from '../../hooks/useAutoSave';
 import MarkdownRenderer from '../../markdown/MarkdownRenderer';
 import { Entry } from '../../types/Entry';
 import Pill from '../../components/Pill';
+import { fetchWeather, getWeatherIconName } from '../../services/WeatherService';
+import { getSetting } from '../../storage/settings';
 
 const extractTags = (text: string): string => {
   const matches = text.match(/#(\w+)/g);
   if (!matches) return '';
   return matches.map(tag => tag.substring(1)).join(', ');
+};
+
+const IS_WEB = Platform.OS === 'web';
+
+const trimLocation = (address: Location.LocationGeocodedAddress): string => {
+  const parts: string[] = [];
+  if (address.subregion) parts.push(address.subregion);
+  if (address.city) parts.push(address.city);
+  if (address.region) parts.push(address.region);
+  if (address.country) parts.push(address.country);
+  return parts.filter(Boolean).join(', ');
+};
+
+const getFullAddress = (address: Location.LocationGeocodedAddress): string => {
+  const parts: string[] = [];
+  if (address.name) parts.push(address.name);
+  if (address.subregion) parts.push(address.subregion);
+  if (address.city) parts.push(address.city);
+  if (address.region) parts.push(address.region);
+  if (address.country) parts.push(address.country);
+  if (address.postalCode) parts.push(address.postalCode);
+  return parts.filter(Boolean).join(', ');
 };
 
 export default function FullScreenEditor({ route, navigation }: any) {
@@ -44,13 +67,24 @@ export default function FullScreenEditor({ route, navigation }: any) {
   // Metadata state - initialize with passed values
   const [date, setDate] = useState<string>(initialDate || '');
   const [time, setTime] = useState<string>(initialTime || '');
-  const [location, setLocation] = useState<string>(initialLocation || '');
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+  const [locationFull, setLocationFull] = useState<string | null>(null);
+  const [locationDisplay, setLocationDisplay] = useState<string>(initialLocation || '');
   const [weather, setWeather] = useState<string>(initialWeather || '');
+  const [weatherCode, setWeatherCode] = useState<number | null>(null);
   const [tags, setTags] = useState<string>(initialTags || '');
   
   // Location/Weather states
   const [locationLoading, setLocationLoading] = useState(false);
+  const [locationError, setLocationError] = useState(false);
+  const [weatherError, setWeatherError] = useState(false);
+  const [weatherLoading, setWeatherLoading] = useState(false);
   const [hasLocationPermission, setHasLocationPermission] = useState<boolean | null>(null);
+
+  // Save confirmation modal
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   
   // Date/Time objects for pickers
   const [entryDateObj, setEntryDateObj] = useState(() => {
@@ -77,7 +111,10 @@ export default function FullScreenEditor({ route, navigation }: any) {
         setMarkdown(content);
         setDate(data.date || '');
         setTime(data.time || '');
-        setLocation(data.location || '');
+        setLatitude(data.latitude || null);
+        setLongitude(data.longitude || null);
+        setLocationFull(data.locationFull || null);
+        setLocationDisplay(data.locationDisplay || '');
         setWeather(data.weather || '');
         // Extract tags from content instead of using stored comma-separated tags
         setTags(extractTags(content));
@@ -112,10 +149,12 @@ export default function FullScreenEditor({ route, navigation }: any) {
     setTags(extracted);
   }, [markdown]);
 
-  const fetchLocationAndWeather = async (onlyIfGranted = false) => {
-    if (Platform.OS === 'web') {
-      setLocation('San Francisco, CA');
-      setWeather('72°F Sunny');
+  const fetchLocation = async (onlyIfGranted = false) => {
+    if (IS_WEB) {
+      setLatitude(37.7749);
+      setLongitude(-122.4194);
+      setLocationFull('San Francisco, CA, USA');
+      setLocationDisplay('San Francisco, CA, USA');
       setHasLocationPermission(true);
       return;
     }
@@ -126,6 +165,7 @@ export default function FullScreenEditor({ route, navigation }: any) {
     }
 
     setLocationLoading(true);
+    setLocationError(false);
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       setHasLocationPermission(status === 'granted');
@@ -135,32 +175,71 @@ export default function FullScreenEditor({ route, navigation }: any) {
       }
 
       const loc = await Location.getCurrentPositionAsync({});
+      const lat = loc.coords.latitude;
+      const lng = loc.coords.longitude;
+      
+      setLatitude(lat);
+      setLongitude(lng);
+
       const [address] = await Location.reverseGeocodeAsync({
-        latitude: loc.coords.latitude,
-        longitude: loc.coords.longitude
+        latitude: lat,
+        longitude: lng
       });
 
       if (address) {
-        const locationStr = address.city 
-          ? `${address.city}, ${address.region}` 
-          : address.subregion || 'Unknown';
-        setLocation(locationStr);
+        const fullAddr = getFullAddress(address);
+        const displayAddr = trimLocation(address);
+        setLocationFull(fullAddr);
+        setLocationDisplay(displayAddr || 'Unknown');
+      } else {
+        setLocationError(true);
       }
-      
-      // Mock weather for consistency
-      setWeather('72°F Sunny');
     } catch (error) {
       console.error('Location error:', error);
+      setLocationError(true);
     } finally {
       setLocationLoading(false);
     }
   };
 
-  const handleLocationPress = () => {
-    fetchLocationAndWeather(false);
+  const fetchWeatherData = async () => {
+    if (!latitude || !longitude) {
+      await fetchLocation(false);
+      if (!latitude || !longitude) return;
+    }
+
+    setWeatherLoading(true);
+    setWeatherError(false);
+
+    try {
+      const weatherData = await fetchWeather(latitude, longitude);
+      if (weatherData) {
+        setWeatherCode(weatherData.weatherCode);
+        const tempUnit = await getSetting('temperatureUnit') || 'c';
+        const tempDisplay = tempUnit === 'f' 
+          ? `${Math.round(weatherData.temperature * 9/5 + 32)}°F`
+          : `${weatherData.temperature}°C`;
+        setWeather(`${tempDisplay} ${weatherData.condition}`);
+      } else {
+        setWeatherError(true);
+      }
+    } catch (error) {
+      console.error('Weather error:', error);
+      setWeatherError(true);
+    } finally {
+      setWeatherLoading(false);
+    }
   };
 
-  const handleSave = useCallback(async (textToSave: string, currentMetadata: { date: string, time: string, location: string, weather: string, tags: string }) => {
+  const handleLocationPress = () => {
+    fetchLocation(false);
+  };
+
+  const handleWeatherPress = () => {
+    fetchWeatherData();
+  };
+
+  const handleSave = useCallback(async (textToSave: string, currentMetadata: { date: string, time: string, latitude?: number | null, longitude?: number | null, locationFull?: string | null, locationDisplay?: string, weather: string, tags: string }) => {
     if (isSaving.current) return;
     if (!textToSave.trim()) return;
     
@@ -177,7 +256,10 @@ export default function FullScreenEditor({ route, navigation }: any) {
           updatedAt: now,
           date: currentMetadata.date || new Date().toISOString().split('T')[0],
           time: currentMetadata.time || '',
-          location: currentMetadata.location || undefined,
+          latitude: latitude || undefined,
+          longitude: longitude || undefined,
+          locationFull: locationFull || undefined,
+          locationDisplay: locationDisplay || undefined,
           weather: currentMetadata.weather || undefined,
           tags: currentMetadata.tags || undefined
         };
@@ -191,7 +273,10 @@ export default function FullScreenEditor({ route, navigation }: any) {
           Date.now(), 
           currentMetadata.date, 
           currentMetadata.time, 
-          currentMetadata.location, 
+          latitude || undefined, 
+          longitude || undefined,
+          locationFull || undefined,
+          locationDisplay || undefined,
           currentMetadata.weather,
           currentMetadata.tags
         );
@@ -199,16 +284,35 @@ export default function FullScreenEditor({ route, navigation }: any) {
     } finally {
       isSaving.current = false;
     }
-  }, [currentEntryId]);
+  }, [currentEntryId, latitude, longitude, locationFull, locationDisplay]);
 
-  useAutoSave(markdown, (t) => handleSave(t, { date, time, location, weather, tags }), 1000);
+  // Track unsaved changes - compare with initial content
+  useEffect(() => {
+    const hasChanges = markdown !== (initialContent || '');
+    setHasUnsavedChanges(hasChanges);
+  }, [markdown, initialContent]);
 
   const handleBack = async () => {
-    try {
-      await handleSave(markdown, { date, time, location, weather, tags });
-    } catch (e) {
-      console.error('handleBack error:', e);
+    if (hasUnsavedChanges || !currentEntryId) {
+      // Show save confirmation modal
+      setShowSaveModal(true);
+    } else {
+      navigation.goBack();
     }
+  };
+
+  const handleSaveAndExit = async () => {
+    try {
+      await handleSave(markdown, { date, time, latitude, longitude, locationFull, locationDisplay, weather, tags });
+      setShowSaveModal(false);
+      navigation.goBack();
+    } catch (e) {
+      console.error('handleSaveAndExit error:', e);
+    }
+  };
+
+  const handleDiscardAndExit = () => {
+    setShowSaveModal(false);
     navigation.goBack();
   };
 
@@ -372,13 +476,13 @@ export default function FullScreenEditor({ route, navigation }: any) {
                         icon={
                             locationLoading ? (
                                 <Ionicons name="location-outline" size={15} color="#d97706" />
-                            ) : (hasLocationPermission === false && !location) ? (
+                            ) : (hasLocationPermission === false && !locationDisplay) ? (
                                 <Ionicons name="location-outline" size={15} color="#ef4444" />
                             ) : (
                                 <Ionicons name="location-outline" size={15} color="#d97706" />
                             )
                         }
-                        label={location || 'Location'}
+                        label={locationDisplay || 'Location'}
                         backgroundColor="#fef3c7"
                         iconColor="#d97706"
                         textColor="#d97706"
@@ -386,11 +490,22 @@ export default function FullScreenEditor({ route, navigation }: any) {
                     />
 
                     <Pill 
-                        icon={<Ionicons name="sunny-outline" size={15} color="#d946ef" />}
-                        label={weather || 'Weather'}
+                        onPress={handleWeatherPress}
+                        icon={
+                          weatherLoading ? null : weatherError ? (
+                            <Ionicons name="cloud-offline-outline" size={15} color="#ef4444" />
+                          ) : weatherCode ? (
+                            <Ionicons name={getWeatherIconName(weatherCode) as any} size={15} color="#d946ef" />
+                          ) : (
+                            <Ionicons name="sunny-outline" size={15} color="#d946ef" />
+                          )
+                        }
+                        label={weatherError ? 'N/A' : weather || 'Weather'}
                         backgroundColor="#fdf4ff"
                         iconColor="#d946ef"
                         textColor="#d946ef"
+                        isError={weatherError}
+                        isLoading={weatherLoading}
                     />
 
                     <Pill 
@@ -462,6 +577,59 @@ export default function FullScreenEditor({ route, navigation }: any) {
           />
         )
       )}
+
+      {/* Save Confirmation Modal */}
+      <Modal
+        visible={showSaveModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowSaveModal(false)}
+      >
+        <Pressable 
+          className="flex-1 bg-black/60 items-center justify-end"
+          onPress={() => setShowSaveModal(false)}
+        >
+          <View className="bg-white dark:bg-neutral-900 w-full rounded-t-[40px] px-8 pt-10 pb-16 shadow-2xl">
+            <View className="flex-row items-center justify-between mb-8">
+              <Text style={{ fontFamily: 'Outfit-Black' }} className="text-neutral-900 dark:text-neutral-50 text-2xl">
+                {currentEntryId ? 'Save Changes?' : 'Save Entry?'}
+              </Text>
+              <TouchableOpacity onPress={() => setShowSaveModal(false)}>
+                <Ionicons name="close" size={24} color="#737373" />
+              </TouchableOpacity>
+            </View>
+
+            <View className="space-y-3">
+              <TouchableOpacity 
+                onPress={handleSaveAndExit}
+                className="flex-row items-center justify-center p-5 rounded-2xl bg-indigo-500"
+              >
+                <Text style={{ fontFamily: 'Outfit-SemiBold' }} className="text-white text-[16px]">
+                  {currentEntryId ? 'Save & Exit' : 'Save Entry'}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                onPress={handleDiscardAndExit}
+                className="flex-row items-center justify-center p-5 rounded-2xl bg-red-500"
+              >
+                <Text style={{ fontFamily: 'Outfit-SemiBold' }} className="text-white text-[16px]">
+                  Discard{currentEntryId ? ' Changes' : ''}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                onPress={() => setShowSaveModal(false)}
+                className="flex-row items-center justify-center p-5 rounded-2xl bg-neutral-100 dark:bg-neutral-800"
+              >
+                <Text style={{ fontFamily: 'Outfit-SemiBold' }} className="text-neutral-600 dark:text-neutral-400 text-[16px]">
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Pressable>
+      </Modal>
     </View>
   );
 }

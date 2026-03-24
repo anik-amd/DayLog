@@ -20,7 +20,10 @@ export const initDb = async () => {
       updatedAt INTEGER,
       date TEXT,
       time TEXT,
-      location TEXT,
+      latitude REAL,
+      longitude REAL,
+      locationFull TEXT,
+      locationDisplay TEXT,
       weather TEXT,
       tags TEXT
     );
@@ -41,7 +44,22 @@ export const initDb = async () => {
     // Column might already exist, ignore error
   }
   try {
-    await database.runAsync('ALTER TABLE entries ADD COLUMN location TEXT');
+    await database.runAsync('ALTER TABLE entries ADD COLUMN latitude REAL');
+  } catch (e) {
+    // Column might already exist, ignore error
+  }
+  try {
+    await database.runAsync('ALTER TABLE entries ADD COLUMN longitude REAL');
+  } catch (e) {
+    // Column might already exist, ignore error
+  }
+  try {
+    await database.runAsync('ALTER TABLE entries ADD COLUMN locationFull TEXT');
+  } catch (e) {
+    // Column might already exist, ignore error
+  }
+  try {
+    await database.runAsync('ALTER TABLE entries ADD COLUMN locationDisplay TEXT');
   } catch (e) {
     // Column might already exist, ignore error
   }

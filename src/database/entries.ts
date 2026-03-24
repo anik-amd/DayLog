@@ -14,8 +14,8 @@ export const createEntry = async (entry: Omit<Entry, 'media'>) => {
   const db = await getDb();
   try {
     await db.runAsync(
-      'INSERT INTO entries (id, content, createdAt, updatedAt, date, time, location, weather, tags) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [entry.id, entry.content, entry.createdAt, entry.updatedAt, entry.date, entry.time || null, entry.location || null, entry.weather || null, tags || null]
+      'INSERT INTO entries (id, content, createdAt, updatedAt, date, time, latitude, longitude, locationFull, locationDisplay, weather, tags) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [entry.id, entry.content, entry.createdAt, entry.updatedAt, entry.date, entry.time || null, entry.latitude || null, entry.longitude || null, entry.locationFull || null, entry.locationDisplay || null, entry.weather || null, tags || null]
     );
   } catch (error) {
     console.error('createEntry error:', error);
@@ -23,12 +23,12 @@ export const createEntry = async (entry: Omit<Entry, 'media'>) => {
   }
 };
 
-export const updateEntry = async (id: string, content: string, updatedAt: number, date?: string, time?: string, location?: string, weather?: string, tags?: string) => {
+export const updateEntry = async (id: string, content: string, updatedAt: number, date?: string, time?: string, latitude?: number, longitude?: number, locationFull?: string, locationDisplay?: string, weather?: string, tags?: string) => {
   const db = await getDb();
 
   await db.runAsync(
-    'UPDATE entries SET content = ?, updatedAt = ?, date = ?, time = ?, location = ?, weather = ?, tags = ? WHERE id = ?',
-    [content, updatedAt, date || null, time || null, location || null, weather || null, tags || null, id]
+    'UPDATE entries SET content = ?, updatedAt = ?, date = ?, time = ?, latitude = ?, longitude = ?, locationFull = ?, locationDisplay = ?, weather = ?, tags = ? WHERE id = ?',
+    [content, updatedAt, date || null, time || null, latitude || null, longitude || null, locationFull || null, locationDisplay || null, weather || null, tags || null, id]
   );
 };
 

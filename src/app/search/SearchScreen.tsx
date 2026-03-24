@@ -85,7 +85,7 @@ export default function SearchScreen() {
       processedQuery = processedQuery.substring(1); // Remove #
       setSearchMode('tag');
     } else {
-      searchKeys = ['content', 'tags', 'location'];
+      searchKeys = ['content', 'tags', 'location', 'weather'];
       setSearchMode('content');
     }
     

@@ -7,7 +7,10 @@ export interface Entry {
   updatedAt: number;
   date: string;
   time?: string;
-  location?: string;
+  latitude?: number;
+  longitude?: number;
+  locationFull?: string;
+  locationDisplay?: string;
   weather?: string;
   tags?: string;
   media?: Media[];

@@ -5,12 +5,15 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useColorScheme } from "nativewind";
 import { getAppStats } from '../../database/entries';
 import { useBackupEngine } from '../../services/BackupEngine';
+import { getTemperatureUnit, setTemperatureUnit } from '../../storage/settings';
 
 export default function SettingsScreen() {
   const navigation = useNavigation();
   const { colorScheme, setColorScheme } = useColorScheme();
   const [stats, setStats] = useState({ entries: 0, photos: 0 });
   const [showThemeModal, setShowThemeModal] = useState(false);
+  const [showTempModal, setShowTempModal] = useState(false);
+  const [temperatureUnit, setTemperatureUnitState] = useState<'c' | 'f'>('c');
   const [lastSync, setLastSync] = useState<string>("Never");
   const [syncing, setSyncing] = useState(false);
 
@@ -34,9 +37,22 @@ export default function SettingsScreen() {
     }
   }, [response]);
 
+  useEffect(() => {
+    (async () => {
+      const unit = await getTemperatureUnit();
+      setTemperatureUnitState(unit);
+    })();
+  }, []);
+
   const handleSetTheme = (theme: "light" | "dark" | "system") => {
     setColorScheme(theme);
     setShowThemeModal(false);
+  };
+
+  const handleSetTempUnit = async (unit: 'c' | 'f') => {
+    await setTemperatureUnit(unit);
+    setTemperatureUnitState(unit);
+    setShowTempModal(false);
   };
 
   const handleBackup = () => {
@@ -149,6 +165,12 @@ export default function SettingsScreen() {
         </Section>
 
         <Section title="Preferences">
+            <SettingItem 
+                icon="thermometer-outline" 
+                label="Temperature Unit" 
+                value={temperatureUnit === 'c' ? 'Celsius (°C)' : 'Fahrenheit (°F)'} 
+                onPress={() => setShowTempModal(true)} 
+            />
             <SettingItem icon="notifications-outline" label="Reminders" value="Off" onPress={() => {}} />
             <SettingItem icon="cloud-upload-outline" label="Automated Sync" value="Coming Soon" onPress={() => {}} last />
         </Section>
@@ -218,6 +240,55 @@ export default function SettingsScreen() {
                             <Ionicons name="settings-outline" size={20} color="#a3a3a3" className="mr-4" />
                             <Text style={{ fontFamily: 'Outfit-SemiBold' }} className="text-neutral-500 text-[16px] ml-3">System Default</Text>
                         </View>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </Pressable>
+      </Modal>
+
+      <Modal
+        visible={showTempModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowTempModal(false)}
+      >
+        <Pressable 
+            className="flex-1 bg-black/60 items-center justify-end"
+            onPress={() => setShowTempModal(false)}
+        >
+            <View className="bg-white dark:bg-neutral-900 w-full rounded-t-[40px] px-8 pt-10 pb-16 shadow-2xl">
+                <View className="flex-row items-center justify-between mb-8">
+                    <Text style={{ fontFamily: 'Outfit-Black' }} className="text-neutral-900 dark:text-neutral-50 text-2xl">Temperature Unit</Text>
+                    <TouchableOpacity onPress={() => setShowTempModal(false)}>
+                        <Ionicons name="close" size={24} color="#737373" />
+                    </TouchableOpacity>
+                </View>
+
+                <View className="space-y-3">
+                    <TouchableOpacity 
+                        onPress={() => handleSetTempUnit('c')}
+                        className={`flex-row items-center justify-between p-5 rounded-2xl border-2 ${
+                            temperatureUnit === 'c' ? 'bg-indigo-50 border-indigo-500' : 'bg-neutral-50 dark:bg-neutral-800 border-transparent'
+                        }`}
+                    >
+                        <View className="flex-row items-center">
+                            <Ionicons name="thermometer" size={20} color={temperatureUnit === 'c' ? "#4f46e5" : "#a3a3a3"} className="mr-4" />
+                            <Text style={{ fontFamily: 'Outfit-SemiBold' }} className={`text-[16px] ml-3 ${temperatureUnit === 'c' ? 'text-indigo-600' : 'text-neutral-500'}`}>Celsius (°C)</Text>
+                        </View>
+                        {temperatureUnit === 'c' && <Ionicons name="checkmark-circle" size={20} color="#4f46e5" />}
+                    </TouchableOpacity>
+
+                    <TouchableOpacity 
+                        onPress={() => handleSetTempUnit('f')}
+                        className={`flex-row items-center justify-between p-5 rounded-2xl border-2 ${
+                            temperatureUnit === 'f' ? 'bg-indigo-50 border-indigo-500' : 'bg-neutral-50 dark:bg-neutral-800 border-transparent'
+                        }`}
+                    >
+                        <View className="flex-row items-center">
+                            <Ionicons name="thermometer" size={20} color={temperatureUnit === 'f' ? "#4f46e5" : "#a3a3a3"} className="mr-4" />
+                            <Text style={{ fontFamily: 'Outfit-SemiBold' }} className={`text-[16px] ml-3 ${temperatureUnit === 'f' ? 'text-indigo-600' : 'text-neutral-500'}`}>Fahrenheit (°F)</Text>
+                        </View>
+                        {temperatureUnit === 'f' && <Ionicons name="checkmark-circle" size={20} color="#4f46e5" />}
                     </TouchableOpacity>
                 </View>
             </View>
