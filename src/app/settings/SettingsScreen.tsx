@@ -102,57 +102,57 @@ export default function SettingsScreen() {
 
   const Section = ({ title, children }: { title: string, children: React.ReactNode }) => (
     <View className="mb-8">
-      <Text style={{ fontFamily: 'Outfit-Black' }} className="text-neutral-500 text-[11px] uppercase tracking-widest px-6 mb-3">{title}</Text>
-      <View className="bg-white dark:bg-neutral-900 border-y border-neutral-200 dark:border-neutral-800/50">
+      <Text style={{ fontFamily: 'Outfit-Black', color: colors.textTertiary, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, paddingHorizontal: 24, marginBottom: 12 }}>{title}</Text>
+      <View style={{ backgroundColor: colors.surface, borderTopWidth: 1, borderBottomWidth: 1, borderColor: colors.border }}>
         {children}
       </View>
     </View>
   );
 
-  const SettingItem = ({ icon, label, value, onPress, last, color = "#a3a3a3" }: any) => (
+  const SettingItem = ({ icon, label, value, onPress, last, color = colors.textSecondary }: any) => (
     <TouchableOpacity 
       onPress={onPress}
-      className={`flex-row items-center justify-between px-6 py-4 ${!last ? 'border-b border-neutral-200 dark:border-neutral-800/30' : ''}`}
+      style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, paddingVertical: 16, borderBottomWidth: last ? 0 : 1, borderColor: colors.border }}
     >
       <View className="flex-row items-center">
-        <View className="w-8 h-8 rounded-lg bg-neutral-100 dark:bg-neutral-800 items-center justify-center mr-4">
+        <View style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: colors.surfaceElevated, alignItems: 'center', justifyContent: 'center', marginRight: 16 }}>
           <Ionicons name={icon} size={18} color={color} />
         </View>
-        <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-neutral-900 dark:text-neutral-200 text-[16px]">{label}</Text>
+        <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 16, color: colors.text }}>{label}</Text>
       </View>
       <View className="flex-row items-center">
-        {value && <Text style={{ fontFamily: 'Outfit-Regular' }} className="text-neutral-500 mr-2 text-[14px]">{value}</Text>}
-        <Ionicons name="chevron-forward" size={16} color="#d4d4d4" />
+        {value && <Text style={{ fontFamily: 'Outfit-Regular', fontSize: 14, color: colors.textSecondary, marginRight: 8 }}>{value}</Text>}
+        <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
       </View>
     </TouchableOpacity>
   );
 
   return (
-    <View className="flex-1 bg-white dark:bg-neutral-900">
+    <View className="flex-1" style={{ backgroundColor: colors.background }}>
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="px-6 pt-14 pb-8 flex-row items-center">
             <TouchableOpacity 
             onPress={() => navigation.goBack()}
-            className="bg-white dark:bg-neutral-900 w-11 h-11 rounded-full items-center justify-center border border-neutral-200 dark:border-neutral-800 mr-5 shadow-sm"
+            style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border, marginRight: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 }}
             >
-            <Ionicons name="arrow-back" size={22} color={colorScheme === 'dark' ? "#a3a3a3" : "#404040"} />
+            <Ionicons name="arrow-back" size={22} color={colors.textSecondary} />
             </TouchableOpacity>
             <View>
-            <Text style={{ fontFamily: 'Outfit-Black' }} className="text-neutral-900 dark:text-neutral-50 text-[32px] tracking-tight">Settings</Text>
-            <Text style={{ fontFamily: 'Outfit-Regular' }} className="text-neutral-500 mt-1">Configure your DayLog</Text>
+            <Text style={{ fontFamily: 'Outfit-Black', fontSize: 32, color: colors.text, letterSpacing: -0.5 }}>Settings</Text>
+            <Text style={{ fontFamily: 'Outfit-Regular', color: colors.textSecondary, marginTop: 4 }}>Configure your DayLog</Text>
             </View>
         </View>
 
         <Section title="Statistics">
-            <View className="flex-row px-4 py-6 justify-around bg-white dark:bg-neutral-900">
+            <View style={{ flexDirection: 'row', paddingHorizontal: 16, paddingVertical: 24, justifyContent: 'space-around', backgroundColor: colors.surface }}>
                 <View className="items-center">
-                    <Text style={{ fontFamily: 'Outfit-Black' }} className="text-indigo-600 dark:text-indigo-400 text-2xl">{stats.entries}</Text>
-                    <Text style={{ fontFamily: 'Outfit-Black' }} className="text-neutral-500 text-[10px] uppercase tracking-widest mt-1">Entries</Text>
+                    <Text style={{ fontFamily: 'Outfit-Black', fontSize: 24, color: colors.accent }}>{stats.entries}</Text>
+                    <Text style={{ fontFamily: 'Outfit-Black', color: colors.textTertiary, fontSize: 10, textTransform: 'uppercase', letterSpacing: 1, marginTop: 4 }}>Entries</Text>
                 </View>
-                <View className="w-[1px] h-10 bg-neutral-200 dark:bg-neutral-800" />
+                <View style={{ width: 1, height: 40, backgroundColor: colors.border }} />
                 <View className="items-center">
-                    <Text style={{ fontFamily: 'Outfit-Black' }} className="text-indigo-600 dark:text-indigo-400 text-2xl">{stats.photos}</Text>
-                    <Text style={{ fontFamily: 'Outfit-Black' }} className="text-neutral-500 text-[10px] uppercase tracking-widest mt-1">Photos</Text>
+                    <Text style={{ fontFamily: 'Outfit-Black', fontSize: 24, color: colors.accent }}>{stats.photos}</Text>
+                    <Text style={{ fontFamily: 'Outfit-Black', color: colors.textTertiary, fontSize: 10, textTransform: 'uppercase', letterSpacing: 1, marginTop: 4 }}>Photos</Text>
                 </View>
             </View>
         </Section>
@@ -173,13 +173,13 @@ export default function SettingsScreen() {
             <SettingItem icon="text" label="Editor Font" value="System Default" onPress={() => {}} last />
         </Section>
 
-        <Section title="Cloud Sync">
+         <Section title="Cloud Sync">
             <SettingItem 
                 icon="cloud-done-outline" 
                 label={syncing ? "Backing up..." : "Google Drive Backup"} 
                 value={response?.type === 'success' ? "Connected" : "Connect"} 
                 onPress={handleBackup} 
-                color={syncing ? "#6366f1" : undefined}
+                color={syncing ? colors.accent : colors.textSecondary}
             />
             <SettingItem 
                 icon="refresh-outline" 
@@ -209,7 +209,7 @@ export default function SettingsScreen() {
         </Section>
 
         <View className="items-center pb-12 mt-4">
-            <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-neutral-700 text-[12px] tracking-tight">Made with minimalism in mind.</Text>
+            <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 12, color: colors.textSecondary }}>Made with minimalism in mind.</Text>
         </View>
       </ScrollView>
 
@@ -220,51 +220,60 @@ export default function SettingsScreen() {
         onRequestClose={() => setShowThemeModal(false)}
       >
         <Pressable 
-            className="flex-1 bg-black/60 items-center justify-end"
+            className="flex-1 items-center justify-end"
+            style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
             onPress={() => setShowThemeModal(false)}
         >
-            <View className="bg-white dark:bg-neutral-900 w-full rounded-t-[40px] px-8 pt-10 pb-16 shadow-2xl">
+            <View style={{ backgroundColor: colors.surface, width: '100%', borderTopLeftRadius: 40, borderTopRightRadius: 40, paddingHorizontal: 32, paddingTop: 40, paddingBottom: 64, shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.15, shadowRadius: 12, elevation: 8 }}>
                 <View className="flex-row items-center justify-between mb-8">
-                    <Text style={{ fontFamily: 'Outfit-Black' }} className="text-neutral-900 dark:text-neutral-50 text-2xl">Choose Theme</Text>
+                    <Text style={{ fontFamily: 'Outfit-Black', fontSize: 24, color: colors.text }}>Choose Theme</Text>
                     <TouchableOpacity onPress={() => setShowThemeModal(false)}>
-                        <Ionicons name="close" size={24} color="#737373" />
+                        <Ionicons name="close" size={24} color={colors.textSecondary} />
                     </TouchableOpacity>
                 </View>
 
                 <View className="space-y-3">
                     <TouchableOpacity 
                         onPress={() => handleSetTheme('light')}
-                        className={`flex-row items-center justify-between p-5 rounded-2xl border-2 ${
-                            colorScheme === 'light' ? 'bg-indigo-50 border-indigo-500' : 'bg-neutral-50 dark:bg-neutral-800 border-transparent'
-                        }`}
+                        style={{
+                            flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, borderRadius: 16, borderWidth: 2,
+                            backgroundColor: colorScheme === 'light' ? colors.accentLight : colors.surfaceElevated,
+                            borderColor: colorScheme === 'light' ? colors.accent : 'transparent'
+                        }}
                     >
                         <View className="flex-row items-center">
-                            <Ionicons name="sunny" size={20} color={colorScheme === 'light' ? "#4f46e5" : "#a3a3a3"} className="mr-4" />
-                            <Text style={{ fontFamily: 'Outfit-SemiBold' }} className={`text-[16px] ml-3 ${colorScheme === 'light' ? 'text-indigo-600' : 'text-neutral-500'}`}>Light Mode</Text>
+                            <Ionicons name="sunny" size={20} color={colorScheme === 'light' ? colors.accent : colors.textSecondary} style={{ marginRight: 16 }} />
+                            <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: 16, color: colorScheme === 'light' ? colors.accent : colors.textSecondary }}>Light Mode</Text>
                         </View>
-                        {colorScheme === 'light' && <Ionicons name="checkmark-circle" size={20} color="#4f46e5" />}
+                        {colorScheme === 'light' && <Ionicons name="checkmark-circle" size={20} color={colors.accent} />}
                     </TouchableOpacity>
 
                     <TouchableOpacity 
                         onPress={() => handleSetTheme('dark')}
-                        className={`flex-row items-center justify-between p-5 rounded-2xl border-2 ${
-                            colorScheme === 'dark' ? 'bg-indigo-50 dark:bg-indigo-500/10 border-indigo-500' : 'bg-neutral-50 dark:bg-neutral-800 border-transparent'
-                        }`}
+                        style={{
+                            flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, borderRadius: 16, borderWidth: 2,
+                            backgroundColor: colorScheme === 'dark' ? colors.accentLight : colors.surfaceElevated,
+                            borderColor: colorScheme === 'dark' ? colors.accent : 'transparent'
+                        }}
                     >
                         <View className="flex-row items-center">
-                            <Ionicons name="moon" size={20} color={colorScheme === 'dark' ? "#4f46e5" : "#a3a3a3"} className="mr-4" />
-                            <Text style={{ fontFamily: 'Outfit-SemiBold' }} className={`text-[16px] ml-3 ${colorScheme === 'dark' ? 'text-indigo-600' : 'text-neutral-500'}`}>Dark Mode</Text>
+                            <Ionicons name="moon" size={20} color={colorScheme === 'dark' ? colors.accent : colors.textSecondary} style={{ marginRight: 16 }} />
+                            <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: 16, color: colorScheme === 'dark' ? colors.accent : colors.textSecondary }}>Dark Mode</Text>
                         </View>
-                        {colorScheme === 'dark' && <Ionicons name="checkmark-circle" size={20} color="#4f46e5" />}
+                        {colorScheme === 'dark' && <Ionicons name="checkmark-circle" size={20} color={colors.accent} />}
                     </TouchableOpacity>
 
                     <TouchableOpacity 
                         onPress={() => handleSetTheme('system')}
-                        className="flex-row items-center justify-between p-5 rounded-2xl bg-neutral-50 dark:bg-neutral-800 border-transparent border-2"
+                        style={{
+                            flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, borderRadius: 16, borderWidth: 2,
+                            backgroundColor: colors.surfaceElevated,
+                            borderColor: 'transparent'
+                        }}
                     >
                         <View className="flex-row items-center">
-                            <Ionicons name="settings-outline" size={20} color="#a3a3a3" className="mr-4" />
-                            <Text style={{ fontFamily: 'Outfit-SemiBold' }} className="text-neutral-500 text-[16px] ml-3">System Default</Text>
+                            <Ionicons name="settings-outline" size={20} color={colors.textSecondary} style={{ marginRight: 16 }} />
+                            <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: 16, color: colors.textSecondary }}>System Default</Text>
                         </View>
                     </TouchableOpacity>
                 </View>
@@ -279,42 +288,47 @@ export default function SettingsScreen() {
         onRequestClose={() => setShowTempModal(false)}
       >
         <Pressable 
-            className="flex-1 bg-black/60 items-center justify-end"
+            className="flex-1 items-center justify-end"
+            style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
             onPress={() => setShowTempModal(false)}
         >
-            <View className="bg-white dark:bg-neutral-900 w-full rounded-t-[40px] px-8 pt-10 pb-16 shadow-2xl">
+            <View style={{ backgroundColor: colors.surface, width: '100%', borderTopLeftRadius: 40, borderTopRightRadius: 40, paddingHorizontal: 32, paddingTop: 40, paddingBottom: 64, shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.15, shadowRadius: 12, elevation: 8 }}>
                 <View className="flex-row items-center justify-between mb-8">
-                    <Text style={{ fontFamily: 'Outfit-Black' }} className="text-neutral-900 dark:text-neutral-50 text-2xl">Temperature Unit</Text>
+                    <Text style={{ fontFamily: 'Outfit-Black', fontSize: 24, color: colors.text }}>Temperature Unit</Text>
                     <TouchableOpacity onPress={() => setShowTempModal(false)}>
-                        <Ionicons name="close" size={24} color="#737373" />
+                        <Ionicons name="close" size={24} color={colors.textSecondary} />
                     </TouchableOpacity>
                 </View>
 
                 <View className="space-y-3">
                     <TouchableOpacity 
                         onPress={() => handleSetTempUnit('c')}
-                        className={`flex-row items-center justify-between p-5 rounded-2xl border-2 ${
-                            temperatureUnit === 'c' ? 'bg-indigo-50 border-indigo-500' : 'bg-neutral-50 dark:bg-neutral-800 border-transparent'
-                        }`}
+                        style={{
+                            flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, borderRadius: 16, borderWidth: 2,
+                            backgroundColor: temperatureUnit === 'c' ? colors.accentLight : colors.surfaceElevated,
+                            borderColor: temperatureUnit === 'c' ? colors.accent : 'transparent'
+                        }}
                     >
                         <View className="flex-row items-center">
-                            <Ionicons name="thermometer" size={20} color={temperatureUnit === 'c' ? "#4f46e5" : "#a3a3a3"} className="mr-4" />
-                            <Text style={{ fontFamily: 'Outfit-SemiBold' }} className={`text-[16px] ml-3 ${temperatureUnit === 'c' ? 'text-indigo-600 dark:text-indigo-400' : 'text-neutral-500'}`}>Celsius (°C)</Text>
+                            <Ionicons name="thermometer" size={20} color={temperatureUnit === 'c' ? colors.accent : colors.textSecondary} style={{ marginRight: 16 }} />
+                            <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: 16, color: temperatureUnit === 'c' ? colors.accent : colors.textSecondary }}>Celsius (°C)</Text>
                         </View>
-                        {temperatureUnit === 'c' && <Ionicons name="checkmark-circle" size={20} color="#4f46e5" />}
+                        {temperatureUnit === 'c' && <Ionicons name="checkmark-circle" size={20} color={colors.accent} />}
                     </TouchableOpacity>
 
                     <TouchableOpacity 
                         onPress={() => handleSetTempUnit('f')}
-                        className={`flex-row items-center justify-between p-5 rounded-2xl border-2 ${
-                            temperatureUnit === 'f' ? 'bg-indigo-50 border-indigo-500' : 'bg-neutral-50 dark:bg-neutral-800 border-transparent'
-                        }`}
+                        style={{
+                            flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, borderRadius: 16, borderWidth: 2,
+                            backgroundColor: temperatureUnit === 'f' ? colors.accentLight : colors.surfaceElevated,
+                            borderColor: temperatureUnit === 'f' ? colors.accent : 'transparent'
+                        }}
                     >
                         <View className="flex-row items-center">
-                            <Ionicons name="thermometer" size={20} color={temperatureUnit === 'f' ? "#4f46e5" : "#a3a3a3"} className="mr-4" />
-                            <Text style={{ fontFamily: 'Outfit-SemiBold' }} className={`text-[16px] ml-3 ${temperatureUnit === 'f' ? 'text-indigo-600 dark:text-indigo-400' : 'text-neutral-500'}`}>Fahrenheit (°F)</Text>
+                            <Ionicons name="thermometer" size={20} color={temperatureUnit === 'f' ? colors.accent : colors.textSecondary} style={{ marginRight: 16 }} />
+                            <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: 16, color: temperatureUnit === 'f' ? colors.accent : colors.textSecondary }}>Fahrenheit (°F)</Text>
                         </View>
-                        {temperatureUnit === 'f' && <Ionicons name="checkmark-circle" size={20} color="#4f46e5" />}
+                        {temperatureUnit === 'f' && <Ionicons name="checkmark-circle" size={20} color={colors.accent} />}
                     </TouchableOpacity>
                 </View>
             </View>
@@ -329,10 +343,11 @@ export default function SettingsScreen() {
         onRequestClose={() => setShowColorSchemeModal(false)}
       >
         <Pressable 
-            className="flex-1 bg-black/60 items-center justify-end"
+            className="flex-1 items-center justify-end"
+            style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
             onPress={() => setShowColorSchemeModal(false)}
         >
-            <View className="w-full rounded-t-[40px] px-8 pt-10 pb-16 shadow-2xl" style={{ backgroundColor: colors.surface }}>
+            <View style={{ backgroundColor: colors.surface, width: '100%', borderTopLeftRadius: 40, borderTopRightRadius: 40, paddingHorizontal: 32, paddingTop: 40, paddingBottom: 64, shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.15, shadowRadius: 12, elevation: 8 }}>
                 <View className="flex-row items-center justify-between mb-8">
                     <Text style={{ fontFamily: 'Outfit-Black', fontSize: 24, color: colors.text }}>Color Scheme</Text>
                     <TouchableOpacity onPress={() => setShowColorSchemeModal(false)}>
