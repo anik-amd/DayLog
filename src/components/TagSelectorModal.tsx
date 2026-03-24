@@ -15,6 +15,7 @@ import { useColorScheme } from 'nativewind';
 import { Ionicons } from '@expo/vector-icons';
 import { TagEntry, SortOption, SortDirection } from '../database/tags';
 import { getSetting, setSetting } from '../storage/settings';
+import { useThemeColors } from '../hooks/useThemeColors';
 
 interface TagSelectorModalProps {
   visible: boolean;
@@ -41,6 +42,7 @@ export default function TagSelectorModal({
   onApply 
 }: TagSelectorModalProps) {
   const { colorScheme } = useColorScheme();
+  const colors = useThemeColors();
   const isDark = colorScheme === 'dark';
   const insets = useSafeAreaInsets();
   
@@ -203,7 +205,7 @@ const filteredTags = useMemo(() => {
           style={[
             styles.container,
             { 
-              backgroundColor: isDark ? '#171717' : '#ffffff',
+              backgroundColor: colors.background,
               paddingBottom: insets.bottom + 16,
               transform: [{ translateY: slideAnim }],
               maxHeight: MAX_HEIGHT,
@@ -211,34 +213,34 @@ const filteredTags = useMemo(() => {
           ]}
         >
           <View style={styles.handleContainer}>
-            <View style={[styles.handle, { backgroundColor: isDark ? '#404040' : '#d4d4d4' }]} />
+            <View style={[styles.handle, { backgroundColor: colors.borderSubtle }]} />
           </View>
 
           <View 
             className="flex-row items-center justify-between px-4 py-3"
-            style={{ borderBottomWidth: 1, borderBottomColor: isDark ? '#262626' : '#e5e5e5' }}
+            style={{ borderBottomWidth: 1, borderBottomColor: colors.border }}
           >
-            <Text style={{ fontFamily: 'Outfit-Medium' }} className={`text-base ${isDark ? 'text-white' : 'text-neutral-900'}`}>
+            <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 16, color: colors.text }}>
               Filter by Tags ({tags.length})
             </Text>
             <TouchableOpacity onPress={handleClose}>
-              <Ionicons name="close" size={24} color={isDark ? '#a1a1aa' : '#737373'} />
+              <Ionicons name="close" size={24} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
 
           <View className="px-4 pt-3">
             <View 
               className="flex-row items-center rounded-lg px-3 py-2"
-              style={{ backgroundColor: isDark ? '#262626' : '#f4f4f5' }}
+              style={{ backgroundColor: colors.surfaceElevated }}
             >
-              <Ionicons name="search" size={18} color={isDark ? '#737373' : '#a1a1aa'} />
+              <Ionicons name="search" size={18} color={colors.textTertiary} />
               <TextInput
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 placeholder="Search tags..."
-                placeholderTextColor={isDark ? '#737373' : '#a1a1aa'}
-                className="flex-1 ml-2 text-base"
-                style={{ fontFamily: 'Outfit-Regular', color: isDark ? '#ffffff' : '#171717' }}
+                placeholderTextColor={colors.textTertiary}
+                className="flex-1 ml-2"
+                style={{ fontFamily: 'Outfit-Regular', fontSize: 16, color: colors.text }}
                 autoCapitalize="none"
                 autoCorrect={false}
               />
@@ -249,12 +251,12 @@ const filteredTags = useMemo(() => {
             <View 
               className="flex-row items-center rounded-full px-2 py-1.5"
               style={{ 
-                backgroundColor: isDark ? 'transparent' : 'transparent',
+                backgroundColor: 'transparent',
                 borderWidth: 1,
-                borderColor: isDark ? '#404040' : '#e5e5e5'
+                borderColor: colors.border
               }}
             >
-              <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 13 }} className="text-neutral-500 mr-3 ml-1">
+              <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 13, color: colors.textTertiary, marginRight: 12, marginLeft: 4 }}>
                 Sort:
               </Text>
               <View className="flex-row items-center flex-1">
@@ -266,21 +268,22 @@ const filteredTags = useMemo(() => {
                       className="flex-row items-center"
                     >
                       <Text 
-                        style={{ fontFamily: 'Outfit-Medium', fontSize: 12 }}
-                        className={sortOption === option.key 
-                          ? 'text-indigo-500' 
-                          : (isDark ? 'text-neutral-400' : 'text-neutral-500')}
+                        style={{ 
+                          fontFamily: 'Outfit-Medium', 
+                          fontSize: 12,
+                          color: sortOption === option.key ? colors.accent : colors.textSecondary
+                        }}
                       >
                         {option.label}
                       </Text>
                       {sortOption === option.key && (
-                        <Text className="text-indigo-500 ml-1 text-xs">
+                        <Text style={{ color: colors.accent, fontSize: 12, marginLeft: 4 }}>
                           {sortDirection === 'asc' ? '↓' : '↑'}
                         </Text>
                       )}
                     </TouchableOpacity>
                     {index < SORT_OPTIONS.length - 1 && (
-                      <View style={{ height: 16, width: 1, backgroundColor: isDark ? '#404040' : '#e5e5e5' }} />
+                      <View style={{ height: 16, width: 1, backgroundColor: colors.border }} />
                     )}
                   </React.Fragment>
                 ))}
@@ -302,31 +305,33 @@ const filteredTags = useMemo(() => {
                   className="flex-row items-center rounded-full px-3 py-2 mr-2 mb-2"
                   style={[
                     isSelected 
-                      ? { backgroundColor: isDark ? '#166534' : '#dcfce7' }
-                      : { backgroundColor: isDark ? '#262626' : '#f4f4f5' }
+                      ? { backgroundColor: colors.pills.tags.background }
+                      : { backgroundColor: colors.surfaceElevated }
                   ]}
                 >
                   <Text
-                    style={{ fontFamily: 'Outfit-Medium' }}
-                    className={`text-sm ${isSelected ? (isDark ? 'text-green-400' : 'text-green-600') : 'text-neutral-500'}`}
+                    style={{ fontFamily: 'Outfit-Medium', fontSize: 14, color: isSelected ? colors.pills.tags.text : colors.textSecondary }}
                   >
                     #{tag.name}
                   </Text>
                   <View
-                    className={`ml-1.5 rounded-full px-1.5 py-0.5 ${
-                      isSelected ? (isDark ? 'bg-green-900' : 'bg-green-200') : isDark ? 'bg-neutral-700' : 'bg-neutral-200'
-                    }`}
+                    style={{
+                      marginLeft: 6,
+                      borderRadius: 10,
+                      paddingHorizontal: 6,
+                      paddingVertical: 2,
+                      backgroundColor: isSelected ? colors.pills.tags.background : colors.surface
+                    }}
                   >
                     <Text
-                      style={{ fontFamily: 'Outfit-Medium', fontSize: 12 }}
-                      className={isSelected ? (isDark ? 'text-green-400' : 'text-green-600') : isDark ? 'text-neutral-400' : 'text-neutral-600'}
+                      style={{ fontFamily: 'Outfit-Medium', fontSize: 12, color: isSelected ? colors.pills.tags.text : colors.textTertiary }}
                     >
                       {tag.count}
                     </Text>
                   </View>
                   {isSelected && (
                     <View className="ml-auto">
-                      <Ionicons name="checkmark-circle" size={18} color={isDark ? '#22c55e' : '#16a34a'} />
+                      <Ionicons name="checkmark-circle" size={18} color={colors.pills.tags.icon} />
                     </View>
                   )}
                 </TouchableOpacity>
@@ -335,25 +340,26 @@ const filteredTags = useMemo(() => {
             
             {filteredTags.length === 0 && (
               <View className="items-center justify-center py-8">
-                <Text style={{ fontFamily: 'Outfit-Regular' }} className="text-neutral-400">
+                <Text style={{ fontFamily: 'Outfit-Regular', color: colors.textTertiary }}>
                   No tags found
                 </Text>
               </View>
             )}
           </ScrollView>
 
-          <View className="px-4 pt-3 border-t" style={{ borderColor: isDark ? '#262626' : '#e5e5e5' }}>
+          <View className="px-4 pt-3 border-t" style={{ borderColor: colors.border }}>
             <View className="flex-row items-center justify-between">
               <TouchableOpacity onPress={handleClear} className="px-4 py-2">
-                <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-neutral-500">
+                <Text style={{ fontFamily: 'Outfit-Medium', color: colors.textSecondary }}>
                   Clear
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleApply}
-                className="flex-1 ml-4 bg-indigo-500 rounded-full py-3 items-center"
+                className="flex-1 ml-4 rounded-full py-3 items-center"
+                style={{ backgroundColor: colors.accent }}
               >
-                <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-white">
+                <Text style={{ fontFamily: 'Outfit-Medium', color: '#ffffff' }}>
                   Filter{localSelected.length > 0 ? ` (${localSelected.length})` : ''}
                 </Text>
               </TouchableOpacity>

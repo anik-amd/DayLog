@@ -340,7 +340,7 @@ The color scheme implementation is divided into phases to systematically update 
 - ClockPicker.tsx
 - WebPicker.tsx
 
-### Phase 5: Tag Selector Modal
+### Phase 5: Tag Selector Modal ✓ DONE
 - TagSelectorModal.tsx
 
 ### Phase 6: Entries Screen
