@@ -300,6 +300,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
         };
         await createEntry(newEntry);
         setCurrentEntryId(newId);
+        setContent('');
         onEntrySaved();
         navigation.navigate('FullScreenEditor', { 
           entryId: newId, 
@@ -465,23 +466,29 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   return (
       <View 
         key={colorScheme}
-        className="px-4 pt-3"
       >
-        <TouchableOpacity 
-          activeOpacity={0.7}
+        <Pressable 
           onPress={handleCardPress}
-          className="rounded-2xl overflow-hidden"
+          className="rounded-2xl"
           style={{
-            backgroundColor: colorScheme === 'dark' ? '#1e293b' : '#ffffff',
+            backgroundColor: colorScheme === 'dark' ? '#1e1e1e' : '#ffffff',
+            paddingHorizontal: 16,
             paddingVertical: 8,
+            borderRadius: 16,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: colorScheme === 'dark' ? 0.3 : 0.1,
+            shadowRadius: 2,
+            elevation: 2,
           }}
         >
           {/* Pills Row - always visible */}
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            style={{ height: 36, paddingTop: 2 }}
-            contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 8, paddingRight: 16, flexWrap: 'nowrap' }}
+          <View style={{ overflow: 'hidden', borderRadius: 12, paddingTop: 6, paddingBottom: 4, paddingLeft: 8, paddingRight: 8 }}>
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              style={{ height: 36 }}
+              contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'nowrap' }}
             scrollEventThrottle={16}
               keyboardShouldPersistTaps="handled"
               nestedScrollEnabled={true}
@@ -561,6 +568,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                 iconColor={colorScheme === 'dark' ? '#38bdf8' : '#0284c7'}
               />
             </ScrollView>
+          </View>
 
           {/* Input Row */}
           <View className="px-4 pt-3 pb-2">
@@ -616,7 +624,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               )}
             </View>
           </View>
-        </TouchableOpacity>
+        </Pressable>
 
         {/* Bottom padding */}
         <View className="h-1" />

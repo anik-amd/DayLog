@@ -312,6 +312,15 @@ export default function FullScreenEditor({ route, navigation }: any) {
     }
   };
 
+  const handleQuickSave = async () => {
+    try {
+      await handleSave(markdown, { date, time, latitude, longitude, locationFull, locationDisplay, weather, tags });
+      navigation.goBack();
+    } catch (e) {
+      console.error('handleQuickSave error:', e);
+    }
+  };
+
   const handleDiscardAndExit = () => {
     setShowSaveModal(false);
     navigation.goBack();
@@ -403,7 +412,7 @@ export default function FullScreenEditor({ route, navigation }: any) {
                 <Ionicons name="arrow-back" size={20} color="#737373" />
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={handleBack} className="bg-neutral-900 dark:bg-white w-10 h-10 rounded-full items-center justify-center">
+            <TouchableOpacity onPress={handleQuickSave} className="bg-neutral-900 dark:bg-white w-10 h-10 rounded-full items-center justify-center">
                 <Ionicons name="checkmark" size={20} color={colorScheme === 'dark' ? '#171717' : '#fff'} />
             </TouchableOpacity>
         </View>
@@ -597,13 +606,10 @@ export default function FullScreenEditor({ route, navigation }: any) {
           onPress={() => setShowSaveModal(false)}
         >
           <View className="bg-white dark:bg-neutral-900 w-full rounded-t-[40px] px-8 pt-10 pb-16 shadow-2xl">
-            <View className="flex-row items-center justify-between mb-8">
-              <Text style={{ fontFamily: 'Outfit-Black' }} className="text-neutral-900 dark:text-neutral-50 text-2xl">
+            <View className="mb-8">
+              <Text style={{ fontFamily: 'Outfit-Black' }} className="text-neutral-900 dark:text-neutral-50 text-2xl text-center">
                 {currentEntryId ? 'Save Changes?' : 'Save Entry?'}
               </Text>
-              <TouchableOpacity onPress={() => setShowSaveModal(false)}>
-                <Ionicons name="close" size={24} color="#737373" />
-              </TouchableOpacity>
             </View>
 
             <View className="space-y-3">
@@ -618,19 +624,10 @@ export default function FullScreenEditor({ route, navigation }: any) {
 
               <TouchableOpacity 
                 onPress={handleDiscardAndExit}
-                className="flex-row items-center justify-center p-5 rounded-2xl bg-red-500"
-              >
-                <Text style={{ fontFamily: 'Outfit-SemiBold' }} className="text-white text-[16px]">
-                  Discard{currentEntryId ? ' Changes' : ''}
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity 
-                onPress={() => setShowSaveModal(false)}
-                className="flex-row items-center justify-center p-5 rounded-2xl bg-neutral-100 dark:bg-neutral-800"
+                className="flex-row items-center justify-center p-5 rounded-2xl border border-neutral-200 dark:border-neutral-700"
               >
                 <Text style={{ fontFamily: 'Outfit-SemiBold' }} className="text-neutral-600 dark:text-neutral-400 text-[16px]">
-                  Cancel
+                  Discard{currentEntryId ? ' Changes' : ''}
                 </Text>
               </TouchableOpacity>
             </View>

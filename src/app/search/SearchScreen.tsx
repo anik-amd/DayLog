@@ -195,7 +195,7 @@ export default function SearchScreen() {
                     key={name}
                     onPress={() => navigation.navigate('Home', { screen: 'Entries', params: { selectedTags: [name] } })}
                     className="flex-row items-center rounded-full px-3 py-1.5 mr-2 mb-2"
-                    style={{ backgroundColor: isDark ? '#404040' : '#f4f4f5' }}
+                    style={{ backgroundColor: isDark ? '#262626' : '#f4f4f5' }}
                   >
                     <Text style={{ fontFamily: 'Outfit-Medium' }} className={`text-sm ${isDark ? 'text-neutral-400' : 'text-neutral-500'}`}>
                       #{name}
