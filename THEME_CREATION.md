@@ -312,3 +312,42 @@ Creating a new color scheme in DayLog requires:
 5. Ensuring components use the theme via `useThemeColors()`
 
 For questions or issues, review the existing themes (Default, Dracula) in `src/themes/colors.ts` as reference implementations.
+
+---
+
+## Implementation Phases
+
+The color scheme implementation is divided into phases to systematically update all components:
+
+### Phase 1: Theme Infrastructure ✓ DONE
+- ColorSchemeContext
+- useThemeColors hook
+- Storage functions
+- Settings UI
+
+### Phase 2: Main Components ✓ DONE
+- CalendarStrip.tsx
+- TabBar.tsx
+- TagStrip.tsx
+- SearchScreen.tsx
+- SettingsScreen.tsx
+
+### Phase 3: Entry Card & Read Entry Screen ✓ DONE
+- EntryCard.tsx
+- ReadEntryScreen.tsx
+
+### Phase 4: Editor Pickers
+- ClockPicker.tsx
+- WebPicker.tsx
+
+### Phase 5: Tag Selector Modal
+- TagSelectorModal.tsx
+
+### Phase 6: Entries Screen
+- EntriesScreen.tsx
+
+### Phase 7: Other Components
+- ConfirmationModal.tsx
+- MarkdownRenderer.tsx
+- RootNavigator.tsx
+- MapScreen.tsx

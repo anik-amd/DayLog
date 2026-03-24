@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useColorScheme } from "nativewind";
 import { Entry } from '../../types/Entry';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface EntryCardProps {
   entry: Entry;
@@ -12,19 +13,17 @@ interface EntryCardProps {
   onTagPress?: (tag: string) => void;
 }
 
-function renderTags(text: string, isDark: boolean) {
+function renderTags(text: string, colors: any) {
   if (!text) return null;
-  const textColor = isDark ? '#d4d4d8' : '#52525b';
-  const tagColor = isDark ? '#4ade80' : '#16a34a';
 
   const tagPattern = /(#\w+)/g;
   const parts = text.split(tagPattern);
 
   return parts.map((part, i) => {
     if (part.match(tagPattern)) {
-      return <Text key={i} style={[{ fontFamily: 'Outfit-Medium', color: tagColor }]}>{part}</Text>;
+      return <Text key={i} style={[{ fontFamily: 'Outfit-Medium', color: colors.pills.tags.text }]}>{part}</Text>;
     }
-    return <Text key={i} style={[localStyles.content, { color: textColor }]}>{part}</Text>;
+    return <Text key={i} style={[localStyles.content, { color: colors.text }]}>{part}</Text>;
   });
 }
 
@@ -60,6 +59,7 @@ const localStyles = StyleSheet.create({
 
 function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCardProps) {
   const { colorScheme } = useColorScheme();
+  const colors = useThemeColors();
   const plainTextPreview = stripMarkdown(entry.content);
 
   const formattedTime = entry.time || new Date(entry.createdAt).toLocaleTimeString(undefined, {
@@ -119,9 +119,9 @@ function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCard
       onPress={() => navigation.navigate('ReadEntry', { entryId: entry.id })}
     >
       <Animated.View style={{ opacity: opacityAnim, transform: [{ scale: scaleAnim }] }}>
-        <View className={`px-5 py-4 ${showBorder ? 'border-t border-neutral-100 dark:border-neutral-800' : ''}`}>
+        <View className="px-5 py-4" style={showBorder ? { borderTopWidth: 1, borderTopColor: colors.border } : {}}>
           <View className="flex-row items-start">
-            <Text style={[localStyles.time, { color: colorScheme === 'dark' ? '#71717a' : '#a1a1aa' }]}>
+            <Text style={[localStyles.time, { color: colors.textSecondary }]}>
               {formattedTime}
             </Text>
             <View className="flex-1">
@@ -129,7 +129,7 @@ function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCard
                 numberOfLines={3}
                 ellipsizeMode="tail"
               >
-                {renderTags(plainTextPreview, colorScheme === 'dark')}
+                {renderTags(plainTextPreview, colors)}
               </Text>
 
               {/* Tags */}
@@ -141,13 +141,13 @@ function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCard
                       onPress={() => onTagPress?.(tag.trim())}
                       className="flex-row items-center mr-2 mb-1"
                     >
-                      <Ionicons name="pricetag-outline" size={12} color={colorScheme === 'dark' ? '#4ade80' : '#16a34a'} />
+                      <Ionicons name="pricetag-outline" size={12} color={colors.pills.tags.icon} />
                       <Text 
                         style={{ 
                           fontFamily: 'Outfit-Medium',
                           fontSize: 12,
                           marginLeft: 4,
-                          color: colorScheme === 'dark' ? '#4ade80' : '#16a34a',
+                          color: colors.pills.tags.text,
                         }}
                       >
                         {tag.trim()}
@@ -162,16 +162,16 @@ function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCard
                 <View className="flex-row items-center mt-2">
                   {entry.locationDisplay && (
                     <View className="flex-row items-center mr-3">
-                      <Ionicons name="location-outline" size={11} color={colorScheme === 'dark' ? '#a3a3a3' : '#737373'} />
-                      <Text style={[localStyles.meta, { color: colorScheme === 'dark' ? '#71717a' : '#a1a1aa' }]}>
+                      <Ionicons name="location-outline" size={11} color={colors.pills.location.icon} />
+                      <Text style={[localStyles.meta, { color: colors.textSecondary }]}>
                         {entry.locationDisplay}
                       </Text>
                     </View>
                   )}
                   {entry.weather && (
                     <View className="flex-row items-center">
-                      <Ionicons name="sunny-outline" size={11} color={colorScheme === 'dark' ? '#a3a3a3' : '#737373'} />
-                      <Text style={[localStyles.meta, { color: colorScheme === 'dark' ? '#71717a' : '#a1a1aa' }]}>
+                      <Ionicons name="sunny-outline" size={11} color={colors.pills.weather.icon} />
+                      <Text style={[localStyles.meta, { color: colors.textSecondary }]}>
                         {entry.weather}
                       </Text>
                     </View>
@@ -185,14 +185,15 @@ function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCard
                     <Image 
                       key={m.id} 
                       source={{ uri: m.path }} 
-                      className="w-14 h-14 rounded-lg mr-1.5 bg-neutral-100 dark:bg-neutral-800" 
+                      className="w-14 h-14 rounded-lg mr-1.5" 
+                      style={{ backgroundColor: colors.borderSubtle }}
                       contentFit="cover"
                       transition={200}
                     />
                   ))}
                   {entry.media.length > 3 && (
-                    <View className="w-14 h-14 rounded-lg bg-neutral-100 dark:bg-neutral-800/80 items-center justify-center">
-                      <Text style={[localStyles.meta, { color: colorScheme === 'dark' ? '#a1a1aa' : '#71717a' }]}>+{entry.media.length - 3}</Text>
+                    <View className="w-14 h-14 rounded-lg items-center justify-center" style={{ backgroundColor: colors.surface }}>
+                      <Text style={[localStyles.meta, { color: colors.textTertiary }]}>+{entry.media.length - 3}</Text>
                     </View>
                   )}
                 </View>

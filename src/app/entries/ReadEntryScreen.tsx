@@ -8,10 +8,12 @@ import { getEntry, deleteEntry } from '../../database/entries';
 import MarkdownRenderer from '../../markdown/MarkdownRenderer';
 import { Entry } from '../../types/Entry';
 import ConfirmationModal from '../../components/ui/ConfirmationModal';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 export default function ReadEntryScreen({ route, navigation }: any) {
   const { entryId } = route.params;
   const { colorScheme } = useColorScheme();
+  const colors = useThemeColors();
   const [entry, setEntry] = useState<Entry | null>(null);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
@@ -57,8 +59,8 @@ export default function ReadEntryScreen({ route, navigation }: any) {
   };
 
   if (!entry) return (
-    <View className="flex-1 bg-white dark:bg-neutral-950 items-center justify-center">
-      <Text style={{ fontFamily: 'Outfit-Regular' }} className="text-neutral-500">Loading...</Text>
+    <View className="flex-1 items-center justify-center" style={{ backgroundColor: colors.background }}>
+      <Text style={{ fontFamily: 'Outfit-Regular', color: colors.textTertiary }}>Loading...</Text>
     </View>
   );
 
@@ -75,29 +77,32 @@ export default function ReadEntryScreen({ route, navigation }: any) {
   });
 
   return (
-    <View className="flex-1 bg-white dark:bg-neutral-900">
+    <View className="flex-1" style={{ backgroundColor: colors.background }}>
       {/* Custom Header */}
-      <View className="flex-row items-center justify-between px-6 pb-4 pt-12 border-b border-neutral-100 dark:border-neutral-900/40">
+      <View className="flex-row items-center justify-between px-6 pb-4 pt-12" style={{ borderBottomWidth: 1, borderBottomColor: colors.border }}>
         <TouchableOpacity 
           onPress={handleBack} 
-          className="bg-neutral-50 dark:bg-neutral-900 w-10 h-10 rounded-full items-center justify-center border border-neutral-200 dark:border-neutral-800"
+          className="w-10 h-10 rounded-full items-center justify-center"
+          style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }}
         >
-          <Ionicons name="arrow-back" size={20} color="#737373" />
+          <Ionicons name="arrow-back" size={20} color={colors.textSecondary} />
         </TouchableOpacity>
 
         <View className="flex-row items-center">
           <TouchableOpacity 
             onPress={() => setIsDeleteModalVisible(true)}
-            className="bg-red-50 dark:bg-red-900/20 w-10 h-10 rounded-full items-center justify-center border border-red-100 dark:border-red-900/30 mr-3"
+            className="w-10 h-10 rounded-full items-center justify-center mr-3"
+            style={{ backgroundColor: `${colors.error}20`, borderWidth: 1, borderColor: `${colors.error}30` }}
           >
-            <Ionicons name="trash-outline" size={18} color="#ef4444" />
+            <Ionicons name="trash-outline" size={18} color={colors.error} />
           </TouchableOpacity>
 
           <TouchableOpacity 
             onPress={handleEdit}
-            className="bg-neutral-900 dark:bg-white w-10 h-10 rounded-full items-center justify-center"
+            className="w-10 h-10 rounded-full items-center justify-center"
+            style={{ backgroundColor: colors.accent }}
           >
-            <Ionicons name="create-outline" size={20} color={colorScheme === 'dark' ? '#171717' : '#fff'} />
+            <Ionicons name="create-outline" size={20} color={colorScheme === 'dark' ? colors.background : '#ffffff'} />
           </TouchableOpacity>
         </View>
       </View>
@@ -105,12 +110,12 @@ export default function ReadEntryScreen({ route, navigation }: any) {
       <ScrollView className="flex-1 px-8 pt-8" showsVerticalScrollIndicator={false}>
         {/* Meta Section */}
         <View className="mb-8">
-          <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-neutral-400 dark:text-neutral-500 text-sm uppercase tracking-widest">
+          <Text style={{ fontFamily: 'Outfit-Medium', color: colors.textTertiary, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 }}>
             {formattedDate}
           </Text>
           <View className="flex-row flex-wrap items-center mt-2">
-            <Ionicons name="time-outline" size={14} color="#a3a3a3" />
-            <Text style={{ fontFamily: 'Outfit-Regular' }} className="text-neutral-500 dark:text-neutral-400 text-base ml-1.5 mr-4">
+            <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
+            <Text style={{ fontFamily: 'Outfit-Regular', color: colors.textSecondary, fontSize: 16, marginLeft: 6, marginRight: 16 }}>
               {formattedTime}
             </Text>
             
@@ -120,8 +125,8 @@ export default function ReadEntryScreen({ route, navigation }: any) {
                 onPress={() => handleTagPress(tag.trim())}
                 className="flex-row items-center mr-3"
               >
-                <Ionicons name="pricetag-outline" size={14} color="#16a34a" />
-                <Text style={{ fontFamily: 'Outfit-Regular' }} className="text-green-600 dark:text-green-400 text-base ml-1.5">
+                <Ionicons name="pricetag-outline" size={14} color={colors.pills.tags.icon} />
+                <Text style={{ fontFamily: 'Outfit-Regular', color: colors.pills.tags.text, fontSize: 16, marginLeft: 6 }}>
                   {tag.trim()}
                 </Text>
               </Pressable>
@@ -131,16 +136,16 @@ export default function ReadEntryScreen({ route, navigation }: any) {
               <View className="flex-row items-center">
                 {entry.locationDisplay && (
                   <View className="flex-row items-center mr-3">
-                    <Ionicons name="location-outline" size={14} color="#a3a3a3" />
-                    <Text style={{ fontFamily: 'Outfit-Regular' }} className="text-neutral-500 dark:text-neutral-400 text-base ml-1.5">
+                    <Ionicons name="location-outline" size={14} color={colors.pills.location.icon} />
+                    <Text style={{ fontFamily: 'Outfit-Regular', color: colors.textSecondary, fontSize: 16, marginLeft: 6 }}>
                       {entry.locationDisplay}
                     </Text>
                   </View>
                 )}
                 {entry.weather && (
                   <View className="flex-row items-center">
-                    <Ionicons name="sunny-outline" size={14} color="#a3a3a3" />
-                    <Text style={{ fontFamily: 'Outfit-Regular' }} className="text-neutral-500 dark:text-neutral-400 text-base ml-1.5">
+                    <Ionicons name="sunny-outline" size={14} color={colors.pills.weather.icon} />
+                    <Text style={{ fontFamily: 'Outfit-Regular', color: colors.textSecondary, fontSize: 16, marginLeft: 6 }}>
                       {entry.weather}
                     </Text>
                   </View>
@@ -158,7 +163,8 @@ export default function ReadEntryScreen({ route, navigation }: any) {
                 <View key={m.id} className="mr-5">
                   <Image 
                     source={{ uri: m.path }} 
-                    className="w-64 h-64 rounded-[40px] bg-neutral-50 dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800" 
+                    className="w-64 h-64 rounded-[40px]"
+                    style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }} 
                     contentFit="cover" 
                   />
                 </View>
