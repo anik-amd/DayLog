@@ -361,8 +361,8 @@ export default function EntriesScreen({ navigation, route }: any) {
             
             {filteredEntries.length === 0 ? (
               <View className="mt-40 items-center opacity-60">
-                <Ionicons name="journal-outline" size={48} color="#d4d4d4" />
-                <Text style={{ fontFamily: 'Outfit-Regular' }} className="text-neutral-400 dark:text-zinc-500 text-lg mt-4">
+                <Ionicons name="journal-outline" size={48} color={colors.textTertiary} />
+                <Text style={{ fontFamily: 'Outfit-Regular', color: colors.textTertiary, fontSize: 16, marginTop: 16 }}>
                   {selectedTags.length > 0 ? `No entries with #${selectedTags.join(', #')}` : 'No entries for this day.'}
                 </Text>
               </View>
@@ -395,12 +395,12 @@ export default function EntriesScreen({ navigation, route }: any) {
                   }}
                 >
                   {/* Date Header */}
-                  <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-neutral-500 dark:text-neutral-400 text-[12px] uppercase tracking-wider mb-2 px-1">
+                  <Text style={{ fontFamily: 'Outfit-Medium', color: colors.textSecondary, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8, paddingLeft: 4 }}>
                     {formatDateHeader(dateStr)}
                   </Text>
                   
                   {/* Entries for this date */}
-                  <View className="bg-white dark:bg-neutral-900 rounded-2xl overflow-hidden">
+                  <View style={{ backgroundColor: colors.surface, borderRadius: 16, overflow: 'hidden' }}>
                     {groupedEntries[dateStr].map((entry: Entry, index: number) => (
                       <EntryCard 
                         key={entry.id} 
@@ -427,7 +427,7 @@ export default function EntriesScreen({ navigation, route }: any) {
                 zIndex: 40,
                 height: 72,
                 paddingHorizontal: 24,
-                backgroundColor: colorScheme === 'dark' ? '#171717' : '#fafafa',
+                backgroundColor: colors.background,
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 1 },
                 shadowOpacity: colorScheme === 'dark' ? 0.3 : 0.08,
@@ -437,38 +437,38 @@ export default function EntriesScreen({ navigation, route }: any) {
             }}
         >
             <View className="flex-1 flex-row items-center justify-between">
-                <Text style={{ fontFamily: 'Outfit-Black' }} className="text-neutral-900 dark:text-neutral-50 text-[22px] tracking-tighter">DayLog</Text>
+                <Text style={{ fontFamily: 'Outfit-Black', fontSize: 22, color: colors.text }}>DayLog</Text>
                 <View className="flex-row items-center">
                     <TouchableOpacity 
                         onPress={() => setTagModalVisible(true)}
                         style={{
-                            backgroundColor: colorScheme === 'dark' ? '#262626' : '#ffffff',
+                            backgroundColor: colors.surface,
                             width: 32,
                             height: 32,
                             borderRadius: 999,
                             alignItems: 'center',
                             justifyContent: 'center',
                             borderWidth: 1,
-                            borderColor: colorScheme === 'dark' ? '#404040' : '#e5e5e5',
+                            borderColor: colors.border,
                             marginRight: 8,
                         }}
                     >
-                        <Ionicons name="pricetag-outline" size={16} color="#737373" />
+                        <Ionicons name="pricetag-outline" size={16} color={colors.textSecondary} />
                     </TouchableOpacity>
                     <TouchableOpacity 
                         onPress={() => navigation.navigate('Settings')}
                         style={{
-                            backgroundColor: colorScheme === 'dark' ? '#262626' : '#ffffff',
+                            backgroundColor: colors.surface,
                             width: 32,
                             height: 32,
                             borderRadius: 999,
                             alignItems: 'center',
                             justifyContent: 'center',
                             borderWidth: 1,
-                            borderColor: colorScheme === 'dark' ? '#404040' : '#e5e5e5',
+                            borderColor: colors.border,
                         }}
                     >
-                        <Ionicons name="settings-outline" size={16} color="#737373" />
+                        <Ionicons name="settings-outline" size={16} color={colors.textSecondary} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -493,13 +493,14 @@ export default function EntriesScreen({ navigation, route }: any) {
             }}
         >
             <View 
-                className="bg-white dark:bg-neutral-900 rounded-2xl overflow-hidden"
                 style={{ 
-                    backgroundColor: colorScheme === 'dark' ? '#171717' : '#ffffff',
+                    backgroundColor: colors.background,
                     borderWidth: 2,
                     borderColor: (selectedTags.length > 0 || selectedDate)
-                        ? (colorScheme === 'dark' ? '#4c1d95' : '#ddd6fe')
-                        : (colorScheme === 'dark' ? '#262626' : '#e5e5e5'),
+                        ? colors.accent
+                        : colors.border,
+                    borderRadius: 16,
+                    overflow: 'hidden',
                 }}
             >
                 <View className="px-4 py-2">
@@ -542,11 +543,12 @@ export default function EntriesScreen({ navigation, route }: any) {
             }}
         >
             <View 
-                className="rounded-[40px] overflow-hidden"
                 style={{ 
-                    backgroundColor: colorScheme === 'dark' ? '#1e293b' : '#ffffff',
+                    backgroundColor: colors.surfaceElevated,
+                    borderRadius: 40,
                     borderWidth: inputFocused ? 2 : 1,
-                    borderColor: colorScheme === 'dark' ? '#4f46e5' : '#ddd6fe',
+                    borderColor: inputFocused ? colors.accent : colors.border,
+                    overflow: 'hidden',
                 }}
             >
                 <QuickEntryBar 

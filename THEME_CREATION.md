@@ -343,7 +343,7 @@ The color scheme implementation is divided into phases to systematically update 
 ### Phase 5: Tag Selector Modal ✓ DONE
 - TagSelectorModal.tsx
 
-### Phase 6: Entries Screen
+### Phase 6: Entries Screen ✓ DONE
 - EntriesScreen.tsx
 
 ### Phase 7: Other Components
