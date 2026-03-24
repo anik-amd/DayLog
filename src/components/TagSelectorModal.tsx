@@ -47,7 +47,7 @@ export default function TagSelectorModal({
   const [localSelected, setLocalSelected] = useState<string[]>(selectedTags);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOption, setSortOption] = useState<SortOption>('usage');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const slideAnim = useRef(new Animated.Value(MAX_HEIGHT)).current;
   const backdropAnim = useRef(new Animated.Value(0)).current;
 
@@ -68,9 +68,9 @@ export default function TagSelectorModal({
       await setSetting('tagSortDirection', newDir);
     } else {
       setSortOption(option);
-      setSortDirection('desc');
+      setSortDirection('asc');
       await setSetting('tagSortOption', option);
-      await setSetting('tagSortDirection', 'desc');
+      await setSetting('tagSortDirection', 'asc');
     }
   };
 
@@ -275,7 +275,7 @@ const filteredTags = useMemo(() => {
                       </Text>
                       {sortOption === option.key && (
                         <Text className="text-indigo-500 ml-1 text-xs">
-                          {sortDirection === 'asc' ? '↑' : '↓'}
+                          {sortDirection === 'asc' ? '↓' : '↑'}
                         </Text>
                       )}
                     </TouchableOpacity>

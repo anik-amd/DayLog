@@ -156,7 +156,7 @@ function parseItalics(text: string, isDark: boolean, onTagPress?: (tag: string) 
     if (seg.match(tagPattern)) {
       parts.push(
         <TouchableOpacity key={`tag-${i}`} onPress={() => onTagPress?.(seg.substring(1))} activeOpacity={0.7}>
-          <Text style={{ fontFamily: 'Outfit-Medium', color: tagColor }}>{seg}</Text>
+          <Text style={{ fontFamily: 'Outfit-Medium', color: tagColor, lineHeight: 28 }}>{seg}</Text>
         </TouchableOpacity>
       );
     } else {

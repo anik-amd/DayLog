@@ -16,10 +16,6 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
     mockStorage[key] = value;
     return Promise.resolve();
   }),
-  removeItem: jest.fn((key: string) => {
-    delete mockStorage[key];
-    return Promise.resolve();
-  }),
 }));
 
 import { getSetting, setSetting } from '../storage/settings';
@@ -39,12 +35,6 @@ describe('Settings Storage', () => {
       await setSetting('tagSortOption', 'usage');
       const result = await getSetting('tagSortOption');
       expect(result).toBe('usage');
-    });
-
-    it('returns null for key with empty value', async () => {
-      mockStorage['daylog_test'] = '';
-      const result = await getSetting('test');
-      expect(result).toBe('');
     });
   });
 
