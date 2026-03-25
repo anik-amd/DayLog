@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 interface PillProps {
@@ -26,17 +26,17 @@ export default function Pill({
   const displayColor = isError && !textColor ? '#ef4444' : (textColor || iconColor);
 
   const content = (
-    <View style={{ backgroundColor }} className="flex-row items-center rounded-full px-3 py-1.5">
+    <View style={[styles.container, { backgroundColor }]}>
       {isLoading ? (
         <ActivityIndicator size="small" color={displayColor} />
       ) : (
-        icon && <View className="mr-1.5">{icon}</View>
+        icon && <View style={styles.iconContainer}>{icon}</View>
       )}
       <Text 
         style={{ 
           fontFamily: 'Outfit-Medium',
           color: displayColor,
-          fontSize: 14
+          fontSize: 13,
         }} 
         numberOfLines={1}
       >
@@ -47,15 +47,33 @@ export default function Pill({
 
   if (onPress) {
     return (
-      <Pressable onPress={onPress} className="flex-row items-center mr-2" disabled={isLoading}>
+      <Pressable onPress={onPress} style={styles.pressable} disabled={isLoading}>
         {content}
       </Pressable>
     );
   }
 
   return (
-    <View className="flex-row items-center mr-2">
+    <View style={styles.pressable}>
       {content}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  pressable: {
+    marginRight: 8,
+  },
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    minHeight: 36,
+    minWidth: 60,
+  },
+  iconContainer: {
+    marginRight: 4,
+  },
+});

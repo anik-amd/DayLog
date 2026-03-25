@@ -80,23 +80,27 @@ export default function TabBar({ state, descriptors, navigation }: BottomTabBarP
             testID={options.tabBarButtonTestID}
             onPress={onPress}
             onLongPress={onLongPress}
-            style={{ flex: 1, alignItems: 'center', paddingTop: 10, paddingBottom: 8 }}
+            style={{ flex: 1, alignItems: 'center', paddingVertical: 8 }}
           >
             <View style={{
               backgroundColor: isFocused ? colors.accentSelected : 'transparent',
-              padding: 6,
-              borderRadius: 12
+              padding: 10,
+              borderRadius: 16,
+              minWidth: 48,
+              minHeight: 48,
+              alignItems: 'center',
+              justifyContent: 'center',
             }}>
               <Ionicons
                 name={Icon}
-                size={20}
+                size={24}
                 color={isFocused ? colors.accent : colors.textTertiary}
               />
             </View>
             <Text
               style={{
                 fontFamily: 'Outfit-Medium',
-                fontSize: 10,
+                fontSize: 11,
                 marginTop: 2,
                 color: isFocused ? colors.accent : colors.textTertiary,
               }}

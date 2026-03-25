@@ -498,7 +498,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
             >
               {/* Tag Pill */}
               <Pill 
-                icon={<Ionicons name="pricetag-outline" size={15} color={colors.pills.tags.icon} />}
+                icon={<Ionicons name="pricetag-outline" size={14} color={colors.pills.tags.icon} />}
                 label={tags || 'Tags'}
                 backgroundColor={colors.pills.tags.background}
                 iconColor={colors.pills.tags.icon}
@@ -508,7 +508,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               {/* Date Pill */}
               <Pill 
                 onPress={() => setShowDatePicker(true)}
-                icon={<Ionicons name="calendar-outline" size={15} color={colors.pills.date.icon} />}
+                icon={<Ionicons name="calendar-outline" size={14} color={colors.pills.date.icon} />}
                 label={formatDate(entryDate)}
                 backgroundColor={colors.pills.date.background}
                 iconColor={colors.pills.date.icon}
@@ -518,7 +518,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               {/* Time Pill */}
               <Pill 
                 onPress={() => setShowTimePicker(true)}
-                icon={<Ionicons name="time-outline" size={15} color={colors.pills.time.icon} />}
+                icon={<Ionicons name="time-outline" size={14} color={colors.pills.time.icon} />}
                 label={formatTime(entryDate)}
                 backgroundColor={colors.pills.time.background}
                 iconColor={colors.pills.time.icon}
@@ -530,11 +530,11 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                 onPress={handleLocationPress}
                 icon={
                   locationLoading ? (
-                    <Ionicons name="location-outline" size={15} color={colors.warning} />
+                    <Ionicons name="location-outline" size={14} color={colors.warning} />
                   ) : (hasLocationPermission === false && !locationDisplay) ? (
-                    <Ionicons name="location-outline" size={15} color={colors.error} />
+                    <Ionicons name="location-outline" size={14} color={colors.error} />
                   ) : (
-                    <Ionicons name="location-outline" size={15} color={colors.pills.location.icon} />
+                    <Ionicons name="location-outline" size={14} color={colors.pills.location.icon} />
                   )
                 }
                 label={locationDisplay || 'Location'}
@@ -549,11 +549,11 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               <Pill 
                 icon={
                   weatherLoading ? null : weatherError ? (
-                    <Ionicons name="cloud-offline-outline" size={15} color={colors.error} />
+                    <Ionicons name="cloud-offline-outline" size={14} color={colors.error} />
                   ) : weatherCode ? (
-                    <Ionicons name={getWeatherIconName(weatherCode) as any} size={15} color={colors.pills.weather.icon} />
+                    <Ionicons name={getWeatherIconName(weatherCode) as any} size={14} color={colors.pills.weather.icon} />
                   ) : (
-                    <Ionicons name="sunny-outline" size={15} color={colors.pills.weather.icon} />
+                    <Ionicons name="sunny-outline" size={14} color={colors.pills.weather.icon} />
                   )
                 }
                 label={weatherError ? 'N/A' : weather || 'Weather'}
@@ -568,7 +568,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               {/* Photo Pill */}
               <Pill 
                 onPress={pickImage}
-                icon={<Ionicons name="image" size={15} color={colors.pills.photo.icon} />}
+                icon={<Ionicons name="image" size={14} color={colors.pills.photo.icon} />}
                 label="Photo"
                 backgroundColor={colors.pills.photo.background}
                 iconColor={colors.pills.photo.icon}
@@ -597,8 +597,8 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                 className="flex-1 p-0"
                 style={{ 
                   color: colors.text,
-                  fontSize: 15,
-                  lineHeight: 22,
+                  fontSize: 16,
+                  lineHeight: 24,
                   fontFamily: 'Outfit-Regular',
                   backgroundColor: 'transparent',
                 }}
@@ -613,10 +613,10 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               {/* Expand icon */}
               <TouchableOpacity 
                   onPress={handleExpand}
-                  className="p-1.5 rounded-full ml-2 mb-0.5"
+                  className="p-2 rounded-full ml-2 mb-0.5"
                   style={{ backgroundColor: colors.accentLight }}
               >
-                  <Ionicons name="expand-outline" size={14} color={colors.accent} />
+                  <Ionicons name="expand-outline" size={16} color={colors.accent} />
               </TouchableOpacity>
 
               {/* Submit icon */}

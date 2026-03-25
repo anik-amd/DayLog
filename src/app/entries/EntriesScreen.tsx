@@ -308,7 +308,6 @@ export default function EntriesScreen({ navigation, route }: any) {
 
   // Handle tag press to toggle tag filter
   const handleTagPress = (tag: string) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setSelectedTags(prev => {
       if (prev.includes(tag)) {
         return prev.filter(t => t !== tag);
@@ -321,7 +320,6 @@ export default function EntriesScreen({ navigation, route }: any) {
 
   // Clear all tag filters
   const clearTagFilter = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setSelectedTags([]);
   };
 
@@ -489,8 +487,8 @@ export default function EntriesScreen({ navigation, route }: any) {
                         onPress={() => setTagModalVisible(true)}
                         style={{
                             backgroundColor: colors.surface,
-                            width: 32,
-                            height: 32,
+                            width: 44,
+                            height: 44,
                             borderRadius: 999,
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -499,14 +497,14 @@ export default function EntriesScreen({ navigation, route }: any) {
                             marginRight: 8,
                         }}
                     >
-                        <Ionicons name="pricetag-outline" size={16} color={colors.textSecondary} />
+                        <Ionicons name="pricetag-outline" size={18} color={colors.textSecondary} />
                     </TouchableOpacity>
                     <TouchableOpacity 
                         onPress={handleThemeToggle}
                         style={{
                             backgroundColor: colors.surface,
-                            width: 32,
-                            height: 32,
+                            width: 44,
+                            height: 44,
                             borderRadius: 999,
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -516,15 +514,15 @@ export default function EntriesScreen({ navigation, route }: any) {
                         }}
                     >
                         <Animated.View style={{ transform: [{ rotate: rotateInterpolate }] }}>
-                            <Ionicons name={colorScheme === 'dark' ? 'sunny' : 'moon'} size={16} color={colors.textSecondary} />
+                            <Ionicons name={colorScheme === 'dark' ? 'sunny' : 'moon'} size={18} color={colors.textSecondary} />
                         </Animated.View>
                     </TouchableOpacity>
                     <TouchableOpacity 
                         onPress={() => navigation.navigate('Settings')}
                         style={{
                             backgroundColor: colors.surface,
-                            width: 32,
-                            height: 32,
+                            width: 44,
+                            height: 44,
                             borderRadius: 999,
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -532,7 +530,7 @@ export default function EntriesScreen({ navigation, route }: any) {
                             borderColor: colors.border,
                         }}
                     >
-                        <Ionicons name="settings-outline" size={16} color={colors.textSecondary} />
+                        <Ionicons name="settings-outline" size={18} color={colors.textSecondary} />
                     </TouchableOpacity>
                 </View>
             </View>

@@ -45,14 +45,19 @@ const CalendarStrip = forwardRef<CalendarStripRef, CalendarStripProps>(
     const scrollRef = useRef<FlatList<DayItem>>(null);
     const datesRef = useRef<DayItem[]>([]);
     const lastCenterDate = useRef<string | null>(null);
+    const lastUpdateTime = useRef<number>(0);
 
     const toggleExpand = () => {
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setExpanded(!expanded);
     };
 
     const handleFlatListScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
       if (!onHighlightChange) return;
+      
+      // Throttle updates to every 100ms
+      const now = Date.now();
+      if (now - lastUpdateTime.current < 100) return;
+      
       const dates = datesRef.current;
       if (!dates || dates.length === 0) return;
 
@@ -65,6 +70,7 @@ const CalendarStrip = forwardRef<CalendarStripRef, CalendarStripProps>(
 
       if (centerDate && centerDate.id !== lastCenterDate.current) {
         lastCenterDate.current = centerDate.id;
+        lastUpdateTime.current = now;
         onHighlightChange(centerDate.id);
       }
     }, [onHighlightChange, screenWidth]);
