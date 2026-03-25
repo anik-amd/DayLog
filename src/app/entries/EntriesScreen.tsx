@@ -597,7 +597,7 @@ export default function EntriesScreen({ navigation, route }: any) {
             key={colorScheme}
             style={{ 
                 position: 'absolute', 
-                bottom: 90,
+                bottom: 88 + Math.max(insets.bottom, 16),
                 left: 16, 
                 right: 16, 
                 zIndex: 999,

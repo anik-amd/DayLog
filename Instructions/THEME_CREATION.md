@@ -82,6 +82,7 @@ export interface ColorSchemeColors {
   // Accent (brand color)
   accent: string;          // Primary accent color
   accentLight: string;    // Lighter variant for backgrounds
+  accentSelected: string; // Selected/active state background (darker than accentLight)
   
   // Borders
   border: string;         // Primary border color
@@ -370,6 +371,7 @@ light: {
   textTertiary: '#81A1C1',     // Frost blue for hints
   accent: '#88C0D0',           // Frost blue - signature accent
   accentLight: '#E3F1F5',      // Light frost for selections
+  accentSelected: '#d8dee9', // Neutral gray for selected tab icon bg
   border: '#B0BCC8',           // Visible but not harsh
   borderSubtle: '#E5E9F0',     // Subtle dividers
   success: '#5D8A4A',          // Darker green for contrast
@@ -398,6 +400,7 @@ dark: {
   textTertiary: '#81A1C1',     // Frost blue
   accent: '#88C0D0',           // Same frost blue as light
   accentLight: '#4C566A',      // Darker accent bg
+  accentSelected: '#5e7a96',  // Darker cyan for selected tab
   border: '#4C566A',           // Visible border
   borderSubtle: '#3B4252',     // Subtle divider
   success: '#A3BE8C',          // Aurora green

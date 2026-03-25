@@ -83,7 +83,7 @@ export default function TabBar({ state, descriptors, navigation }: BottomTabBarP
             style={{ flex: 1, alignItems: 'center', paddingTop: 10, paddingBottom: 8 }}
           >
             <View style={{
-              backgroundColor: isFocused ? colors.accentLight : 'transparent',
+              backgroundColor: isFocused ? colors.accentSelected : 'transparent',
               padding: 6,
               borderRadius: 12
             }}>

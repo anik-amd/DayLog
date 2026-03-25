@@ -22,6 +22,7 @@ export interface ColorSchemeColors {
   textTertiary: string;
   accent: string;
   accentLight: string;
+  accentSelected: string;
   border: string;
   borderSubtle: string;
   success: string;
@@ -48,6 +49,7 @@ export const colorSchemes: Record<string, ColorScheme> = {
       textTertiary: '#a1a1aa',
       accent: '#6366f1',
       accentLight: '#e0e7ff',
+      accentSelected: '#c7d2fe',
       border: '#e5e5e5',
       borderSubtle: '#f4f4f5',
       success: '#16a34a',
@@ -71,6 +73,7 @@ export const colorSchemes: Record<string, ColorScheme> = {
       textTertiary: '#52525b',
       accent: '#818cf8',
       accentLight: '#312e81',
+      accentSelected: '#4338ca',
       border: '#262626',
       borderSubtle: '#404040',
       success: '#22c55e',
@@ -97,6 +100,7 @@ export const colorSchemes: Record<string, ColorScheme> = {
       textTertiary: '#8b8fa3',
       accent: '#bd93f9',
       accentLight: '#f3e8ff',
+      accentSelected: '#e9d5ff',
       border: '#e0e0e0',
       borderSubtle: '#ebebeb',
       success: '#50fa7b',
@@ -120,6 +124,7 @@ export const colorSchemes: Record<string, ColorScheme> = {
       textTertiary: '#6272a4',
       accent: '#bd93f9',
       accentLight: '#4a3b6b',
+      accentSelected: '#6b4f8a',
       border: '#555b70',
       borderSubtle: '#4a4560',
       success: '#50fa7b',
@@ -146,6 +151,7 @@ export const colorSchemes: Record<string, ColorScheme> = {
       textTertiary: '#81A1C1',
       accent: '#88C0D0',
       accentLight: '#E3F1F5',
+      accentSelected: '#d8dee9',
       border: '#B0BCC8',
       borderSubtle: '#E5E9F0',
       success: '#5D8A4A',
@@ -169,6 +175,7 @@ export const colorSchemes: Record<string, ColorScheme> = {
       textTertiary: '#81A1C1',
       accent: '#88C0D0',
       accentLight: '#4C566A',
+      accentSelected: '#5e7a96',
       border: '#4C566A',
       borderSubtle: '#3B4252',
       success: '#A3BE8C',
