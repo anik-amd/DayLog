@@ -1,5 +1,9 @@
 # DayLog
 
+> ⚠️ **Pre-Release Notice**  
+> This app is in active development (v0.1.x). Bugs, unfinished features, and UI changes are expected.  
+> **Use at your own risk.** Backup your data regularly and report issues on GitHub.
+
 [![License](https://img.shields.io/badge/license-MIT%20%2B%20Non--Commercial-red)](LICENSE)
 [![Version](https://img.shields.io/badge/version-0.1.1-blue)](package.json)
 [![Platform](https://img.shields.io/badge/platform-Android-green)](https://play.google.com/store)

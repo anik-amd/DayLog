@@ -8,7 +8,7 @@ The goal is to build a fast, stable, offline-first diary application step by ste
 
 ---
 
-# Phase 1 – Project Foundation
+# Phase 1 – Project Foundation ✓ DONE
 
 ## Objective
 
@@ -36,7 +36,7 @@ The app should run on Android and show two empty screens with working navigation
 
 ---
 
-# Phase 2 – Local Database System
+# Phase 2 – Local Database System ✓ DONE
 
 ## Objective
 
@@ -62,7 +62,7 @@ The app must be able to store and load entries locally even after closing and re
 
 ---
 
-# Phase 3 – Timeline Screen (Basic Version)
+# Phase 3 – Timeline Screen (Basic Version) ✓ DONE
 
 ## Objective
 
@@ -86,7 +86,7 @@ The app should now feel like a working diary (text only).
 
 ---
 
-# Phase 4 – Quick Entry System
+# Phase 4 – Quick Entry System ✓ DONE
 
 ## Objective
 
@@ -107,7 +107,7 @@ The user should be able to open the app and instantly write something without op
 
 ---
 
-# Phase 5 – Full Screen Editor
+# Phase 5 – Full Screen Editor ✓ DONE
 
 ## Objective
 
@@ -127,7 +127,7 @@ The app now supports both short notes and long diary entries.
 
 ---
 
-# Phase 6 – Markdown Support
+# Phase 6 – Markdown Support ✓ DONE
 
 ## Objective
 
@@ -151,30 +151,26 @@ Entries now look structured and readable.
 
 ---
 
-# Phase 7 – Media Support
+# Phase 7 – Media Support ✓ DONE
 
 ## Objective
 
-Allow users to attach images, audio, and video.
+Allow users to attach images.
 
 ## Tasks
 
 1. Add image picker
-2. Add camera support
-3. Add audio recording
-4. Save media locally
-5. Link media to entries
-6. Show image preview inside EntryCard
-7. Add simple audio playback
-8. Add video preview
+2. Save media locally
+3. Link media to entries
+4. Show image preview inside EntryCard
 
 ## Result of Phase 7
 
-The app becomes a full multimedia diary.
+The app supports image attachments.
 
 ---
 
-# Phase 8 – Mini Calendar
+# Phase 8 – Mini Calendar ✓ DONE
 
 ## Objective
 
@@ -182,10 +178,10 @@ Add a small calendar for navigation.
 
 ## Tasks
 
-1. Create MiniCalendar component
+1. Create CalendarStrip component (horizontal strip)
 2. Highlight days that contain entries
 3. Allow clicking a date to filter entries
-4. Ensure it remains minimal and lightweight
+4. Auto-scroll to visible date on scroll
 
 ## Result of Phase 8
 
@@ -193,7 +189,68 @@ Users can easily navigate old entries.
 
 ---
 
-# Phase 9 – Settings System
+# Phase 9 – Tag System ✓ DONE
+
+## Objective
+
+Add hashtag-based tag system for organizing entries.
+
+## Tasks
+
+1. Create tags table in SQLite
+2. Extract hashtags (#tag) from entry content
+3. Create TagStrip component on timeline
+4. Create TagSelectorModal for multi-tag filtering
+5. Implement AND logic for tag filtering
+6. Track tag usage counts for sorting
+
+## Result of Phase 9
+
+Users can organize entries with hashtags and filter by tags.
+
+---
+
+# Phase 10 – Location & Weather ✓ DONE
+
+## Objective
+
+Add location and weather data to entries.
+
+## Tasks
+
+1. Integrate expo-location for GPS
+2. Add reverse geocoding for addresses
+3. Integrate Open-Meteo API for weather
+4. Add temperature unit setting (Celsius/Fahrenheit)
+5. Add pills in QuickEntryBar and FullScreenEditor
+
+## Result of Phase 10
+
+Entries can include location and weather metadata.
+
+---
+
+# Phase 11 – Search Screen ✓ DONE
+
+## Objective
+
+Add dedicated search screen with full-text and tag search.
+
+## Tasks
+
+1. Create SearchScreen with bottom tab navigation
+2. Implement Fuse.js for fuzzy search
+3. Support content and tag search
+4. Show popular tags when search is empty
+5. Click tag to filter timeline
+
+## Result of Phase 11
+
+Users can quickly find entries by content or tags.
+
+---
+
+# Phase 12 – Settings System ✓ DONE
 
 ## Objective
 
@@ -206,37 +263,54 @@ Create a minimal settings page.
    - light
    - system default
 
-2. Add export to JSON
-3. Add export to PDF
-4. Add manual backup button
+2. Add color scheme selection (Default, Dracula, Nord)
+3. Add temperature unit preference
+4. Add Google Drive backup button
+5. Add app statistics display
 
-## Result of Phase 9
+## Result of Phase 12
 
 The app becomes stable for long-term use.
 
 ---
 
-# Phase 10 – Google Drive Backup
+# Phase 13 – Map Screen (Placeholder) ✓ DONE
 
 ## Objective
 
-Allow secure backup of entries and media.
+Add map screen (placeholder for future implementation).
 
 ## Tasks
 
-1. Implement Google sign-in
-2. Convert entries to JSON
-3. Upload JSON to Google Drive
-4. Upload media files
-5. Add restore from backup
+1. Create MapScreen with bottom tab
+2. Show "Map coming soon" placeholder
 
-## Result of Phase 10
+## Result of Phase 13
+
+Navigation structure is complete.
+
+---
+
+# Phase 14 – Google Drive Backup
+
+## Objective
+
+Allow secure backup of entries to Google Drive.
+
+## Tasks
+
+1. Implement Google OAuth
+2. Create BackupEngine service
+3. Upload SQLite database to Google Drive
+4. Add manual backup button in settings
+
+## Result of Phase 14
 
 Users will not lose their journal data.
 
 ---
 
-# Phase 11 – Performance Optimization
+# Phase 15 – Performance Optimization
 
 ## Objective
 
@@ -250,13 +324,13 @@ Make the app fast and smooth.
 4. Reduce unnecessary re-renders
 5. Optimize large entries
 
-## Result of Phase 11
+## Result of Phase 15
 
 The app should feel fast even with many entries.
 
 ---
 
-# Phase 12 – Android Widget
+# Phase 16 – Android Widget
 
 ## Objective
 
@@ -266,10 +340,9 @@ Add a home screen widget for quick entry.
 
 1. Create quick text entry widget
 2. Add quick image capture
-3. Add quick audio recording
-4. Open the quick entry popup from widget
+3. Open the quick entry popup from widget
 
-## Result of Phase 12
+## Result of Phase 16
 
 DayLog becomes a truly fast capture tool.
 

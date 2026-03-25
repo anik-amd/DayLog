@@ -34,8 +34,19 @@ Required storage systems:
 
 - SQLite (for entries and metadata)
 - Local file storage (for media files)
+- AsyncStorage (for settings)
 - JSON export system (for backups)
 - Google Drive API (backup only, not real-time sync)
+
+---
+
+## 1.3 External Services
+
+The app integrates with:
+
+- **Open-Meteo API**: Free weather API for fetching current weather data
+- **Fuse.js**: Client-side fuzzy search for entry search functionality
+- **Google OAuth + Drive API**: For backup functionality
 
 ---
 
@@ -60,57 +71,70 @@ src/
 │
 ├── app/
 │   ├── entries/
-│   │   ├── EntriesScreen.tsx
-│   │   └── EntryCard.tsx
+│   │   ├── EntriesScreen.tsx      # Main timeline screen
+│   │   ├── EntryCard.tsx          # Entry display component
+│   │   ├── CalendarStrip.tsx      # Horizontal calendar strip
+│   │   └── ReadEntryScreen.tsx    # Full entry view screen
 │   │
 │   ├── editor/
-│   │   ├── QuickEntryBar.tsx
-│   │   ├── ExpandedEditor.tsx
-│   │   └── FullScreenEditor.tsx
+│   │   ├── QuickEntryBar.tsx      # Bottom quick entry input
+│   │   ├── FullScreenEditor.tsx   # Full screen editor
+│   │   ├── Picker.tsx             # Custom date/time picker (web)
+│   │   ├── ClockPicker.tsx        # Time picker component
+│   │   └── WebPicker.tsx          # Web picker component
 │   │
 │   ├── settings/
-│   │   └── SettingsScreen.tsx
+│   │   └── SettingsScreen.tsx    # Settings page
+│   │
+│   ├── search/
+│   │   └── SearchScreen.tsx       # Search screen
+│   │
+│   ├── map/
+│   │   └── MapScreen.tsx          # Map screen (placeholder)
 │   │
 │   └── navigation/
-│       └── RootNavigator.tsx
+│       ├── RootNavigator.tsx      # Root navigation
+│       └── TabBar.tsx             # Custom bottom tab bar
 │
 ├── components/
 │   ├── ui/
-│   │   ├── Button.tsx
-│   │   ├── Card.tsx
-│   │   ├── TextArea.tsx
-│   │   └── Modal.tsx
+│   │   ├── ConfirmationModal.tsx # Confirmation dialog
+│   │   ├── Pill.tsx               # Reusable pill component
+│   │   └── ...
 │   │
-│   ├── calendar/
-│   │   └── MiniCalendar.tsx
-│   │
-│   └── media/
-│       ├── ImagePreview.tsx
-│       ├── AudioPlayer.tsx
-│       └── VideoPreview.tsx
+│   ├── TagStrip.tsx               # Horizontal tag strip
+│   ├── TagPill.tsx                # Tag pill component
+│   └── TagSelectorModal.tsx       # Tag selection modal
 │
 ├── database/
-│   ├── db.ts
-│   ├── entries.ts
-│   └── migrations.ts
+│   ├── db.ts                      # SQLite initialization
+│   ├── entries.ts                 # Entry CRUD operations
+│   ├── tags.ts                    # Tag management
+│   └── media.ts                   # Media CRUD operations
 │
 ├── storage/
-│   ├── fileStorage.ts
-│   ├── mediaManager.ts
-│   └── backupManager.ts
+│   └── settings.ts                # AsyncStorage settings
 │
-├── markdown/
-│   ├── markdownParser.ts
-│   └── markdownRenderer.tsx
+├── services/
+│   ├── WeatherService.ts          # Open-Meteo API integration
+│   └── BackupEngine.ts            # Google Drive backup
+│
+├── themes/
+│   └── colors.ts                  # Color scheme definitions
+│
+├── contexts/
+│   └── ColorSchemeContext.tsx     # Theme context provider
 │
 ├── hooks/
-│   ├── useEntries.ts
-│   ├── useAutoSave.ts
-│   └── useMedia.ts
+│   ├── useThemeColors.ts          # Theme colors hook
+│   └── useAutoSave.ts             # Auto-save hook
+│
+├── markdown/
+│   └── MarkdownRenderer.tsx       # Markdown rendering
 │
 └── types/
-    ├── Entry.ts
-    └── Media.ts
+    ├── Entry.ts                   # Entry type definition
+    └── Media.ts                   # Media type definition
 ```
 
 ---
@@ -126,8 +150,15 @@ id: string
 content: string
 createdAt: number
 updatedAt: number
-date: string
-media: Media[]
+date: string            // YYYY-MM-DD format
+time?: string           // HH:MM format, optional
+latitude?: number       // GPS latitude, optional
+longitude?: number      // GPS longitude, optional
+locationFull?: string   // Full address, optional
+locationDisplay?: string // Short display address, optional
+weather?: string        // e.g., "22°C Clear sky", optional
+tags?: string           // Comma-separated extracted hashtags, optional
+media?: Media[]         // Array of media items, optional
 ```
 
 ---
@@ -157,7 +188,17 @@ content TEXT
 createdAt INTEGER
 updatedAt INTEGER
 date TEXT
+time TEXT
+latitude REAL
+longitude REAL
+locationFull TEXT
+locationDisplay TEXT
+weather TEXT
+tags TEXT
 ```
+
+Indexes:
+- `idx_entries_date` on `date` column
 
 ---
 
@@ -172,6 +213,20 @@ type TEXT
 path TEXT
 createdAt INTEGER
 ```
+
+---
+
+## Table: tags
+
+Columns:
+
+```
+name TEXT PRIMARY KEY
+count INTEGER DEFAULT 0
+createdAt INTEGER
+```
+
+Used for tracking tag usage counts and sorting by popularity.
 
 ---
 

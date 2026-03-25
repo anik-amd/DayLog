@@ -8,8 +8,9 @@ It is not a traditional diary app where the user opens a page and writes a long 
 
 - want to quickly capture thoughts throughout the day
 - may write only 1–2 lines at a time
-- may attach images, audio, or video quickly
+- may attach images, voice recordings, or location/weather data
 - want everything automatically organized into a timeline
+- want to organize entries with tags
 
 DayLog should feel closer to a messaging input box than a writing application.
 
@@ -80,8 +81,12 @@ It must:
 - show entries in chronological order (newest first)
 - collapse large entries automatically
 - show a preview of text
-- show media previews if present (image/video/audio)
+- show media previews if present (image)
 - feel smooth while scrolling
+- include a **calendar strip** at the top for date navigation
+- show dots on dates that have entries
+- support **tag filtering** - tap tags to filter entries
+- support **AND logic** for multiple tag selection
 
 The timeline is the default screen when the app opens.
 
@@ -93,13 +98,26 @@ Instead of opening a full editor page, the app must open a **small full-width in
 
 This input should behave like a messaging input box.
 
+#### Quick Entry Pills
+
+The quick entry bar includes several metadata pills:
+
+- **Tags**: Automatically extracted from `#hashtag` in content
+- **Date**: Tap to change entry date (defaults to today)
+- **Time**: Tap to change entry time (defaults to current time)
+- **Location**: Tap to fetch current GPS location (reverse geocoded address)
+- **Weather**: Tap to fetch current weather (via Open-Meteo API)
+- **Photo**: Tap to attach images from gallery
+
 #### Behaviour:
 
-1. User taps the add button
-2. A small input bar appears at the bottom
+1. User opens the app
+2. A small input bar appears at the bottom with pills row
 3. User can write quickly (1–2 lines)
-4. If text becomes longer, the input expands automatically
-5. If the user taps the expand arrow, the editor opens in full screen
+4. Tags are automatically extracted from `#hashtag` syntax
+5. User can tap pills to add location/weather data
+6. If text becomes longer, the input expands automatically
+7. If the user taps the expand arrow, the editor opens in full screen
 
 This is the main way users will create entries.
 
@@ -201,8 +219,11 @@ The settings page must remain minimal.
 Initial features:
 
 - theme selection (dark / light / system default)
-- export entries to PDF
+- color scheme selection (Default, Dracula, Nord)
+- temperature unit (Celsius / Fahrenheit)
+- export entries to JSON
 - backup to Google Drive
+- app statistics (total entries, total photos)
 
 No unnecessary settings should be added.
 
@@ -235,22 +256,74 @@ The widget must be fast and minimal.
 
 ---
 
+### 5.11 Tag System
+
+The app uses a hashtag-based tag system:
+
+- Tags are extracted automatically from `#hashtag` syntax in entry content
+- Tags are stored in a dedicated `tags` table with usage count
+- Users can filter entries by one or more tags (AND logic)
+- Tag strip appears below the calendar on the timeline
+- Most used tags appear first in the tag selector modal
+
+---
+
+### 5.12 Search Screen
+
+The app includes a dedicated search screen (accessible via bottom tab):
+
+- Full-text search across entry content using Fuse.js
+- Tag search (prefix with `#`)
+- Search results show entry preview with date
+- Popular tags displayed when search is empty
+- Click on tag to filter timeline by that tag
+
+---
+
+### 5.13 Map Screen
+
+The app includes a map screen (placeholder, accessible via bottom tab):
+
+- Currently shows "Map coming soon" placeholder
+- Future: View entries on a map by location
+
+---
+
+### 5.14 Color Schemes
+
+The app supports multiple color schemes (themes):
+
+- **Default**: Indigo accent
+- **Dracula**: Purple/pink accent
+- **Nord**: Frost blue accent
+
+Each scheme has both light and dark variants. Users can switch between schemes in Settings.
+
+---
+
 ## 6. Data Structure
 
 Each entry must contain:
 
 - id
-- timestamp
 - content (markdown)
-- media array
-- createdAt
-- updatedAt
+- createdAt (timestamp)
+- updatedAt (timestamp)
+- date (YYYY-MM-DD format)
+- time (optional, HH:MM format)
+- latitude (optional)
+- longitude (optional)
+- locationFull (optional, full address)
+- locationDisplay (optional, short display address)
+- weather (optional, e.g., "22°C Clear sky")
+- tags (optional, comma-separated extracted from content)
+- media array (optional)
 
 Media object structure:
 
 - type (image / video / audio / file)
-- local file path
-- optional preview
+- path (local file path)
+- createdAt (timestamp)
 
 The structure must work offline and must not depend on a server.
 

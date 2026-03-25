@@ -92,20 +92,24 @@ This is more important than having many features.
 
 The agent must focus on features in this order:
 
-1. Local database
-2. Timeline screen
-3. Quick entry bar
-4. Auto-save system
-5. Full screen editor
-6. Markdown support
-7. Media support
-8. Mini calendar
-9. Settings page
-10. Google Drive backup
-11. Performance optimization
-12. Android widget
+1. Local database ✓
+2. Timeline screen ✓
+3. Quick entry bar ✓
+4. Auto-save system ✓
+5. Full screen editor ✓
+6. Markdown support ✓
+7. Media support (images) ✓
+8. Mini calendar ✓
+9. Tag system ✓
+10. Location & weather ✓
+11. Search screen ✓
+12. Settings page ✓
+13. Map screen (placeholder) ✓
+14. Google Drive backup
+15. Performance optimization
+16. Android widget
 
-Do not implement advanced features before the basic system is stable.
+Most core features are now implemented. Remaining work focuses on backup, optimization, and widget.
 
 ---
 
@@ -132,13 +136,15 @@ The agent must follow a clean folder structure.
 
 Main folders:
 
-- app/
-- components/
-- database/
-- storage/
-- markdown/
-- hooks/
-- types/
+- app/ (screens: entries, editor, settings, search, map, navigation)
+- components/ (reusable UI components)
+- database/ (SQLite operations)
+- storage/ (settings persistence)
+- services/ (WeatherService, BackupEngine)
+- themes/ (color schemes)
+- contexts/ (React contexts)
+- hooks/ (custom hooks)
+- types/ (TypeScript types)
 
 The agent must not place everything inside one folder.
 
