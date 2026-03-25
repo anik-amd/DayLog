@@ -1,5 +1,5 @@
 import './global.css';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, StyleSheet, StatusBar } from 'react-native';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import RootNavigator from './src/app/navigation/RootNavigator';
@@ -8,6 +8,49 @@ import { useColorScheme } from "nativewind";
 import { useFonts, Outfit_400Regular, Outfit_500Medium, Outfit_600SemiBold, Outfit_700Bold, Outfit_900Black } from '@expo-google-fonts/outfit';
 import { getTheme } from './src/storage/settings';
 import { ColorSchemeProvider } from './src/contexts/ColorSchemeContext';
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class AppErrorBoundary extends React.Component<{children: React.ReactNode}, ErrorBoundaryState> {
+  constructor(props: {children: React.ReactNode}) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    const errorMessage = error.message || '';
+    
+    if (errorMessage.includes('ExpoKeepAwake') || 
+        errorMessage.includes('KeepAwake') ||
+        errorMessage.includes('current activity is no longer available')) {
+      this.setState({ hasError: false, error: null });
+      return;
+    }
+    
+    console.log('ErrorBoundary caught:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <SafeAreaProvider>
+          <View style={styles.errorContainer}>
+            <ActivityIndicator size="large" color="#6366f1" />
+          </View>
+        </SafeAreaProvider>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 function AppContent() {
   const { colorScheme, setColorScheme } = useColorScheme();
@@ -41,37 +84,6 @@ export default function App() {
     'Outfit-Black': Outfit_900Black,
   });
 
-  useEffect(() => {
-    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      const reason = event.reason;
-      const errorMessage = reason?.message || String(reason) || '';
-      
-      if (errorMessage.includes('ExpoKeepAwake') || 
-          errorMessage.includes('KeepAwake') ||
-          errorMessage.includes('current activity is no longer available')) {
-        event.preventDefault();
-      }
-    };
-
-    const handleError = (event: ErrorEvent) => {
-      const errorMessage = event.message || '';
-      
-      if (errorMessage.includes('ExpoKeepAwake') || 
-          errorMessage.includes('KeepAwake') ||
-          errorMessage.includes('current activity is no longer available')) {
-        event.preventDefault();
-      }
-    };
-
-    window.addEventListener('unhandledrejection', handleUnhandledRejection);
-    window.addEventListener('error', handleError);
-
-    return () => {
-      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
-      window.removeEventListener('error', handleError);
-    };
-  }, []);
-
   if (!fontsLoaded) {
     return (
       <SafeAreaProvider>
@@ -83,18 +95,26 @@ export default function App() {
   }
 
   return (
-    <SafeAreaProvider>
-      <ColorSchemeProvider>
-        <NavigationContainer theme={DarkTheme}>
-          <AppContent />
-        </NavigationContainer>
-      </ColorSchemeProvider>
-    </SafeAreaProvider>
+    <AppErrorBoundary>
+      <SafeAreaProvider>
+        <ColorSchemeProvider>
+          <NavigationContainer theme={DarkTheme}>
+            <AppContent />
+          </NavigationContainer>
+        </ColorSchemeProvider>
+      </SafeAreaProvider>
+    </AppErrorBoundary>
   );
 }
 
 const styles = StyleSheet.create({
   loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#09090b',
+  },
+  errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
