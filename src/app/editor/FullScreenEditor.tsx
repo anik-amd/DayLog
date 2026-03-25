@@ -414,8 +414,8 @@ export default function FullScreenEditor({ route, navigation }: any) {
                 <Ionicons name="arrow-back" size={20} color={colors.textSecondary} />
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={handleQuickSave} className="w-10 h-10 rounded-full items-center justify-center" style={{ backgroundColor: colors.text }}>
-                <Ionicons name="checkmark" size={20} color={colors.background} />
+            <TouchableOpacity onPress={handleQuickSave} className="w-10 h-10 rounded-full items-center justify-center" style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }}>
+                <Ionicons name="checkmark" size={20} color={colors.textSecondary} />
             </TouchableOpacity>
         </View>
 

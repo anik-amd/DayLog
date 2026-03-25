@@ -32,9 +32,9 @@ export default function TabBar({ state, descriptors, navigation }: BottomTabBarP
         left: 0,
         right: 0,
         paddingBottom: Math.max(insets.bottom, 16) + 8,
-        backgroundColor: isDark ? '#1c1c1c' : '#f0f7ff',
+        backgroundColor: colors.surface,
         borderTopWidth: 1,
-        borderTopColor: isDark ? '#262626' : '#e5e5e5',
+        borderTopColor: colors.border,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: -2 },
         shadowOpacity: isDark ? 0.3 : 0.1,
@@ -85,14 +85,14 @@ export default function TabBar({ state, descriptors, navigation }: BottomTabBarP
             <Ionicons
               name={Icon}
               size={20}
-              color={isFocused ? colors.accent : isDark ? '#52525b' : '#a1a1aa'}
+              color={isFocused ? colors.accent : colors.textTertiary}
             />
             <Text
               style={{
                 fontFamily: 'Outfit-Medium',
                 fontSize: 10,
                 marginTop: 2,
-                color: isFocused ? colors.accent : isDark ? '#52525b' : '#a1a1aa',
+                color: isFocused ? colors.accent : colors.textTertiary,
               }}
             >
               {label}

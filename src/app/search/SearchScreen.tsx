@@ -140,7 +140,7 @@ export default function SearchScreen() {
         <View className="flex-row items-center">
           <View 
             className="flex-1 flex-row items-center rounded-full px-4 py-2"
-            style={{ backgroundColor: colors.surfaceElevated }}
+            style={{ backgroundColor: colors.surface }}
           >
             <Ionicons name="search" size={20} color={colors.textTertiary} />
             <TextInput

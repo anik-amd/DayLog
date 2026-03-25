@@ -163,7 +163,7 @@ const CalendarStrip = forwardRef<CalendarStripRef, CalendarStripProps>(
                 ? { backgroundColor: colors.accent }
                 : isHighlighted
                   ? { backgroundColor: colors.accentLight, borderWidth: 1, borderColor: colors.accent }
-                  : { backgroundColor: isDark ? '#1e1e1e' : '#ffffff', borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#e5e5e5', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 3 }
+                  : { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 3 }
             ]}
           >
             <Text style={{ fontFamily: 'Outfit-Black', fontSize: 8, letterSpacing: -0.5, color: isSelected ? '#ffffff' : isHighlighted ? colors.accent : item.isToday ? colors.accent : (isDark ? '#737373' : '#a1a1aa') }}>

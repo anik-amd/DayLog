@@ -385,7 +385,7 @@ export default function EntriesScreen({ navigation, route }: any) {
             ref={scrollViewRef as any}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ 
-                paddingTop: 220,
+                paddingTop: 280,
                 paddingBottom: 150, 
                 paddingHorizontal: 15 
             }}
@@ -470,9 +470,10 @@ export default function EntriesScreen({ navigation, route }: any) {
                 left: 0, 
                 right: 0, 
                 zIndex: 40,
-                height: 72,
+                paddingTop: Math.max(insets.top, 48),
+                paddingBottom: 12,
                 paddingHorizontal: 24,
-                backgroundColor: colors.background,
+                backgroundColor: colors.surface,
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 1 },
                 shadowOpacity: colorScheme === 'dark' ? 0.3 : 0.08,
@@ -541,7 +542,7 @@ export default function EntriesScreen({ navigation, route }: any) {
         <Animated.View 
             style={{ 
                 position: 'absolute', 
-                top: 78,
+                top: 78 + Math.max(insets.top, 48),
                 left: 15,
                 right: 15,
                 zIndex: 30,
