@@ -127,7 +127,13 @@ src/
 │
 ├── hooks/
 │   ├── useThemeColors.ts          # Theme colors hook
-│   └── useAutoSave.ts             # Auto-save hook
+│   ├── useAutoSave.ts             # Auto-save hook
+│   ├── useResponsive.ts           # Device info (tablet, landscape, font scale)
+│   └── useKeyboardHeight.ts       # Keyboard height detection
+│
+├── utils/
+│   ├── responsive.ts              # Scaling functions (moderateScale, breakpoints)
+│   └── spacing.ts                 # Responsive spacing constants
 │
 ├── markdown/
 │   └── MarkdownRenderer.tsx       # Markdown rendering

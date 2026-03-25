@@ -10,12 +10,15 @@ import { Entry } from '../../types/Entry';
 import TagSelectorModal from '../../components/TagSelectorModal';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import TagPill from '../../components/TagPill';
+import { useResponsive } from '../../hooks/useResponsive';
+import { moderateScale } from '../../utils/responsive';
 
 const MAX_VISIBLE_TAGS = 10;
 
 export default function SearchScreen() {
   const { colorScheme } = useColorScheme();
   const colors = useThemeColors();
+  const { fontSize, spacing, isTablet } = useResponsive();
   const isDark = colorScheme === 'dark';
   const navigation = useNavigation<any>();
   const inputRef = useRef<TextInput>(null);

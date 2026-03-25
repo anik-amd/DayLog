@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useResponsive } from '../hooks/useResponsive';
+import { moderateScale } from '../utils/responsive';
 
 interface PillProps {
   icon?: React.ReactNode;
@@ -23,20 +25,30 @@ export default function Pill({
   isLoading, 
   isError
 }: PillProps) {
+  const { fontSize } = useResponsive();
   const displayColor = isError && !textColor ? '#ef4444' : (textColor || iconColor);
 
   const content = (
-    <View style={[styles.container, { backgroundColor }]}>
+    <View style={{ 
+      backgroundColor, 
+      flexDirection: 'row', 
+      alignItems: 'center', 
+      borderRadius: moderateScale(20), 
+      paddingHorizontal: moderateScale(12), 
+      paddingVertical: moderateScale(8),
+      minHeight: moderateScale(36),
+      minWidth: moderateScale(60),
+    }}>
       {isLoading ? (
         <ActivityIndicator size="small" color={displayColor} />
       ) : (
-        icon && <View style={styles.iconContainer}>{icon}</View>
+        icon && <View style={{ marginRight: moderateScale(4) }}>{icon}</View>
       )}
       <Text 
         style={{ 
           fontFamily: 'Outfit-Medium',
           color: displayColor,
-          fontSize: 13,
+          fontSize: fontSize.sm,
         }} 
         numberOfLines={1}
       >
@@ -47,33 +59,15 @@ export default function Pill({
 
   if (onPress) {
     return (
-      <Pressable onPress={onPress} style={styles.pressable} disabled={isLoading}>
+      <Pressable onPress={onPress} style={{ marginRight: moderateScale(8) }} disabled={isLoading}>
         {content}
       </Pressable>
     );
   }
 
   return (
-    <View style={styles.pressable}>
+    <View style={{ marginRight: moderateScale(8) }}>
       {content}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  pressable: {
-    marginRight: 8,
-  },
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    minHeight: 36,
-    minWidth: 60,
-  },
-  iconContainer: {
-    marginRight: 4,
-  },
-});

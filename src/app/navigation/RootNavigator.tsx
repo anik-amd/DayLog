@@ -10,6 +10,7 @@ import MapScreen from '../map/MapScreen';
 import SearchScreen from '../search/SearchScreen';
 import TabBar from './TabBar';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import { TabBarHeightProvider, useTabBarHeight } from '../../contexts/TabBarHeightContext';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -43,10 +44,11 @@ function HomeStack() {
   );
 }
 
-export default function RootNavigator() {
+function TabNavigatorWithHeight() {
+  const { setTabBarHeight } = useTabBarHeight();
   return (
     <Tab.Navigator
-      tabBar={(props) => <TabBar {...props} />}
+      tabBar={(props) => <TabBar {...props} onHeightChange={setTabBarHeight} />}
       screenOptions={{
         headerShown: false,
         tabBarStyle: { display: 'none' },
@@ -56,5 +58,13 @@ export default function RootNavigator() {
       <Tab.Screen name="Map" component={MapScreen} />
       <Tab.Screen name="Search" component={SearchScreen} />
     </Tab.Navigator>
+  );
+}
+
+export default function RootNavigator() {
+  return (
+    <TabBarHeightProvider>
+      <TabNavigatorWithHeight />
+    </TabBarHeightProvider>
   );
 }

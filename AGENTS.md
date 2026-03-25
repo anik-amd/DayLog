@@ -145,12 +145,37 @@ Main folders:
 - contexts/ (React contexts)
 - hooks/ (custom hooks)
 - types/ (TypeScript types)
+- utils/ (responsive utilities, spacing constants)
 
 The agent must not place everything inside one folder.
 
 ---
 
-# 8. Coding Rules
+# 8. Responsive Design
+
+The app must use responsive design patterns for all screen sizes:
+
+### Required Patterns
+
+- Use `useResponsive` hook from `src/hooks/useResponsive.ts` to get device information
+- Use `moderateScale()` from `src/utils/responsive.ts` for dimensions
+- Use `spacing` from `src/utils/spacing.ts` for consistent spacing
+- Respect system font scale via `useResponsive().fontScale`
+
+### Screen Size Handling
+
+- Check `isTablet`, `isLandscape`, `isPortrait` for layout adjustments
+- Use breakpoints for conditional styling: `xs`, `sm`, `md`, `lg`, `xl`
+- Test on phone, tablet, and landscape orientations
+
+### Never Use Hardcoded Pixel Values
+
+- All sizing must use responsive scaling functions
+- No fixed widths/heights - always scale based on screen dimensions
+
+---
+
+# 9. Coding Rules
 
 The agent must:
 
@@ -427,6 +452,11 @@ DayLog supports multiple color schemes (themes) that define colors for all UI el
 - `src/hooks/useThemeColors.ts` - Hook to access current theme colors
 - `src/contexts/ColorSchemeContext.tsx` - Global state for color scheme (enables reactive updates)
 - `src/storage/settings.ts` - Storage for persisting selected scheme
+
+### Responsive Utilities
+- `src/hooks/useResponsive.ts` - Hook providing device info (isTablet, isLandscape, fontScale, etc.)
+- `src/utils/responsive.ts` - Scaling functions (moderateScale, scale, breakpoints)
+- `src/utils/spacing.ts` - Pre-defined responsive spacing and font scales
 
 ## How Color Schemes Work
 

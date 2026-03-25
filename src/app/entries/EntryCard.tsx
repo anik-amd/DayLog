@@ -6,6 +6,8 @@ import { useNavigation } from '@react-navigation/native';
 import { useColorScheme } from "nativewind";
 import { Entry } from '../../types/Entry';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import { useResponsive } from '../../hooks/useResponsive';
+import { moderateScale, fontScaleSize } from '../../utils/responsive';
 
 interface EntryCardProps {
   entry: Entry;
@@ -13,7 +15,7 @@ interface EntryCardProps {
   onTagPress?: (tag: string) => void;
 }
 
-function renderTags(text: string, colors: any) {
+function renderTags(text: string, colors: any, fontSizes: ReturnType<typeof useResponsive>['fontSize']) {
   if (!text) return null;
 
   const tagPattern = /(#\w+)/g;
@@ -21,9 +23,9 @@ function renderTags(text: string, colors: any) {
 
   return parts.map((part, i) => {
     if (part.match(tagPattern)) {
-      return <Text key={i} style={[{ fontFamily: 'Outfit-Medium', color: colors.pills.tags.text }]}>{part}</Text>;
+      return <Text key={i} style={[{ fontFamily: 'Outfit-Medium', fontSize: fontSizes.sm, color: colors.pills.tags.text }]}>{part}</Text>;
     }
-    return <Text key={i} style={[styles.content, { color: colors.text }]}>{part}</Text>;
+    return <Text key={i} style={[{ fontFamily: 'Outfit-Regular', fontSize: fontSizes.md, color: colors.text }]}>{part}</Text>;
   });
 }
 
@@ -38,29 +40,15 @@ const stripMarkdown = (text: string) => {
     .trim();
 };
 
-const styles = StyleSheet.create({
-  time: {
-    fontFamily: 'Outfit-Medium',
-    fontSize: 13,
-    marginRight: 12,
-    marginTop: 2,
-  },
-  content: {
-    fontFamily: 'Outfit-Regular',
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  meta: {
-    fontFamily: 'Outfit-Regular',
-    fontSize: 12,
-    marginLeft: 4,
-  },
-});
-
 function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCardProps) {
   const { colorScheme } = useColorScheme();
   const colors = useThemeColors();
+  const { fontSize, isLandscape, isTablet } = useResponsive();
   const plainTextPreview = stripMarkdown(entry.content);
+
+  const baseLineHeight = moderateScale(24);
+  const lineHeight = isLandscape ? baseLineHeight * 0.9 : baseLineHeight;
+  const maxLines = isLandscape ? (isTablet ? 6 : 4) : (isTablet ? 6 : 3);
 
   const formattedTime = entry.time || new Date(entry.createdAt).toLocaleTimeString(undefined, {
     hour: '2-digit',
@@ -76,17 +64,34 @@ function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCard
         opacity: pressed ? 0.7 : 1,
       })}
     >
-      <View className="px-4 py-3" style={showBorder ? { borderTopWidth: 1, borderTopColor: colors.borderSubtle } : {}}>
+      <View 
+        className="px-4 py-3" 
+        style={showBorder ? { borderTopWidth: 1, borderTopColor: colors.borderSubtle } : {}}
+      >
         <View className="flex-row items-start">
-          <Text style={[styles.time, { color: colors.textSecondary }]}>
+          <Text 
+            style={{ 
+              fontFamily: 'Outfit-Medium', 
+              fontSize: fontSize.sm, 
+              marginRight: moderateScale(12), 
+              marginTop: moderateScale(2),
+              color: colors.textSecondary 
+            }}
+          >
             {formattedTime}
           </Text>
           <View className="flex-1">
             <Text 
-              numberOfLines={3}
+              numberOfLines={maxLines}
               ellipsizeMode="tail"
+              style={{ 
+                fontFamily: 'Outfit-Regular', 
+                fontSize: fontSize.md, 
+                lineHeight: lineHeight,
+                color: colors.text 
+              }}
             >
-              {renderTags(plainTextPreview, colors)}
+              {renderTags(plainTextPreview, colors, fontSize)}
             </Text>
 
             {entry.tags && (
@@ -97,12 +102,12 @@ function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCard
                     onPress={() => onTagPress?.(tag.trim())}
                     className="flex-row items-center mr-3 mb-1"
                   >
-                    <Ionicons name="pricetag-outline" size={11} color={colors.pills.tags.icon} />
+                    <Ionicons name="pricetag-outline" size={moderateScale(11)} color={colors.pills.tags.icon} />
                     <Text 
                       style={{ 
                         fontFamily: 'Outfit-Medium',
-                        fontSize: 12,
-                        marginLeft: 4,
+                        fontSize: fontSize.sm - 2,
+                        marginLeft: moderateScale(4),
                         color: colors.pills.tags.text,
                       }}
                     >
@@ -117,16 +122,16 @@ function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCard
               <View className="flex-row items-center mt-2">
                 {entry.locationDisplay && (
                   <View className="flex-row items-center mr-4">
-                    <Ionicons name="location-outline" size={11} color={colors.pills.location.icon} />
-                    <Text style={[styles.meta, { color: colors.textSecondary }]}>
+                    <Ionicons name="location-outline" size={moderateScale(11)} color={colors.pills.location.icon} />
+                    <Text style={{ fontFamily: 'Outfit-Regular', fontSize: fontSize.sm - 2, marginLeft: moderateScale(4), color: colors.textSecondary }}>
                       {entry.locationDisplay}
                     </Text>
                   </View>
                 )}
                 {entry.weather && (
                   <View className="flex-row items-center">
-                    <Ionicons name="sunny-outline" size={11} color={colors.pills.weather.icon} />
-                    <Text style={[styles.meta, { color: colors.textSecondary }]}>
+                    <Ionicons name="sunny-outline" size={moderateScale(11)} color={colors.pills.weather.icon} />
+                    <Text style={{ fontFamily: 'Outfit-Regular', fontSize: fontSize.sm - 2, marginLeft: moderateScale(4), color: colors.textSecondary }}>
                       {entry.weather}
                     </Text>
                   </View>
@@ -140,15 +145,28 @@ function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCard
                   <Image 
                     key={m.id} 
                     source={{ uri: m.path }} 
-                    className="w-12 h-12 rounded-lg mr-1.5" 
-                    style={{ backgroundColor: colors.borderSubtle }}
+                    className="rounded-lg mr-1.5" 
+                    style={{ 
+                      width: moderateScale(48), 
+                      height: moderateScale(48),
+                      backgroundColor: colors.borderSubtle 
+                    }}
                     contentFit="cover"
                     transition={200}
                   />
                 ))}
                 {entry.media.length > 3 && (
-                  <View className="w-12 h-12 rounded-lg items-center justify-center" style={{ backgroundColor: colors.surface }}>
-                    <Text style={[styles.meta, { color: colors.textTertiary }]}>+{entry.media.length - 3}</Text>
+                  <View 
+                    className="rounded-lg items-center justify-center" 
+                    style={{ 
+                      width: moderateScale(48), 
+                      height: moderateScale(48), 
+                      backgroundColor: colors.surface 
+                    }}
+                  >
+                    <Text style={{ fontFamily: 'Outfit-Regular', fontSize: fontSize.sm - 2, color: colors.textTertiary }}>
+                      +{entry.media.length - 3}
+                    </Text>
                   </View>
                 )}
               </View>

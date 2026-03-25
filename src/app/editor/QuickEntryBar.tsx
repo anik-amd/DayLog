@@ -15,6 +15,8 @@ import Pill from '../../components/Pill';
 import { fetchWeather, getWeatherIconName } from '../../services/WeatherService';
 import { getSetting } from '../../storage/settings';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import { useResponsive } from '../../hooks/useResponsive';
+import { moderateScale } from '../../utils/responsive';
 
 const trimLocation = (address: Location.LocationGeocodedAddress): string => {
   const parts: string[] = [];
@@ -61,6 +63,7 @@ const extractTags = (text: string): string => {
 export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, onEntryDateChange, onDatePress, onTimePress, onFocusChange }: QuickEntryBarProps) {
   const { colorScheme } = useColorScheme();
   const colors = useThemeColors();
+  const { fontSize, fontScale, isLandscape, isTablet } = useResponsive();
   const inputRef = useRef<RNTextInput>(null);
   const [content, setContent] = useState('');
   const [images, setImages] = useState<string[]>([]);
@@ -597,8 +600,8 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                 className="flex-1 p-0"
                 style={{ 
                   color: colors.text,
-                  fontSize: 16,
-                  lineHeight: 24,
+                  fontSize: moderateScale(16) * fontScale,
+                  lineHeight: moderateScale(24) * fontScale,
                   fontFamily: 'Outfit-Regular',
                   backgroundColor: 'transparent',
                 }}
@@ -616,7 +619,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                   className="p-2 rounded-full ml-2 mb-0.5"
                   style={{ backgroundColor: colors.accentLight }}
               >
-                  <Ionicons name="expand-outline" size={16} color={colors.accent} />
+                  <Ionicons name="expand-outline" size={moderateScale(16)} color={colors.accent} />
               </TouchableOpacity>
 
               {/* Submit icon */}
@@ -626,7 +629,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
                     className="p-2 rounded-full ml-1 mb-0.5"
                     style={{ backgroundColor: colors.accent }}
                 >
-                    <Ionicons name="checkmark" size={16} color="white" />
+                    <Ionicons name="checkmark" size={moderateScale(16)} color="white" />
                 </TouchableOpacity>
               )}
             </View>

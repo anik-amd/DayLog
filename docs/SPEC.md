@@ -346,6 +346,33 @@ The app must feel more like a notebook than a productivity tool.
 
 ---
 
+## 7.1 Responsive Design & Accessibility
+
+The app must be fully responsive across all screen sizes and configurations:
+
+### Screen Size Support
+
+- **Phones** (320px - 767px): Primary target, optimized for portrait and landscape
+- **Tablets** (768px+): Enhanced layouts with larger spacing, wider components
+- **Landscape Mode**: Adjusted layouts, increased content visibility, proper padding
+- **Foldables**: Dynamic adaptation using window dimensions
+
+### Responsive Implementation
+
+- All dimensions use scaling functions based on reference screen (390x844)
+- `moderateScale()` provides non-linear scaling for a natural feel
+- `useResponsive` hook provides device information throughout the app
+- Breakpoints: xs (<375), sm (375-413), md (414-767), lg (768-1024), xl (1024+)
+
+### Accessibility
+
+- Respects system font scale (accessibility settings)
+- Touch targets minimum 44px (Material Design guidelines)
+- Proper contrast ratios maintained across color schemes
+- Dynamic type scaling respects user preferences
+
+---
+
 ## 8. Technical Requirements
 
 The project must use:

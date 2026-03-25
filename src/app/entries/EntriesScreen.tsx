@@ -20,11 +20,18 @@ import Picker from '../editor/Picker';
 import TagStrip from '../../components/TagStrip';
 import TagSelectorModal from '../../components/TagSelectorModal';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import { useTabBarHeight } from '../../contexts/TabBarHeightContext';
+import { useKeyboardHeight } from '../../hooks/useKeyboardHeight';
+import { useResponsive } from '../../hooks/useResponsive';
+import { moderateScale } from '../../utils/responsive';
 
 export default function EntriesScreen({ navigation, route }: any) {
   const { colorScheme, setColorScheme } = useNativeWindColorScheme();
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
+  const { tabBarHeight } = useTabBarHeight();
+  const keyboardHeight = useKeyboardHeight();
+  const { spacing, fontSize, isTablet, isLandscape } = useResponsive();
   const routeParams = route.params || {};
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -481,7 +488,7 @@ export default function EntriesScreen({ navigation, route }: any) {
             }}
         >
             <View className="flex-1 flex-row items-center justify-between">
-                <Text style={{ fontFamily: 'Outfit-Black', fontSize: 22, color: colors.text }}>DayLog</Text>
+                <Text style={{ fontFamily: 'Outfit-Black', fontSize: fontSize.xl, color: colors.text }}>DayLog</Text>
                 <View className="flex-row items-center">
                     <TouchableOpacity 
                         onPress={() => setTagModalVisible(true)}
@@ -595,9 +602,9 @@ export default function EntriesScreen({ navigation, route }: any) {
             key={colorScheme}
             style={{ 
                 position: 'absolute', 
-                bottom: 88 + Math.max(insets.bottom, 16),
-                left: 16, 
-                right: 16, 
+                bottom: tabBarHeight + keyboardHeight + spacing.md,
+                left: spacing.md, 
+                right: spacing.md, 
                 zIndex: 999,
                 transform: [
                     { translateY: quickBarTranslate },
@@ -607,7 +614,7 @@ export default function EntriesScreen({ navigation, route }: any) {
             <View 
                 style={{ 
                     backgroundColor: colors.background,
-                    borderRadius: 40,
+                    borderRadius: moderateScale(40),
                     borderWidth: inputFocused ? 2 : 1,
                     borderColor: inputFocused ? colors.accent : colors.border,
                     overflow: 'hidden',

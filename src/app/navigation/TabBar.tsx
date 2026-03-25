@@ -1,10 +1,12 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, LayoutChangeEvent } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from "nativewind";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import { useResponsive } from '../../hooks/useResponsive';
+import { moderateScale } from '../../utils/responsive';
 
 type TabRoute = {
   name: string;
@@ -18,20 +20,40 @@ const tabs: TabRoute[] = [
   { name: 'Search', icon: 'search-outline', activeIcon: 'search' },
 ];
 
-export default function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+interface CustomTabBarProps extends BottomTabBarProps {
+  onHeightChange?: (height: number) => void;
+}
+
+export default function TabBar({ state, descriptors, navigation, onHeightChange }: CustomTabBarProps) {
   const { colorScheme } = useColorScheme();
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
+  const { fontSize, isTablet, isLandscape } = useResponsive();
   const isDark = colorScheme === "dark";
+  const [tabBarHeight, setTabBarHeight] = useState(0);
+
+  const handleLayout = (event: LayoutChangeEvent) => {
+    const { height } = event.nativeEvent.layout;
+    if (height > 0 && height !== tabBarHeight) {
+      setTabBarHeight(height);
+      onHeightChange?.(height);
+    }
+  };
+
+  const iconSize = isTablet ? moderateScale(28) : moderateScale(24);
+  const iconPadding = isTablet ? moderateScale(14) : moderateScale(10);
+  const tabPadding = isTablet ? moderateScale(12) : moderateScale(8);
+  const bottomPadding = Math.max(insets.bottom, moderateScale(16)) + moderateScale(8);
 
   return (
     <View
+      onLayout={handleLayout}
       style={{
         position: 'absolute',
         bottom: 0,
         left: 0,
         right: 0,
-        paddingBottom: Math.max(insets.bottom, 16) + 8,
+        paddingBottom: bottomPadding,
         backgroundColor: colors.surface,
         borderTopWidth: 1,
         borderTopColor: colors.border,
@@ -80,28 +102,28 @@ export default function TabBar({ state, descriptors, navigation }: BottomTabBarP
             testID={options.tabBarButtonTestID}
             onPress={onPress}
             onLongPress={onLongPress}
-            style={{ flex: 1, alignItems: 'center', paddingVertical: 8 }}
+            style={{ flex: 1, alignItems: 'center', paddingVertical: tabPadding }}
           >
             <View style={{
               backgroundColor: isFocused ? colors.accentSelected : 'transparent',
-              padding: 10,
-              borderRadius: 16,
-              minWidth: 48,
-              minHeight: 48,
+              padding: iconPadding,
+              borderRadius: moderateScale(16),
+              minWidth: moderateScale(48),
+              minHeight: moderateScale(48),
               alignItems: 'center',
               justifyContent: 'center',
             }}>
               <Ionicons
                 name={Icon}
-                size={24}
+                size={iconSize}
                 color={isFocused ? colors.accent : colors.textTertiary}
               />
             </View>
             <Text
               style={{
                 fontFamily: 'Outfit-Medium',
-                fontSize: 11,
-                marginTop: 2,
+                fontSize: fontSize.sm - 2,
+                marginTop: moderateScale(2),
                 color: isFocused ? colors.accent : colors.textTertiary,
               }}
             >

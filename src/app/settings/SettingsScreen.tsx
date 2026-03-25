@@ -9,12 +9,15 @@ import { getTemperatureUnit, setTemperatureUnit, getTheme, setTheme, getColorSch
 import { colorSchemes } from '../../themes/colors';
 import { useColorSchemeContext } from '../../contexts/ColorSchemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import { useResponsive } from '../../hooks/useResponsive';
+import { moderateScale } from '../../utils/responsive';
 
 export default function SettingsScreen() {
   const navigation = useNavigation();
   const { colorScheme, setColorScheme } = useColorScheme();
   const colors = useThemeColors();
   const { setSchemeName } = useColorSchemeContext();
+  const { fontSize, spacing, isTablet } = useResponsive();
   const [stats, setStats] = useState({ entries: 0, photos: 0 });
   const [showThemeModal, setShowThemeModal] = useState(false);
   const [showTempModal, setShowTempModal] = useState(false);

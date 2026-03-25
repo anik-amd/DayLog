@@ -1,9 +1,11 @@
-import React, { useMemo, useState, useRef, forwardRef, useImperativeHandle, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, LayoutAnimation, Platform, UIManager, ListRenderItemInfo, useWindowDimensions, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
+import React, { useMemo, useState, useRef, forwardRef, useImperativeHandle, useCallback, useEffect } from 'react';
+import { View, Text, FlatList, TouchableOpacity, Platform, UIManager, ListRenderItemInfo, NativeSyntheticEvent, NativeScrollEvent, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Calendar } from 'react-native-calendars';
 import { useColorScheme } from "nativewind";
 import { useThemeColors } from '../../hooks/useThemeColors';
+import { useResponsive } from '../../hooks/useResponsive';
+import { moderateScale } from '../../utils/responsive';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -23,10 +25,6 @@ export interface CalendarStripRef {
   scrollToDate: (date: string) => void;
 }
 
-const CELL_WIDTH = 44;
-const CELL_MARGIN = 8;
-const CELL_TOTAL = CELL_WIDTH + CELL_MARGIN;
-
 interface DayItem {
   id: string;
   dayName: string;
@@ -40,12 +38,27 @@ const CalendarStrip = forwardRef<CalendarStripRef, CalendarStripProps>(
     const [expanded, setExpanded] = useState(false);
     const { colorScheme } = useColorScheme();
     const colors = useThemeColors();
+    const { fontSize, isLandscape, isTablet } = useResponsive();
     const isDark = colorScheme === "dark";
-    const { width: screenWidth } = useWindowDimensions();
+    
+    const CELL_WIDTH = isTablet ? moderateScale(52) : moderateScale(44);
+    const CELL_MARGIN = isTablet ? moderateScale(10) : moderateScale(8);
+    const CELL_TOTAL = CELL_WIDTH + CELL_MARGIN;
+    
     const scrollRef = useRef<FlatList<DayItem>>(null);
     const datesRef = useRef<DayItem[]>([]);
     const lastCenterDate = useRef<string | null>(null);
     const lastUpdateTime = useRef<number>(0);
+    const screenWidthRef = useRef(0);
+    
+    // Get screen width from dimensions
+    const [screenWidth, setScreenWidth] = useState(0);
+    
+    useEffect(() => {
+      const { width } = Dimensions.get('window');
+      screenWidthRef.current = width;
+      setScreenWidth(width);
+    }, []);
 
     const toggleExpand = () => {
       setExpanded(!expanded);
@@ -73,7 +86,7 @@ const CalendarStrip = forwardRef<CalendarStripRef, CalendarStripProps>(
         lastUpdateTime.current = now;
         onHighlightChange(centerDate.id);
       }
-    }, [onHighlightChange, screenWidth]);
+    }, [onHighlightChange, screenWidth, CELL_TOTAL]);
 
     const scrollToDate = (date: string) => {
       const dates = datesRef.current;
