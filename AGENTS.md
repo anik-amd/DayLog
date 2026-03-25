@@ -332,7 +332,7 @@ This must be used when:
 
 ### Version Location
 - App version is stored in `package.json` (version field)
-- Current version: `0.0.1` (pre-release)
+- Current version: `0.1.1`
 
 ### Version Bumping
 Before merging to master, run one of these commands to bump the version:
@@ -368,31 +368,46 @@ Before merging to master, run one of these commands to bump the version:
 
 ### Changelog File
 - Location: `CHANGELOG.md` in project root
-- Maintained manually - agents should NOT auto-generate
+- Must be updated **before** every version bump
 
-### Before Release
-1. User edits CHANGELOG.md
-2. Add new version section at top with:
-   - Version number and date
-   - Added/Changed/Fixed/Removed sections
-3. Include in release notes automatically
+### When Version Bump is Requested
+When the user requests a version bump (e.g., "bump version" or "release"), the agent MUST:
+
+1. Read the current CHANGELOG.md to understand existing entries
+2. Add a new version section at the top with:
+   - Version number (matching the new version from package.json)
+   - Today's date (YYYY-MM-DD format)
+   - Sections: Added, Changed, Fixed, Removed (only include sections with changes)
+3. List all significant changes made since the last release
+4. If unsure about what changed, summarize the main work completed
 
 ### Release Process
-1. Before merging to master: update CHANGELOG.md
-2. Merge to master triggers workflow
-3. Workflow reads CHANGELOG.md and includes in release body
+1. User requests version bump
+2. Agent updates CHANGELOG.md with new version entry
+3. Agent runs `npm version patch|minor|major`
+4. Agent commits changes (includes package.json + CHANGELOG.md)
+5. Agent merges to master (triggers workflow)
+
+### Important
+- ALWAYS update CHANGELOG.md before running npm version command
+- Do not skip this step - the changelog is the release notes for users
+- Be descriptive about changes so users understand what's new
 
 ### Example Format
 ```markdown
 # Changelog
 
-## [0.0.2] - 2024-01-15
+## [0.1.2] - 2024-01-15
 ### Added
-- Multi-tag filtering
+- Quick entry bar on timeline screen
+- Auto-save functionality
 
 ### Fixed
-- Loading spinner
+- Loading spinner issue on startup
 ```
+
+### Current Version
+Check `package.json` for the current version before updating changelog.
 
 ---
 
