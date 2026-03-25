@@ -41,6 +41,37 @@ export default function App() {
     'Outfit-Black': Outfit_900Black,
   });
 
+  useEffect(() => {
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      const reason = event.reason;
+      const errorMessage = reason?.message || String(reason) || '';
+      
+      if (errorMessage.includes('ExpoKeepAwake') || 
+          errorMessage.includes('KeepAwake') ||
+          errorMessage.includes('current activity is no longer available')) {
+        event.preventDefault();
+      }
+    };
+
+    const handleError = (event: ErrorEvent) => {
+      const errorMessage = event.message || '';
+      
+      if (errorMessage.includes('ExpoKeepAwake') || 
+          errorMessage.includes('KeepAwake') ||
+          errorMessage.includes('current activity is no longer available')) {
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    window.addEventListener('error', handleError);
+
+    return () => {
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      window.removeEventListener('error', handleError);
+    };
+  }, []);
+
   if (!fontsLoaded) {
     return (
       <SafeAreaProvider>
