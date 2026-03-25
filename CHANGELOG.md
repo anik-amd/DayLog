@@ -2,6 +2,16 @@
 
 All notable changes to DayLog will be documented in this file.
 
+## [0.1.1] - 2026-03-25
+### Added
+- **CONTRIBUTING.md**: New contribution guide for human and AI contributors
+- **LICENSE**: Added MIT license with non-commercial use restriction
+
+### Changed
+- **Documentation Restructuring**: Renamed `Instructions/` folder to `docs/` for better organization
+- **README.md**: Enhanced with badges, feature list, installation instructions, and documentation links
+- **AGENTS.md**: Updated to reference new `/docs/` path, clarified changelog update requirements for releases
+
 ## [0.1.0] - 2026-03-25
 ### Added
 - **Color Scheme System**: Added Dracula theme with dark/light modes
