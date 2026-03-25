@@ -1,12 +1,12 @@
 # Reference Files Location
 
-All project instructions, architecture, and roadmap documents are located in the `/instructions` folder.  
+All project instructions, architecture, and roadmap documents are located in the `/docs` folder.  
 
 AI agents **must read and follow** these files before generating or modifying any code:
 
-- `/instructions/DAYLOG_SPEC.md` – Philosophy & Features
-- `/instructions/DAYLOG_TECHNICAL_ARCHITECTURE.md` – Technical Architecture
-- `/instructions/DAYLOG_FEATURE_ROADMAP.md` – Step-by-step Build Order
+- `/docs/SPEC.md` – Philosophy & Features
+- `/docs/TECHNICAL_ARCHITECTURE.md` – Technical Architecture
+- `/docs/FEATURE_ROADMAP.md` – Step-by-step Build Order
 
 Agents **must not ignore** these files. Always check here first before writing code.
 
@@ -455,7 +455,7 @@ Each pill type has:
 
 ## Creating New Color Schemes
 
-When adding a new color scheme, read `instructions/THEME_CREATION.md` for detailed step-by-step instructions.
+When adding a new color scheme, read `docs/THEME_CREATION.md` for detailed step-by-step instructions.
 
 Key steps:
 1. Add new scheme entry in `src/themes/colors.ts`
