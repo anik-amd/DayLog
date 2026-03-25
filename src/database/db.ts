@@ -1,10 +1,16 @@
 import * as SQLite from 'expo-sqlite';
+import { Platform } from 'react-native';
 
 let db: SQLite.SQLiteDatabase | null = null;
 
 export const getDb = async () => {
   if (!db) {
-    db = await SQLite.openDatabaseAsync('daylog.db');
+    // Use in-memory database for web since file system is not available
+    if (Platform.OS === 'web') {
+      db = await SQLite.openDatabaseAsync(':memory:');
+    } else {
+      db = await SQLite.openDatabaseAsync('daylog.db');
+    }
   }
   return db;
 };

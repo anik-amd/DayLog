@@ -17,6 +17,14 @@ export const createEntry = async (entry: Omit<Entry, 'media'>) => {
       'INSERT INTO entries (id, content, createdAt, updatedAt, date, time, latitude, longitude, locationFull, locationDisplay, weather, tags) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [entry.id, entry.content, entry.createdAt, entry.updatedAt, entry.date, entry.time || null, entry.latitude || null, entry.longitude || null, entry.locationFull || null, entry.locationDisplay || null, entry.weather || null, tags || null]
     );
+    
+    // Update tag counts
+    if (tags) {
+      const tagList = tags.split(',').map(t => t.trim()).filter(Boolean);
+      for (const tag of tagList) {
+        await updateTagCount(tag, 1);
+      }
+    }
   } catch (error) {
     console.error('createEntry error:', error);
     throw error;
