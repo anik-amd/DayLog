@@ -3,6 +3,8 @@ import { View, Text, TouchableOpacity, Modal, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from "nativewind";
 import { useThemeColors } from '../../hooks/useThemeColors';
+import { useResponsive } from '../../hooks/useResponsive';
+import { moderateScale } from '../../utils/responsive';
 
 interface ConfirmationModalProps {
   visible: boolean;
@@ -27,6 +29,7 @@ export default function ConfirmationModal({
 }: ConfirmationModalProps) {
   const { colorScheme } = useColorScheme();
   const colors = useThemeColors();
+  const { fontSize, spacing } = useResponsive();
 
   return (
     <Modal
@@ -40,28 +43,64 @@ export default function ConfirmationModal({
         style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
         onPress={onCancel}
       >
-        <Pressable onPress={(e) => e.stopPropagation()} style={{ backgroundColor: colors.surface, width: '100%', borderTopLeftRadius: 40, borderTopRightRadius: 40, paddingHorizontal: 32, paddingTop: 40, paddingBottom: 64, shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.15, shadowRadius: 12, elevation: 8 }}>
+        <Pressable 
+          onPress={(e) => e.stopPropagation()} 
+          style={{ 
+            backgroundColor: colors.surface, 
+            width: '100%', 
+            borderTopLeftRadius: moderateScale(40), 
+            borderTopRightRadius: moderateScale(40), 
+            paddingHorizontal: moderateScale(32), 
+            paddingTop: moderateScale(40), 
+            paddingBottom: moderateScale(64), 
+            shadowColor: '#000', 
+            shadowOffset: { width: 0, height: -4 }, 
+            shadowOpacity: 0.15, 
+            shadowRadius: 12, 
+            elevation: 8 
+          }}
+        >
           <View className="mb-8">
-            <Text style={{ fontFamily: 'Outfit-Black', fontSize: 24, color: colors.text, textAlign: 'center' }}>
+            <Text style={{ fontFamily: 'Outfit-Black', fontSize: fontSize.xl, color: colors.text, textAlign: 'center' }}>
               {title}
             </Text>
+            {message && (
+              <Text style={{ fontFamily: 'Outfit-Regular', fontSize: fontSize.md, color: colors.textSecondary, textAlign: 'center', marginTop: spacing.sm }}>
+                {message}
+              </Text>
+            )}
           </View>
 
           <View className="space-y-3">
             <TouchableOpacity 
               onPress={onConfirm}
-              style={{ backgroundColor: isDestructive ? colors.error : colors.accent, padding: 20, borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}
+              style={{ 
+                backgroundColor: isDestructive ? colors.error : colors.accent, 
+                padding: moderateScale(20), 
+                borderRadius: moderateScale(16), 
+                flexDirection: 'row', 
+                alignItems: 'center', 
+                justifyContent: 'center' 
+              }}
             >
-              <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: 16, color: '#ffffff' }}>
+              <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: fontSize.md, color: '#ffffff' }}>
                 {confirmLabel}
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
               onPress={onCancel}
-              style={{ padding: 20, borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border }}
+              style={{ 
+                padding: moderateScale(20), 
+                borderRadius: moderateScale(16), 
+                flexDirection: 'row', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                borderWidth: 1, 
+                borderColor: colors.border 
+              }}
             >
-              <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: 16, color: colors.textSecondary }}>
+              <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: fontSize.md, color: colors.textSecondary }}>
                 {cancelLabel}
               </Text>
             </TouchableOpacity>

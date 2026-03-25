@@ -1,13 +1,10 @@
 import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { View, Text, ActivityIndicator, KeyboardAvoidingView, Platform, LayoutAnimation, UIManager, TouchableOpacity, Animated, ScrollView, Keyboard } from 'react-native';
+import { View, Text, ActivityIndicator, KeyboardAvoidingView, Platform, TouchableOpacity, Animated, ScrollView, Keyboard } from 'react-native';
 import { useFocusEffect, useRoute } from '@react-navigation/native';
 import { useColorScheme as useNativeWindColorScheme } from "nativewind";
 import { Ionicons } from '@expo/vector-icons';
 
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 import { initDb } from '../../database/db';
 import { createEntry, getAllEntries } from '../../database/entries';
 import { getAllTags } from '../../database/tags';

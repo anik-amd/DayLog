@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColors } from '../hooks/useThemeColors';
+import { useResponsive } from '../hooks/useResponsive';
+import { moderateScale } from '../utils/responsive';
 
 interface TagPillProps {
   name: string;
@@ -14,6 +16,7 @@ interface TagPillProps {
 
 export default function TagPill({ name, count, isSelected = false, onPress, showCheckmark = false, showRemove = false }: TagPillProps) {
   const colors = useThemeColors();
+  const { fontSize } = useResponsive();
 
   return (
     <TouchableOpacity
@@ -22,11 +25,12 @@ export default function TagPill({ name, count, isSelected = false, onPress, show
         {
           flexDirection: 'row',
           alignItems: 'center',
-          borderRadius: 20,
-          paddingHorizontal: 12,
-          paddingVertical: 6,
-          marginRight: 8,
-          marginBottom: 8,
+          borderRadius: moderateScale(20),
+          paddingHorizontal: moderateScale(12),
+          paddingVertical: moderateScale(6),
+          marginRight: moderateScale(8),
+          marginBottom: moderateScale(8),
+          minHeight: moderateScale(36),
         },
         isSelected 
           ? { backgroundColor: colors.pills.tags.background, borderWidth: 2, borderColor: colors.accent }
@@ -36,7 +40,7 @@ export default function TagPill({ name, count, isSelected = false, onPress, show
       <Text
         style={{ 
           fontFamily: 'Outfit-Medium', 
-          fontSize: 14, 
+          fontSize: fontSize.sm, 
           color: isSelected ? colors.pills.tags.text : colors.textSecondary 
         }}
       >
@@ -45,17 +49,17 @@ export default function TagPill({ name, count, isSelected = false, onPress, show
       {count !== undefined && (
         <View
           style={{
-            marginLeft: 6,
-            borderRadius: 10,
-            paddingHorizontal: 6,
-            paddingVertical: 2,
+            marginLeft: moderateScale(6),
+            borderRadius: moderateScale(10),
+            paddingHorizontal: moderateScale(6),
+            paddingVertical: moderateScale(2),
             backgroundColor: isSelected ? `${colors.accent}30` : colors.surfaceElevated,
           }}
         >
           <Text
             style={{ 
               fontFamily: 'Outfit-Medium', 
-              fontSize: 12, 
+              fontSize: fontSize.sm - 2, 
               color: isSelected ? colors.accent : colors.textSecondary 
             }}
           >
@@ -64,13 +68,13 @@ export default function TagPill({ name, count, isSelected = false, onPress, show
         </View>
       )}
       {showCheckmark && isSelected && (
-        <View style={{ marginLeft: 6 }}>
-          <Ionicons name="checkmark-circle" size={16} color={colors.pills.tags.icon} />
+        <View style={{ marginLeft: moderateScale(6) }}>
+          <Ionicons name="checkmark-circle" size={moderateScale(16)} color={colors.pills.tags.icon} />
         </View>
       )}
       {showRemove && isSelected && (
-        <TouchableOpacity onPress={onPress} style={{ marginLeft: 4 }}>
-          <Ionicons name="close-circle" size={14} color={colors.pills.tags.icon} />
+        <TouchableOpacity onPress={onPress} style={{ marginLeft: moderateScale(4) }}>
+          <Ionicons name="close-circle" size={moderateScale(14)} color={colors.pills.tags.icon} />
         </TouchableOpacity>
       )}
     </TouchableOpacity>

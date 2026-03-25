@@ -155,7 +155,7 @@ export default function SearchScreen() {
               className="flex-1 ml-2"
               style={{ 
                 fontFamily: 'Outfit-Regular',
-                fontSize: 16,
+                fontSize: fontSize.md,
                 color: colors.text
               }}
               autoCapitalize="none"
@@ -186,15 +186,13 @@ export default function SearchScreen() {
           {popularTags.length > 0 && (
             <View className="px-4 pt-4">
               <View className="flex-row items-center justify-between mb-3">
-                <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 12, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1 }}>
-                  Most used tags
+                <Text style={{ fontFamily: 'Outfit-Medium', fontSize: fontSize.sm, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1 }}>
+                  {searching ? 'Searching...' : `${results.length} results`}
                 </Text>
-                {popularTags.length > MAX_VISIBLE_TAGS && (
-                  <TouchableOpacity onPress={() => setTagModalVisible(true)}>
-                    <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 12, color: colors.accent }}>
-                      Show all
-                    </Text>
-                  </TouchableOpacity>
+                {results.length > 0 && (
+                  <Text style={{ fontFamily: 'Outfit-Medium', fontSize: fontSize.sm, color: colors.accent }}>
+                    {' '}for "{query}"
+                  </Text>
                 )}
               </View>
               <View className="flex-row flex-wrap">
@@ -213,7 +211,7 @@ export default function SearchScreen() {
             <View className="flex-1 items-center justify-center opacity-50 px-4">
               <Ionicons name="search" size={48} color={colors.textTertiary} />
               <Text 
-                style={{ fontFamily: 'Outfit-Regular', fontSize: 16, color: colors.textTertiary, marginTop: 16 }}
+                style={{ fontFamily: 'Outfit-Regular', fontSize: fontSize.md, color: colors.textTertiary, marginTop: spacing.md }}
               >
                 Start typing to search
               </Text>
@@ -228,7 +226,7 @@ export default function SearchScreen() {
         <View className="flex-1 items-center justify-center opacity-50">
           <Ionicons name="document-text-outline" size={48} color={colors.textTertiary} />
           <Text 
-            style={{ fontFamily: 'Outfit-Regular', fontSize: 16, color: colors.textTertiary, marginTop: 16 }}
+            style={{ fontFamily: 'Outfit-Regular', fontSize: fontSize.md, color: colors.textTertiary, marginTop: spacing.md }}
           >
             No entries found
           </Text>
@@ -252,14 +250,14 @@ export default function SearchScreen() {
               >
                 <Text 
                   numberOfLines={3}
-                  style={{ fontFamily: 'Outfit-Regular', fontSize: 15, lineHeight: 24, color: colors.text }}
+                  style={{ fontFamily: 'Outfit-Regular', fontSize: fontSize.md, lineHeight: moderateScale(24), color: colors.text }}
                 >
                   {entry.content}
                 </Text>
                 <View className="flex-row items-center mt-3">
                   <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
                   <Text 
-                    style={{ fontFamily: 'Outfit-Regular', fontSize: 12, color: colors.textSecondary, marginLeft: 4 }}
+                    style={{ fontFamily: 'Outfit-Regular', fontSize: fontSize.sm, color: colors.textSecondary, marginLeft: spacing.xs }}
                   >
                     {new Date(entry.createdAt).toLocaleDateString(undefined, { 
                       month: 'short', 

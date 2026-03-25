@@ -9,11 +9,14 @@ import MarkdownRenderer from '../../markdown/MarkdownRenderer';
 import { Entry } from '../../types/Entry';
 import ConfirmationModal from '../../components/ui/ConfirmationModal';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import { useResponsive } from '../../hooks/useResponsive';
+import { moderateScale } from '../../utils/responsive';
 
 export default function ReadEntryScreen({ route, navigation }: any) {
   const { entryId } = route.params;
   const { colorScheme } = useColorScheme();
   const colors = useThemeColors();
+  const { fontSize, spacing } = useResponsive();
   const [entry, setEntry] = useState<Entry | null>(null);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 

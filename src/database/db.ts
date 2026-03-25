@@ -1,5 +1,4 @@
 import * as SQLite from 'expo-sqlite';
-import { initTagsDb, recalculateAllTagCounts } from './tags';
 
 let db: SQLite.SQLiteDatabase | null = null;
 
@@ -75,6 +74,7 @@ export const initDb = async () => {
   }
 
   // Initialize tags database and recalculate counts
+  const { initTagsDb, recalculateAllTagCounts } = await import('./tags');
   await initTagsDb();
   await recalculateAllTagCounts();
 };

@@ -16,6 +16,8 @@ import Pill from '../../components/Pill';
 import { fetchWeather, getWeatherIconName } from '../../services/WeatherService';
 import { getSetting } from '../../storage/settings';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import { useResponsive } from '../../hooks/useResponsive';
+import { moderateScale } from '../../utils/responsive';
 
 const extractTags = (text: string): string => {
   const matches = text.match(/#(\w+)/g);
@@ -48,6 +50,7 @@ const getFullAddress = (address: Location.LocationGeocodedAddress): string => {
 export default function FullScreenEditor({ route, navigation }: any) {
   const { colorScheme } = useColorScheme();
   const colors = useThemeColors();
+  const { fontSize, spacing } = useResponsive();
   const isDark = colorScheme === 'dark';
   const { 
     entryId: initialEntryId, 

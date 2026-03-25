@@ -1,15 +1,11 @@
 import React, { useMemo, useState, useRef, forwardRef, useImperativeHandle, useCallback, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Platform, UIManager, ListRenderItemInfo, NativeSyntheticEvent, NativeScrollEvent, Dimensions } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ListRenderItemInfo, NativeSyntheticEvent, NativeScrollEvent, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Calendar } from 'react-native-calendars';
 import { useColorScheme } from "nativewind";
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useResponsive } from '../../hooks/useResponsive';
 import { moderateScale } from '../../utils/responsive';
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 import { Entry } from '../../types/Entry';
 

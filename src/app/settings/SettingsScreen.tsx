@@ -105,7 +105,7 @@ export default function SettingsScreen() {
 
   const Section = ({ title, children }: { title: string, children: React.ReactNode }) => (
     <View className="mb-8">
-      <Text style={{ fontFamily: 'Outfit-Black', color: colors.textTertiary, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, paddingHorizontal: 24, marginBottom: 12 }}>{title}</Text>
+      <Text style={{ fontFamily: 'Outfit-Black', color: colors.textTertiary, fontSize: fontSize.sm - 1, textTransform: 'uppercase', letterSpacing: 1, paddingHorizontal: spacing.lg, marginBottom: spacing.md }}>{title}</Text>
       <View style={{ backgroundColor: colors.surface, borderTopWidth: 1, borderBottomWidth: 1, borderColor: colors.border }}>
         {children}
       </View>
@@ -115,17 +115,17 @@ export default function SettingsScreen() {
   const SettingItem = ({ icon, label, value, onPress, last, color = colors.textSecondary }: any) => (
     <TouchableOpacity 
       onPress={onPress}
-      style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, paddingVertical: 16, borderBottomWidth: last ? 0 : 1, borderColor: colors.border }}
+      style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.lg, paddingVertical: spacing.md, borderBottomWidth: last ? 0 : 1, borderColor: colors.border }}
     >
       <View className="flex-row items-center">
-        <View style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: colors.surfaceElevated, alignItems: 'center', justifyContent: 'center', marginRight: 16 }}>
-          <Ionicons name={icon} size={18} color={color} />
+        <View style={{ width: moderateScale(32), height: moderateScale(32), borderRadius: moderateScale(8), backgroundColor: colors.surfaceElevated, alignItems: 'center', justifyContent: 'center', marginRight: spacing.md }}>
+          <Ionicons name={icon} size={moderateScale(18)} color={color} />
         </View>
-        <Text style={{ fontFamily: 'Outfit-Medium', fontSize: 16, color: colors.text }}>{label}</Text>
+        <Text style={{ fontFamily: 'Outfit-Medium', fontSize: fontSize.md, color: colors.text }}>{label}</Text>
       </View>
       <View className="flex-row items-center">
-        {value && <Text style={{ fontFamily: 'Outfit-Regular', fontSize: 14, color: colors.textSecondary, marginRight: 8 }}>{value}</Text>}
-        <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+        {value && <Text style={{ fontFamily: 'Outfit-Regular', fontSize: fontSize.sm, color: colors.textSecondary, marginRight: spacing.sm }}>{value}</Text>}
+        <Ionicons name="chevron-forward" size={moderateScale(16)} color={colors.textTertiary} />
       </View>
     </TouchableOpacity>
   );
@@ -136,26 +136,26 @@ export default function SettingsScreen() {
         <View className="px-6 pt-14 pb-8 flex-row items-center">
             <TouchableOpacity 
             onPress={() => navigation.goBack()}
-            style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border, marginRight: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 }}
+            style={{ width: moderateScale(44), height: moderateScale(44), borderRadius: moderateScale(22), backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border, marginRight: spacing.lg, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 }}
             >
-            <Ionicons name="arrow-back" size={22} color={colors.textSecondary} />
+            <Ionicons name="arrow-back" size={moderateScale(22)} color={colors.textSecondary} />
             </TouchableOpacity>
             <View>
-            <Text style={{ fontFamily: 'Outfit-Black', fontSize: 32, color: colors.text, letterSpacing: -0.5 }}>Settings</Text>
-            <Text style={{ fontFamily: 'Outfit-Regular', color: colors.textSecondary, marginTop: 4 }}>Configure your DayLog</Text>
+            <Text style={{ fontFamily: 'Outfit-Black', fontSize: fontSize.title, color: colors.text, letterSpacing: -0.5 }}>Settings</Text>
+            <Text style={{ fontFamily: 'Outfit-Regular', fontSize: fontSize.md, color: colors.textSecondary, marginTop: spacing.xs }}>Configure your DayLog</Text>
             </View>
         </View>
 
         <Section title="Statistics">
-            <View style={{ flexDirection: 'row', paddingHorizontal: 16, paddingVertical: 24, justifyContent: 'space-around', backgroundColor: colors.surface }}>
+            <View style={{ flexDirection: 'row', paddingHorizontal: spacing.md, paddingVertical: spacing.lg, justifyContent: 'space-around', backgroundColor: colors.surface }}>
                 <View className="items-center">
-                    <Text style={{ fontFamily: 'Outfit-Black', fontSize: 24, color: colors.accent }}>{stats.entries}</Text>
-                    <Text style={{ fontFamily: 'Outfit-Black', color: colors.textTertiary, fontSize: 10, textTransform: 'uppercase', letterSpacing: 1, marginTop: 4 }}>Entries</Text>
+                    <Text style={{ fontFamily: 'Outfit-Black', fontSize: fontSize.xl, color: colors.accent }}>{stats.entries}</Text>
+                    <Text style={{ fontFamily: 'Outfit-Black', color: colors.textTertiary, fontSize: fontSize.xs, textTransform: 'uppercase', letterSpacing: 1, marginTop: spacing.xs }}>Entries</Text>
                 </View>
-                <View style={{ width: 1, height: 40, backgroundColor: colors.border }} />
+                <View style={{ width: 1, height: moderateScale(40), backgroundColor: colors.border }} />
                 <View className="items-center">
-                    <Text style={{ fontFamily: 'Outfit-Black', fontSize: 24, color: colors.accent }}>{stats.photos}</Text>
-                    <Text style={{ fontFamily: 'Outfit-Black', color: colors.textTertiary, fontSize: 10, textTransform: 'uppercase', letterSpacing: 1, marginTop: 4 }}>Photos</Text>
+                    <Text style={{ fontFamily: 'Outfit-Black', fontSize: fontSize.xl, color: colors.accent }}>{stats.photos}</Text>
+                    <Text style={{ fontFamily: 'Outfit-Black', color: colors.textTertiary, fontSize: fontSize.xs, textTransform: 'uppercase', letterSpacing: 1, marginTop: spacing.xs }}>Photos</Text>
                 </View>
             </View>
         </Section>

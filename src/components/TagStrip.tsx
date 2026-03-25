@@ -3,6 +3,8 @@ import { View, ScrollView, StyleSheet } from 'react-native';
 import { useColorScheme } from 'nativewind';
 import { TagEntry } from '../database/tags';
 import { useThemeColors } from '../hooks/useThemeColors';
+import { useResponsive } from '../hooks/useResponsive';
+import { moderateScale } from '../utils/responsive';
 import TagPill from './TagPill';
 
 interface TagStripProps {
@@ -15,6 +17,7 @@ interface TagStripProps {
 export default function TagStrip({ tags, selectedTags, onTagPress, onMorePress }: TagStripProps) {
   const { colorScheme } = useColorScheme();
   const colors = useThemeColors();
+  const { spacing } = useResponsive();
   
   const displayTags = tags.slice(0, 10);
 
@@ -53,6 +56,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 4,
+    paddingHorizontal: moderateScale(4),
   },
 });
