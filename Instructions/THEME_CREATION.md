@@ -351,3 +351,128 @@ The color scheme implementation is divided into phases to systematically update 
 - MarkdownRenderer.tsx
 - RootNavigator.tsx
 - MapScreen.tsx
+
+---
+
+## Nord Theme Example (Reference Implementation)
+
+The Nord theme demonstrates a "calm, minimal, modern" aesthetic with proper contrast for both light and dark modes. Use this as a reference when creating new themes.
+
+### Nord Light Mode
+
+```typescript
+light: {
+  background: '#ECEFF4',      // Arctic blue-gray
+  surface: '#E5E9F0',          // Slightly darker than background
+  surfaceElevated: '#F5F8FA',  // NOT pure white - softer shade
+  text: '#2E3440',             // Polar night text
+  textSecondary: '#4C566A',     // Muted text
+  textTertiary: '#81A1C1',     // Frost blue for hints
+  accent: '#88C0D0',           // Frost blue - signature accent
+  accentLight: '#E3F1F5',      // Light frost for selections
+  border: '#B0BCC8',           // Visible but not harsh
+  borderSubtle: '#E5E9F0',     // Subtle dividers
+  success: '#5D8A4A',          // Darker green for contrast
+  warning: '#EBCB8B',          // Warm aurora
+  error: '#BF616A',            // Red
+  pills: {
+    tags: { background: '#D4E8D1', icon: '#5D8A4A', text: '#5D8A4A' },
+    date: { background: '#E8E0F0', icon: '#B48EAD', text: '#B48EAD' },
+    time: { background: '#E8E0F0', icon: '#B48EAD', text: '#B48EAD' },
+    location: { background: '#FFF5E6', icon: '#D08770', text: '#D08770' },
+    weather: { background: '#D0E5EA', icon: '#5A8A9A', text: '#5A8A9A' },
+    photo: { background: '#D0DEE8', icon: '#5A7A94', text: '#5A7A94' },
+  },
+},
+```
+
+### Nord Dark Mode
+
+```typescript
+dark: {
+  background: '#2E3440',       // Polar night
+  surface: '#3B4252',          // Polar night surface
+  surfaceElevated: '#434C5E',  // Elevated
+  text: '#ECEFF4',             // Arctic white
+  textSecondary: '#D8DEE9',    // Muted
+  textTertiary: '#81A1C1',     // Frost blue
+  accent: '#88C0D0',           // Same frost blue as light
+  accentLight: '#4C566A',      // Darker accent bg
+  border: '#4C566A',           // Visible border
+  borderSubtle: '#3B4252',     // Subtle divider
+  success: '#A3BE8C',          // Aurora green
+  warning: '#EBCB8B',          // Aurora yellow
+  error: '#BF616A',            // Red
+  pills: {
+    tags: { background: '#354A2E', icon: '#A3BE8C', text: '#A3BE8C' },
+    date: { background: '#4A3550', icon: '#B48EAD', text: '#B48EAD' },
+    time: { background: '#4A3550', icon: '#B48EAD', text: '#B48EAD' },
+    location: { background: '#4A3830', icon: '#D08770', text: '#D08770' },
+    weather: { background: '#354550', icon: '#88C0D0', text: '#88C0D0' },
+    photo: { background: '#354050', icon: '#81A1C1', text: '#81A1C1' },
+  },
+},
+```
+
+### Nord Design Principles
+
+1. **Calm**: Cool blue-gray palette (Aurora & Polar Night inspired)
+2. **Minimal**: No pure blacks or whites, subtle contrasts
+3. **Modern**: Frost blue accent (`#88C0D0`) used consistently
+4. **Contrast-aware**: Light mode uses darker text/icons for readability
+
+---
+
+## Contrast Checklist for Light Mode
+
+When creating or validating a new theme, use this checklist to ensure proper contrast in light mode:
+
+### Background & Surface
+
+- [ ] `background` is distinguishable from white (not pure `#FFFFFF`)
+- [ ] `surface` provides subtle contrast against background
+- [ ] `surfaceElevated` is NOT pure white - use `#F5F8FA` or similar soft shade
+
+### Text Contrast
+
+- [ ] `text` has sufficient contrast against `background` (WCAG AA: 4.5:1 minimum)
+- [ ] `textSecondary` is distinguishable from `text` but still readable
+- [ ] `textTertiary` provides enough contrast for placeholder/hint text
+
+### Border Visibility
+
+- [ ] `border` is visible against `background` (aim for ~10-15% difference)
+- [ ] Too light = invisible, too dark = harsh (balance is key)
+- [ ] Test on actual device - simulators can be misleading
+
+### Pill Colors (Critical)
+
+- [ ] `pills.tags.background` is distinguishable from main `background`
+- [ ] `pills.tags.icon` and `pills.tags.text` are dark enough for readability
+- [ ] ALL pill types have sufficient contrast (not just using accent color)
+- [ ] Light mode pills need DARKER icons/text than dark mode
+
+### Component Integration
+
+- [ ] Search input background matches header (both use `surface`)
+- [ ] Tab bar uses `colors.surface` for background
+- [ ] Calendar date cells use `colors.surface` (not hardcoded colors)
+- [ ] Selected tab indicator uses `colors.accentLight` background
+
+### Unification Test
+
+- [ ] Timeline header, search card, and tab bar backgrounds are consistent
+- [ ] Navigation icons use `colors.textTertiary` for unselected state
+- [ ] Buttons and interactive elements use theme colors, not hardcoded hex values
+
+---
+
+### Common Light Mode Contrast Fixes
+
+| Issue | Solution |
+|-------|----------|
+| Pill icons hard to read | Darken icon/text color (e.g., `#5D8A4A` instead of `#A3BE8C`) |
+| Border invisible | Darken to `#B0BCC8` or similar |
+| surfaceElevated too white | Use `#F5F8FA` instead of `#FFFFFF` |
+| Tags blend with background | Darken background to `#D4E8D1`, darken text to `#5D8A4A` |
+| Input fields too bright | Change from `surfaceElevated` to `surface` |

@@ -82,11 +82,17 @@ export default function TabBar({ state, descriptors, navigation }: BottomTabBarP
             onLongPress={onLongPress}
             style={{ flex: 1, alignItems: 'center', paddingTop: 10, paddingBottom: 8 }}
           >
-            <Ionicons
-              name={Icon}
-              size={20}
-              color={isFocused ? colors.accent : colors.textTertiary}
-            />
+            <View style={{
+              backgroundColor: isFocused ? colors.accentLight : 'transparent',
+              padding: 6,
+              borderRadius: 12
+            }}>
+              <Ionicons
+                name={Icon}
+                size={20}
+                color={isFocused ? colors.accent : colors.textTertiary}
+              />
+            </View>
             <Text
               style={{
                 fontFamily: 'Outfit-Medium',
