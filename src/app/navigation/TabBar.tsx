@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, LayoutChangeEvent } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, LayoutChangeEvent, Keyboard, Platform } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from "nativewind";
@@ -31,6 +31,22 @@ export default function TabBar({ state, descriptors, navigation, onHeightChange 
   const { fontSize, isTablet, isLandscape } = useResponsive();
   const isDark = colorScheme === "dark";
   const [tabBarHeight, setTabBarHeight] = useState(0);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const showListener = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      () => setKeyboardVisible(true)
+    );
+    const hideListener = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => setKeyboardVisible(false)
+    );
+    return () => {
+      showListener.remove();
+      hideListener.remove();
+    };
+  }, []);
 
   const handleLayout = (event: LayoutChangeEvent) => {
     const { height } = event.nativeEvent.layout;
@@ -64,6 +80,7 @@ export default function TabBar({ state, descriptors, navigation, onHeightChange 
         elevation: 8,
         zIndex: 50,
         flexDirection: 'row',
+        display: keyboardVisible ? 'none' : 'flex',
       }}
     >
       {state.routes.map((route, index) => {
