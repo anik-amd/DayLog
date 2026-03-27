@@ -160,14 +160,11 @@ export default function EntriesScreen({ navigation, route }: any) {
   const lastScrollY = useRef(0);
   const headerVisible = useRef(true);
 
-  // Sync keyboard state with scroll animation - reset translate when keyboard appears
+  // Sync keyboard state with scroll animation - reset QuickEntryBar when keyboard appears
   useEffect(() => {
     if (isKeyboardVisible) {
-      // Keyboard is open - reset all scroll translations so they don't interfere with keyboard positioning
+      // Only reset QuickEntryBar position - do NOT reset header/calendar
       quickBarTranslate.setValue(0);
-      headerPosition.setValue(0);
-      calendarTranslate.setValue(0);
-      headerVisible.current = true;
     }
   }, [isKeyboardVisible]);
 
@@ -707,7 +704,7 @@ export default function EntriesScreen({ navigation, route }: any) {
             key={colorScheme}
             style={{ 
               position: 'absolute', 
-              bottom: isKeyboardVisible ? tabBarHeight + keyboardHeight + spacing.sm : tabBarHeight + spacing.md,
+              bottom: isKeyboardVisible ? keyboardHeight + spacing.sm : tabBarHeight + spacing.md,
               left: spacing.md, 
               right: spacing.md, 
               zIndex: 999,
