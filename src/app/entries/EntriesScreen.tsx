@@ -44,24 +44,22 @@ export default function EntriesScreen({ navigation, route }: any) {
         const newHeight = e.endCoordinates.height;
         setKeyboardHeight(newHeight);
         setKeyboardVisible(true);
-        // Smooth animation using timing with proper easing (required for bottom property)
-        Animated.timing(keyboardHeightAnim, {
-          toValue: newHeight,
-          duration: 250,
-          easing: Easing.bezier(0.25, 0.1, 0.25, 0.75),
-          useNativeDriver: false,
+        Animated.spring(keyboardHeightAnim, {
+          toValue: -newHeight * 0.1,
+          useNativeDriver: true,
+          bounciness: 0,
+          speed: 20,
         }).start();
       }
     );
     const hideListener = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
       () => {
-        // Smooth animation when keyboard disappears
-        Animated.timing(keyboardHeightAnim, {
+        Animated.spring(keyboardHeightAnim, {
           toValue: 0,
-          duration: 200,
-          easing: Easing.bezier(0.25, 0.1, 0.25, 0.75),
-          useNativeDriver: false,
+          useNativeDriver: true,
+          bounciness: 0,
+          speed: 20,
         }).start(() => {
           setKeyboardHeight(0);
           setKeyboardVisible(false);
@@ -163,7 +161,6 @@ export default function EntriesScreen({ navigation, route }: any) {
   // Sync keyboard state with scroll animation - reset QuickEntryBar when keyboard appears
   useEffect(() => {
     if (isKeyboardVisible) {
-      // Only reset QuickEntryBar position - do NOT reset header/calendar
       quickBarTranslate.setValue(0);
     }
   }, [isKeyboardVisible]);
@@ -699,7 +696,7 @@ export default function EntriesScreen({ navigation, route }: any) {
               </View>
           </Animated.View>
         ) : (
-          /* Native (iOS/Android): Fixed position - keyboard awareness removed */
+          /* Native (iOS/Android): Keyboard-aware animated position */
           <Animated.View 
             key={colorScheme}
             style={{ 
@@ -710,6 +707,7 @@ export default function EntriesScreen({ navigation, route }: any) {
               zIndex: 999,
               transform: [
                 { translateY: quickBarTranslate },
+                { translateY: keyboardHeightAnim },
               ],
             }}
           >
