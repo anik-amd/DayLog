@@ -52,6 +52,7 @@ function TabNavigatorWithHeight() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: { display: 'none' },
+        tabBarHideOnKeyboard: true,
       }}
     >
       <Tab.Screen name="Home" component={HomeStack} />
