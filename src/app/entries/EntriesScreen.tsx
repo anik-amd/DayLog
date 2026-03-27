@@ -699,12 +699,12 @@ export default function EntriesScreen({ navigation, route }: any) {
               </View>
           </Animated.View>
         ) : (
-          /* Native (iOS/Android): Use animated keyboard height for smooth positioning */
+          /* Native (iOS/Android): Fixed position - keyboard awareness removed */
           <Animated.View 
             key={colorScheme}
             style={{ 
               position: 'absolute', 
-              bottom: isKeyboardVisible ? keyboardHeight + spacing.sm : tabBarHeight + spacing.md,
+              bottom: tabBarHeight + spacing.md,
               left: spacing.md, 
               right: spacing.md, 
               zIndex: 999,
