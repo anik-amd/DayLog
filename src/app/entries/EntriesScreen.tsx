@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { View, Text, ActivityIndicator, KeyboardAvoidingView, Platform, TouchableOpacity, Animated, ScrollView, Keyboard } from 'react-native';
+import { View, Text, ActivityIndicator, Platform, TouchableOpacity, Animated, ScrollView, Keyboard, Easing } from 'react-native';
 import { useFocusEffect, useRoute } from '@react-navigation/native';
 import { useColorScheme as useNativeWindColorScheme } from "nativewind";
 import { Ionicons } from '@expo/vector-icons';
@@ -18,7 +18,6 @@ import TagStrip from '../../components/TagStrip';
 import TagSelectorModal from '../../components/TagSelectorModal';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useTabBarHeight } from '../../contexts/TabBarHeightContext';
-import { useKeyboardHeight } from '../../hooks/useKeyboardHeight';
 import { useResponsive } from '../../hooks/useResponsive';
 import { moderateScale } from '../../utils/responsive';
 
@@ -27,7 +26,58 @@ export default function EntriesScreen({ navigation, route }: any) {
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const { tabBarHeight } = useTabBarHeight();
-  const keyboardHeight = useKeyboardHeight();
+  const isWeb = Platform.OS === 'web';
+  
+  // Track keyboard height using React Native's built-in Keyboard API
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  
+  // Animated value for smooth keyboard transitions
+  const keyboardHeightAnim = useRef(new Animated.Value(0)).current;
+  
+  useEffect(() => {
+    if (isWeb) return;
+    
+    const showListener = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (e) => {
+        const newHeight = e.endCoordinates.height;
+        setKeyboardHeight(newHeight);
+        setKeyboardVisible(true);
+        // Smooth animation using timing with proper easing (required for bottom property)
+        Animated.timing(keyboardHeightAnim, {
+          toValue: newHeight,
+          duration: 250,
+          easing: Easing.bezier(0.25, 0.1, 0.25, 0.75),
+          useNativeDriver: false,
+        }).start();
+      }
+    );
+    const hideListener = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => {
+        // Smooth animation when keyboard disappears
+        Animated.timing(keyboardHeightAnim, {
+          toValue: 0,
+          duration: 200,
+          easing: Easing.bezier(0.25, 0.1, 0.25, 0.75),
+          useNativeDriver: false,
+        }).start(() => {
+          setKeyboardHeight(0);
+          setKeyboardVisible(false);
+        });
+      }
+    );
+
+    return () => {
+      showListener.remove();
+      hideListener.remove();
+    };
+  }, [isWeb]);
+   
+  // Determine keyboard visibility from state
+  const isKeyboardVisible = keyboardVisible;
+  
   const { spacing, fontSize, isTablet, isLandscape } = useResponsive();
   const routeParams = route.params || {};
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -110,6 +160,17 @@ export default function EntriesScreen({ navigation, route }: any) {
   const lastScrollY = useRef(0);
   const headerVisible = useRef(true);
 
+  // Sync keyboard state with scroll animation - reset translate when keyboard appears
+  useEffect(() => {
+    if (isKeyboardVisible) {
+      // Keyboard is open - reset all scroll translations so they don't interfere with keyboard positioning
+      quickBarTranslate.setValue(0);
+      headerPosition.setValue(0);
+      calendarTranslate.setValue(0);
+      headerVisible.current = true;
+    }
+  }, [isKeyboardVisible]);
+
   useEffect(() => {
     highlightedDateRef.current = highlightedDate;
   }, [highlightedDate]);
@@ -179,50 +240,53 @@ export default function EntriesScreen({ navigation, route }: any) {
       calendarRef.current?.scrollToDate(visibleDate);
     }
 
-    if (delta > 8 && headerVisible.current) {
-      headerVisible.current = false;
-      Animated.parallel([
-        Animated.spring(headerPosition, {
-          toValue: -88,
-          useNativeDriver: true,
-          speed: 40,
-          bounciness: 0,
-        }),
-        Animated.spring(calendarTranslate, {
-          toValue: -68,
-          useNativeDriver: true,
-          speed: 40,
-          bounciness: 0,
-        }),
-        Animated.spring(quickBarTranslate, {
-          toValue: 200,
-          useNativeDriver: true,
-          speed: 40,
-          bounciness: 0,
-        }),
-      ]).start();
-    } else if (delta < -8 && !headerVisible.current) {
-      headerVisible.current = true;
-      Animated.parallel([
-        Animated.spring(headerPosition, {
-          toValue: 0,
-          useNativeDriver: true,
-          speed: 30,
-          bounciness: 4,
-        }),
-        Animated.spring(calendarTranslate, {
-          toValue: 0,
-          useNativeDriver: true,
-          speed: 30,
-          bounciness: 4,
-        }),
-        Animated.spring(quickBarTranslate, {
-          toValue: 0,
-          useNativeDriver: true,
-          speed: 30,
-          bounciness: 4,
-        }),
-      ]).start();
+    // Only apply scroll-based hiding when keyboard is NOT visible
+    if (!isKeyboardVisible) {
+      if (delta > 8 && headerVisible.current) {
+        headerVisible.current = false;
+        Animated.parallel([
+          Animated.spring(headerPosition, {
+            toValue: -88,
+            useNativeDriver: true,
+            speed: 40,
+            bounciness: 0,
+          }),
+          Animated.spring(calendarTranslate, {
+            toValue: -68,
+            useNativeDriver: true,
+            speed: 40,
+            bounciness: 0,
+          }),
+          Animated.spring(quickBarTranslate, {
+            toValue: 200,
+            useNativeDriver: true,
+            speed: 40,
+            bounciness: 0,
+          }),
+        ]).start();
+      } else if (delta < -8 && !headerVisible.current) {
+        headerVisible.current = true;
+        Animated.parallel([
+          Animated.spring(headerPosition, {
+            toValue: 0,
+            useNativeDriver: true,
+            speed: 30,
+            bounciness: 4,
+          }),
+          Animated.spring(calendarTranslate, {
+            toValue: 0,
+            useNativeDriver: true,
+            speed: 30,
+            bounciness: 4,
+          }),
+          Animated.spring(quickBarTranslate, {
+            toValue: 0,
+            useNativeDriver: true,
+            speed: 30,
+            bounciness: 4,
+          }),
+        ]).start();
+      }
     }
 
     lastScrollY.current = currentY;
@@ -594,50 +658,95 @@ export default function EntriesScreen({ navigation, route }: any) {
             </View>
         </Animated.View>
 
-        {/* HIDABLE Bottom Section: Quick Entry Bar (Solid Floating Card) */}
-        <Animated.View 
+        {/* HIDABLE Bottom Section: Quick Entry Bar */}
+        {isWeb ? (
+          /* Web: Simple static positioning - no keyboard awareness needed */
+          <Animated.View 
             key={colorScheme}
             style={{ 
-                position: 'absolute', 
-                bottom: tabBarHeight + keyboardHeight + spacing.md,
-                left: spacing.md, 
-                right: spacing.md, 
-                zIndex: 999,
-                transform: [
-                    { translateY: quickBarTranslate },
-                ],
+              position: 'absolute', 
+              bottom: tabBarHeight + spacing.md,
+              left: spacing.md, 
+              right: spacing.md, 
+              zIndex: 999,
             }}
-        >
-            <View 
-                style={{ 
-                    backgroundColor: colors.background,
-                    borderRadius: moderateScale(40),
-                    borderWidth: inputFocused ? 2 : 1,
-                    borderColor: inputFocused ? colors.accent : colors.border,
-                    overflow: 'hidden',
-                }}
-            >
-                <QuickEntryBar 
-                  onEntrySaved={() => {
-                    fetchEntries();
-                    loadTagCounts();
+          >
+              <View 
+                  style={{ 
+                      backgroundColor: colors.background,
+                      borderRadius: moderateScale(40),
+                      borderWidth: inputFocused ? 2 : 1,
+                      borderColor: inputFocused ? colors.accent : colors.border,
+                      overflow: 'hidden',
                   }}
-                  entryDate={entryDate}
-                  onEntryDateChange={setEntryDate}
-                  onFocusChange={setInputFocused}
-                  onDatePress={() => {
-                    setPickerType('date');
-                    setPickerDate(entryDate);
-                    setPickerVisible(true);
+              >
+                  <QuickEntryBar 
+                    onEntrySaved={() => {
+                      fetchEntries();
+                      loadTagCounts();
+                    }}
+                    entryDate={entryDate}
+                    onEntryDateChange={setEntryDate}
+                    onFocusChange={setInputFocused}
+                    onDatePress={() => {
+                      setPickerType('date');
+                      setPickerDate(entryDate);
+                      setPickerVisible(true);
+                    }}
+                    onTimePress={() => {
+                      setPickerType('time');
+                      setPickerDate(entryDate);
+                      setPickerVisible(true);
+                    }}
+                  />
+              </View>
+          </Animated.View>
+        ) : (
+          /* Native (iOS/Android): Use animated keyboard height for smooth positioning */
+          <Animated.View 
+            key={colorScheme}
+            style={{ 
+              position: 'absolute', 
+              bottom: isKeyboardVisible ? tabBarHeight + keyboardHeight + spacing.sm : tabBarHeight + spacing.md,
+              left: spacing.md, 
+              right: spacing.md, 
+              zIndex: 999,
+              transform: [
+                { translateY: quickBarTranslate },
+              ],
+            }}
+          >
+              <View 
+                  style={{ 
+                      backgroundColor: colors.background,
+                      borderRadius: moderateScale(40),
+                      borderWidth: inputFocused ? 2 : 1,
+                      borderColor: inputFocused ? colors.accent : colors.border,
+                      overflow: 'hidden',
                   }}
-                  onTimePress={() => {
-                    setPickerType('time');
-                    setPickerDate(entryDate);
-                    setPickerVisible(true);
-                  }}
-                />
-            </View>
-        </Animated.View>
+              >
+                  <QuickEntryBar 
+                    onEntrySaved={() => {
+                      fetchEntries();
+                      loadTagCounts();
+                    }}
+                    entryDate={entryDate}
+                    onEntryDateChange={setEntryDate}
+                    onFocusChange={setInputFocused}
+                    onDatePress={() => {
+                      setPickerType('date');
+                      setPickerDate(entryDate);
+                      setPickerVisible(true);
+                    }}
+                    onTimePress={() => {
+                      setPickerType('time');
+                      setPickerDate(entryDate);
+                      setPickerVisible(true);
+                    }}
+                  />
+              </View>
+          </Animated.View>
+        )}
 
         {/* Web Picker - Rendered at screen level */}
         {Platform.OS === 'web' && (
