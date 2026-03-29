@@ -20,6 +20,7 @@ import { useThemeColors } from '../../hooks/useThemeColors';
 import { useTabBarHeight } from '../../contexts/TabBarHeightContext';
 import { useResponsive } from '../../hooks/useResponsive';
 import { moderateScale } from '../../utils/responsive';
+import { formatDateToString, getTodayString, getYesterdayString, isToday, isYesterday } from '../../utils/dateUtils';
 
 export default function EntriesScreen({ navigation, route }: any) {
   const { colorScheme, setColorScheme } = useNativeWindColorScheme();
@@ -145,7 +146,7 @@ export default function EntriesScreen({ navigation, route }: any) {
   const [pickerType, setPickerType] = useState<'date' | 'time'>('date');
   const [entryDate, setEntryDate] = useState(new Date());
   const [inputFocused, setInputFocused] = useState(false);
-  const [highlightedDate, setHighlightedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [highlightedDate, setHighlightedDate] = useState<string>(getTodayString());
   const calendarRef = useRef<CalendarStripRef>(null);
   const datePositionsRef = useRef<{ [date: string]: number }>({});
   const scrollViewRef = useRef<ScrollView>(null);
@@ -332,7 +333,7 @@ export default function EntriesScreen({ navigation, route }: any) {
             content: "Welcome to DayLog! This is your first test entry, created automatically.",
             createdAt: Date.now(),
             updatedAt: Date.now(),
-            date: new Date().toISOString().split('T')[0]
+            date: getTodayString()
           };
           
           await createEntry(testEntry);
@@ -342,14 +343,14 @@ export default function EntriesScreen({ navigation, route }: any) {
         setEntries(currentEntries);
         await loadTagCounts();
         
-        if (currentEntries.length > 0) {
-          const today = new Date().toISOString().split('T')[0];
-          highlightedDateRef.current = today;
-          setHighlightedDate(today);
-          setTimeout(() => {
-            calendarRef.current?.scrollToDate(today);
-          }, 100);
-        }
+    if (currentEntries.length > 0) {
+      const today = getTodayString();
+      highlightedDateRef.current = today;
+      setHighlightedDate(today);
+      setTimeout(() => {
+        calendarRef.current?.scrollToDate(today);
+      }, 100);
+    }
       } catch (error) {
         console.error("Database initialization failed:", error);
       } finally {
@@ -385,15 +386,15 @@ export default function EntriesScreen({ navigation, route }: any) {
     setSelectedTags([]);
   };
 
-  // When selectedDate is cleared, reset highlightedDate to today
-  useEffect(() => {
-    if (!selectedDate && entries.length > 0) {
-      const today = new Date().toISOString().split('T')[0];
-      highlightedDateRef.current = today;
-      setHighlightedDate(today);
-      calendarRef.current?.scrollToDate(today);
-    }
-  }, [selectedDate]);
+// When selectedDate is cleared, reset highlightedDate to today
+useEffect(() => {
+  if (!selectedDate && entries.length > 0) {
+    const today = getTodayString();
+    highlightedDateRef.current = today;
+    setHighlightedDate(today);
+    calendarRef.current?.scrollToDate(today);
+  }
+}, [selectedDate]);
 
   // Group entries by date
   const groupedEntries = filteredEntries.reduce((groups: { [key: string]: Entry[] }, entry) => {
@@ -408,24 +409,21 @@ export default function EntriesScreen({ navigation, route }: any) {
   // Sort dates in descending order (newest first)
   const sortedDates = Object.keys(groupedEntries).sort((a, b) => b.localeCompare(a));
 
-  const formatDateHeader = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
+const formatDateHeader = (dateStr: string) => {
+  const date = new Date(dateStr);
 
-    if (dateStr === today.toISOString().split('T')[0]) {
-      return 'Today';
-    } else if (dateStr === yesterday.toISOString().split('T')[0]) {
-      return 'Yesterday';
-    } else {
-      return date.toLocaleDateString(undefined, {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric'
-      });
-    }
-  };
+  if (isToday(dateStr)) {
+    return 'Today';
+  } else if (isYesterday(dateStr)) {
+    return 'Yesterday';
+  } else {
+    return date.toLocaleDateString(undefined, {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+};
 
   return (
     <View 

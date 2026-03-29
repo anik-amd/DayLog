@@ -17,6 +17,7 @@ import { getSetting } from '../../storage/settings';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useResponsive } from '../../hooks/useResponsive';
 import { moderateScale } from '../../utils/responsive';
+import { formatDateToString, getTodayString, getYesterdayString } from '../../utils/dateUtils';
 
 const trimLocation = (address: Location.LocationGeocodedAddress): string => {
   const parts: string[] = [];
@@ -220,7 +221,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
     isSaving.current = true;
     try {
       const now = entryDate.getTime();
-      const dateStr = entryDate.toISOString().split('T')[0];
+      const dateStr = formatDateToString(entryDate);
       const timeStr = formatTime(entryDate);
       const extractedTags = extractTags(textToSave);
       
@@ -297,11 +298,11 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
         const currentTags = extractTags(content);
         const newEntry: Omit<Entry, 'media'> = { 
           id: newId, 
-          content, 
-          createdAt: now, 
-          updatedAt: now, 
-          date: entryDate.toISOString().split('T')[0],
-          tags: currentTags || undefined
+      content,
+      createdAt: now,
+      updatedAt: now,
+      date: formatDateToString(entryDate),
+      tags: currentTags || undefined
         };
         await createEntry(newEntry);
         setCurrentEntryId(newId);
@@ -310,7 +311,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
         navigation.navigate('FullScreenEditor', { 
           entryId: newId, 
           initialContent: content, 
-          initialDate: entryDate.toISOString(),
+          initialDate: formatDateToString(entryDate),
           initialTime: formatTime(entryDate),
           initialLocation: locationDisplay,
           initialWeather: weather,
@@ -322,7 +323,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
         navigation.navigate('FullScreenEditor', { 
           entryId: currentEntryId, 
           initialContent: content, 
-          initialDate: entryDate.toISOString(),
+          initialDate: formatDateToString(entryDate),
           initialTime: formatTime(entryDate),
           initialLocation: locationDisplay,
           initialWeather: weather,
@@ -333,7 +334,7 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
         navigation.navigate('FullScreenEditor', { 
           entryId: null, 
           initialContent: content, 
-          initialDate: entryDate.toISOString(),
+          initialDate: formatDateToString(entryDate),
           initialTime: formatTime(entryDate),
           initialLocation: locationDisplay,
           initialWeather: weather,
@@ -388,12 +389,12 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
         activeEntryId = `${now}-${Math.random().toString(36).substring(2, 9)}`;
         const currentTags = extractTags(content);
         const newEntry: Omit<Entry, 'media'> = { 
-          id: activeEntryId, 
-          content: content || '', 
-          createdAt: now, 
-          updatedAt: now, 
-          date: entryDate.toISOString().split('T')[0],
-          tags: currentTags || undefined
+      id: activeEntryId,
+      content: content || '',
+      createdAt: now,
+      updatedAt: now,
+      date: formatDateToString(entryDate),
+      tags: currentTags || undefined
         };
         await createEntry(newEntry);
         setCurrentEntryId(activeEntryId);
@@ -446,14 +447,10 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   };
 
   const formatDate = (date: Date) => {
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    const dateStr = date.toISOString().split('T')[0];
-    if (dateStr === today.toISOString().split('T')[0]) {
+    const dateStr = formatDateToString(date);
+    if (dateStr === getTodayString()) {
       return 'Today';
-    } else if (dateStr === yesterday.toISOString().split('T')[0]) {
+    } else if (dateStr === getYesterdayString()) {
       return 'Yesterday';
     } else {
       return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });

@@ -18,6 +18,7 @@ import { getSetting } from '../../storage/settings';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useResponsive } from '../../hooks/useResponsive';
 import { moderateScale } from '../../utils/responsive';
+import { formatDateToString, getTodayString, getYesterdayString } from '../../utils/dateUtils';
 
 const extractTags = (text: string): string => {
   const matches = text.match(/#(\w+)/g);
@@ -70,9 +71,33 @@ export default function FullScreenEditor({ route, navigation }: any) {
   const [selection, setSelection] = useState({ start: 0, end: 0 });
   const isInitialLoad = useRef(true);
 
-  // Metadata state - initialize with passed values
-  const [date, setDate] = useState<string>(initialDate || '');
-  const [time, setTime] = useState<string>(initialTime || '');
+// Metadata state - initialize with passed values
+// Extract date (YYYY-MM-DD) from ISO string if it includes time
+const normalizeDate = (dateStr: string): string => {
+  if (!dateStr) return '';
+  // If it's already in YYYY-MM-DD format, return as-is
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+  // If it's an ISO string with time, extract the date part
+  if (dateStr.includes('T')) {
+    return dateStr.split('T')[0];
+  }
+  return dateStr;
+};
+
+// Extract time (HH:MM) from ISO string if present
+const extractTimeFromISO = (dateStr: string): string => {
+  if (!dateStr || !dateStr.includes('T')) return '';
+  const timePart = dateStr.split('T')[1];
+  if (timePart) {
+    // Extract just HH:MM from the time string
+    const match = timePart.match(/^(\d{2}:\d{2})/);
+    if (match) return match[1];
+  }
+  return '';
+};
+
+const [date, setDate] = useState<string>(normalizeDate(initialDate) || '');
+const [time, setTime] = useState<string>(initialTime || extractTimeFromISO(initialDate) || '');
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
   const [locationFull, setLocationFull] = useState<string | null>(null);
@@ -112,11 +137,11 @@ export default function FullScreenEditor({ route, navigation }: any) {
     if (currentEntryId) {
       const data = await getEntry(currentEntryId);
       if (data) {
-        setEntry(data);
-        const content = data.content || '';
-        setMarkdown(content);
-        setDate(data.date || '');
-        setTime(data.time || '');
+      setEntry(data);
+      const content = data.content || '';
+      setMarkdown(content);
+      setDate(normalizeDate(data.date || ''));
+      setTime(data.time || '');
         setLatitude(data.latitude || null);
         setLongitude(data.longitude || null);
         setLocationFull(data.locationFull || null);
@@ -260,7 +285,7 @@ export default function FullScreenEditor({ route, navigation }: any) {
           content: textToSave,
           createdAt: now,
           updatedAt: now,
-          date: currentMetadata.date || new Date().toISOString().split('T')[0],
+          date: currentMetadata.date || formatDateToString(new Date()),
           time: currentMetadata.time || '',
           latitude: latitude || undefined,
           longitude: longitude || undefined,
@@ -372,14 +397,14 @@ export default function FullScreenEditor({ route, navigation }: any) {
     loadEntry();
   };
 
-  const handleDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(false);
-    if (selectedDate) {
-      setEntryDateObj(selectedDate);
-      const dateStr = selectedDate.toISOString().split('T')[0];
-      setDate(dateStr);
-    }
-  };
+const handleDateChange = (event: any, selectedDate?: Date) => {
+  setShowDatePicker(false);
+  if (selectedDate) {
+    setEntryDateObj(selectedDate);
+    const dateStr = formatDateToString(selectedDate);
+    setDate(dateStr);
+  }
+};
 
   const handleTimeChange = (event: any, selectedTime?: Date) => {
     setShowTimePicker(false);
@@ -390,22 +415,18 @@ export default function FullScreenEditor({ route, navigation }: any) {
     }
   };
 
-  const formatDate = (date: Date) => {
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
+const formatDate = (date: Date) => {
+  const dateStr = formatDateToString(date);
+  if (dateStr === getTodayString()) {
+    return 'Today';
+  } else if (dateStr === getYesterdayString()) {
+    return 'Yesterday';
+  } else {
+    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  }
+};
 
-    const dateStr = date.toISOString().split('T')[0];
-    if (dateStr === today.toISOString().split('T')[0]) {
-      return 'Today';
-    } else if (dateStr === yesterday.toISOString().split('T')[0]) {
-      return 'Yesterday';
-    } else {
-      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-    }
-  };
-
-  return (
+return (
     <View className="flex-1" style={{ backgroundColor: colors.background }}>
       <KeyboardAvoidingView 
         className="flex-1" 

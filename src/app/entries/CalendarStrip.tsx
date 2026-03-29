@@ -6,6 +6,7 @@ import { useColorScheme } from "nativewind";
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useResponsive } from '../../hooks/useResponsive';
 import { moderateScale } from '../../utils/responsive';
+import { formatDateToString, getTodayString } from '../../utils/dateUtils';
 
 import { Entry } from '../../types/Entry';
 
@@ -81,44 +82,44 @@ const CalendarStrip = forwardRef<CalendarStripRef, CalendarStripProps>(
       const startDate = new Date(today);
       startDate.setDate(today.getDate() - 60);
 
-      for (let i = 0; i < 90; i++) {
-        const d = new Date(startDate);
-        d.setDate(startDate.getDate() + i);
-        const id = d.toISOString().split('T')[0];
-        const hasEntries = entries.some(e => e.date === id);
+  for (let i = 0; i < 90; i++) {
+    const d = new Date(startDate);
+    d.setDate(startDate.getDate() + i);
+    const id = formatDateToString(d);
+    const hasEntries = entries.some(e => e.date === id);
 
-        list.push({
-          id,
-          dayName: d.toLocaleDateString(undefined, { weekday: 'short' }),
-          dayNum: d.getDate(),
-          isToday: id === today.toISOString().split('T')[0],
-          hasEntries
-        });
-      }
+    list.push({
+      id,
+      dayName: d.toLocaleDateString(undefined, { weekday: 'short' }),
+      dayNum: d.getDate(),
+      isToday: id === getTodayString(),
+      hasEntries
+    });
+  }
       datesRef.current = list;
       return list;
     }, [entries]);
 
-    const markedDates = useMemo(() => {
-      const marks: any = {};
-      entries.forEach(e => {
-        marks[e.date] = { marked: true, dotColor: colors.accent };
-      });
-      const todayStr = new Date().toISOString().split('T')[0];
-      if (marks[todayStr]) {
-        marks[todayStr].dotColor = colors.accent;
-      } else {
-        marks[todayStr] = { marked: true, dotColor: isDark ? '#3f3f46' : '#d4d4d4' };
-      }
-      if (selectedDate) {
-        marks[selectedDate] = {
-          ...marks[selectedDate],
-          selected: true,
-          selectedColor: colors.accent,
-        };
-      }
-      return marks;
-    }, [entries, selectedDate, colors.accent, isDark]);
+const markedDates = useMemo(() => {
+  const marks: any = {};
+  entries.forEach(e => {
+    marks[e.date] = { marked: true, dotColor: colors.accent };
+  });
+  const todayStr = getTodayString();
+  if (marks[todayStr]) {
+    marks[todayStr].dotColor = colors.accent;
+  } else {
+    marks[todayStr] = { marked: true, dotColor: isDark ? '#3f3f46' : '#d4d4d4' };
+  }
+  if (selectedDate) {
+    marks[selectedDate] = {
+      ...marks[selectedDate],
+      selected: true,
+      selectedColor: colors.accent,
+    };
+  }
+  return marks;
+}, [entries, selectedDate, colors.accent, isDark]);
 
     const monthLabel = useMemo(() => {
       try {
