@@ -638,8 +638,8 @@ return (
               </Text>
             </View>
 
-            <View className="space-y-3">
-              <TouchableOpacity 
+            <View style={{ gap: spacing.sm }}>
+              <TouchableOpacity
                 onPress={handleSaveAndExit}
                 style={{ backgroundColor: colors.accent, padding: 20, borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}
               >
@@ -648,7 +648,7 @@ return (
                 </Text>
               </TouchableOpacity>
 
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={handleDiscardAndExit}
                 style={{ padding: 20, borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border }}
               >

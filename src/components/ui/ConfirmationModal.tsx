@@ -71,40 +71,40 @@ export default function ConfirmationModal({
             )}
           </View>
 
-          <View className="space-y-3">
-            <TouchableOpacity 
-              onPress={onConfirm}
-              style={{ 
-                backgroundColor: isDestructive ? colors.error : colors.accent, 
-                padding: moderateScale(20), 
-                borderRadius: moderateScale(16), 
-                flexDirection: 'row', 
-                alignItems: 'center', 
-                justifyContent: 'center' 
-              }}
-            >
-              <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: fontSize.md, color: '#ffffff' }}>
-                {confirmLabel}
-              </Text>
-            </TouchableOpacity>
+      <View style={{ gap: spacing.sm }}>
+        <TouchableOpacity
+          onPress={onConfirm}
+          style={{
+            backgroundColor: isDestructive ? colors.error : colors.accent,
+            padding: moderateScale(20),
+            borderRadius: moderateScale(16),
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: fontSize.md, color: '#ffffff' }}>
+            {confirmLabel}
+          </Text>
+        </TouchableOpacity>
 
-            <TouchableOpacity 
-              onPress={onCancel}
-              style={{ 
-                padding: moderateScale(20), 
-                borderRadius: moderateScale(16), 
-                flexDirection: 'row', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                borderWidth: 1, 
-                borderColor: colors.border 
-              }}
-            >
-              <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: fontSize.md, color: colors.textSecondary }}>
-                {cancelLabel}
-              </Text>
-            </TouchableOpacity>
-          </View>
+        <TouchableOpacity
+          onPress={onCancel}
+          style={{
+            padding: moderateScale(20),
+            borderRadius: moderateScale(16),
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderWidth: 1,
+            borderColor: colors.border
+          }}
+        >
+          <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: fontSize.md, color: colors.textSecondary }}>
+            {cancelLabel}
+          </Text>
+        </TouchableOpacity>
+      </View>
         </Pressable>
       </Pressable>
     </Modal>

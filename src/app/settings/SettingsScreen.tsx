@@ -238,51 +238,51 @@ export default function SettingsScreen() {
                     </TouchableOpacity>
                 </View>
 
-                <View className="space-y-3">
-                    <TouchableOpacity 
-                        onPress={() => handleSetTheme('light')}
-                        style={{
-                            flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, borderRadius: 16, borderWidth: 2,
-                            backgroundColor: colorScheme === 'light' ? colors.accentLight : colors.surfaceElevated,
-                            borderColor: colorScheme === 'light' ? colors.accent : 'transparent'
-                        }}
-                    >
-                        <View className="flex-row items-center">
-                            <Ionicons name="sunny" size={20} color={colorScheme === 'light' ? colors.accent : colors.textSecondary} style={{ marginRight: 16 }} />
-                            <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: 16, color: colorScheme === 'light' ? colors.accent : colors.textSecondary }}>Light Mode</Text>
-                        </View>
-                        {colorScheme === 'light' && <Ionicons name="checkmark-circle" size={20} color={colors.accent} />}
-                    </TouchableOpacity>
-
-                    <TouchableOpacity 
-                        onPress={() => handleSetTheme('dark')}
-                        style={{
-                            flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, borderRadius: 16, borderWidth: 2,
-                            backgroundColor: colorScheme === 'dark' ? colors.accentLight : colors.surfaceElevated,
-                            borderColor: colorScheme === 'dark' ? colors.accent : 'transparent'
-                        }}
-                    >
-                        <View className="flex-row items-center">
-                            <Ionicons name="moon" size={20} color={colorScheme === 'dark' ? colors.accent : colors.textSecondary} style={{ marginRight: 16 }} />
-                            <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: 16, color: colorScheme === 'dark' ? colors.accent : colors.textSecondary }}>Dark Mode</Text>
-                        </View>
-                        {colorScheme === 'dark' && <Ionicons name="checkmark-circle" size={20} color={colors.accent} />}
-                    </TouchableOpacity>
-
-                    <TouchableOpacity 
-                        onPress={() => handleSetTheme('system')}
-                        style={{
-                            flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, borderRadius: 16, borderWidth: 2,
-                            backgroundColor: colors.surfaceElevated,
-                            borderColor: 'transparent'
-                        }}
-                    >
-                        <View className="flex-row items-center">
-                            <Ionicons name="settings-outline" size={20} color={colors.textSecondary} style={{ marginRight: 16 }} />
-                            <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: 16, color: colors.textSecondary }}>System Default</Text>
-                        </View>
-                    </TouchableOpacity>
+            <View style={{ gap: spacing.sm }}>
+              <TouchableOpacity
+                onPress={() => handleSetTheme('light')}
+                style={{
+                  flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, borderRadius: 16, borderWidth: 2,
+                  backgroundColor: colorScheme === 'light' ? colors.accentLight : colors.surfaceElevated,
+                  borderColor: colorScheme === 'light' ? colors.accent : 'transparent'
+                }}
+              >
+                <View className="flex-row items-center">
+                  <Ionicons name="sunny" size={20} color={colorScheme === 'light' ? colors.accent : colors.textSecondary} style={{ marginRight: 16 }} />
+                  <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: 16, color: colorScheme === 'light' ? colors.accent : colors.textSecondary }}>Light Mode</Text>
                 </View>
+                {colorScheme === 'light' && <Ionicons name="checkmark-circle" size={20} color={colors.accent} />}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => handleSetTheme('dark')}
+                style={{
+                  flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, borderRadius: 16, borderWidth: 2,
+                  backgroundColor: colorScheme === 'dark' ? colors.accentLight : colors.surfaceElevated,
+                  borderColor: colorScheme === 'dark' ? colors.accent : 'transparent'
+                }}
+              >
+                <View className="flex-row items-center">
+                  <Ionicons name="moon" size={20} color={colorScheme === 'dark' ? colors.accent : colors.textSecondary} style={{ marginRight: 16 }} />
+                  <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: 16, color: colorScheme === 'dark' ? colors.accent : colors.textSecondary }}>Dark Mode</Text>
+                </View>
+                {colorScheme === 'dark' && <Ionicons name="checkmark-circle" size={20} color={colors.accent} />}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => handleSetTheme('system')}
+                style={{
+                  flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, borderRadius: 16, borderWidth: 2,
+                  backgroundColor: colors.surfaceElevated,
+                  borderColor: 'transparent'
+                }}
+              >
+                <View className="flex-row items-center">
+                  <Ionicons name="settings-outline" size={20} color={colors.textSecondary} style={{ marginRight: 16 }} />
+                  <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: 16, color: colors.textSecondary }}>System Default</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
             </View>
         </Pressable>
       </Modal>
@@ -306,37 +306,37 @@ export default function SettingsScreen() {
                     </TouchableOpacity>
                 </View>
 
-                <View className="space-y-3">
-                    <TouchableOpacity 
-                        onPress={() => handleSetTempUnit('c')}
-                        style={{
-                            flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, borderRadius: 16, borderWidth: 2,
-                            backgroundColor: temperatureUnit === 'c' ? colors.accentLight : colors.surfaceElevated,
-                            borderColor: temperatureUnit === 'c' ? colors.accent : 'transparent'
-                        }}
-                    >
-                        <View className="flex-row items-center">
-                            <Ionicons name="thermometer" size={20} color={temperatureUnit === 'c' ? colors.accent : colors.textSecondary} style={{ marginRight: 16 }} />
-                            <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: 16, color: temperatureUnit === 'c' ? colors.accent : colors.textSecondary }}>Celsius (°C)</Text>
-                        </View>
-                        {temperatureUnit === 'c' && <Ionicons name="checkmark-circle" size={20} color={colors.accent} />}
-                    </TouchableOpacity>
-
-                    <TouchableOpacity 
-                        onPress={() => handleSetTempUnit('f')}
-                        style={{
-                            flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, borderRadius: 16, borderWidth: 2,
-                            backgroundColor: temperatureUnit === 'f' ? colors.accentLight : colors.surfaceElevated,
-                            borderColor: temperatureUnit === 'f' ? colors.accent : 'transparent'
-                        }}
-                    >
-                        <View className="flex-row items-center">
-                            <Ionicons name="thermometer" size={20} color={temperatureUnit === 'f' ? colors.accent : colors.textSecondary} style={{ marginRight: 16 }} />
-                            <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: 16, color: temperatureUnit === 'f' ? colors.accent : colors.textSecondary }}>Fahrenheit (°F)</Text>
-                        </View>
-                        {temperatureUnit === 'f' && <Ionicons name="checkmark-circle" size={20} color={colors.accent} />}
-                    </TouchableOpacity>
+            <View style={{ gap: spacing.sm }}>
+              <TouchableOpacity
+                onPress={() => handleSetTempUnit('c')}
+                style={{
+                  flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, borderRadius: 16, borderWidth: 2,
+                  backgroundColor: temperatureUnit === 'c' ? colors.accentLight : colors.surfaceElevated,
+                  borderColor: temperatureUnit === 'c' ? colors.accent : 'transparent'
+                }}
+              >
+                <View className="flex-row items-center">
+                  <Ionicons name="thermometer" size={20} color={temperatureUnit === 'c' ? colors.accent : colors.textSecondary} style={{ marginRight: 16 }} />
+                  <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: 16, color: temperatureUnit === 'c' ? colors.accent : colors.textSecondary }}>Celsius (°C)</Text>
                 </View>
+                {temperatureUnit === 'c' && <Ionicons name="checkmark-circle" size={20} color={colors.accent} />}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => handleSetTempUnit('f')}
+                style={{
+                  flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, borderRadius: 16, borderWidth: 2,
+                  backgroundColor: temperatureUnit === 'f' ? colors.accentLight : colors.surfaceElevated,
+                  borderColor: temperatureUnit === 'f' ? colors.accent : 'transparent'
+                }}
+              >
+                <View className="flex-row items-center">
+                  <Ionicons name="thermometer" size={20} color={temperatureUnit === 'f' ? colors.accent : colors.textSecondary} style={{ marginRight: 16 }} />
+                  <Text style={{ fontFamily: 'Outfit-SemiBold', fontSize: 16, color: temperatureUnit === 'f' ? colors.accent : colors.textSecondary }}>Fahrenheit (°F)</Text>
+                </View>
+                {temperatureUnit === 'f' && <Ionicons name="checkmark-circle" size={20} color={colors.accent} />}
+              </TouchableOpacity>
+            </View>
             </View>
         </Pressable>
       </Modal>
@@ -361,8 +361,8 @@ export default function SettingsScreen() {
                     </TouchableOpacity>
                 </View>
 
-                <View className="space-y-3">
-                    {Object.entries(colorSchemes).map(([key, scheme]) => (
+            <View style={{ gap: spacing.sm }}>
+              {Object.entries(colorSchemes).map(([key, scheme]) => (
                         <TouchableOpacity 
                             key={key}
                             onPress={() => handleSetColorScheme(key)}
