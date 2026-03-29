@@ -104,14 +104,15 @@ export default function TabBar({ state, descriptors, navigation, onHeightChange 
             onLongPress={onLongPress}
             style={{ flex: 1, alignItems: 'center', paddingVertical: tabPadding }}
           >
-            <View style={{
+            <View style={{ 
               backgroundColor: isFocused ? colors.accentSelected : 'transparent',
               padding: iconPadding,
               borderRadius: moderateScale(16),
-              minWidth: moderateScale(48),
-              minHeight: moderateScale(48),
+              width: moderateScale(48),
+              height: moderateScale(48),
               alignItems: 'center',
               justifyContent: 'center',
+              overflow: 'hidden',
             }}>
               <Ionicons
                 name={Icon}
