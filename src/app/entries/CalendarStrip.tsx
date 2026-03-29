@@ -1,5 +1,5 @@
-import React, { useMemo, useState, useRef, forwardRef, useImperativeHandle, useCallback, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ListRenderItemInfo, NativeSyntheticEvent, NativeScrollEvent, Dimensions } from 'react-native';
+import React, { useMemo, useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Calendar } from 'react-native-calendars';
 import { useColorScheme } from "nativewind";
@@ -36,20 +36,19 @@ const CalendarStrip = forwardRef<CalendarStripRef, CalendarStripProps>(
     const colors = useThemeColors();
     const { fontSize, isLandscape, isTablet } = useResponsive();
     const isDark = colorScheme === "dark";
-    
+
     const CELL_WIDTH = isTablet ? moderateScale(52) : moderateScale(44);
     const CELL_MARGIN = isTablet ? moderateScale(10) : moderateScale(8);
     const CELL_TOTAL = CELL_WIDTH + CELL_MARGIN;
-    
-    const scrollRef = useRef<FlatList<DayItem>>(null);
+
+    const scrollRef = useRef<ScrollView>(null);
     const datesRef = useRef<DayItem[]>([]);
     const lastCenterDate = useRef<string | null>(null);
-    const lastUpdateTime = useRef<number>(0);
     const screenWidthRef = useRef(0);
-    
+
     // Get screen width from dimensions
     const [screenWidth, setScreenWidth] = useState(0);
-    
+
     useEffect(() => {
       const { width } = Dimensions.get('window');
       screenWidthRef.current = width;
@@ -60,37 +59,15 @@ const CalendarStrip = forwardRef<CalendarStripRef, CalendarStripProps>(
       setExpanded(!expanded);
     };
 
-    const handleFlatListScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (!onHighlightChange) return;
-      
-      // Throttle updates to every 100ms
-      const now = Date.now();
-      if (now - lastUpdateTime.current < 100) return;
-      
-      const dates = datesRef.current;
-      if (!dates || dates.length === 0) return;
-
-      const offsetX = event.nativeEvent.contentOffset.x;
-      const listLeftPadding = 4;
-      const centerX = offsetX + (screenWidth - 30) / 2 - listLeftPadding;
-      const centerIndex = Math.max(0, Math.floor(centerX / CELL_TOTAL));
-      const clampedIndex = Math.min(centerIndex, dates.length - 1);
-      const centerDate = dates[clampedIndex];
-
-      if (centerDate && centerDate.id !== lastCenterDate.current) {
-        lastCenterDate.current = centerDate.id;
-        lastUpdateTime.current = now;
-        onHighlightChange(centerDate.id);
-      }
-    }, [onHighlightChange, screenWidth, CELL_TOTAL]);
-
     const scrollToDate = (date: string) => {
       const dates = datesRef.current;
       if (!dates || dates.length === 0) return;
       const item = dates.find(d => d.id === date);
       if (item && scrollRef.current) {
         lastCenterDate.current = date;
-        scrollRef.current.scrollToItem({ item, animated: true, viewPosition: 0.5 });
+        const index = dates.findIndex(d => d.id === date);
+        const offsetX = index * CELL_TOTAL;
+        scrollRef.current.scrollTo({ x: offsetX, animated: true });
       }
     };
 
@@ -155,46 +132,6 @@ const CalendarStrip = forwardRef<CalendarStripRef, CalendarStripProps>(
       }
     }, [highlightedDate]);
 
-    const getItemLayout = (_: any, index: number) => ({
-      length: CELL_TOTAL,
-      offset: CELL_TOTAL * index,
-      index,
-    });
-
-    const renderItem = ({ item }: ListRenderItemInfo<DayItem>) => {
-      const isSelected = item.id === selectedDate;
-      const isHighlighted = item.id === highlightedDate;
-
-      return (
-        <TouchableOpacity
-          onPress={() => onDateSelect(isSelected ? null : item.id)}
-          style={{ width: CELL_WIDTH, height: 56, marginRight: CELL_MARGIN }}
-          activeOpacity={0.8}
-        >
-          <View
-            className="flex-1 items-center justify-center rounded-[20px]"
-            style={[
-              isSelected
-                ? { backgroundColor: colors.accent }
-                : isHighlighted
-                  ? { backgroundColor: colors.accentLight, borderWidth: 1, borderColor: colors.accent }
-                  : { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 3 }
-            ]}
-          >
-            <Text style={{ fontFamily: 'Outfit-Black', fontSize: 8, letterSpacing: -0.5, color: isSelected ? '#ffffff' : isHighlighted ? colors.accent : item.isToday ? colors.accent : (isDark ? '#737373' : '#a1a1aa') }}>
-              {item.dayName}
-            </Text>
-            <Text style={{ fontFamily: 'Outfit-Black', fontSize: 14, color: isSelected ? '#ffffff' : isHighlighted ? colors.accent : item.isToday ? (isDark ? '#ffffff' : '#171717') : (isDark ? '#e4e4e7' : '#404040') }}>
-              {item.dayNum}
-            </Text>
-            {item.hasEntries && !isSelected && (
-              <View className="absolute bottom-1.5 w-1 h-1 rounded-full" style={{ backgroundColor: item.isToday ? colors.accent : (isDark ? '#52525b' : '#d4d4d4') }} />
-            )}
-          </View>
-        </TouchableOpacity>
-      );
-    };
-
     return (
       <View>
         <View className="flex-row items-center justify-between px-0 pt-0 pb-2">
@@ -248,18 +185,47 @@ const CalendarStrip = forwardRef<CalendarStripRef, CalendarStripProps>(
             <Text style={{ fontFamily: 'Outfit-Medium' }} className="text-neutral-600 dark:text-neutral-300 text-[11px] uppercase tracking-widest mb-1.5 text-center">
               {monthLabel}
             </Text>
-            <FlatList
+            <ScrollView
               ref={scrollRef}
-              data={dates}
-              renderItem={renderItem}
-              keyExtractor={(item) => item.id}
               horizontal
               showsHorizontalScrollIndicator={false}
-              getItemLayout={getItemLayout}
               contentContainerStyle={{ paddingLeft: 4, paddingRight: 4, paddingBottom: 4 }}
-              onScroll={handleFlatListScroll}
-              scrollEventThrottle={16}
-            />
+            >
+              {dates.map((item) => {
+                const isSelected = item.id === selectedDate;
+                const isHighlighted = item.id === highlightedDate;
+
+                return (
+                  <TouchableOpacity
+                    key={item.id}
+                    onPress={() => onDateSelect(isSelected ? null : item.id)}
+                    style={{ width: CELL_WIDTH, height: 56, marginRight: CELL_MARGIN }}
+                    activeOpacity={0.8}
+                  >
+                    <View
+                      className="flex-1 items-center justify-center rounded-[20px]"
+                      style={[
+                        isSelected
+                        ? { backgroundColor: colors.accent }
+                        : isHighlighted
+                        ? { backgroundColor: colors.accentLight, borderWidth: 1, borderColor: colors.accent }
+                        : { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 3 }
+                      ]}
+                    >
+                      <Text style={{ fontFamily: 'Outfit-Black', fontSize: 8, letterSpacing: -0.5, color: isSelected ? '#ffffff' : isHighlighted ? colors.accent : item.isToday ? colors.accent : (isDark ? '#737373' : '#a1a1aa') }}>
+                        {item.dayName}
+                      </Text>
+                      <Text style={{ fontFamily: 'Outfit-Black', fontSize: 14, color: isSelected ? '#ffffff' : isHighlighted ? colors.accent : item.isToday ? (isDark ? '#ffffff' : '#171717') : (isDark ? '#e4e4e7' : '#404040') }}>
+                        {item.dayNum}
+                      </Text>
+                      {item.hasEntries && !isSelected && (
+                        <View className="absolute bottom-1.5 w-1 h-1 rounded-full" style={{ backgroundColor: item.isToday ? colors.accent : (isDark ? '#52525b' : '#d4d4d4') }} />
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
           </>
         )}
       </View>
