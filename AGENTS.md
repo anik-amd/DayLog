@@ -405,12 +405,19 @@ Before merging to master, run one of these commands to bump the version:
 When the user requests a version bump (e.g., "bump version" or "release"), the agent MUST:
 
 1. Read the current CHANGELOG.md to understand existing entries
-2. Add a new version section at the top with:
+2. Review commits since the last version to identify user-facing changes:
+   - Run: `git log $(git describe --tags --abbrev=0)..HEAD --oneline` to see commits since last release
+   - Focus only on changes users will instantly recognize (features, fixes, UI improvements)
+   - Skip internal refactoring, code cleanup, dev tooling, and documentation updates
+3. Add a new version section at the top with:
    - Version number (matching the new version from package.json)
    - Today's date (YYYY-MM-DD format)
    - Sections: Added, Changed, Fixed, Removed (only include sections with changes)
-3. List all significant changes made since the last release
-4. If unsure about what changed, summarize the main work completed
+4. Document user-facing changes in clear, conventional format:
+   - Use user-centric language (e.g., "Added dark mode toggle" not "Implemented theme context")
+   - Group by type: Added, Changed, Fixed, Removed
+   - Only include what matters to end users - this is NOT a dev changelog
+5. If unsure about what changed, summarize the main work completed
 
 ### Release Process
 1. User requests version bump
@@ -421,8 +428,10 @@ When the user requests a version bump (e.g., "bump version" or "release"), the a
 
 ### Important
 - ALWAYS update CHANGELOG.md before running npm version command
+- Changelog updates ONLY happen during version bumps (patch, minor, major)
 - Do not skip this step - the changelog is the release notes for users
-- Be descriptive about changes so users understand what's new
+- Focus on user experience, not implementation details
+- Keep entries concise and meaningful
 
 ### Example Format
 ```markdown
@@ -436,6 +445,30 @@ When the user requests a version bump (e.g., "bump version" or "release"), the a
 ### Fixed
 - Loading spinner issue on startup
 ```
+
+### User-Centric Language Guide
+
+**Write for users, not developers.** Focus on what users experience, not how you built it.
+
+**Good Examples (User-Facing):**
+- "Added dark mode toggle in settings"
+- "Fixed keyboard covering text on small screens"
+- "Improved search to find entries by location"
+- "Added Nord theme option"
+- "Smoother scrolling in timeline"
+
+**Avoid (Implementation Details):**
+- "Implemented ThemeContext with React Context API"
+- "Fixed KeyboardAvoidingView positioning bug"
+- "Added FTS5 virtual table for location indexing"
+- "Refactored color scheme system architecture"
+- "Optimized FlatList rendering performance"
+
+**Tips:**
+- Use present tense and active voice
+- Describe the benefit, not the mechanism
+- Group related changes together
+- 5-10 meaningful entries per release is plenty
 
 ### Current Version
 Check `package.json` for the current version before updating changelog.

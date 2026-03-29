@@ -1,44 +1,30 @@
 # Changelog
 
-All notable changes to DayLog will be documented in this file.
-
-## [0.1.1] - 2026-03-25
-### Added
-- **CONTRIBUTING.md**: New contribution guide for human and AI contributors
-- **LICENSE**: Added MIT license with non-commercial use restriction
-
-### Changed
-- **Documentation Restructuring**: Renamed `Instructions/` folder to `docs/` for better organization
-- **README.md**: Enhanced with badges, feature list, installation instructions, and documentation links
-- **AGENTS.md**: Updated to reference new `/docs/` path, clarified changelog update requirements for releases
-
 ## [0.1.0] - 2026-03-25
+
 ### Added
-- **Color Scheme System**: Added Dracula theme with dark/light modes
-- **Quick Theme Toggle**: Switch themes directly from timeline header
-- **Search Feature**: Full-text search across entries, tags, locations, and weather
-- **Tags Filtering**: Filter entries by tags with TagSelectorModal
-- **Unified TagPills**: Consistent tag styling across timeline, search, and modals
-- **Improved Tag Counters**: Better contrast and visibility
+- **Dracula Theme**: New color scheme with dark and light variants
+- **Quick Theme Toggle**: Switch themes instantly from the timeline header
+- **Search**: Find entries by text, tags, locations, and weather
+- **Tag Filtering**: Organize entries by selecting multiple tags
+- **Nord Theme**: Cool arctic color palette option
 
 ### Changed
-- Entries now blend with background with subtle borders
-- Quick entry bar has lighter background
-- Smooth animations when toggling tags
+- Entry cards now blend smoothly with the background
+- Quick entry bar has improved visibility
+- Smoother animations when toggling tags
 
 ## [0.0.1] - 2026-03-22
+
 ### Added
-- Initial release
-- Timeline with calendar strip
-- Quick entry bar for fast note capture
-- Full screen editor
-- Search functionality with fuzzy search
-- Tag filtering with multi-select
-- SQLite local database
-- Markdown support for entries
+- **Timeline View**: Scrollable diary with calendar navigation
+- **Quick Entry**: Fast note capture from bottom bar
+- **Full Editor**: Long-form writing with markdown support
+- **Search & Tags**: Find and organize entries
+- **Photos**: Attach images to entries
+- **Dark Mode**: System and manual theme options
 
 ### Features
-- Offline-first architecture
-- Auto-save entries
-- Media support for photos
-- Dark mode support
+- Works offline
+- Auto-saves entries
+- SQLite local storage
