@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Platform, Share, Alert, Modal, Animated, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useColorScheme } from "nativewind";
 import { getAppStats } from '../../database/entries';
@@ -27,6 +28,7 @@ export default function SettingsScreen() {
   const [savedColorScheme, setSavedColorScheme] = useState<string>('default');
   const [lastSync, setLastSync] = useState<string>("Never");
   const [syncing, setSyncing] = useState(false);
+  const [appVersion, setAppVersion] = useState<string>('');
 
   const { promptAsync, response, uploadBackup } = useBackupEngine();
 
@@ -56,6 +58,7 @@ export default function SettingsScreen() {
       setSavedTheme(theme);
       const scheme = await getColorScheme();
       setSavedColorScheme(scheme);
+      setAppVersion(Constants.expoConfig?.version || '0.0.0');
     })();
   }, []);
 
@@ -208,7 +211,7 @@ export default function SettingsScreen() {
             <SettingItem icon="share-outline" label="Tell a Friend" onPress={onShare} />
             <SettingItem icon="star-outline" label="Rate DayLog" onPress={() => {}} />
             <SettingItem icon="help-circle-outline" label="Support" onPress={() => {}} />
-            <SettingItem icon="information-circle-outline" label="About DayLog" value="v1.0.0" onPress={() => {}} last />
+            <SettingItem icon="information-circle-outline" label="About DayLog" value={appVersion ? `v${appVersion}` : ''} onPress={() => {}} last />
         </Section>
 
         <View className="items-center pb-12 mt-4">
