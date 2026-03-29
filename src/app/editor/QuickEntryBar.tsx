@@ -580,8 +580,8 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
             </ScrollView>
           </View>
 
-          {/* Input Row */}
-          <View className="px-4 pt-3 pb-2">
+      {/* Input Row */}
+      <View className="px-4 pt-3" style={{ paddingBottom: moderateScale(10) }}>
             <View className="flex-row items-end">
               {/* Images preview */}
               {images.length > 0 && (
@@ -634,12 +634,9 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
               )}
             </View>
           </View>
-        </Pressable>
+  </Pressable>
 
-        {/* Bottom padding */}
-        <View className="h-1" />
-
-      {/* Native Date/Time Pickers - iOS uses native, Android uses custom picker */}
+  {/* Native Date/Time Pickers - iOS uses native, Android uses custom picker */}
       {showDatePicker && (
         Platform.OS === 'ios' ? (
           <DateTimePicker
