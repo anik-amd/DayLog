@@ -12,11 +12,23 @@ import { useThemeColors } from '../../hooks/useThemeColors';
 import { useResponsive } from '../../hooks/useResponsive';
 import { moderateScale } from '../../utils/responsive';
 
+const getWeatherIconFromCondition = (weatherStr: string | undefined): string => {
+  if (!weatherStr) return 'sunny-outline';
+  const condition = weatherStr.toLowerCase();
+  if (condition.includes('clear')) return 'sunny-outline';
+  if (condition.includes('partly') || condition.includes('mainly')) return 'partly-sunny-outline';
+  if (condition.includes('cloud') || condition.includes('overcast') || condition.includes('fog')) return 'cloud-outline';
+  if (condition.includes('rain') || condition.includes('drizzle')) return 'rainy-outline';
+  if (condition.includes('snow')) return 'snow-outline';
+  if (condition.includes('thunder')) return 'thunderstorm-outline';
+  return 'sunny-outline';
+};
+
 export default function ReadEntryScreen({ route, navigation }: any) {
   const { entryId } = route.params;
   const { colorScheme } = useColorScheme();
   const colors = useThemeColors();
-  const { fontSize, spacing } = useResponsive();
+  const { fontSize } = useResponsive();
   const [entry, setEntry] = useState<Entry | null>(null);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
@@ -111,51 +123,72 @@ export default function ReadEntryScreen({ route, navigation }: any) {
       </View>
 
       <ScrollView className="flex-1 px-8 pt-8" showsVerticalScrollIndicator={false}>
-        {/* Meta Section */}
+        {/* Meta Section - Stacked vertically */}
         <View className="mb-8">
+          {/* Date */}
           <Text style={{ fontFamily: 'Outfit-Medium', color: colors.textTertiary, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 }}>
             {formattedDate}
           </Text>
-          <View className="flex-row flex-wrap items-center mt-2">
-            <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
-            <Text style={{ fontFamily: 'Outfit-Regular', color: colors.textSecondary, fontSize: 16, marginLeft: 6, marginRight: 16 }}>
+          
+          {/* Time - separate row */}
+          <View className="flex-row items-center mt-1.5">
+            <Ionicons name="time-outline" size={moderateScale(12)} color={colors.textSecondary} />
+            <Text style={{ fontFamily: 'Outfit-Medium', color: colors.textSecondary, fontSize: fontSize.sm - 2, marginLeft: moderateScale(4) }}>
               {formattedTime}
             </Text>
-            
-            {entry.tags && entry.tags.split(',').map((tag, index) => (
-              <Pressable
-                key={index}
-                onPress={() => handleTagPress(tag.trim())}
-                className="flex-row items-center mr-3"
-              >
-                <Ionicons name="pricetag-outline" size={14} color={colors.pills.tags.icon} />
-                <Text style={{ fontFamily: 'Outfit-Regular', color: colors.pills.tags.text, fontSize: 16, marginLeft: 6 }}>
-                  {tag.trim()}
-                </Text>
-              </Pressable>
-            ))}
-
-            {(entry.locationDisplay || entry.weather) && (
-              <View className="flex-row items-center">
-                {entry.locationDisplay && (
-                  <View className="flex-row items-center mr-3">
-                    <Ionicons name="location-outline" size={14} color={colors.pills.location.icon} />
-                    <Text style={{ fontFamily: 'Outfit-Regular', color: colors.textSecondary, fontSize: 16, marginLeft: 6 }}>
-                      {entry.locationDisplay}
-                    </Text>
-                  </View>
-                )}
-                {entry.weather && (
-                  <View className="flex-row items-center">
-                    <Ionicons name="sunny-outline" size={14} color={colors.pills.weather.icon} />
-                    <Text style={{ fontFamily: 'Outfit-Regular', color: colors.textSecondary, fontSize: 16, marginLeft: 6 }}>
-                      {entry.weather}
-                    </Text>
-                  </View>
-                )}
-              </View>
-            )}
           </View>
+          
+          {/* Tags - separate row below time */}
+          {entry.tags && (
+            <View className="flex-row flex-wrap mt-1.5">
+              {entry.tags.split(',').map((tag, index) => (
+                <Pressable
+                  key={index}
+                  onPress={() => handleTagPress(tag.trim())}
+                  className="flex-row items-center mr-3 mb-1"
+                >
+                  <Ionicons name="pricetag-outline" size={moderateScale(11)} color={colors.pills.tags.icon} />
+                  <Text style={{ fontFamily: 'Outfit-Medium', color: colors.pills.tags.text, fontSize: fontSize.sm - 2, marginLeft: moderateScale(4) }}>
+                    {tag.trim()}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          )}
+
+          {/* Location - separate row below tags */}
+          {entry.locationDisplay && (
+            <View className="flex-row items-start mt-1.5" style={{ flexWrap: 'wrap' }}>
+              <Ionicons
+                name="location-outline"
+                size={moderateScale(11)}
+                color={colors.pills.location.icon}
+                style={{ marginTop: moderateScale(1) }}
+              />
+              <Text
+                style={{
+                  fontFamily: 'Outfit-Regular',
+                  color: colors.textSecondary,
+                  fontSize: fontSize.sm - 2,
+                  marginLeft: moderateScale(4),
+                  flex: 1,
+                  flexWrap: 'wrap'
+                }}
+              >
+                {entry.locationDisplay}
+              </Text>
+            </View>
+          )}
+
+          {/* Weather - separate row below location */}
+          {entry.weather && (
+            <View className="flex-row items-center mt-1.5">
+              <Ionicons name={getWeatherIconFromCondition(entry.weather) as any} size={moderateScale(11)} color={colors.pills.weather.icon} />
+              <Text style={{ fontFamily: 'Outfit-Medium', color: colors.pills.weather.text, fontSize: fontSize.sm - 2, marginLeft: moderateScale(4) }}>
+                {entry.weather}
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Gallery */}

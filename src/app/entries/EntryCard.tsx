@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, ScrollView } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -7,7 +7,7 @@ import { useColorScheme } from "nativewind";
 import { Entry } from '../../types/Entry';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useResponsive } from '../../hooks/useResponsive';
-import { moderateScale, fontScaleSize } from '../../utils/responsive';
+import { moderateScale } from '../../utils/responsive';
 
 interface EntryCardProps {
   entry: Entry;
@@ -15,7 +15,7 @@ interface EntryCardProps {
   onTagPress?: (tag: string) => void;
 }
 
-function renderTags(text: string, colors: any, fontSizes: ReturnType<typeof useResponsive>['fontSize']) {
+function renderTags(text: string, colors: any, fontSizes: any) {
   if (!text) return null;
 
   const tagPattern = /(#\w+)/g;
@@ -40,6 +40,18 @@ const stripMarkdown = (text: string) => {
     .trim();
 };
 
+const getWeatherIconFromCondition = (weatherStr: string | undefined): string => {
+  if (!weatherStr) return 'sunny-outline';
+  const condition = weatherStr.toLowerCase();
+  if (condition.includes('clear')) return 'sunny-outline';
+  if (condition.includes('partly') || condition.includes('mainly')) return 'partly-sunny-outline';
+  if (condition.includes('cloud') || condition.includes('overcast') || condition.includes('fog')) return 'cloud-outline';
+  if (condition.includes('rain') || condition.includes('drizzle')) return 'rainy-outline';
+  if (condition.includes('snow')) return 'snow-outline';
+  if (condition.includes('thunder')) return 'thunderstorm-outline';
+  return 'sunny-outline';
+};
+
 function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCardProps) {
   const { colorScheme } = useColorScheme();
   const colors = useThemeColors();
@@ -55,7 +67,18 @@ function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCard
     minute: '2-digit'
   });
 
+  const extractTemperature = (weatherStr: string | undefined): string => {
+    if (!weatherStr) return '';
+    const match = weatherStr.match(/^([\d°F°C]+)/);
+    return match ? match[1] : weatherStr;
+  };
+
   const navigation = useNavigation<any>();
+
+  const hasWeather = !!entry.weather;
+  const hasTags = !!entry?.tags;
+  const hasLocation = !!entry?.locationDisplay;
+  const hasMedia = entry?.media && entry.media.length > 0;
 
   return (
     <Pressable
@@ -69,17 +92,40 @@ function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCard
         style={showBorder ? { borderTopWidth: 1, borderTopColor: colors.borderSubtle } : {}}
       >
         <View className="flex-row items-start">
-          <Text 
-            style={{ 
-              fontFamily: 'Outfit-Medium', 
-              fontSize: fontSize.sm, 
-              marginRight: moderateScale(12), 
-              marginTop: moderateScale(2),
-              color: colors.textSecondary 
-            }}
-          >
-            {formattedTime}
-          </Text>
+          {/* Time + Weather Column */}
+          <View className="items-start" style={{ marginRight: moderateScale(12), minWidth: moderateScale(40) }}>
+            <Text
+              style={{
+                fontFamily: 'Outfit-Medium',
+                fontSize: fontSize.sm,
+                color: colors.textSecondary,
+                lineHeight: lineHeight
+              }}
+            >
+              {formattedTime}
+            </Text>
+            {hasWeather && (
+              <View className="mt-0.5">
+                <Ionicons
+                  name={getWeatherIconFromCondition(entry.weather) as any}
+                  size={moderateScale(12)}
+                  color={colors.pills.weather.icon}
+                />
+                <Text
+                  style={{
+                    fontFamily: 'Outfit-Medium',
+                    fontSize: fontSize.sm - 2,
+                    color: colors.pills.weather.text,
+                    marginTop: moderateScale(1)
+                  }}
+                >
+                  {extractTemperature(entry.weather)}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          {/* Content Column */}
           <View className="flex-1">
             <Text 
               numberOfLines={maxLines}
@@ -94,9 +140,9 @@ function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCard
               {renderTags(plainTextPreview, colors, fontSize)}
             </Text>
 
-            {entry.tags && (
+            {hasTags && (
               <View className="flex-row flex-wrap mt-1.5">
-                {entry.tags.split(',').map((tag, index) => (
+                {entry?.tags?.split(',').map((tag, index) => (
                   <Pressable
                     key={index}
                     onPress={() => onTagPress?.(tag.trim())}
@@ -118,30 +164,36 @@ function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCard
               </View>
             )}
 
-            {(entry.locationDisplay || entry.weather) && (
-              <View className="flex-row items-center mt-2">
-                {entry.locationDisplay && (
-                  <View className="flex-row items-center mr-4">
-                    <Ionicons name="location-outline" size={moderateScale(11)} color={colors.pills.location.icon} />
-                    <Text style={{ fontFamily: 'Outfit-Regular', fontSize: fontSize.sm - 2, marginLeft: moderateScale(4), color: colors.textSecondary }}>
-                      {entry.locationDisplay}
-                    </Text>
-                  </View>
-                )}
-                {entry.weather && (
-                  <View className="flex-row items-center">
-                    <Ionicons name="sunny-outline" size={moderateScale(11)} color={colors.pills.weather.icon} />
-                    <Text style={{ fontFamily: 'Outfit-Regular', fontSize: fontSize.sm - 2, marginLeft: moderateScale(4), color: colors.textSecondary }}>
-                      {entry.weather}
-                    </Text>
-                  </View>
-                )}
-              </View>
+            {hasLocation && (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                className="mt-1.5"
+                contentContainerStyle={{ alignItems: 'center' }}
+              >
+                <View className="flex-row items-center">
+                  <Ionicons
+                    name="location-outline"
+                    size={moderateScale(11)}
+                    color={colors.pills.location.icon}
+                  />
+                  <Text
+                    style={{
+                      fontFamily: 'Outfit-Regular',
+                      fontSize: fontSize.sm - 2,
+                      marginLeft: moderateScale(4),
+                      color: colors.textSecondary
+                    }}
+                  >
+                    {entry.locationDisplay}
+                  </Text>
+                </View>
+              </ScrollView>
             )}
 
-            {entry.media && entry.media.length > 0 && (
-              <View className="flex-row mt-2">
-                {entry.media.slice(0, 3).map((m, idx) => (
+            {hasMedia && (
+              <View className="flex-row mt-1.5">
+                {entry?.media?.slice(0, 3).map((m, idx) => (
                   <Image 
                     key={m.id} 
                     source={{ uri: m.path }} 
@@ -155,7 +207,7 @@ function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCard
                     transition={200}
                   />
                 ))}
-                {entry.media.length > 3 && (
+                {(entry?.media?.length || 0) > 3 && (
                   <View 
                     className="rounded-lg items-center justify-center" 
                     style={{ 
@@ -165,7 +217,7 @@ function EntryCardComponent({ entry, showBorder = false, onTagPress }: EntryCard
                     }}
                   >
                     <Text style={{ fontFamily: 'Outfit-Regular', fontSize: fontSize.sm - 2, color: colors.textTertiary }}>
-                      +{entry.media.length - 3}
+                      +{((entry?.media?.length) || 0) - 3}
                     </Text>
                   </View>
                 )}
