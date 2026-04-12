@@ -13,6 +13,7 @@ import { addMediaToEntry } from '../../database/media';
 import { Entry } from '../../types/Entry';
 import Pill from '../../components/Pill';
 import { fetchWeather, getWeatherIconName } from '../../services/WeatherService';
+import { fetchLocationOnWeb } from '../../services/WebGeolocation';
 import { getSetting } from '../../storage/settings';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useResponsive } from '../../hooks/useResponsive';
@@ -104,7 +105,12 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
   const navigation = useNavigation<any>();
 
   useEffect(() => {
-    // Check permission silently on mount
+    // Check permission silently on mount (mobile only, web requires user tap)
+    if (IS_WEB) {
+      setHasLocationPermission(null);
+      return;
+    }
+    
     (async () => {
       const { status } = await Location.getForegroundPermissionsAsync();
       setHasLocationPermission(status === 'granted');
@@ -122,11 +128,28 @@ export default function QuickEntryBar({ onEntrySaved, entryDate: propEntryDate, 
 
   const fetchLocation = async (onlyIfGranted = false) => {
     if (IS_WEB) {
-      setLatitude(37.7749);
-      setLongitude(-122.4194);
-      setLocationFull('San Francisco, CA, USA');
-      setLocationDisplay('San Francisco, CA, USA');
-      setHasLocationPermission(true);
+      setLocationLoading(true);
+      setLocationError(false);
+      
+      try {
+        const result = await fetchLocationOnWeb();
+        if (result) {
+          setLatitude(result.location.latitude);
+          setLongitude(result.location.longitude);
+          setLocationFull(result.address.full);
+          setLocationDisplay(result.address.display);
+          setHasLocationPermission(true);
+        } else {
+          setLocationError(true);
+          setHasLocationPermission(false);
+        }
+      } catch (error) {
+        console.error('Web location error:', error);
+        setLocationError(true);
+        setHasLocationPermission(false);
+      } finally {
+        setLocationLoading(false);
+      }
       return;
     }
 

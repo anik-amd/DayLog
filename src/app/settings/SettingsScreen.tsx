@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Platform, Share, Alert, Modal, Animated, Pressable } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Platform, Alert, Modal, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useColorScheme } from "nativewind";
 import { getAppStats } from '../../database/entries';
-import { useBackupEngine } from '../../services/BackupEngine';
+import { getGoogleAuthRequest, shareBackupFile, getBackupInfo, BackupInfo } from '../../services/BackupService';
+import { restoreFromString } from '../../services/RestoreService';
 import { getTemperatureUnit, setTemperatureUnit, getTheme, setTheme, getColorScheme } from '../../storage/settings';
 import { colorSchemes } from '../../themes/colors';
 import { useColorSchemeContext } from '../../contexts/ColorSchemeContext';
@@ -30,14 +31,17 @@ export default function SettingsScreen() {
   const [syncing, setSyncing] = useState(false);
   const [appVersion, setAppVersion] = useState<string>('');
 
-  const { promptAsync, response, uploadBackup } = useBackupEngine();
+  const [request, response, promptAsync] = getGoogleAuthRequest();
+  const [backupInfo, setBackupInfo] = useState<BackupInfo | null>(null);
+  const [showRestoreModal, setShowRestoreModal] = useState(false);
 
   useEffect(() => {
     if (response?.type === 'success') {
       const { authentication } = response;
       if (authentication?.accessToken) {
         setSyncing(true);
-        uploadBackup(authentication.accessToken).then(success => {
+        const { uploadBackupToDrive } = require('../../services/BackupService');
+        uploadBackupToDrive(authentication.accessToken).then((success: boolean) => {
             if (success) {
                 setLastSync(new Date().toLocaleString());
                 Alert.alert("Backup Successful", "Your DayLog has been safely uploaded to Google Drive.");
@@ -49,6 +53,15 @@ export default function SettingsScreen() {
       }
     }
   }, [response]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const info = await getBackupInfo();
+        setBackupInfo(info);
+      } catch (e) {}
+    })();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -85,6 +98,34 @@ export default function SettingsScreen() {
     promptAsync();
   };
 
+  const handleExportBackup = async () => {
+    try {
+      const success = await shareBackupFile();
+      if (success) {
+        Alert.alert("Backup Created", "Your backup file has been downloaded.");
+      }
+    } catch (error) {
+      Alert.alert("Backup Failed", "Could not create backup file.");
+    }
+  };
+
+  const handleRestore = async () => {
+    Alert.alert(
+      "Restore Backup",
+      "This will replace all current entries with the backup. This cannot be undone. Continue?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Restore",
+          style: "destructive",
+          onPress: () => {
+            setShowRestoreModal(true);
+          },
+        },
+      ]
+    );
+  };
+
   const fetchStats = async () => {
     const data = await getAppStats();
     setStats(data);
@@ -98,12 +139,20 @@ export default function SettingsScreen() {
 
   const onShare = async () => {
     try {
-      await Share.share({
-        message: 'DayLog - A minimal, offline-first personal journal. Download it now!',
-      });
+      const { Platform } = require('react-native');
+      const { shareBackupFile } = require('../../services/BackupService');
+      await shareBackupFile();
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const formatBytes = (bytes: number): string => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
 
   const Section = ({ title, children }: { title: string, children: React.ReactNode }) => (
@@ -179,19 +228,25 @@ export default function SettingsScreen() {
             <SettingItem icon="text" label="Editor Font" value="System Default" onPress={() => {}} last />
         </Section>
 
-         <Section title="Cloud Sync">
+         <Section title="Backup & Restore">
             <SettingItem 
-                icon="cloud-done-outline" 
-                label={syncing ? "Backing up..." : "Google Drive Backup"} 
-                value={response?.type === 'success' ? "Connected" : "Connect"} 
+                icon="cloud-upload-outline" 
+                label={syncing ? "Backing up..." : "Backup to Google Drive"} 
+                value={backupInfo ? `${backupInfo.entryCount} entries` : "Export"} 
                 onPress={handleBackup} 
                 color={syncing ? colors.accent : colors.textSecondary}
             />
             <SettingItem 
-                icon="refresh-outline" 
-                label="Last Synchronized" 
-                value={lastSync} 
-                onPress={() => {}} 
+                icon="download-outline" 
+                label="Download Backup" 
+                value={backupInfo ? formatBytes(backupInfo.size) : ""} 
+                onPress={handleExportBackup} 
+            />
+            <SettingItem 
+                icon="cloud-download-outline" 
+                label="Restore from Backup" 
+                value="" 
+                onPress={handleRestore} 
                 last 
             />
         </Section>
