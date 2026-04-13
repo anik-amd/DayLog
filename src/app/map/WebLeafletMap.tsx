@@ -19,9 +19,13 @@ interface WebLeafletMapProps {
   colors: ColorSchemeColors;
   fontSize: any;
   spacing: any;
-  onMarkerPress?: (location: LocationGroup) => void;
+  isDarkMode?: boolean;
+  onMarkerPress: (location: LocationGroup, position?: { x: number; y: number }) => void;
   searchRegion?: Region | null;
 }
+
+const LIGHT_TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+const DARK_TILE_URL = 'https://tiles.stadiamaps.com/styles/alidade_smooth_dark/{z}/{x}/{y}.png';
 
 declare global {
   interface Window {
@@ -30,11 +34,16 @@ declare global {
   }
 }
 
-export default function WebLeafletMap({ locations, colors, fontSize, spacing, onMarkerPress, searchRegion }: WebLeafletMapProps) {
+export default function WebLeafletMap({ locations, colors, fontSize, spacing, isDarkMode = false, onMarkerPress, searchRegion }: WebLeafletMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
+  const onMarkerPressRef = useRef(onMarkerPress);
   const [isMapReady, setIsMapReady] = useState(false);
+
+  useEffect(() => {
+    onMarkerPressRef.current = onMarkerPress;
+  }, [onMarkerPress]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -59,18 +68,19 @@ export default function WebLeafletMap({ locations, colors, fontSize, spacing, on
       document.body.appendChild(script);
     };
 
-    const initMap = () => {
-      if (!mapContainerRef.current || !window.L || mapRef.current) return;
+const initMap = () => {
+    if (!mapContainerRef.current || !window.L || mapRef.current) return;
 
-      const map = window.L.map(mapContainerRef.current, {
-        zoomControl: true,
-        attributionControl: true,
-      });
+    const map = window.L.map(mapContainerRef.current, {
+      zoomControl: false,
+      attributionControl: true,
+    });
 
-      window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap',
-      }).addTo(map);
+    const tileUrl = isDarkMode ? DARK_TILE_URL : LIGHT_TILE_URL;
+    window.L.tileLayer(tileUrl, {
+      maxZoom: 19,
+      attribution: isDarkMode ? '&copy; CartoDB' : '&copy; OpenStreetMap',
+    }).addTo(map);
 
       mapRef.current = map;
       setIsMapReady(true);
@@ -122,9 +132,21 @@ export default function WebLeafletMap({ locations, colors, fontSize, spacing, on
       const marker = window.L.marker([location.latitude, location.longitude], { icon })
         .addTo(mapRef.current);
 
-      if (onMarkerPress) {
-        marker.on('click', () => onMarkerPress(location));
-      }
+      marker.on('click', () => {
+        if (onMarkerPressRef.current) {
+          const markerEl = marker.getElement();
+          if (markerEl) {
+            const rect = markerEl.getBoundingClientRect();
+            const position = {
+              x: rect.left + rect.width / 2,
+              y: rect.top,
+            };
+            onMarkerPressRef.current(location, position);
+          } else {
+            onMarkerPressRef.current(location);
+          }
+        }
+      });
 
       markersRef.current.push(marker);
     });
@@ -133,39 +155,75 @@ if (locations.length > 0) {
     const bounds = window.L.latLngBounds(locations.map(loc => [loc.latitude, loc.longitude]));
     mapRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
   }
-}, [locations, isMapReady, colors, onMarkerPress]);
+}, [locations, isMapReady, colors]);
 
-  useEffect(() => {
-    if (!isMapReady || !mapRef.current || !window.L || !searchRegion) return;
-    mapRef.current.flyTo([searchRegion.latitude, searchRegion.longitude], 13, {
-      duration: 0.5,
-    });
-  }, [searchRegion, isMapReady]);
+useEffect(() => {
+  if (!isMapReady || !mapRef.current || !window.L || !searchRegion) return;
+  mapRef.current.flyTo([searchRegion.latitude, searchRegion.longitude], 13, {
+    duration: 0.5,
+  });
+}, [searchRegion, isMapReady]);
 
-  const fitToMarkers = useCallback(() => {
-    if (!mapRef.current || !window.L || locations.length === 0) return;
-    const bounds = window.L.latLngBounds(locations.map(loc => [loc.latitude, loc.longitude]));
-    mapRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
-  }, [locations]);
+useEffect(() => {
+  if (!isMapReady || !mapRef.current || !window.L) return;
+  mapRef.current.eachLayer((layer: any) => {
+    if (layer instanceof window.L.TileLayer) {
+      mapRef.current.removeLayer(layer);
+    }
+  });
+  const tileUrl = isDarkMode ? DARK_TILE_URL : LIGHT_TILE_URL;
+  window.L.tileLayer(tileUrl, {
+    maxZoom: 19,
+    attribution: isDarkMode ? '&copy; CartoDB' : '&copy; OpenStreetMap',
+  }).addTo(mapRef.current);
+}, [isDarkMode, isMapReady]);
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.mapWrapper}>
-        <div
-          ref={mapContainerRef}
-          id="leaflet-map"
-          style={{ width: '100%', height: '100%' }}
-        />
-      </View>
-      <View style={[styles.controls, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <TouchableOpacity
-          onPress={fitToMarkers}
-          style={[styles.fitButton, { backgroundColor: colors.surfaceElevated }]}
-        >
-          <Ionicons name="scan-outline" size={moderateScale(20)} color={colors.textSecondary} />
-        </TouchableOpacity>
-      </View>
-    </View>
+const fitToMarkers = useCallback(() => {
+  if (!mapRef.current || !window.L || locations.length === 0) return;
+  const bounds = window.L.latLngBounds(locations.map(loc => [loc.latitude, loc.longitude]));
+  mapRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+}, [locations]);
+
+const handleZoomIn = useCallback(() => {
+  if (!mapRef.current || !window.L) return;
+  mapRef.current.zoomIn();
+}, []);
+
+const handleZoomOut = useCallback(() => {
+  if (!mapRef.current || !window.L) return;
+  mapRef.current.zoomOut();
+}, []);
+
+return (
+<View style={styles.container}>
+  <View style={styles.mapWrapper}>
+    <div
+      ref={mapContainerRef}
+      id="leaflet-map"
+      style={{ width: '100%', height: '100%' }}
+    />
+  </View>
+  <View style={[styles.controls, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+    <TouchableOpacity
+      onPress={handleZoomIn}
+      style={[styles.zoomButton, { backgroundColor: colors.surfaceElevated }]}
+    >
+      <Ionicons name="add" size={moderateScale(22)} color={colors.textSecondary} />
+    </TouchableOpacity>
+    <TouchableOpacity
+      onPress={handleZoomOut}
+      style={[styles.zoomButton, { backgroundColor: colors.surfaceElevated }]}
+    >
+      <Ionicons name="remove" size={moderateScale(22)} color={colors.textSecondary} />
+    </TouchableOpacity>
+    <TouchableOpacity
+      onPress={fitToMarkers}
+      style={[styles.fitButton, { backgroundColor: colors.surfaceElevated }]}
+    >
+      <Ionicons name="scan-outline" size={moderateScale(20)} color={colors.textSecondary} />
+    </TouchableOpacity>
+  </View>
+</View>
   );
 }
 
@@ -179,10 +237,20 @@ const styles = StyleSheet.create({
   },
   controls: {
     position: 'absolute',
-    top: moderateScale(12),
+    bottom: moderateScale(100),
     right: moderateScale(12),
+    zIndex: 1000,
     borderRadius: moderateScale(12),
     borderWidth: 1,
+    flexDirection: 'column',
+    gap: moderateScale(8),
+  },
+  zoomButton: {
+    width: moderateScale(44),
+    height: moderateScale(44),
+    borderRadius: moderateScale(12),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   fitButton: {
     width: moderateScale(44),

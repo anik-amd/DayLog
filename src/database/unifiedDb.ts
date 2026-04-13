@@ -328,7 +328,7 @@ export const getAppStats = async () => {
 
 export const getEntriesGroupedByLocation = async (precision: number = 3) => {
   const entries = await getAllEntries();
-  const groups: Record<string, { latitude: number; longitude: number; entryCount: number; tags: { name: string; count: number }[] }> = {};
+  const groups: Record<string, { latitude: number; longitude: number; entryCount: number; tags: { name: string; count: number }[]; locationFull?: string }> = {};
   
   for (const entry of entries) {
     if (entry.latitude == null || entry.longitude == null) continue;
@@ -337,7 +337,7 @@ export const getEntriesGroupedByLocation = async (precision: number = 3) => {
     const key = `${latKey},${lngKey}`;
     
     if (!groups[key]) {
-      groups[key] = { latitude: latKey, longitude: lngKey, entryCount: 0, tags: [] };
+      groups[key] = { latitude: latKey, longitude: lngKey, entryCount: 0, tags: [], locationFull: entry.locationFull };
     }
     groups[key].entryCount++;
     
@@ -419,7 +419,29 @@ export interface LocationGroup {
   longitude: number;
   entryCount: number;
   tags: { name: string; count: number }[];
+  locationFull?: string;
 }
+
+export const getEntriesAtLocation = async (
+  latitude: number,
+  longitude: number,
+  precision: number = 3
+): Promise<Entry[]> => {
+  const entries = await getAllEntries();
+  const roundedLat = Number(latitude.toFixed(precision));
+  const roundedLon = Number(longitude.toFixed(precision));
+  
+  return entries
+    .filter(e => {
+      if (!e.latitude || !e.longitude) return false;
+      return (
+        Number(e.latitude.toFixed(precision)) === roundedLat &&
+        Number(e.longitude.toFixed(precision)) === roundedLon
+      );
+    })
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .slice(0, 50);
+};
 
 export type SortOption = 'usage' | 'alphabetical' | 'date';
 export type SortDirection = 'asc' | 'desc';

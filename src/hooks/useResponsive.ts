@@ -35,6 +35,12 @@ export function useResponsive(): ResponsiveValues {
   const spacing = getSpacing();
   const fontSizes = getFontSize();
 
+  const isSmallPhone = width < 375;
+  const isLargePhone = width >= 414;
+  const isTablet = width >= 768;
+  const isLandscape = width > height;
+  const isPortrait = height >= width;
+
   return {
     width,
     height,

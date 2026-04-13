@@ -1,1 +1,1 @@
-export { initDb, createEntry, updateEntry, deleteEntry, getEntry, getAllEntries, getEntriesByTags, getAppStats, getEntriesGroupedByLocation, exportAllData, importAllData, clearAllData } from './unifiedDb';
+export { initDb, createEntry, updateEntry, deleteEntry, getEntry, getAllEntries, getEntriesByTags, getAppStats, getEntriesGroupedByLocation, getEntriesAtLocation, exportAllData, importAllData, clearAllData } from './unifiedDb';

@@ -3,11 +3,15 @@ import { View, Text, StyleSheet, TouchableOpacity, Platform, ActivityIndicator, 
 import { useColorScheme } from "nativewind";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useResponsive } from '../../hooks/useResponsive';
-import { getEntriesGroupedByLocation, LocationGroup } from '../../database/entries';
+import { getEntriesGroupedByLocation, getEntriesAtLocation, LocationGroup } from '../../database/entries';
+import { Entry } from '../../types/Entry';
 import { moderateScale } from '../../utils/responsive';
+import EntrySheet from '../../components/EntrySheet';
 import WebLeafletMap from './WebLeafletMap';
+import { getBrowserLocation } from '../../services/WebGeolocation';
 
 const isWeb = Platform.OS === 'web';
 
@@ -32,6 +36,9 @@ const DEFAULT_REGION = {
   latitudeDelta: 0.5,
   longitudeDelta: 0.5,
 };
+
+const LIGHT_TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+const DARK_TILE_URL = 'https://tiles.stadiamaps.com/styles/alidade_smooth_dark/{z}/{x}/{y}.png';
 
 interface Region {
   latitude: number;
@@ -114,42 +121,90 @@ function SearchBar({
   colors, 
   fontSize, 
   spacing, 
-  onSearch 
+  onSearch,
+  userLocation 
 }: { 
   colors: ReturnType<typeof useThemeColors>;
   fontSize: ReturnType<typeof useResponsive>['fontSize'];
   spacing: ReturnType<typeof useResponsive>['spacing'];
   onSearch: (region: Region) => void;
+  userLocation?: { lat: number; lon: number } | null;
 }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [searching, setSearching] = useState(false);
+  const [error, setError] = useState(false);
+  
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastQueryRef = useRef<string>('');
 
   const searchLocation = useCallback(async (text: string) => {
     setQuery(text);
+    
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+    
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
     if (text.length < 3) {
       setResults([]);
       setShowResults(false);
+      setError(false);
       return;
     }
 
-    setSearching(true);
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(text)}&format=json&limit=5`,
-        { headers: { 'User-Agent': 'DayLog/1.0' } }
-      );
-      const data: SearchResult[] = await response.json();
-      setResults(data);
-      setShowResults(data.length > 0);
-    } catch (error) {
-      console.error('Search failed:', error);
-      setResults([]);
-    } finally {
-      setSearching(false);
-    }
-  }, []);
+    debounceRef.current = setTimeout(async () => {
+      if (text !== lastQueryRef.current) {
+        lastQueryRef.current = text;
+      } else {
+        return;
+      }
+      
+      setError(false);
+      setSearching(true);
+      
+      abortControllerRef.current = new AbortController();
+      
+      try {
+        let url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(text)}&format=json&limit=8&accept-language=en`;
+        
+        if (userLocation) {
+          const delta = 0.18;
+          const viewbox = `${userLocation.lon - delta},${userLocation.lat - delta},${userLocation.lon + delta},${userLocation.lat + delta}`;
+          url += `&viewbox=${viewbox}&bounded=1`;
+        }
+
+        const response = await fetch(url, { 
+          headers: { 'User-Agent': 'DayLog/1.0' },
+          signal: abortControllerRef.current.signal
+        });
+        
+        if (response.status === 429) {
+          setError(true);
+          return;
+        }
+        
+        const data: SearchResult[] = await response.json();
+        
+        if (text === lastQueryRef.current) {
+          setResults(data);
+          setShowResults(data.length > 0);
+        }
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+          console.error('Search failed:', err);
+          setError(true);
+        }
+      } finally {
+        setSearching(false);
+      }
+    }, 300);
+  }, [userLocation]);
 
   const handleSelect = useCallback((result: SearchResult) => {
     const region: Region = {
@@ -190,21 +245,31 @@ function SearchBar({
       </View>
       {showResults && (
         <View style={[styles.searchResults, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          {results.map((result) => (
-            <TouchableOpacity
-              key={result.place_id}
-              style={[styles.searchResultItem, { borderBottomColor: colors.border }]}
-              onPress={() => handleSelect(result)}
-            >
-              <Ionicons name="location-outline" size={moderateScale(18)} color={colors.textSecondary} />
-              <Text 
-                style={{ color: colors.text, fontSize: fontSize.sm, flex: 1, marginLeft: spacing.sm }}
-                numberOfLines={2}
+          <FlatList
+            data={results}
+            keyExtractor={(item) => item.place_id.toString()}
+            renderItem={({ item, index }) => (
+              <TouchableOpacity
+                key={item.place_id}
+                style={[
+                  styles.searchResultItem, 
+                  { borderBottomColor: colors.border },
+                  index === results.length - 1 && { borderBottomWidth: 0 }
+                ]}
+                onPress={() => handleSelect(item)}
               >
-                {result.display_name}
-              </Text>
-            </TouchableOpacity>
-          ))}
+                <Ionicons name="location-outline" size={moderateScale(18)} color={colors.textSecondary} />
+                <Text 
+                  style={{ color: colors.text, fontSize: fontSize.sm, flex: 1, marginLeft: spacing.sm }}
+                  numberOfLines={2}
+                >
+                  {item.display_name}
+                </Text>
+              </TouchableOpacity>
+            )}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={true}
+          />
         </View>
       )}
     </View>
@@ -219,6 +284,7 @@ function NativeMapView({
   isTablet,
   isLandscape,
   fontScale,
+  isDarkMode,
   onMarkerPress,
   searchRegion,
   onSearchComplete
@@ -230,6 +296,7 @@ function NativeMapView({
   isTablet: boolean;
   isLandscape: boolean;
   fontScale: number;
+  isDarkMode: boolean;
   onMarkerPress?: (location: LocationGroup) => void;
   searchRegion?: Region | null;
   onSearchComplete?: () => void;
@@ -264,22 +331,42 @@ function NativeMapView({
     setShowTags(zoomedIn);
   }, []);
 
-  const fitToMarkers = useCallback(() => {
-    if (locations.length === 0 || !mapRef.current) return;
-    const coordinates = locations.map(loc => ({
-      latitude: loc.latitude,
-      longitude: loc.longitude,
-    }));
-    mapRef.current.fitToCoordinates(coordinates, {
-      edgePadding: {
-        top: moderateScale(80),
-        right: moderateScale(40),
-        bottom: moderateScale(100),
-        left: moderateScale(40),
-      },
-      animated: true,
-    });
-  }, [locations]);
+const fitToMarkers = useCallback(() => {
+  if (locations.length === 0 || !mapRef.current) return;
+  const coordinates = locations.map(loc => ({
+    latitude: loc.latitude,
+    longitude: loc.longitude,
+  }));
+  mapRef.current.fitToCoordinates(coordinates, {
+    edgePadding: {
+      top: moderateScale(80),
+      right: moderateScale(40),
+      bottom: moderateScale(100),
+      left: moderateScale(40),
+    },
+    animated: true,
+  });
+}, [locations]);
+
+const handleZoomIn = useCallback(() => {
+  if (!mapRef.current) return;
+  mapRef.current.animateToRegion({
+    latitude: region.latitude,
+    longitude: region.longitude,
+    latitudeDelta: region.latitudeDelta / 2,
+    longitudeDelta: region.longitudeDelta / 2,
+  }, 300);
+}, [region]);
+
+const handleZoomOut = useCallback(() => {
+  if (!mapRef.current) return;
+  mapRef.current.animateToRegion({
+    latitude: region.latitude,
+    longitude: region.longitude,
+    latitudeDelta: region.latitudeDelta * 2,
+    longitudeDelta: region.longitudeDelta * 2,
+  }, 300);
+}, [region]);
 
   const getMarkerSize = useCallback((entryCount: number) => {
     const baseSize = moderateScale(28);
@@ -304,21 +391,21 @@ function NativeMapView({
     <>
       <View style={styles.mapContainer}>
         {MapView && (
-          <MapView
-            ref={mapRef}
-            style={styles.map}
-            region={region}
-            onRegionChangeComplete={handleRegionChange}
-            mapType="none"
-            showsUserLocation
-            showsMyLocationButton={false}
-            showsCompass={false}
-          >
-            <UrlTile
-              urlTemplate="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-              maximumZ={19}
-              flipY={false}
-            />
+<MapView
+          ref={mapRef}
+          style={styles.map}
+          region={region}
+          onRegionChangeComplete={handleRegionChange}
+          mapType="none"
+          showsUserLocation
+          showsMyLocationButton={false}
+          showsCompass={false}
+        >
+          <UrlTile
+            urlTemplate={isDarkMode ? DARK_TILE_URL : LIGHT_TILE_URL}
+            maximumZ={19}
+            flipY={false}
+          />
             {locations.map((location, index) => {
               const markerSize = getMarkerSize(location.entryCount);
               const maxTagCount = location.tags.length > 0 ? location.tags[0].count : 0;
@@ -416,19 +503,38 @@ function NativeMapView({
             </Text>
           </View>
         )}
+        <View style={[styles.nativeControls, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <TouchableOpacity onPress={handleZoomIn} style={[styles.nativeZoomButton, { backgroundColor: colors.surfaceElevated }]}>
+            <Ionicons name="add" size={moderateScale(22)} color={colors.textSecondary} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleZoomOut} style={[styles.nativeZoomButton, { backgroundColor: colors.surfaceElevated }]}>
+            <Ionicons name="remove" size={moderateScale(22)} color={colors.textSecondary} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={fitToMarkers} style={[styles.nativeZoomButton, { backgroundColor: colors.surfaceElevated }]}>
+            <Ionicons name="scan-outline" size={moderateScale(20)} color={colors.textSecondary} />
+          </TouchableOpacity>
+        </View>
       </View>
     </>
   );
 }
 
-export default function MapScreen() {
+export default function MapScreen({ navigation }: any) {
   const { colorScheme } = useColorScheme();
   const colors = useThemeColors();
   const { fontSize, spacing, isTablet, isLandscape, fontScale } = useResponsive();
+  const isDarkMode = colorScheme === 'dark';
 
   const [locations, setLocations] = useState<LocationGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchRegion, setSearchRegion] = useState<Region | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
+
+  const [selectedLocation, setSelectedLocation] = useState<LocationGroup | null>(null);
+  const [sheetEntries, setSheetEntries] = useState<Entry[]>([]);
+  const [sheetLoading, setSheetLoading] = useState(false);
+  const [sheetVisible, setSheetVisible] = useState(false);
+  const [markerPosition, setMarkerPosition] = useState<{ x: number; y: number } | null>(null);
 
   const fetchLocations = useCallback(async () => {
     try {
@@ -441,13 +547,65 @@ export default function MapScreen() {
     }
   }, []);
 
+  const fetchUserLocation = useCallback(async () => {
+    try {
+      if (isWeb) {
+        const loc = await getBrowserLocation();
+        setUserLocation({ lat: loc.latitude, lon: loc.longitude });
+      } else {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status === 'granted') {
+          const loc = await Location.getCurrentPositionAsync({});
+          setUserLocation({ 
+            lat: loc.coords.latitude, 
+            lon: loc.coords.longitude 
+          });
+        }
+      }
+    } catch (error) {
+      console.warn('Could not get user location:', error);
+    }
+  }, []);
+
   const handleSearch = useCallback((region: Region) => {
     setSearchRegion({ ...region });
   }, []);
 
+  const handleMarkerPress = useCallback(async (location: LocationGroup, position?: { x: number; y: number }) => {
+    setSelectedLocation(location);
+    setMarkerPosition(position || null);
+    setSheetVisible(true);
+    setSheetLoading(true);
+    
+    try {
+      const entries = await getEntriesAtLocation(location.latitude, location.longitude, 3);
+      setSheetEntries(entries);
+    } catch (error) {
+      console.error('Failed to fetch entries:', error);
+      setSheetEntries([]);
+    } finally {
+      setSheetLoading(false);
+    }
+  }, []);
+
+  const handleEntryPress = useCallback((entry: Entry) => {
+    setSheetVisible(false);
+    setTimeout(() => {
+      navigation.getParent()?.navigate('ReadEntry', { entryId: entry.id });
+    }, 300);
+  }, [navigation]);
+
+  const handleSheetClose = useCallback(() => {
+    setSheetVisible(false);
+    setSelectedLocation(null);
+    setMarkerPosition(null);
+    setSheetEntries([]);
+  }, []);
+
   useEffect(() => {
     fetchLocations();
-  }, [fetchLocations]);
+    fetchUserLocation();
+  }, [fetchLocations, fetchUserLocation]);
 
   if (loading) {
     return (
@@ -461,7 +619,7 @@ export default function MapScreen() {
   if (locations.length === 0) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <SearchBar colors={colors} fontSize={fontSize} spacing={spacing} onSearch={handleSearch} />
+        <SearchBar colors={colors} fontSize={fontSize} spacing={spacing} onSearch={handleSearch} userLocation={userLocation} />
         <EmptyState colors={colors} spacing={spacing} fontSize={fontSize} />
         <StatsBar locations={locations} colors={colors} fontSize={fontSize} spacing={spacing} />
       </View>
@@ -471,24 +629,37 @@ export default function MapScreen() {
   if (isWeb) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <SearchBar colors={colors} fontSize={fontSize} spacing={spacing} onSearch={handleSearch} />
+        <SearchBar colors={colors} fontSize={fontSize} spacing={spacing} onSearch={handleSearch} userLocation={userLocation} />
         <View style={styles.mapContainer}>
           <WebLeafletMap
             locations={locations}
             colors={colors}
             fontSize={fontSize}
             spacing={spacing}
+            isDarkMode={isDarkMode}
             searchRegion={searchRegion}
+            onMarkerPress={handleMarkerPress}
           />
         </View>
         <StatsBar locations={locations} colors={colors} fontSize={fontSize} spacing={spacing} />
+        <EntrySheet
+          visible={sheetVisible}
+          location={selectedLocation}
+          entries={sheetEntries}
+          loading={sheetLoading}
+          colors={colors}
+          fontSize={fontSize}
+          spacing={spacing}
+          onClose={handleSheetClose}
+          onEntryPress={handleEntryPress}
+        />
       </View>
     );
   }
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <SearchBar colors={colors} fontSize={fontSize} spacing={spacing} onSearch={handleSearch} />
+      <SearchBar colors={colors} fontSize={fontSize} spacing={spacing} onSearch={handleSearch} userLocation={userLocation} />
       <NativeMapView
         locations={locations}
         colors={colors}
@@ -497,10 +668,24 @@ export default function MapScreen() {
         isTablet={isTablet}
         isLandscape={isLandscape}
         fontScale={fontScale}
+        isDarkMode={isDarkMode}
         searchRegion={searchRegion}
         onSearchComplete={() => setSearchRegion(null)}
+        onMarkerPress={handleMarkerPress}
       />
       <StatsBar locations={locations} colors={colors} fontSize={fontSize} spacing={spacing} />
+      <EntrySheet
+        visible={sheetVisible}
+        location={selectedLocation}
+        entries={sheetEntries}
+        loading={sheetLoading}
+        colors={colors}
+        fontSize={fontSize}
+        spacing={spacing}
+        markerPosition={markerPosition}
+        onClose={handleSheetClose}
+        onEntryPress={handleEntryPress}
+      />
     </View>
   );
 }
@@ -567,6 +752,29 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 3,
+  },
+  nativeControls: {
+    position: 'absolute',
+    bottom: moderateScale(100),
+    right: moderateScale(12),
+    zIndex: 1000,
+    borderRadius: moderateScale(12),
+    borderWidth: 1,
+    flexDirection: 'column',
+    gap: moderateScale(8),
+    padding: moderateScale(8),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  nativeZoomButton: {
+    width: moderateScale(44),
+    height: moderateScale(44),
+    borderRadius: moderateScale(12),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   statsBar: {
     flexDirection: 'row',
