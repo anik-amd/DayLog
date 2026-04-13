@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, ActivityIndicator, TextInput, FlatList, Keyboard } from 'react-native';
 import { useColorScheme } from "nativewind";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -38,6 +38,13 @@ interface Region {
   longitude: number;
   latitudeDelta: number;
   longitudeDelta: number;
+}
+
+interface SearchResult {
+  place_id: number;
+  display_name: string;
+  lat: string;
+  lon: string;
 }
 
 function LoadingState({ colors, spacing, fontSize }: {
@@ -103,16 +110,119 @@ function StatsBar({ locations, colors, fontSize, spacing }: {
   );
 }
 
-function NativeMapView({ 
-  locations, 
+function SearchBar({ 
   colors, 
   fontSize, 
   spacing, 
-  isTablet, 
+  onSearch 
+}: { 
+  colors: ReturnType<typeof useThemeColors>;
+  fontSize: ReturnType<typeof useResponsive>['fontSize'];
+  spacing: ReturnType<typeof useResponsive>['spacing'];
+  onSearch: (region: Region) => void;
+}) {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [showResults, setShowResults] = useState(false);
+  const [searching, setSearching] = useState(false);
+
+  const searchLocation = useCallback(async (text: string) => {
+    setQuery(text);
+    if (text.length < 3) {
+      setResults([]);
+      setShowResults(false);
+      return;
+    }
+
+    setSearching(true);
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(text)}&format=json&limit=5`,
+        { headers: { 'User-Agent': 'DayLog/1.0' } }
+      );
+      const data: SearchResult[] = await response.json();
+      setResults(data);
+      setShowResults(data.length > 0);
+    } catch (error) {
+      console.error('Search failed:', error);
+      setResults([]);
+    } finally {
+      setSearching(false);
+    }
+  }, []);
+
+  const handleSelect = useCallback((result: SearchResult) => {
+    const region: Region = {
+      latitude: parseFloat(result.lat),
+      longitude: parseFloat(result.lon),
+      latitudeDelta: 0.05,
+      longitudeDelta: 0.05,
+    };
+    onSearch(region);
+    setQuery(result.display_name.split(',')[0]);
+    setShowResults(false);
+    Keyboard.dismiss();
+  }, [onSearch]);
+
+  const handleClear = useCallback(() => {
+    setQuery('');
+    setResults([]);
+    setShowResults(false);
+  }, []);
+
+  return (
+    <View style={styles.searchContainer}>
+      <View style={[styles.searchBar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <Ionicons name="search" size={moderateScale(20)} color={colors.textSecondary} />
+        <TextInput
+          style={[styles.searchInput, { color: colors.text, fontSize: fontSize.md }]}
+          placeholder="Search location..."
+          placeholderTextColor={colors.textTertiary}
+          value={query}
+          onChangeText={searchLocation}
+          onFocus={() => results.length > 0 && setShowResults(true)}
+        />
+        {query.length > 0 && (
+          <TouchableOpacity onPress={handleClear}>
+            <Ionicons name="close-circle" size={moderateScale(20)} color={colors.textSecondary} />
+          </TouchableOpacity>
+        )}
+      </View>
+      {showResults && (
+        <View style={[styles.searchResults, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          {results.map((result) => (
+            <TouchableOpacity
+              key={result.place_id}
+              style={[styles.searchResultItem, { borderBottomColor: colors.border }]}
+              onPress={() => handleSelect(result)}
+            >
+              <Ionicons name="location-outline" size={moderateScale(18)} color={colors.textSecondary} />
+              <Text 
+                style={{ color: colors.text, fontSize: fontSize.sm, flex: 1, marginLeft: spacing.sm }}
+                numberOfLines={2}
+              >
+                {result.display_name}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+    </View>
+  );
+}
+
+function NativeMapView({
+  locations,
+  colors,
+  fontSize,
+  spacing,
+  isTablet,
   isLandscape,
   fontScale,
-  onMarkerPress 
-}: { 
+  onMarkerPress,
+  searchRegion,
+  onSearchComplete
+}: {
   locations: LocationGroup[];
   colors: ReturnType<typeof useThemeColors>;
   fontSize: ReturnType<typeof useResponsive>['fontSize'];
@@ -121,6 +231,8 @@ function NativeMapView({
   isLandscape: boolean;
   fontScale: number;
   onMarkerPress?: (location: LocationGroup) => void;
+  searchRegion?: Region | null;
+  onSearchComplete?: () => void;
 }) {
   const mapRef = useRef<any>(null);
   const [region, setRegion] = useState<Region>(DEFAULT_REGION);
@@ -136,6 +248,15 @@ function NativeMapView({
       });
     }
   }, [locations]);
+
+  useEffect(() => {
+    if (searchRegion && mapRef.current) {
+      mapRef.current.animateToRegion(searchRegion, 500);
+      setTimeout(() => {
+        onSearchComplete?.();
+      }, 600);
+    }
+  }, [searchRegion, onSearchComplete]);
 
   const handleRegionChange = useCallback((newRegion: Region) => {
     setRegion(newRegion);
@@ -181,30 +302,6 @@ function NativeMapView({
 
   return (
     <>
-      <View style={[styles.header, { paddingHorizontal: isLandscape ? spacing.lg : spacing.md, paddingTop: spacing.sm }]}>
-        <Text style={{ fontFamily: 'Outfit-Black', fontSize: fontSize.xl, color: colors.text }}>
-          Map
-        </Text>
-        <View style={styles.headerButtons}>
-          <TouchableOpacity
-            onPress={fitToMarkers}
-            style={{
-              width: moderateScale(44),
-              height: moderateScale(44),
-              borderRadius: moderateScale(22),
-              backgroundColor: colors.surface,
-              borderWidth: 1,
-              borderColor: colors.border,
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginRight: spacing.sm,
-            }}
-          >
-            <Ionicons name="scan-outline" size={moderateScale(20)} color={colors.textSecondary} />
-          </TouchableOpacity>
-        </View>
-      </View>
-
       <View style={styles.mapContainer}>
         {MapView && (
           <MapView
@@ -331,6 +428,7 @@ export default function MapScreen() {
 
   const [locations, setLocations] = useState<LocationGroup[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchRegion, setSearchRegion] = useState<Region | null>(null);
 
   const fetchLocations = useCallback(async () => {
     try {
@@ -343,59 +441,54 @@ export default function MapScreen() {
     }
   }, []);
 
+  const handleSearch = useCallback((region: Region) => {
+    setSearchRegion({ ...region });
+  }, []);
+
   useEffect(() => {
     fetchLocations();
   }, [fetchLocations]);
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1" style={[styles.container, { backgroundColor: colors.background }]}>
-        <View style={[styles.header, { paddingHorizontal: spacing.md, paddingTop: spacing.md }]}>
-          <Text style={{ fontFamily: 'Outfit-Black', fontSize: fontSize.xl, color: colors.text }}>
-            Map
-          </Text>
-        </View>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <LoadingState colors={colors} spacing={spacing} fontSize={fontSize} />
-      </SafeAreaView>
+        <StatsBar locations={locations} colors={colors} fontSize={fontSize} spacing={spacing} />
+      </View>
     );
   }
 
   if (locations.length === 0) {
     return (
-      <SafeAreaView className="flex-1" style={[styles.container, { backgroundColor: colors.background }]}>
-        <View style={[styles.header, { paddingHorizontal: spacing.md, paddingTop: spacing.md }]}>
-          <Text style={{ fontFamily: 'Outfit-Black', fontSize: fontSize.xl, color: colors.text }}>
-            Map
-          </Text>
-        </View>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <SearchBar colors={colors} fontSize={fontSize} spacing={spacing} onSearch={handleSearch} />
         <EmptyState colors={colors} spacing={spacing} fontSize={fontSize} />
-      </SafeAreaView>
+        <StatsBar locations={locations} colors={colors} fontSize={fontSize} spacing={spacing} />
+      </View>
     );
   }
 
   if (isWeb) {
     return (
-      <SafeAreaView className="flex-1" style={[styles.container, { backgroundColor: colors.background }]}>
-        <View style={[styles.header, { paddingHorizontal: spacing.md, paddingTop: spacing.md }]}>
-          <Text style={{ fontFamily: 'Outfit-Black', fontSize: fontSize.xl, color: colors.text }}>
-            Map
-          </Text>
-        </View>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <SearchBar colors={colors} fontSize={fontSize} spacing={spacing} onSearch={handleSearch} />
         <View style={styles.mapContainer}>
           <WebLeafletMap
             locations={locations}
             colors={colors}
             fontSize={fontSize}
             spacing={spacing}
+            searchRegion={searchRegion}
           />
         </View>
         <StatsBar locations={locations} colors={colors} fontSize={fontSize} spacing={spacing} />
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1" style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <SearchBar colors={colors} fontSize={fontSize} spacing={spacing} onSearch={handleSearch} />
       <NativeMapView
         locations={locations}
         colors={colors}
@@ -404,9 +497,11 @@ export default function MapScreen() {
         isTablet={isTablet}
         isLandscape={isLandscape}
         fontScale={fontScale}
+        searchRegion={searchRegion}
+        onSearchComplete={() => setSearchRegion(null)}
       />
       <StatsBar locations={locations} colors={colors} fontSize={fontSize} spacing={spacing} />
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -427,13 +522,9 @@ const styles = StyleSheet.create({
   },
   mapContainer: {
     flex: 1,
-    borderRadius: moderateScale(16),
-    marginHorizontal: moderateScale(16),
-    overflow: 'hidden',
   },
   map: {
     flex: 1,
-    borderRadius: moderateScale(16),
   },
   markerContainer: {
     alignItems: 'center',
@@ -489,5 +580,49 @@ const styles = StyleSheet.create({
   statItem: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  searchContainer: {
+    position: 'absolute',
+    top: moderateScale(12),
+    left: moderateScale(12),
+    right: moderateScale(12),
+    zIndex: 100,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: moderateScale(12),
+    paddingVertical: moderateScale(10),
+    borderRadius: moderateScale(12),
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: moderateScale(8),
+    marginRight: moderateScale(8),
+    paddingVertical: 0,
+  },
+  searchResults: {
+    marginTop: moderateScale(8),
+    borderRadius: moderateScale(12),
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
+    maxHeight: moderateScale(200),
+  },
+  searchResultItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: moderateScale(12),
+    paddingVertical: moderateScale(10),
+    borderBottomWidth: 1,
   },
 });

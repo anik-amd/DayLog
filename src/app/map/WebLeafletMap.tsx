@@ -7,12 +7,20 @@ import { useResponsive } from '../../hooks/useResponsive';
 import { moderateScale } from '../../utils/responsive';
 import { ColorSchemeColors } from '../../themes/colors';
 
+interface Region {
+  latitude: number;
+  longitude: number;
+  latitudeDelta: number;
+  longitudeDelta: number;
+}
+
 interface WebLeafletMapProps {
   locations: LocationGroup[];
   colors: ColorSchemeColors;
   fontSize: any;
   spacing: any;
   onMarkerPress?: (location: LocationGroup) => void;
+  searchRegion?: Region | null;
 }
 
 declare global {
@@ -22,7 +30,7 @@ declare global {
   }
 }
 
-export default function WebLeafletMap({ locations, colors, fontSize, spacing, onMarkerPress }: WebLeafletMapProps) {
+export default function WebLeafletMap({ locations, colors, fontSize, spacing, onMarkerPress, searchRegion }: WebLeafletMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
@@ -121,11 +129,18 @@ export default function WebLeafletMap({ locations, colors, fontSize, spacing, on
       markersRef.current.push(marker);
     });
 
-    if (locations.length > 0) {
-      const bounds = window.L.latLngBounds(locations.map(loc => [loc.latitude, loc.longitude]));
-      mapRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
-    }
-  }, [locations, isMapReady, colors, onMarkerPress]);
+if (locations.length > 0) {
+    const bounds = window.L.latLngBounds(locations.map(loc => [loc.latitude, loc.longitude]));
+    mapRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+  }
+}, [locations, isMapReady, colors, onMarkerPress]);
+
+  useEffect(() => {
+    if (!isMapReady || !mapRef.current || !window.L || !searchRegion) return;
+    mapRef.current.flyTo([searchRegion.latitude, searchRegion.longitude], 13, {
+      duration: 0.5,
+    });
+  }, [searchRegion, isMapReady]);
 
   const fitToMarkers = useCallback(() => {
     if (!mapRef.current || !window.L || locations.length === 0) return;
@@ -161,8 +176,6 @@ const styles = StyleSheet.create({
   },
   mapWrapper: {
     flex: 1,
-    borderRadius: moderateScale(16),
-    overflow: 'hidden',
   },
   controls: {
     position: 'absolute',
