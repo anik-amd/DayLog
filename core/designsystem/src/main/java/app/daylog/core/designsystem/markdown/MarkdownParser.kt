@@ -145,7 +145,10 @@ object MarkdownParser {
         typography: DayLogTypography,
         colors: DayLogColors,
     ): SpanStyle = when (marker) {
-        "**" -> SpanStyle(fontWeight = FontWeight.Bold)
+        // Spectral is cut at three weights, so bold is the heaviest of them rather than a weight
+        // that does not exist. Asking for a weight the family does not have would fall back to
+        // the same face anyway, but silently.
+        "**" -> SpanStyle(fontWeight = FontWeight.SemiBold)
         "*" -> SpanStyle(fontStyle = FontStyle.Italic)
         "__" -> SpanStyle(textDecoration = TextDecoration.Underline)
         "`" -> SpanStyle(

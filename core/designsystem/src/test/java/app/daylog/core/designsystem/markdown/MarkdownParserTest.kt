@@ -31,7 +31,8 @@ class MarkdownParserTest {
         val result = parse("a **bold** word")
 
         assertEquals("a bold word", result.text)
-        assertTrue(result.spanStyles.any { it.item.fontWeight == FontWeight.Bold })
+        // Spectral is cut at three weights, so bold is the heaviest of them.
+        assertTrue(result.spanStyles.any { it.item.fontWeight == FontWeight.SemiBold })
     }
 
     @Test
@@ -120,7 +121,7 @@ class MarkdownParserTest {
         val result = parse("**strong**")
 
         assertEquals("strong", result.text)
-        assertTrue(result.spanStyles.any { it.item.fontWeight == FontWeight.Bold })
+        assertTrue(result.spanStyles.any { it.item.fontWeight == FontWeight.SemiBold })
         assertTrue(result.spanStyles.none { it.item.fontStyle == FontStyle.Italic })
     }
 
