@@ -39,6 +39,12 @@ androidComponents {
 }
 
 dependencies {
+    // The fakes stand in for the real things, so they need the real things' types. This is the
+    // one module that depends on the code it is used to test, which is why it is never a
+    // dependency of anything that ships.
+    api(project(":core:model"))
+    api(project(":core:data"))
+
     api(libs.junit)
     api(libs.kotlinx.coroutines.test)
     api(libs.turbine)
