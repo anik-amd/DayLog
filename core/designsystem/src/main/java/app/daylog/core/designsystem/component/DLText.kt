@@ -2,10 +2,12 @@ package app.daylog.core.designsystem.component
 
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
+import app.daylog.core.designsystem.markdown.MarkdownParser
 import app.daylog.core.designsystem.theme.DayLogTheme
 
 /**
@@ -22,11 +24,34 @@ fun DLText(
     color: Color = DayLogTheme.colors.ink,
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Ellipsis,
+    /**
+     * Whether the text is markdown and should be rendered as such.
+     *
+     * The entry text is markdown, so it is parsed here rather than by each screen that shows it.
+     * Screens that show plain text leave it off.
+     */
+    annotated: Boolean = false,
 ) {
+    val textStyle = style.copy(color = color)
+
+    if (annotated) {
+        val parsed = remember(text, textStyle) {
+            MarkdownParser.parse(text, DayLogTheme.typography, DayLogTheme.colors)
+        }
+        BasicText(
+            text = parsed,
+            modifier = modifier,
+            style = textStyle,
+            maxLines = maxLines,
+            overflow = overflow,
+        )
+        return
+    }
+
     BasicText(
         text = text,
         modifier = modifier,
-        style = style.copy(color = color),
+        style = textStyle,
         maxLines = maxLines,
         overflow = overflow,
     )

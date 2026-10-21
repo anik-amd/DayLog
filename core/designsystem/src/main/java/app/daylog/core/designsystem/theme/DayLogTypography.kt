@@ -27,6 +27,8 @@ data class DayLogTypography(
     val entryBody: TextStyle,
     /** A single entry's title, when it has one. */
     val entryTitle: TextStyle,
+    /** A second-level heading inside an entry. */
+    val entrySubheading: TextStyle,
     /** Screen-level heading. */
     val chromeTitle: TextStyle,
     /** Interface label: buttons, chips, field labels. */
@@ -63,6 +65,13 @@ data class DayLogTypography(
                 fontSize = 20.sp,
                 lineHeight = 27.sp,
                 letterSpacing = (-0.2).sp,
+            ),
+            entrySubheading = TextStyle(
+                fontFamily = bodyFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 15.sp,
+                lineHeight = 21.sp,
+                letterSpacing = 0.sp,
             ),
             chromeTitle = TextStyle(
                 fontFamily = chromeFamily,

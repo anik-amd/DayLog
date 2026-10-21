@@ -79,6 +79,7 @@ fun EntryRow(
             text = entry.content,
             style = DayLogTheme.typography.entryBody,
             color = colors.ink,
+            annotated = true,
         )
 
         // A place and the weather are not in the text, so they are shown as chips. A tag is:
