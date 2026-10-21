@@ -131,14 +131,14 @@ object DayLogIcons {
     /**
      * A cloud, for weather.
      *
-     * Two overlapping circles and a base line make a shape that is unmistakably a cloud at any
-     * size, which an arc-built one is not.
+     * One large circle and one small one, sat on a base line. The shape is unmistakable at any
+     * size, which an arc-built one is not, and it is made of parts that are already exact.
      */
     val Weather: ImageVector = icon("Weather") {
-        circle(9.5f, 14f, 3.5f)
-        circle(14.5f, 13f, 4.5f)
-        moveTo(7f, 18.5f)
-        lineTo(17f, 18.5f)
+        circle(13.5f, 12.5f, 4.5f)
+        circle(8.5f, 14f, 3.2f)
+        moveTo(6f, 18f)
+        lineTo(17f, 18f)
     }
 
     /** A picture frame, for photos. */

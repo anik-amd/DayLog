@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import app.daylog.core.common.DayLabels
 import app.daylog.core.common.toLocalDateTime
@@ -28,8 +29,17 @@ import java.util.Locale
  *
  * It is wide enough for "Yesterday" and "12 March" to sit against the rule without wrapping, and
  * narrow enough to leave the entry text the room it needs to be read in.
+ *
+ * The margin grows with the text. A reader who has turned the font up has already said they want
+ * fewer words on a line, so the margin takes its share rather than the day name being cut off.
  */
-val GutterWidth = 80.dp
+@Composable
+fun gutterWidth(): Dp = (GUTTER_WIDTH_DP * LocalDensity.current.fontScale)
+    .coerceAtMost(GUTTER_MAX_DP)
+    .dp
+
+private const val GUTTER_WIDTH_DP = 80f
+private const val GUTTER_MAX_DP = 112f
 
 /**
  * The space between the margin rule and the entry text.
@@ -55,7 +65,7 @@ fun EntryRow(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = GutterWidth + GutterGap, end = 20.dp, bottom = 22.dp),
+            .padding(start = gutterWidth() + GutterGap, end = 20.dp, bottom = 22.dp),
     ) {
         DLMeta(
             text = DayLabels.time(entry.createdAt.toLocalDateTime(zone), locale),

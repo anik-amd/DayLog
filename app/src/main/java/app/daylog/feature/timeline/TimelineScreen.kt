@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.daylog.core.designsystem.component.DLEmptyState
 import app.daylog.core.designsystem.component.DLMeta
@@ -48,6 +49,7 @@ fun TimelineScreen(
 ) {
     val colors = DayLogTheme.colors
     val items = groups.toTimelineItems()
+    val gutter = gutterWidth()
 
     if (items.isEmpty()) {
         Box(
@@ -67,38 +69,48 @@ fun TimelineScreen(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(colors.background)
-            .drawBehind {
-                // The rule. It runs the whole length of the timeline, past the last entry, the
-                // way the margin of a page runs past the last line of writing.
-                val x = GutterWidth.toPx()
-                drawLine(
-                    color = colors.rule,
-                    start = Offset(x, 0f),
-                    end = Offset(x, size.height),
-                    strokeWidth = 1f,
-                )
-            },
+            .background(colors.background),
         contentPadding = contentPadding,
     ) {
         items(items, key = { itemKey(it) }) { item ->
+            // The rule is drawn a piece at a time, by each row, so it begins with the first day
+            // and ends with the last entry. A rule that ran on past the writing into the empty
+            // space below would be a line to nothing.
+            val rule = Modifier.marginRule(gutter, colors.rule)
+
             when (item) {
-                is TimelineItem.Heading -> DayHeading(item.group)
-                is TimelineItem.Row -> EntryRow(entry = item.entry)
+                is TimelineItem.Heading -> DayHeading(item.group, rule)
+                is TimelineItem.Row -> EntryRow(
+                    entry = item.entry,
+                    modifier = rule,
+                )
             }
         }
     }
 }
 
 /**
+ * Draws the margin rule down a row.
+ */
+private fun Modifier.marginRule(gutter: Dp, color: Color): Modifier = drawBehind {
+    val x = gutter.toPx()
+    drawLine(
+        color = color,
+        start = Offset(x, 0f),
+        end = Offset(x, size.height),
+        strokeWidth = 1f,
+    )
+}
+
+/**
  * The day's name, in the margin.
  */
 @Composable
-private fun DayHeading(group: DayGroup) {
+private fun DayHeading(group: DayGroup, modifier: Modifier = Modifier) {
     val colors = DayLogTheme.colors
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(top = 26.dp, end = 20.dp),
         verticalAlignment = Alignment.Top,
@@ -106,7 +118,7 @@ private fun DayHeading(group: DayGroup) {
         // The heading hugs the rule, the way a date is written in the margin of a ledger.
         Box(
             modifier = Modifier
-                .width(GutterWidth)
+                .width(gutterWidth())
                 .padding(end = 12.dp),
             contentAlignment = Alignment.TopEnd,
         ) {
