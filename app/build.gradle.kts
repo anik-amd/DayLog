@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.screenshot)
 }
 
 android {
@@ -62,6 +63,9 @@ android {
     buildFeatures {
         compose = true
     }
+
+    // Turns on the screenshotTest source set, where the reference images are declared.
+    experimentalProperties["android.experimental.enableScreenshotTest"] = true
 
     packaging {
         resources {
@@ -124,4 +128,9 @@ dependencies {
     testImplementation(platform(libs.compose.bom))
     testImplementation(libs.compose.ui.test.junit4)
     debugImplementation(libs.compose.ui.test.manifest)
+
+    // The screenshot tests render the previews on the JVM, so the design can be checked without
+    // a device.
+    screenshotTestImplementation(libs.screenshot.validation.api)
+    screenshotTestImplementation(libs.compose.ui.tooling)
 }
