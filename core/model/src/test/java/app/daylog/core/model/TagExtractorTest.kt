@@ -20,6 +20,11 @@ class TagExtractorTest {
 
     @Test
     fun `ignores a hash that is not at a word boundary`() {
+        assertEquals(emptyList<String>(), TagExtractor.extract("email me at name#work"))
+    }
+
+    @Test
+    fun `ignores a tag that starts with a digit`() {
         assertEquals(emptyList<String>(), TagExtractor.extract("costs #5"))
     }
 
@@ -31,6 +36,11 @@ class TagExtractorTest {
     @Test
     fun `keeps digits and underscores inside a tag`() {
         assertEquals(listOf("day_42"), TagExtractor.extract("#day_42"))
+    }
+
+    @Test
+    fun `keeps hyphens inside a tag`() {
+        assertEquals(listOf("day-42"), TagExtractor.extract("#day-42"))
     }
 
     @Test

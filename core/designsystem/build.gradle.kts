@@ -37,6 +37,14 @@ kotlin {
     }
 }
 
+androidComponents {
+    // The release unit tests duplicate the debug ones. One variant is enough and it halves the
+    // time CI spends running tests.
+    beforeVariants(selector().withBuildType("release")) { variant ->
+        variant.enableUnitTest = false
+    }
+}
+
 dependencies {
     api(project(":core:model"))
 
