@@ -52,15 +52,15 @@ object MarkdownParser {
     ) {
         when {
             line.startsWith("# ") -> {
-                withStyle(typography.entryTitle) {
-                    appendInline(line.removePrefix("# "), typography, colors)
-                }
+                pushStyle(typography.entryTitle)
+                appendInline(line.removePrefix("# "), typography, colors)
+                pop()
             }
 
             line.startsWith("## ") -> {
-                withStyle(typography.entrySubheading) {
-                    appendInline(line.removePrefix("## "), typography, colors)
-                }
+                pushStyle(typography.entrySubheading)
+                appendInline(line.removePrefix("## "), typography, colors)
+                pop()
             }
 
             line.startsWith("- ") || line.startsWith("* ") -> {
@@ -120,9 +120,9 @@ object MarkdownParser {
                 if (close > index + marker.length) {
                     val content = text.substring(index + marker.length, close)
                     flush()
-                    withStyle(styleFor(marker, typography, colors)) {
-                        append(content)
-                    }
+                    pushStyle(styleFor(marker, typography, colors))
+                    append(content)
+                    pop()
                     index = close + marker.length
                     continue
                 }

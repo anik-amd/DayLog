@@ -35,8 +35,10 @@ fun DLText(
     val textStyle = style.copy(color = color)
 
     if (annotated) {
-        val parsed = remember(text, textStyle) {
-            MarkdownParser.parse(text, DayLogTheme.typography, DayLogTheme.colors)
+        val typography = DayLogTheme.typography
+        val palette = DayLogTheme.colors
+        val parsed = remember(text, typography, palette) {
+            MarkdownParser.parse(text, typography, palette)
         }
         BasicText(
             text = parsed,
