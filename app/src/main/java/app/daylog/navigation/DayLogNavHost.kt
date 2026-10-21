@@ -1,0 +1,60 @@
+package app.daylog.navigation
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import app.daylog.di.AppContainer
+import app.daylog.feature.editor.FullScreenEditor
+import app.daylog.feature.timeline.TimelineRoute
+
+/**
+ * The screens in the app.
+ */
+object Routes {
+    const val Timeline = "timeline"
+    const val Editor = "editor"
+}
+
+/**
+ * The app's navigation.
+ *
+ * Two screens: the timeline, and the full editor that opens over it. There is no bottom
+ * navigation bar — the timeline is the app, and the editor is a mode of it.
+ */
+@Composable
+fun DayLogNavHost(
+    container: AppContainer,
+    modifier: Modifier = androidx.compose.ui.Modifier,
+) {
+    val navController = rememberNavController()
+    var editorText by remember { mutableStateOf("") }
+
+    NavHost(
+        navController = navController,
+        startDestination = Routes.Timeline,
+        modifier = modifier,
+    ) {
+        composable(Routes.Timeline) {
+            TimelineRoute(
+                container = container,
+                onOpenEditor = {
+                    editorText = ""
+                    navController.navigate(Routes.Editor)
+                },
+            )
+        }
+
+        composable(Routes.Editor) {
+            FullScreenEditor(
+                initialText = editorText,
+                onTextChanged = { editorText = it },
+                onBack = { navController.popBackStack() },
+            )
+        }
+    }
+}
