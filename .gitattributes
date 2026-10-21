@@ -1,0 +1,20 @@
+# Line endings
+#
+# The build runs on Linux, so a script with Windows line endings will not run at all. These are
+# pinned to LF so the checkout is the same everywhere.
+
+* text=auto eol=lf
+
+*.sh text eol=lf
+gradlew text eol=lf
+*.bat text eol=crlf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.webp binary
+*.ttf binary
+*.otf binary
+*.jar binary
+*.keystore binary
+*.apk binary
