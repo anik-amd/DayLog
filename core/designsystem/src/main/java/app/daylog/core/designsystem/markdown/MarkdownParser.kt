@@ -7,6 +7,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.toSpanStyle
 import app.daylog.core.designsystem.color.DayLogColors
 import app.daylog.core.designsystem.theme.DayLogTypography
 
@@ -52,13 +53,13 @@ object MarkdownParser {
     ) {
         when {
             line.startsWith("# ") -> {
-                pushStyle(typography.entryTitle)
+                pushStyle(typography.entryTitle.toSpanStyle())
                 appendInline(line.removePrefix("# "), typography, colors)
                 pop()
             }
 
             line.startsWith("## ") -> {
-                pushStyle(typography.entrySubheading)
+                pushStyle(typography.entrySubheading.toSpanStyle())
                 appendInline(line.removePrefix("## "), typography, colors)
                 pop()
             }
