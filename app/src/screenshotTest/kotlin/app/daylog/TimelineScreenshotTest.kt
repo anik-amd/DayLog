@@ -44,14 +44,17 @@ private val today: LocalDate = LocalDate.now(zone)
 private val sampleEntries = listOf(
     Entry(
         uid = "1",
-        content = "The train was late, so I read the whole of the essay on the way in and " +
-            "arrived with something to think about. #reading",
+        content = "# The train was late\n" +
+            "So I read the whole of the essay on the way in and arrived with something to think " +
+            "about. **That** was the best part of the morning. #reading",
         createdAt = at(today, 9, 14),
         updatedAt = at(today, 9, 14),
     ),
     Entry(
         uid = "2",
-        content = "Rain all afternoon. Finished the second chapter of the book.",
+        content = "Rain all afternoon. Finished the second chapter of the book.\n" +
+            "- read the essay\n" +
+            "- wrote two lines",
         createdAt = at(today, 18, 2),
         updatedAt = at(today, 18, 2),
         placeName = "Bologna",
