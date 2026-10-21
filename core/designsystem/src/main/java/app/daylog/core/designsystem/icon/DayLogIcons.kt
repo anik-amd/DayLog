@@ -57,10 +57,10 @@ object DayLogIcons {
     private fun PathBuilder.circle(centerX: Float, centerY: Float, radius: Float) {
         val k = radius * CircleK
         moveTo(centerX, centerY - radius)
-        cubicTo(centerX + k, centerY - radius, centerX + radius, centerY - k, centerX + radius, centerY)
-        cubicTo(centerX + radius, centerY + k, centerX + k, centerY + radius, centerX, centerY + radius)
-        cubicTo(centerX - k, centerY + radius, centerX - radius, centerY + k, centerX - radius, centerY)
-        cubicTo(centerX - radius, centerY - k, centerX - k, centerY - radius, centerX, centerY - radius)
+        curveTo(centerX + k, centerY - radius, centerX + radius, centerY - k, centerX + radius, centerY)
+        curveTo(centerX + radius, centerY + k, centerX + k, centerY + radius, centerX, centerY + radius)
+        curveTo(centerX - k, centerY + radius, centerX - radius, centerY + k, centerX - radius, centerY)
+        curveTo(centerX - radius, centerY - k, centerX - k, centerY - radius, centerX, centerY - radius)
         close()
     }
 
@@ -221,13 +221,13 @@ object DayLogIcons {
         lineTo(8f, 20f)
         moveTo(8f, 4f)
         lineTo(13f, 4f)
-        cubicTo(16f, 4f, 17.5f, 5.5f, 17.5f, 8f)
-        cubicTo(17.5f, 10.5f, 16f, 12f, 13f, 12f)
+        curveTo(16f, 4f, 17.5f, 5.5f, 17.5f, 8f)
+        curveTo(17.5f, 10.5f, 16f, 12f, 13f, 12f)
         lineTo(8f, 12f)
         moveTo(8f, 12f)
         lineTo(13.5f, 12f)
-        cubicTo(16.5f, 12f, 18f, 13.5f, 18f, 16f)
-        cubicTo(18f, 18.5f, 16.5f, 20f, 13.5f, 20f)
+        curveTo(16.5f, 12f, 18f, 13.5f, 18f, 16f)
+        curveTo(18f, 18.5f, 16.5f, 20f, 13.5f, 20f)
         lineTo(8f, 20f)
     }
 
@@ -245,8 +245,8 @@ object DayLogIcons {
     val Underline: ImageVector = icon("Underline") {
         moveTo(7f, 4f)
         lineTo(7f, 10f)
-        cubicTo(7f, 13.5f, 9f, 15f, 12f, 15f)
-        cubicTo(15f, 15f, 17f, 13.5f, 17f, 10f)
+        curveTo(7f, 13.5f, 9f, 15f, 12f, 15f)
+        curveTo(15f, 15f, 17f, 13.5f, 17f, 10f)
         lineTo(17f, 4f)
         moveTo(6f, 20f)
         lineTo(18f, 20f)
