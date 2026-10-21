@@ -117,7 +117,7 @@ fun DLIconButton(
     contentDescription: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    val tint: Color = DayLogTheme.colors.ink,
+    tint: Color = DayLogTheme.colors.ink,
     enabled: Boolean = true,
 ) {
     val press = rememberPressState(onClick = onClick, enabled = enabled)
