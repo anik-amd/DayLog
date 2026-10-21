@@ -1,6 +1,7 @@
 package app.daylog
 
 import android.app.Application
+import app.daylog.di.AppContainer
 
 /**
  * Application entry point.
