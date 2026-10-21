@@ -147,10 +147,11 @@ class EntryRepository(
 
         tags.forEach { name ->
             tagDao.insertTag(TagEntity(name = name))
-            tagDao.link(entryUid, name)
         }
+        tagDao.insertLinks(tags.map { name -> EntryTagEntity(entryUid = entryUid, tagName = name) })
 
         tagDao.recountAll()
+        tagDao.deleteUnusedTags()
     }
 }
 

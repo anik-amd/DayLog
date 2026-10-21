@@ -56,7 +56,7 @@ interface TagDao {
     suspend fun insertTag(tag: TagEntity)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun link(entryUid: String, tagName: String)
+    suspend fun insertLinks(links: List<EntryTagEntity>)
 
     @Query("DELETE FROM entry_tags WHERE entryUid = :entryUid")
     suspend fun deleteLinksForEntry(entryUid: String)
@@ -103,6 +103,6 @@ interface TagDao {
         deleteAllLinks()
         deleteAllTags()
         tags.forEach { insertTag(it) }
-        links.forEach { link(it.entryUid, it.tagName) }
+        insertLinks(links)
     }
 }
