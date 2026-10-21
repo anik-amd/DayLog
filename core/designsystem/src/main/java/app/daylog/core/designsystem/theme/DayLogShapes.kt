@@ -1,5 +1,7 @@
 package app.daylog.core.designsystem.theme
 
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 
 /**
@@ -10,14 +12,26 @@ import androidx.compose.ui.unit.dp
  */
 object DayLogShapes {
     /** Chips, small controls. */
-    val chip = 6.dp
+    val chipRadius = 6.dp
 
     /** Cards and grouped content. */
-    val card = 10.dp
+    val cardRadius = 10.dp
 
     /** Sheets and large surfaces. */
-    val sheet = 16.dp
+    val sheetRadius = 16.dp
 
     /** Date pills in the timeline margin. */
-    val pill = 999.dp
+    val pillRadius = 999.dp
+
+    /** Chips, small controls. */
+    val chip: Shape = RoundedCornerShape(chipRadius)
+
+    /** Cards and grouped content. */
+    val card: Shape = RoundedCornerShape(cardRadius)
+
+    /** Sheets and large surfaces. */
+    val sheet: Shape = RoundedCornerShape(sheetRadius)
+
+    /** Date pills in the timeline margin. */
+    val pill: Shape = RoundedCornerShape(pillRadius)
 }

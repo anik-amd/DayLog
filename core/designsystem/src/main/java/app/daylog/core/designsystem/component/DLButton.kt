@@ -4,7 +4,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,9 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -63,10 +60,13 @@ fun DLButton(
     contentColor: Color? = null,
 ) {
     val colors = DayLogTheme.colors
+    val press = rememberPressState(onClick = onClick, enabled = enabled)
 
     val background = when {
         !enabled -> Color.Transparent
-        style == DLButtonStyle.Filled -> colors.ink
+        style == DLButtonStyle.Filled ->
+            if (press.isPressed) colors.ink.copy(alpha = 0.82f) else colors.ink
+        press.isPressed -> colors.ink.copy(alpha = 0.06f)
         else -> Color.Transparent
     }
     val foreground = when {
@@ -88,8 +88,8 @@ fun DLButton(
             )
             .clickable(
                 enabled = enabled,
-                interactionSource = remember { MutableInteractionSource() },
-                indication = rememberRipple(bounded = true),
+                interactionSource = press.interactionSource,
+                indication = null,
                 onClick = onClick,
             )
             .padding(horizontal = 16.dp, vertical = 10.dp),
@@ -117,16 +117,22 @@ fun DLIconButton(
     contentDescription: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    tint: Color = DayLogTheme.colors.ink,
+    val tint: Color = DayLogTheme.colors.ink,
     enabled: Boolean = true,
 ) {
+    val press = rememberPressState(onClick = onClick, enabled = enabled)
+
     Box(
         modifier = modifier
             .size(40.dp)
+            .background(
+                if (press.isPressed) DayLogTheme.colors.ink.copy(alpha = 0.06f) else Color.Transparent,
+                DayLogShapes.pill,
+            )
             .clickable(
                 enabled = enabled,
-                interactionSource = remember { MutableInteractionSource() },
-                indication = rememberRipple(bounded = false),
+                interactionSource = press.interactionSource,
+                indication = null,
                 onClick = onClick,
             ),
         contentAlignment = Alignment.Center,
