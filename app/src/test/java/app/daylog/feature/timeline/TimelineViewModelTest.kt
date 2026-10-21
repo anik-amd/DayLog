@@ -82,13 +82,12 @@ class TimelineViewModelTest {
     fun `the bar empties once the entry is written`() =
         runTest(mainDispatcherRule.dispatcher) {
             val viewModel = viewModel()
-            val states = collectStates(viewModel)
+            watchState(viewModel)
 
             viewModel.onDraftChanged("a thought")
             advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
-            runCurrent()
 
-            assertEquals("", states.last().draft)
+            assertEquals("", viewModel.state.value.draft)
         }
 
     @Test
@@ -132,19 +131,18 @@ class TimelineViewModelTest {
     fun `a deleted entry does not show in the timeline`() =
         runTest(mainDispatcherRule.dispatcher) {
             val viewModel = viewModel()
-            val states = collectStates(viewModel)
+            watchState(viewModel)
 
             viewModel.onDraftChanged("a thought")
             advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
-            runCurrent()
             val uid = entryDao.stored.first().uid
 
             viewModel.deleteEntry(uid)
             advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
-            runCurrent()
 
-            assertEquals(0, states.last().groups.sumOf { it.entries.size })
-            assertFalse(states.last().groups.any { group -> group.entries.any { it.uid == uid } })
+            val groups = viewModel.state.value.groups
+            assertEquals(0, groups.sumOf { it.entries.size })
+            assertFalse(groups.any { group -> group.entries.any { it.uid == uid } })
         }
 
     /**
@@ -160,13 +158,13 @@ class TimelineViewModelTest {
 
     /**
      * Watches the state, so the flow is running while the test moves time.
+     *
+     * The watcher is launched in the background scope, which cancels it when the test ends. A
+     * watcher left running would fail the test for having unfinished work, which says nothing
+     * about the behaviour being tested.
      */
-    private fun kotlinx.coroutines.test.TestScope.collectStates(
-        viewModel: TimelineViewModel,
-    ): List<TimelineUiState> {
-        val states = mutableListOf<TimelineUiState>()
-        launch { viewModel.state.collect { states += it } }
+    private fun kotlinx.coroutines.test.TestScope.watchState(viewModel: TimelineViewModel) {
+        backgroundScope.launch { viewModel.state.collect { } }
         runCurrent()
-        return states
     }
 }
