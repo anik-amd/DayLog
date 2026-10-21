@@ -3,8 +3,7 @@ name: Pre-release APK
 # Builds a signed release candidate and attaches it to a draft release.
 #
 # The APK is built from the `pre-release` branch, tested on a real device by hand, and only then
-# merged into `main` for a public release. The version code is offset by the run number so a
-# candidate can always be installed over an earlier one without a reinstall.
+# merged into `main` for a public release.
 on:
   push:
     branches:
@@ -13,6 +12,10 @@ on:
 concurrency:
   group: prerelease-${{ github.ref }}
   cancel-in-progress: false
+
+env:
+  ANDROID_HOME: /usr/local/lib/android/sdk
+  ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
 jobs:
   prerelease:
@@ -33,14 +36,10 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Accept SDK licenses
-        run: sdkmanager --licenses <<< $'y\n' || true
-
-      - name: Install SDK platform
-        run: sdkmanager "platforms;android-36" "build-tools;36.0.0" "platform-tools"
+      - name: Install the Android SDK
+        run: |
+          bash scripts/install-android-sdk.sh "$ANDROID_HOME"
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
 
       - name: Restore signing key
         env:
@@ -93,7 +92,7 @@ jobs:
             | Detail | Value |
             |---|---|
             | Version | `${{ steps.version.outputs.version }}` |
-            | Version code | `${{ steps.version.outputs.code }}` + ${{ github.run_number }} |
+            | Version code | `${{ steps.version.outputs.code }}` |
             | Commit | `${{ github.sha }}` |
             | Built | ${{ github.run_started_at }} |
           files: app/build/outputs/apk/release/*.apk

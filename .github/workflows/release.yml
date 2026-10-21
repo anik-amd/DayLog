@@ -16,6 +16,10 @@ concurrency:
 permissions:
   contents: write
 
+env:
+  ANDROID_HOME: /usr/local/lib/android/sdk
+  ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+
 jobs:
   release:
     name: Build and publish
@@ -35,14 +39,10 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Accept SDK licenses
-        run: sdkmanager --licenses <<< $'y\n' || true
-
-      - name: Install SDK platform
-        run: sdkmanager "platforms;android-36" "build-tools;36.0.0" "platform-tools"
+      - name: Install the Android SDK
+        run: |
+          bash scripts/install-android-sdk.sh "$ANDROID_HOME"
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
 
       - name: Restore signing key
         env:

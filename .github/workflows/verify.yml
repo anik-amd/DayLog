@@ -2,8 +2,9 @@ name: Verify
 
 # Fast feedback on every change: compiles the app and runs the JVM test suite.
 #
-# No emulator and no lint gate. Emulator tests are where the minutes and the flakes live, and the
-# parts that would fail there are already covered by JVM tests. Lint is a separate, opt-in check.
+# No emulator and no lint gate. Emulator tests are where the minutes and the flakes come from, and
+# the parts that would fail there are already covered by JVM tests. Lint is a separate, opt-in
+# check.
 on:
   push:
     branches:
@@ -16,6 +17,10 @@ on:
 concurrency:
   group: verify-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  ANDROID_HOME: /usr/local/lib/android/sdk
+  ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
 jobs:
   verify:
@@ -36,14 +41,10 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Accept SDK licenses
-        run: sdkmanager --licenses <<< $'y\n' || true
-
-      - name: Install SDK platform
-        run: sdkmanager "platforms;android-36" "build-tools;36.0.0" "platform-tools"
+      - name: Install the Android SDK
+        run: |
+          bash scripts/install-android-sdk.sh "$ANDROID_HOME"
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
 
       - name: Run tests and assemble
         run: ./gradlew test assembleDebug --stacktrace
