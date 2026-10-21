@@ -3,9 +3,9 @@ package app.daylog.core.designsystem.theme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import app.daylog.core.designsystem.color.DayLogColors
 import app.daylog.core.designsystem.color.NightColors
@@ -14,24 +14,34 @@ import app.daylog.core.model.DayLogAccentSource
 import app.daylog.core.model.DayLogThemeMode
 
 /**
- * The complete visual environment for a screen.
+ * The values a theme provides.
+ *
+ * This is the payload the composition local carries. It is separate from [DayLogTheme] itself
+ * so that the ambient accessors and the composable can share one name without colliding.
  */
 @Immutable
-data class DayLogTheme(
+data class DayLogThemeValues(
     val colors: DayLogColors,
     val typography: DayLogTypography,
     val spacing: DayLogSpacing,
     val isDark: Boolean,
 )
 
-internal val LocalDayLogTheme = ProvidableCompositionLocal<DayLogTheme> {
+internal val LocalDayLogTheme = staticCompositionLocalOf<DayLogThemeValues> {
     error("DayLogTheme is not provided. Wrap your content in DayLogTheme.")
 }
 
 /**
- * The ambient design system. Read it like `MaterialTheme`.
+ * The complete visual environment for a screen.
+ *
+ * Read it like `MaterialTheme`:
+ *
+ * ```
+ * Text("Today", color = DayLogTheme.colors.ink)
+ * ```
  */
 object DayLogTheme {
+
     val colors: DayLogColors
         @Composable @ReadOnlyComposable get() = LocalDayLogTheme.current.colors
 
@@ -87,7 +97,7 @@ fun DayLogTheme(
     }
 
     CompositionLocalProvider(
-        LocalDayLogTheme provides DayLogTheme(
+        LocalDayLogTheme provides DayLogThemeValues(
             colors = colors,
             typography = typography,
             spacing = DayLogSpacing(),

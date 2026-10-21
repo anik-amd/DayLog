@@ -7,6 +7,7 @@ plugins {
 android {
     namespace = "app.daylog.core.designsystem"
     compileSdk = libs.versions.compileSdk.get().toInt()
+    buildToolsVersion = libs.versions.buildTools.get()
 
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()

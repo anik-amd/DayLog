@@ -9,7 +9,7 @@
         }
     },
     "onCreateCommand": "bash .devcontainer/setup-android.sh",
-    "remoteEnv": {
+    "containerEnv": {
         "ANDROID_HOME": "/usr/local/lib/android/sdk",
         "ANDROID_SDK_ROOT": "/usr/local/lib/android/sdk",
         "GRADLE_USER_HOME": "/home/vscode/.gradle"

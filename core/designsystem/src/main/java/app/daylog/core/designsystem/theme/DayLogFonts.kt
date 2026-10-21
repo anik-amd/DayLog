@@ -3,6 +3,7 @@ package app.daylog.core.designsystem.theme
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import app.daylog.core.designsystem.R
 
 /**
  * The two typefaces of the app, bundled so the app renders identically offline.

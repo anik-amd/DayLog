@@ -4,6 +4,9 @@
 # The SDK is not in any official devcontainer image, so it is installed here. Everything is
 # pinned to exact versions so a rebuild produces the same toolchain every time.
 #
+# The Android CLI (`android sdk install`) is used rather than `sdkmanager`, which Google has
+# deprecated in favour of it.
+#
 # This script must never fail the Codespace creation. If the SDK cannot be installed the
 # container still comes up and the error is printed, because a half-built container is more
 # useful than no container: the SDK can be installed by hand afterwards.
@@ -13,6 +16,7 @@ ANDROID_SDK_ROOT="/usr/local/lib/android/sdk"
 CMDLINE_TOOLS_VERSION="16111833"
 BUILD_TOOLS_VERSION="36.0.0"
 PLATFORM_VERSION="36"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 fail() {
     echo ""
@@ -23,7 +27,8 @@ fail() {
     exit 0
 }
 
-if [ -d "${ANDROID_SDK_ROOT}/platforms/android-${PLATFORM_VERSION}" ]; then
+if [ -d "${ANDROID_SDK_ROOT}/platforms/android-${PLATFORM_VERSION}" ] \
+    && [ -d "${ANDROID_SDK_ROOT}/build-tools/${BUILD_TOOLS_VERSION}" ]; then
     echo "Android SDK already present, skipping."
     exit 0
 fi
@@ -37,16 +42,14 @@ sudo mkdir -p "${ANDROID_SDK_ROOT}/cmdline-tools"
 sudo chown -R "$(id -u):$(id -g)" "${ANDROID_SDK_ROOT}"
 
 TMP_DIR="$(mktemp -d)"
-cd "${TMP_DIR}" || fail "could not create a temporary directory"
-
 echo "Downloading the Android command line tools..."
-if ! curl -fsSL -o cmdline-tools.zip \
+if ! curl -fsSL -o "${TMP_DIR}/cmdline-tools.zip" \
     "https://dl.google.com/android/repository/commandlinetools-linux-${CMDLINE_TOOLS_VERSION}_latest.zip"; then
     rm -rf "${TMP_DIR}"
     fail "could not download the command line tools"
 fi
 
-unzip -q cmdline-tools.zip -d "${TMP_DIR}/unzipped" || {
+unzip -q "${TMP_DIR}/cmdline-tools.zip" -d "${TMP_DIR}/unzipped" || {
     rm -rf "${TMP_DIR}"
     fail "could not unpack the command line tools"
 }
@@ -59,16 +62,18 @@ export ANDROID_HOME="${ANDROID_SDK_ROOT}"
 export ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT}"
 export PATH="${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools:${PATH}"
 
-echo "Accepting the SDK licences..."
-yes | sdkmanager --licenses > /dev/null 2>&1 || true
-
 echo "Installing platform ${PLATFORM_VERSION} and build tools ${BUILD_TOOLS_VERSION}..."
-if ! sdkmanager --install \
-    "platform-tools" \
-    "platforms;android-${PLATFORM_VERSION}" \
-    "build-tools;${BUILD_TOOLS_VERSION}"; then
-    fail "sdkmanager could not install the platform"
+if ! android sdk install \
+    "platforms/android-${PLATFORM_VERSION}" \
+    "build-tools/${BUILD_TOOLS_VERSION}" \
+    "platform-tools"; then
+    fail "the Android CLI could not install the platform"
 fi
 
+# Gradle reads the SDK location from local.properties. ANDROID_HOME would do, but writing the
+# file keeps the build working in a plain shell that has not inherited the container's
+# environment - which is how the CI and the gh CLI both invoke it.
+echo "sdk.dir=${ANDROID_SDK_ROOT}" > "${REPO_ROOT}/local.properties"
+
 echo "Android SDK ready."
-sdkmanager --list_installed || true
+android sdk list 2>&1 | tail -20 || true

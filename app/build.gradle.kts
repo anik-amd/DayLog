@@ -8,6 +8,8 @@ plugins {
 android {
     namespace = "app.daylog"
     compileSdk = libs.versions.compileSdk.get().toInt()
+    // Pinned so every build uses the same tools rather than whichever the plugin defaults to.
+    buildToolsVersion = libs.versions.buildTools.get()
 
     defaultConfig {
         applicationId = "com.anik_amd.daylog"
@@ -78,6 +80,14 @@ android {
 kotlin {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
+}
+
+androidComponents {
+    // See core/data: the release unit tests duplicate the debug ones, and running both means two
+    // KSP tasks write the exported Room schema at the same time.
+    beforeVariants(selector().withBuildType("release")) { variant ->
+        variant.enableUnitTest = false
     }
 }
 

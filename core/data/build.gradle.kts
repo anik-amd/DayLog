@@ -8,6 +8,7 @@ plugins {
 android {
     namespace = "app.daylog.core.data"
     compileSdk = libs.versions.compileSdk.get().toInt()
+    buildToolsVersion = libs.versions.buildTools.get()
 
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
@@ -36,6 +37,15 @@ kotlin {
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
     arg("room.incremental", "true")
+}
+
+androidComponents {
+    // The release unit tests run exactly the same code as the debug ones, and running both means
+    // Room exports its schema from two KSP tasks at once, which corrupts the file. One variant is
+    // enough, and it halves the time CI spends running tests.
+    beforeVariants(selector().withBuildType("release")) { variant ->
+        variant.enableUnitTest = false
+    }
 }
 
 dependencies {
