@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.Flow
 interface EntryDao {
 
     /**
-     * Every live entry, newest first. Deleted entries are filtered out here rather than at the call
-     * site so no screen can accidentally show a tombstone.
+     * Every live entry, newest first. Deleted entries are filtered out here rather than at the
+     * call site so no screen can accidentally show a tombstone.
      */
     @Query("SELECT * FROM entries WHERE deletedAt IS NULL ORDER BY createdAt DESC")
     fun observeEntries(): Flow<List<EntryEntity>>
@@ -42,8 +42,18 @@ interface EntryDao {
     @Query("SELECT * FROM entries WHERE updatedAt > :since AND deletedAt IS NOT NULL")
     suspend fun findTombstonesSince(since: Long): List<EntryEntity>
 
+    /**
+     * Puts a whole set of entries in at once, which is what an imported backup does.
+     */
     @Transaction
-    suspend fun replaceAll(entries: List<EntryEntity>, tags: List<TagEntity>, links: List<EntryTagEntity>) {
+    suspend fun insertAllWithTags(
+        entries: List<EntryEntity>,
+        links: List<EntryTagEntity>,
+    ) {
         insertAll(entries)
+        insertLinks(links)
     }
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertLinks(links: List<EntryTagEntity>)
 }

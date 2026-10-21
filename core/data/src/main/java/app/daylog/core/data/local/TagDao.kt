@@ -1,6 +1,8 @@
 package app.daylog.core.data.local
 
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
@@ -17,6 +19,12 @@ interface TagDao {
     @Query("SELECT tagName FROM entry_tags WHERE entryUid = :entryUid")
     suspend fun tagsForEntry(entryUid: String): List<String>
 
+    /**
+     * The tags that are actually in use, with their counts.
+     *
+     * A tag that no entry carries any more is not shown, so the list is always a truthful summary
+     * of the entries rather than a history of what was once typed.
+     */
     @Query(
         """
         SELECT t.* FROM tags t
@@ -29,6 +37,9 @@ interface TagDao {
     )
     fun observeTagsInUse(): Flow<List<TagEntity>>
 
+    /**
+     * The entries carrying every one of the given tags.
+     */
     @Query(
         """
         SELECT e.uid FROM entries e
@@ -41,10 +52,11 @@ interface TagDao {
     )
     fun observeEntriesWithAllTags(tags: List<String>, tagCount: Int): Flow<List<String>>
 
-    @Transaction
-    suspend fun clearLinksForEntry(entryUid: String) {
-        deleteLinksForEntry(entryUid)
-    }
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertTag(tag: TagEntity)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun link(entryUid: String, tagName: String)
 
     @Query("DELETE FROM entry_tags WHERE entryUid = :entryUid")
     suspend fun deleteLinksForEntry(entryUid: String)
@@ -54,4 +66,43 @@ interface TagDao {
 
     @Query("DELETE FROM tags")
     suspend fun deleteAllTags()
+
+    /**
+     * Recounts every tag from the entries that carry it.
+     *
+     * Counting from the join table rather than incrementing as tags are written means the counts
+     * cannot drift out of step with the entries, whatever order things happened in.
+     */
+    @Query(
+        """
+        UPDATE tags SET count = (
+            SELECT COUNT(*) FROM entry_tags et
+            INNER JOIN entries e ON e.uid = et.entryUid
+            WHERE et.tagName = tags.name AND e.deletedAt IS NULL
+        )
+        """,
+    )
+    suspend fun recountAll()
+
+    /**
+     * Removes the tags no entry carries any more.
+     */
+    @Query(
+        """
+        DELETE FROM tags WHERE name NOT IN (
+            SELECT DISTINCT et.tagName FROM entry_tags et
+            INNER JOIN entries e ON e.uid = et.entryUid
+            WHERE e.deletedAt IS NULL
+        )
+        """,
+    )
+    suspend fun deleteUnusedTags()
+
+    @Transaction
+    suspend fun replaceAll(tags: List<TagEntity>, links: List<EntryTagEntity>) {
+        deleteAllLinks()
+        deleteAllTags()
+        tags.forEach { insertTag(it) }
+        links.forEach { link(it.entryUid, it.tagName) }
+    }
 }

@@ -1,6 +1,8 @@
 package app.daylog.core.data.local
 
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
@@ -12,6 +14,12 @@ interface MediaDao {
 
     @Query("SELECT COUNT(*) FROM media")
     fun observeCount(): Flow<Int>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(media: MediaEntity)
+
+    @Query("DELETE FROM media WHERE uid = :uid")
+    suspend fun deleteByUid(uid: String)
 
     @Query("DELETE FROM media WHERE entryUid = :entryUid")
     suspend fun deleteForEntry(entryUid: String)
