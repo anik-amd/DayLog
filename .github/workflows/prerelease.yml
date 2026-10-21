@@ -13,6 +13,10 @@ concurrency:
   group: prerelease-${{ github.ref }}
   cancel-in-progress: false
 
+# The draft release is created by the workflow, so it needs permission to write releases.
+permissions:
+  contents: write
+
 env:
   ANDROID_HOME: /usr/local/lib/android/sdk
   ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
