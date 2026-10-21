@@ -62,6 +62,13 @@ export ANDROID_HOME="${ANDROID_SDK_ROOT}"
 export ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT}"
 export PATH="${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools:${PATH}"
 
+# Put the Android CLI on the PATH for every shell, including the ones `gh codespace ssh` opens.
+# It is the supported way to install SDK packages and to drive an emulator or a device.
+sudo ln -sf "${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/android" /usr/local/bin/android
+sudo ln -sf "${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/adb" /usr/local/bin/adb 2>/dev/null || true
+sudo ln -sf "${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager" /usr/local/bin/sdkmanager 2>/dev/null || true
+sudo ln -sf "${ANDROID_SDK_ROOT}/platform-tools/adb" /usr/local/bin/adb 2>/dev/null || true
+
 echo "Installing platform ${PLATFORM_VERSION} and build tools ${BUILD_TOOLS_VERSION}..."
 if ! android sdk install \
     "platforms/android-${PLATFORM_VERSION}" \
