@@ -27,12 +27,13 @@ object DayLabels {
      * the date, with the year only when it is not the current one.
      */
     fun dayHeader(date: LocalDate, today: LocalDate, locale: Locale): String {
-        val daysApart = java.time.temporal.ChronoUnit.DAYS.between(today, date)
+        // Measured from the date to today, so a day in the past is a positive number of days ago.
+        val daysAgo = java.time.temporal.ChronoUnit.DAYS.between(date, today)
 
         return when {
-            daysApart == 0L -> "Today"
-            daysApart == 1L -> "Yesterday"
-            daysApart in 2..6 -> date.format(
+            daysAgo == 0L -> "Today"
+            daysAgo == 1L -> "Yesterday"
+            daysAgo in 2..6 -> date.format(
                 DateTimeFormatter.ofPattern("EEEE", locale),
             )
             date.year == today.year -> date.format(

@@ -45,7 +45,9 @@ class DayLabelsTest {
     @Test
     fun `the time of an entry is shown in the locale's short form`() {
         val moment = LocalDateTime.of(2026, 3, 30, 14, 32)
-        assertEquals("2:32 PM", DayLabels.time(moment, locale))
+        // The space before AM and PM is a narrow no-break space in the current CLDR data, so the
+        // comparison normalises it rather than hard-coding one particular space character.
+        assertEquals("2:32 PM", DayLabels.time(moment, locale).replace(' ', ' '))
     }
 
     @Test
