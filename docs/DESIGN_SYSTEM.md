@@ -54,7 +54,8 @@ chips. A genuine weight axis means no synthetic bold.
 
 | Role | Family | Size / line | Weight | Used for |
 |---|---|---|---|---|
-| `entryTitle` | Spectral | 20 / 27 | SemiBold | An entry's title |
+| `entryTitle` | Spectral | 20 / 27 | SemiBold | An entry's title, and a first-level heading |
+| `entrySubheading` | Spectral | 15 / 21 | SemiBold | A second-level heading inside an entry |
 | `entryBody` | Spectral | 17 / 26 | Normal | Entry prose |
 | `chromeTitle` | Instrument Sans | 20 / 26 | SemiBold | Screen headings |
 | `label` | Instrument Sans | 13 / 18 | Medium | Buttons, chips, field labels |
@@ -62,6 +63,10 @@ chips. A genuine weight axis means no synthetic bold.
 
 Roles are named by purpose, not by size, so a screen cannot quietly use `entryBody` for a button
 label. Sentence case everywhere — no tracked capitals.
+
+Spectral is cut at three weights — Regular, Medium and SemiBold — so **bold** in markdown is the
+SemiBold face. Asking for a weight the family does not have would fall back to the same face
+anyway, but silently.
 
 ---
 

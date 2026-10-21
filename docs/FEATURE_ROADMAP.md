@@ -82,13 +82,16 @@ saves.
 
 ## P4 — Editor and markdown
 
-- [ ] Full-screen editor with a formatting toolbar *(the screen exists; the markdown does not)*
-- [ ] Custom markdown parser → `AnnotatedString`: bold, italic, underline, H1, H2, bullets,
+- [x] Full-screen editor with a formatting toolbar *(the screen exists; the toolbar is a first cut)*
+- [x] Custom markdown parser → `AnnotatedString`: bold, italic, underline, H1, H2, bullets,
       numbered, code
+- [x] The timeline renders markdown rather than showing the source
 - [ ] Live preview toggle
+- [ ] The toolbar works on the selection rather than on the whole entry
 - [ ] Parser ↔ toolbar round-trip
 
-**Gate:** parser table tests and a round-trip test green.
+**Gate:** parser table tests green — sixteen of them, covering the markers, the escapes and the
+markers that are not closed.
 
 ---
 
