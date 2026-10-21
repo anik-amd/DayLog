@@ -115,10 +115,11 @@ object MarkdownParser {
             }
 
             val marker = MARKERS.firstOrNull { text.startsWith(it, index) }
-            if (marker != null) {
+            if (marker != null && opensHere(text, index)) {
                 val close = text.indexOf(marker, index + marker.length)
-                // A marker that is never closed is just a character.
-                if (close > index + marker.length) {
+                // A marker that is never closed, or that closes in the middle of a word, is just a
+                // character.
+                if (close > index + marker.length && closesHere(text, close + marker.length)) {
                     val content = text.substring(index + marker.length, close)
                     flush()
                     pushStyle(styleFor(marker, typography, colors))
@@ -159,6 +160,21 @@ object MarkdownParser {
      */
     private fun isMarker(character: Char): Boolean =
         character == '*' || character == '_' || character == '`' || character == '#'
+
+    /**
+     * Whether a marker may start here.
+     *
+     * A marker in the middle of a word is part of the word: `a*b*c` is not italics, it is
+     * something with asterisks in it.
+     */
+    private fun opensHere(text: String, index: Int): Boolean =
+        index == 0 || !text[index - 1].isLetterOrDigit()
+
+    /**
+     * Whether a marker may end here.
+     */
+    private fun closesHere(text: String, end: Int): Boolean =
+        end >= text.length || !text[end].isLetterOrDigit()
 
     /**
      * The part of a text style that can be applied to a run of text.
