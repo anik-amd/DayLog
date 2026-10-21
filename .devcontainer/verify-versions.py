@@ -11,9 +11,8 @@ Usage: python3 .devcontainer/verify-versions.py
 from __future__ import annotations
 
 import re
+import subprocess
 import sys
-import urllib.error
-import urllib.request
 from pathlib import Path
 
 CATALOG = Path("gradle/libs.versions.toml")
@@ -87,13 +86,23 @@ def latest_version(coordinate: str) -> str | None:
         return None
     path = f"{group.replace('.', '/')}/{artifact}/maven-metadata.xml"
     url = f"{repository_for(group)}/{path}"
+
+    # curl is used rather than urllib because the standard library in a minimal container image
+    # may not ship the http modules.
     try:
-        with urllib.request.urlopen(url, timeout=25) as response:
-            body = response.read().decode("utf-8", "replace")
-    except (urllib.error.URLError, OSError):
+        result = subprocess.run(
+            ["curl", "-fsSL", "--max-time", "25", url],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except FileNotFoundError:
         return None
 
-    match = re.search(r"<release>([^<]*)</release>", body)
+    if result.returncode != 0:
+        return None
+
+    match = re.search(r"<release>([^<]*)</release>", result.stdout)
     return match.group(1) if match else None
 
 
