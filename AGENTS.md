@@ -230,7 +230,8 @@ Read `/docs/DESIGN_SYSTEM.md` before touching a screen. The short version:
 - Spectral for entry text, Instrument Sans for chrome.
 - **Accent marks data, never chrome.** It is not a button colour and not a navigation colour.
 - Flat surfaces. Separation is a 1dp rule or one tone step. No shadows on cards.
-- The margin rule is the app's signature: dates sit in a 72dp gutter beside a vertical hairline.
+- The margin rule is the app's signature: dates sit in a gutter beside a vertical hairline, and
+  the gutter grows with the text so a day name is never cut off.
 
 ---
 
