@@ -13,10 +13,40 @@ recurring bugs, not to reach a coverage number.
 | Repositories, ViewModels | JUnit4, `kotlinx-coroutines-test`, Turbine | yes | ~1s |
 | Room DAOs, FTS, migrations | Robolectric 4.17 | yes | ~10s |
 | Compose UI | `ui-test-junit4` under Robolectric | yes | ~30s |
+| **The design itself** | **Compose Preview Screenshot Testing** | **yes** | **~1 min** |
 | Real device | manual, in the pre-release phase | no | — |
 
 No emulator in CI. Emulator tests are where the minutes and the flakes live, and the logic worth
 protecting is already covered on the JVM.
+
+---
+
+## The design is tested too
+
+`core/designsystem` and the screens are rendered on the JVM by Compose Preview Screenshot Testing
+and compared against reference images that are committed to the repository.
+
+This is the only way the design is ever looked at in CI, and it is worth as much as the unit
+tests: a change that breaks the margin rule, truncates a day name or makes the text unreadable
+fails the build rather than being noticed weeks later.
+
+```
+app/src/screenshotTest/          the previews that are rendered
+app/src/screenshotTestDebug/reference/   the approved images
+```
+
+The previews are written against real content — a long entry, a short one, a tagged one, a place
+and the weather — because a design that only works with tidy text is a design that only works in
+a demo. Every screen has a preview for Paper, for Night and for a large text scale.
+
+```bash
+./gradlew updateDebugScreenshotTest    # approve the current appearance
+./gradlew validateDebugScreenshotTest  # fail if the appearance changed
+```
+
+> The standalone screenshot plugin is the older of the two ways to do this. AGP 9.5 has a newer one
+> built into the plugin itself; the project stays on AGP 8.13, so it uses this one. Moving to the
+> newer setup is a separate decision, not a side effect.
 
 ---
 
@@ -67,10 +97,11 @@ real thread:
 
 ```kotlin
 @Test
-fun `autosave waits for the writer to go quiet`() = runTest {
-    // ...
-}
+fun `autosave waits for the writer to go quiet`() = runTest { ... }
 ```
+
+`core:testing` holds `TestDispatchers`, the fakes and the test data, so a test reads as the one
+thing it is about rather than a wall of constructor arguments.
 
 ### Flows
 
@@ -111,6 +142,20 @@ CI runs `./gradlew test assembleDebug`. A phase is not finished until both are g
 
 ---
 
+## Checking the versions
+
+The version matrix in `gradle/libs.versions.toml` is pinned on purpose: it is the set of versions
+known to work together. This script proves the pins are still real and reports what has moved on,
+so a bump is a decision rather than an accident.
+
+```bash
+python3 .devcontainer/verify-versions.py
+```
+
+A newer version is not a reason to bump.
+
+---
+
 ## Manual checks
 
 These need a device and are done in the pre-release phase, not in CI:
@@ -129,5 +174,6 @@ A change is done when:
 
 1. Its tests exist and pass.
 2. `./gradlew test assembleDebug` is green in the Codespace.
-3. The rules in `AGENTS.md` and `docs/DESIGN_SYSTEM.md` are respected.
-4. The changelog is updated if a user can see the difference.
+3. If it changed how something looks, the reference images have been updated and looked at.
+4. The rules in `AGENTS.md` and `docs/DESIGN_SYSTEM.md` are respected.
+5. The changelog is updated if a user can see the difference.

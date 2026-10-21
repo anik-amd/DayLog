@@ -109,6 +109,28 @@ is to prevent data loss and recurring bugs, not to reach a coverage number.
 Tests live next to the code they test: `src/test/java/...`. Test names read as sentences:
 ``fun `tags are extracted from the start of the content`() ``.
 
+### The design is tested too
+
+Compose Preview Screenshot Testing renders the screens on the JVM and compares them against
+reference images committed to the repository. A change that breaks the margin rule or truncates a
+day name fails the build.
+
+- Changed how something looks: `./gradlew updateDebugScreenshotTest`, then **look at the images**
+  before committing them.
+- Checking nothing changed by accident: `./gradlew validateDebugScreenshotTest`.
+
+Never update the reference images without looking at them. They are the only way the design is
+ever seen, so a blind update makes them worthless.
+
+### Checking the versions
+
+```bash
+python3 .devcontainer/verify-versions.py
+```
+
+The version matrix is pinned because it is known to work together. A newer version is not a reason
+to bump.
+
 ---
 
 # 6. Where to work
@@ -116,8 +138,12 @@ Tests live next to the code they test: `src/test/java/...`. Test names read as s
 Development happens in the **GitHub Codespace**, not on a laptop. The Codespace has the Android
 SDK, the Gradle cache and enough disk for the build; a desktop checkout does not.
 
-- Write code in the Codespace or sync it there with `gh codespace cp`.
-- Run `./gradlew` in the Codespace. Never expect a local machine to have the Android SDK.
+- Write the code, push it, and pull it in the Codespace. Never expect a local machine to have the
+  Android SDK.
+- Run `./gradlew` in the Codespace.
+- The **Android CLI** drives the app from the terminal: `android run` deploys an APK, `android
+  screen capture` takes a screenshot, `android layout` dumps the view tree, `android input` taps
+  and types.
 - Commit and push from whichever side holds the change.
 
 ---
@@ -224,6 +250,12 @@ Run the type-safe build and the tests in the Codespace:
 
 ```bash
 ./gradlew test assembleDebug
+```
+
+If the work changed how something looks, update the reference images and look at them:
+
+```bash
+./gradlew updateDebugScreenshotTest
 ```
 
 If it does not pass, it is not done. Report what changed and what you verified.

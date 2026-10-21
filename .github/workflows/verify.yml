@@ -49,11 +49,23 @@ jobs:
       - name: Run tests and assemble
         run: ./gradlew test assembleDebug --stacktrace
 
+      - name: Check the design has not changed
+        run: ./gradlew validateDebugScreenshotTest --stacktrace
+
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-reports
           path: '**/build/reports/tests/**'
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Upload the screenshot report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshot-report
+          path: '**/build/reports/screenshotTest/**'
           retention-days: 7
           if-no-files-found: ignore

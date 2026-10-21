@@ -171,13 +171,36 @@ enough disk to build; a laptop checkout does not.
 ```bash
 gh codespace create -R anik-amd/DayLog \
   --devcontainer-path .devcontainer/devcontainer.json \
-  -m standardLinux
+  -m standardLinux32gb
 ```
 
-`.devcontainer/setup-android.sh` installs the command-line tools and pins `platforms;android-36`
-and `build-tools;36.0.0`, so every rebuild gets the same toolchain.
+`.devcontainer/Dockerfile` starts from the java image and removes a stale Yarn APT source whose
+signing key has expired. Left in place, every `apt-get update` fails on it, which breaks every
+devcontainer feature and leaves the Codespace on the bare fallback image with no JDK.
 
-The loop: write code, sync it with `gh codespace cp`, run `./gradlew` there, commit, push.
+`.devcontainer/setup-android.sh` installs the SDK through `scripts/install-android-sdk.sh`, the
+same script the CI workflows call, so the two cannot drift apart. The SDK is installed with the
+**Android CLI** (`android sdk install`) rather than `sdkmanager`, which Google has deprecated.
+
+The Android CLI is also how the app is driven: `android run` deploys an APK, `android screen
+capture` takes a screenshot, `android layout` dumps the view tree, and `android input` taps and
+types. It is the one tool that covers the whole loop from a terminal.
+
+```bash
+android run --apks=app/build/outputs/apk/debug/app-debug.apk
+android screen capture -o screen.png
+android layout --pretty
+```
+
+The loop: write code, push, pull in the Codespace, run `./gradlew` there, commit, push.
+
+---
+
+## Checking the versions
+
+`gradle/libs.versions.toml` is pinned on purpose. `python3 .devcontainer/verify-versions.py`
+proves every pin still exists on the repository that serves it and reports what has moved on, so
+a bump is a decision rather than an accident.
 
 ---
 
