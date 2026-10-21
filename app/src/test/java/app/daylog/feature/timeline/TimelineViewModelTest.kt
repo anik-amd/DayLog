@@ -45,7 +45,7 @@ class TimelineViewModelTest {
             val viewModel = viewModel()
 
             viewModel.onDraftChanged("a thought")
-            advanceTimeBy(TimelineViewModel.AUTOSAVE_DELAY_MS - 1)
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS - 1)
 
             assertEquals(0, entryDao.stored.size)
         }
@@ -56,7 +56,7 @@ class TimelineViewModelTest {
             val viewModel = viewModel()
 
             viewModel.onDraftChanged("a thought")
-            advanceTimeBy(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
 
             assertEquals(1, entryDao.stored.size)
             assertEquals("a thought", entryDao.stored.first().content)
@@ -68,11 +68,11 @@ class TimelineViewModelTest {
             val viewModel = viewModel()
 
             viewModel.onDraftChanged("a")
-            advanceTimeBy(300)
+            advance(300)
             viewModel.onDraftChanged("a th")
-            advanceTimeBy(300)
+            advance(300)
             viewModel.onDraftChanged("a thought")
-            advanceTimeBy(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
 
             assertEquals(1, entryDao.stored.size)
             assertEquals("a thought", entryDao.stored.first().content)
@@ -85,7 +85,7 @@ class TimelineViewModelTest {
             val states = collectStates(viewModel)
 
             viewModel.onDraftChanged("a thought")
-            advanceTimeBy(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
             runCurrent()
 
             assertEquals("", states.last().draft)
@@ -97,7 +97,7 @@ class TimelineViewModelTest {
             val viewModel = viewModel()
 
             viewModel.onDraftChanged("   ")
-            advanceTimeBy(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
 
             assertEquals(0, entryDao.stored.size)
         }
@@ -108,7 +108,7 @@ class TimelineViewModelTest {
             val viewModel = viewModel()
 
             viewModel.onDraftChanged("a thought #work")
-            advanceTimeBy(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
 
             assertEquals(listOf("work"), tagDao.tagsForEntry(entryDao.stored.first().uid))
         }
@@ -118,7 +118,7 @@ class TimelineViewModelTest {
         runTest(mainDispatcherRule.dispatcher) {
             val viewModel = viewModel()
             viewModel.onDraftChanged("a thought")
-            advanceTimeBy(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
             val uid = entryDao.stored.first().uid
 
             viewModel.deleteEntry(uid)
@@ -135,17 +135,28 @@ class TimelineViewModelTest {
             val states = collectStates(viewModel)
 
             viewModel.onDraftChanged("a thought")
-            advanceTimeBy(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
             runCurrent()
             val uid = entryDao.stored.first().uid
 
             viewModel.deleteEntry(uid)
-            advanceTimeBy(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
             runCurrent()
 
             assertEquals(0, states.last().groups.sumOf { it.entries.size })
             assertFalse(states.last().groups.any { group -> group.entries.any { it.uid == uid } })
         }
+
+    /**
+     * Moves the virtual clock and runs whatever is due.
+     *
+     * `advanceTimeBy` alone does not run the work that was scheduled for exactly the moment it
+     * reached, so the clock is followed by `runCurrent`.
+     */
+    private fun kotlinx.coroutines.test.TestScope.advance(millis: Long) {
+        advanceTimeBy(millis)
+        runCurrent()
+    }
 
     /**
      * Watches the state, so the flow is running while the test moves time.
