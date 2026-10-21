@@ -1,0 +1,14 @@
+version: 2
+
+updates:
+  # Gradle dependencies are pinned exactly in gradle/libs.versions.toml. Dependabot proposes the
+  # bump as one reviewable pull request so the version matrix is never updated piecemeal.
+  - package-ecosystem: gradle
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      gradle:
+        patterns:
+          - '*'

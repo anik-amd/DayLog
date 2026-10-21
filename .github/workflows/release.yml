@@ -1,0 +1,80 @@
+name: Release
+
+# Publishes a signed APK as a GitHub release when `main` is tagged.
+#
+# The tag is the trigger: `v0.2.0` in `gradle/libs.versions.toml` must match the tag, so a release
+# can never be published under a version the app does not claim.
+on:
+  push:
+    tags:
+      - 'v*'
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept SDK licenses
+        run: sdkmanager --licenses <<< $'y\n' || true
+
+      - name: Install SDK platform
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0" "platform-tools"
+
+      - name: Restore signing key
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_KEY_STORE_PASSWORD: ${{ secrets.SIGNING_KEY_STORE_PASSWORD }}
+          SIGNING_KEY_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_KEY_PASSWORD }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/keystore"
+          echo "$SIGNING_KEY" | tr -d '\r\n' | base64 -d > "$RUNNER_TEMP/keystore/upload.keystore"
+          {
+            echo "DAYLOG_KEYSTORE_PATH=$RUNNER_TEMP/keystore/upload.keystore"
+            echo "DAYLOG_STORE_PASSWORD=$SIGNING_KEY_STORE_PASSWORD"
+            echo "DAYLOG_KEY_ALIAS=upload"
+            echo "DAYLOG_KEY_PASSWORD=$SIGNING_KEY_KEY_PASSWORD"
+          } >> "$GITHUB_ENV"
+
+      - name: Check tag matches version
+        run: |
+          VERSION=$(grep -E '^versionName\s*=' gradle/libs.versions.toml | head -1 | cut -d'"' -f2)
+          TAG="${GITHUB_REF_NAME#v}"
+          if [ "$VERSION" != "$TAG" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match versionName $VERSION in gradle/libs.versions.toml"
+            exit 1
+          fi
+
+      - name: Build release APK
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: DayLog ${{ github.ref_name }}
+          body_path: CHANGELOG.md
+          files: app/build/outputs/apk/release/*.apk

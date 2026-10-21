@@ -1,125 +1,84 @@
 # DayLog
 
-> ⚠️ **Pre-Release Notice**  
-> This app is in active development (v0.1.x). Bugs, unfinished features, and UI changes are expected.  
-> **Use at your own risk.** Backup your data regularly and report issues on GitHub.
+**A fast, minimal diary for Android. Write the thought, keep moving.**
 
-[![License](https://img.shields.io/badge/license-MIT%20%2B%20Non--Commercial-red)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.1.1-blue)](package.json)
-[![Platform](https://img.shields.io/badge/platform-Android-green)](https://play.google.com/store)
-[![React Native](https://img.shields.io/badge/React%20Native-0.83.2-61DAFB)](https://reactnative.dev)
-[![Expo](https://img.shields.io/badge/Expo-55-blue)](https://expo.dev)
+DayLog is an offline-first diary built around one idea: capturing a thought should take seconds,
+not setup. The app opens straight into your timeline with the cursor already waiting. You type, and
+it saves itself.
 
-**DayLog** is a fast, minimal, and offline-first personal diary application designed to capture thoughts instantly without distractions. It emphasizes speed and a smooth quick-entry experience, allowing users to write as naturally as texting in a messaging app.
-
-## Core Philosophy
-
-- **Speed Over Complexity:** The app is built with rapid thought capture in mind. Open the app and start typing immediately.
-- **Minimal & Distraction-Free:** Unnecessary features have been omitted to maintain a calm and clean user interface. 
-- **Offline-First Storage:** All diary entries and media reside strictly on the local device by default. Backups happen over Google Drive, ensuring complete control over user data.
-- **Robustness:** No over-engineering and minimal reliance on heavy libraries. It prioritizes a reliable user experience out of the box.
-
-## Features
-
-- **Quick Entry** - Start typing instantly with auto-save
-- **Timeline View** - Browse entries in a clean chronological list
-- **Markdown Support** - Write with formatting, keep full editability
-- **Media Attachments** - Add photos to entries
-- **Tag System** - Organize entries with custom tags
-- **Calendar View** - Navigate entries by date
-- **Search** - Find entries quickly
-- **Google Drive Backup** - Optional cloud backup
-- **Multiple Themes** - Choose your preferred color scheme
-
-## Tech Stack
-
-- **Framework:** React Native + Expo (Managed Workflow)
-- **Language:** TypeScript
-- **Styling:** NativeWind (Tailwind CSS for React Native)
-- **Routing:** React Navigation (Native Stack)
-- **Storage:** Expo SQLite for rapid database access and local file storage for media.
-- **Format:** Fully editable Markdown text system.
+> **Pre-release notice**
+> This is the native rewrite of DayLog (v0.2.0). It is in active development and being tested on
+> real devices before release. Back up your data regularly and report issues on GitHub.
 
 ---
 
-## Getting Started
+## What it does
 
-### Prerequisites
+- **Timeline** — entries grouped by day, dates set in the margin like a ledger
+- **Quick entry** — one line at the bottom that grows as you type and saves itself
+- **Full editor** — a proper writing screen with a formatting toolbar and live preview
+- **Markdown** — `**bold**`, `*italic*`, `__underline__`, headings, lists. Stored as Markdown, stays editable as Markdown
+- **Tags** — type `#hashtag` and it is picked up. Filter by several tags at once
+- **Place & weather** — attach a place by name; the weather there is fetched and kept with the entry
+- **Calendar** — a month grid with a mark on every day you wrote
+- **Search** — full-text across entries and tags
+- **Photos** — attach from the system picker, no permission prompt
+- **Themes** — Paper (light), Night (dark), or follow the system. The accent can follow your wallpaper
+- **Your data stays yours** — everything is on the device. Export to JSON any time
 
-- Node.js (LTS version recommended)
-- npm or yarn
-- Expo CLI
-- Android Studio (for Android development)
-- Xcode (for iOS development, macOS only)
+---
 
-### Installation
+## Built with
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/anik-amd/DayLog.git
-   cd DayLog
-   ```
+Kotlin · Jetpack Compose · Room · DataStore · Coroutines
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+No analytics. No accounts. No ads. No tracking. The only network request the app ever makes is to
+look up a place name and its weather.
 
-3. Start the development server:
-   ```bash
-   npx expo start
-   ```
+---
 
-4. Run on your preferred platform:
-   - Press `a` for Android
-   - Press `i` for iOS
-   - Press `w` for Web
+## Building from source
 
-### Building APK
-
-To build a standalone Android APK:
+The app is built in a [GitHub Codespace](https://github.com/anik-amd/DayLog) — the Android SDK and
+the Gradle cache live there, so no local Android setup is needed.
 
 ```bash
-npx expo prebuild --platform android
-cd android
-./gradlew assembleRelease
+gh codespace create -R anik-amd/DayLog \
+  --devcontainer-path .devcontainer/devcontainer.json \
+  -m standardLinux
+
+gh codespace ssh --codename <name> -- "./gradlew test assembleDebug"
 ```
 
-The APK will be at `android/app/build/outputs/apk/release/`
+Requirements: JDK 21, Android SDK with platform 36 and build-tools 36.0.0.
+
+---
+
+## Releases
+
+`dev` → `pre-release` → `main`.
+
+A push to `pre-release` builds a signed APK and opens a draft release for testing on a real
+device. Once it is confirmed, it is merged into `main`, tagged, and published.
+
+The application id and signing key are unchanged from the previous React Native release, so the
+native app installs over the existing one.
 
 ---
 
 ## Documentation
 
-For detailed documentation, see the `/docs` folder:
+- [`docs/SPEC.md`](docs/SPEC.md) — what the app is
+- [`docs/TECHNICAL_ARCHITECTURE.md`](docs/TECHNICAL_ARCHITECTURE.md) — how it is built
+- [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) — tokens, type, rules
+- [`docs/FEATURE_ROADMAP.md`](docs/FEATURE_ROADMAP.md) — what is being built
+- [`docs/TESTING.md`](docs/TESTING.md) — what is tested
+- [`AGENTS.md`](AGENTS.md) — the rules for AI agents working on this repo
 
-| File | Description |
-|------|-------------|
-| [SPEC.md](docs/SPEC.md) | Philosophy, features, and app goals |
-| [TECHNICAL_ARCHITECTURE.md](docs/TECHNICAL_ARCHITECTURE.md) | Technical architecture and design |
-| [FEATURE_ROADMAP.md](docs/FEATURE_ROADMAP.md) | Development roadmap and priorities |
-| [THEME_CREATION.md](docs/THEME_CREATION.md) | Guide to creating new color themes |
-
----
-
-## Contributing
-
-Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details on how to get started.
-
-For AI agents contributing to this project, please read [AGENTS.md](AGENTS.md) for development workflow and guidelines.
+The previous React Native app is preserved on the `legacy/react-native` branch.
 
 ---
 
 ## License
 
-This project is licensed under the **MIT License with Non-Commercial Use Restriction**.
-
-See [LICENSE](LICENSE) for full details.
-
----
-
-## Acknowledgments
-
-- [Expo](https://expo.dev) - For the amazing development platform
-- [React Native](https://reactnative.dev) - For the cross-platform framework
-- [NativeWind](https://nativewind.dev) - For Tailwind CSS on React Native
+MIT + Non-Commercial. See [`LICENSE`](LICENSE).

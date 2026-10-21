@@ -1,407 +1,215 @@
-# DayLog – Technical Architecture Specification
+# DayLog — Technical Architecture
 
-This document defines the full technical structure of the DayLog application.
-It is written specifically for AI agents that will generate and maintain the codebase.
-
-This file focuses only on architecture, folder structure, data flow, and implementation rules.
+Kotlin + Jetpack Compose. No bridge, no JavaScript thread, no runtime layout pass.
 
 ---
 
-# 1. Technology Stack
+## Modules
 
-## 1.1 Frontend
-
-The application must be built using:
-
-- React Native
-- Expo (managed workflow)
-- TypeScript
-- NativeWind (Tailwind for React Native)
-- React Navigation
-
-The codebase must be written in a way that it can later support:
-
-- React Native Web
-- Desktop version (via web build)
-
----
-
-## 1.2 Storage
-
-The app must work **offline-first**.
-
-Required storage systems:
-
-- SQLite (for entries and metadata)
-- Local file storage (for media files)
-- AsyncStorage (for settings)
-- JSON export system (for backups)
-- Google Drive API (backup only, not real-time sync)
-
----
-
-## 1.3 External Services
-
-The app integrates with:
-
-- **Open-Meteo API**: Free weather API for fetching current weather data
-- **Fuse.js**: Client-side fuzzy search for entry search functionality
-- **Google OAuth + Drive API**: For backup functionality
-
----
-
-## 1.3 Content System
-
-Entries must be stored as:
-
-- Markdown text
-- Media file references
-- Timestamps
-
-Markdown must not be converted before saving. It must always be stored as raw text.
-
----
-
-# 2. Project Folder Structure
-
-The project must follow a clean and scalable folder structure.
+Six Gradle modules. The split exists so the fast things stay fast: the pure-Kotlin modules have
+no Android dependency, so their tests run on the JVM in milliseconds.
 
 ```
-src/
-│
-├── app/
-│   ├── entries/
-│   │   ├── EntriesScreen.tsx      # Main timeline screen
-│   │   ├── EntryCard.tsx          # Entry display component
-│   │   ├── CalendarStrip.tsx      # Horizontal calendar strip
-│   │   └── ReadEntryScreen.tsx    # Full entry view screen
-│   │
-│   ├── editor/
-│   │   ├── QuickEntryBar.tsx      # Bottom quick entry input
-│   │   ├── FullScreenEditor.tsx   # Full screen editor
-│   │   ├── Picker.tsx             # Custom date/time picker (web)
-│   │   ├── ClockPicker.tsx        # Time picker component
-│   │   └── WebPicker.tsx          # Web picker component
-│   │
-│   ├── settings/
-│   │   └── SettingsScreen.tsx    # Settings page
-│   │
-│   ├── search/
-│   │   └── SearchScreen.tsx       # Search screen
-│   │
-│   ├── map/
-│   │   └── MapScreen.tsx          # Map screen (placeholder)
-│   │
-│   └── navigation/
-│       ├── RootNavigator.tsx      # Root navigation
-│       └── TabBar.tsx             # Custom bottom tab bar
-│
-├── components/
-│   ├── ui/
-│   │   ├── ConfirmationModal.tsx # Confirmation dialog
-│   │   ├── Pill.tsx               # Reusable pill component
-│   │   └── ...
-│   │
-│   ├── TagStrip.tsx               # Horizontal tag strip
-│   ├── TagPill.tsx                # Tag pill component
-│   └── TagSelectorModal.tsx       # Tag selection modal
-│
-├── database/
-│   ├── db.ts                      # SQLite initialization
-│   ├── entries.ts                 # Entry CRUD operations
-│   ├── tags.ts                    # Tag management
-│   └── media.ts                   # Media CRUD operations
-│
-├── storage/
-│   └── settings.ts                # AsyncStorage settings
-│
-├── services/
-│   ├── WeatherService.ts          # Open-Meteo API integration
-│   └── BackupEngine.ts            # Google Drive backup
-│
-├── themes/
-│   └── colors.ts                  # Color scheme definitions
-│
-├── contexts/
-│   └── ColorSchemeContext.tsx     # Theme context provider
-│
-├── hooks/
-│   ├── useThemeColors.ts          # Theme colors hook
-│   ├── useAutoSave.ts             # Auto-save hook
-│   ├── useResponsive.ts           # Device info (tablet, landscape, font scale)
-│   └── useKeyboardHeight.ts       # Keyboard height detection
-│
-├── utils/
-│   ├── responsive.ts              # Scaling functions (moderateScale, breakpoints)
-│   └── spacing.ts                 # Responsive spacing constants
-│
-├── markdown/
-│   └── MarkdownRenderer.tsx       # Markdown rendering
-│
-└── types/
-    ├── Entry.ts                   # Entry type definition
-    └── Media.ts                   # Media type definition
+daylog/
+├─ app/                    application, DI, navigation, permissions
+├─ core/
+│  ├─ common/              AppResult, AppError, dispatchers, date/text helpers   (pure JVM)
+│  ├─ model/               Entry, Tag, Media, domain rules                       (pure JVM)
+│  ├─ data/                Room, DataStore, repositories, backup, weather
+│  ├─ designsystem/        Ink & Margin: tokens, theme, components
+│  └─ testing/             fakes, fixtures, test helpers
+├─ gradle/libs.versions.toml   every version, one file
+└─ .devcontainer/              the Codespace definition
 ```
 
----
-
-# 3. Data Model
-
-## 3.1 Entry Type
-
-Every journal entry must follow this structure:
+### Dependency direction
 
 ```
-id: string
-content: string
-createdAt: number
-updatedAt: number
-date: string            // YYYY-MM-DD format
-time?: string           // HH:MM format, optional
-latitude?: number       // GPS latitude, optional
-longitude?: number      // GPS longitude, optional
-locationFull?: string   // Full address, optional
-locationDisplay?: string // Short display address, optional
-weather?: string        // e.g., "22°C Clear sky", optional
-tags?: string           // Comma-separated extracted hashtags, optional
-media?: Media[]         // Array of media items, optional
+app ──▶ core:data ──▶ core:model ──▶ core:common
+ │
+ ├──▶ core:designsystem
+ └──▶ core:model
 ```
 
----
+One way only. `core:model` and `core:common` are plain Kotlin modules — they cannot even see
+Android classes, which is what guarantees their tests are fast and hermetic.
 
-## 3.2 Media Type
+`core:data` does not depend on `core:designsystem`. Data does not know what colour is.
 
-Media must follow this structure:
-
-```
-type: "image" | "video" | "audio" | "file"
-path: string
-preview?: string
-createdAt: number
-```
+`core:testing` is a test-only module. It is consumed with `testImplementation` only, so it never
+ends up in a shipped APK.
 
 ---
 
-# 4. Database Structure (SQLite)
+## Why these versions
 
-## Table: entries
+| Piece | Version | Reason |
+|---|---|---|
+| Gradle | 8.14.6 | Latest 8.14 patch. AGP 8.13 needs 8.13+. |
+| AGP | 8.13.2 | Last 8.x stable. Caps compileSdk at 36, avoiding AGP 9's plugin-model break. |
+| Kotlin | 2.3.20 | Matches KSP 2.3.12's stdlib dependency exactly. |
+| KSP | 2.3.12 | Decoupled from the Kotlin version since 2.3.0. |
+| Compose compiler | 2.3.20 | Must equal the Kotlin version. |
+| Compose BOM | 2026.06.01 | ui/material3 1.11.4. Needs compileSdk 35 only. |
+| compileSdk / targetSdk | 36 | Newest stable platform. |
+| minSdk | 26 | Android 8.0, ~97% of devices, and `java.time` without desugaring. |
+| Room | 2.8.5 | Needs compileSdk 34 only. |
+| DataStore | 1.3.0 | compileSdk 34. |
+| core-ktx | 1.17.0 | 1.19.x needs compileSdk 37, which AGP 8.x cannot compile. |
+| activity-compose | 1.13.0 | compileSdk 36, needs AGP 8.9.1+. |
+| lifecycle | 2.10.0 | 2.11.x needs compileSdk 37. |
+| navigation-compose | 2.9.8 | 2.10.x needs compileSdk 37. |
+| coil3 | 3.2.0 | 3.6.3 needs compileSdk 37. |
+| Robolectric | 4.17 | Supports API 36. |
 
-Columns:
+The constraint that drives this table is **compileSdk 36**. Several newer AndroidX releases
+require compileSdk 37, which in turn requires AGP 9, whose Kotlin plugin model is a breaking
+change. Staying on AGP 8.13.2 costs a few library versions and buys a build that is known to
+work.
 
-```
-id TEXT PRIMARY KEY
-content TEXT
-createdAt INTEGER
-updatedAt INTEGER
-date TEXT
-time TEXT
-latitude REAL
-longitude REAL
-locationFull TEXT
-locationDisplay TEXT
-weather TEXT
-tags TEXT
-```
-
-Indexes:
-- `idx_entries_date` on `date` column
+Every version is pinned exactly. No ranges, no `latest`. One file to bump.
 
 ---
 
-## Table: media
+## Build configuration
 
-Columns:
+`gradle.properties`:
 
-```
-id TEXT PRIMARY KEY
-entryId TEXT
-type TEXT
-path TEXT
-createdAt INTEGER
+```properties
+org.gradle.jvmargs=-Xmx3072m -Dfile.encoding=UTF-8
+org.gradle.parallel=true
+org.gradle.caching=true
+org.gradle.configuration-cache=true
 ```
 
+JDK 21 everywhere, CI and Codespace alike. Bytecode targets Java 17.
+
+`gradle/libs.versions.toml` is the single source of truth for versions. Nothing else names a
+version.
+
 ---
 
-## Table: tags
+## Data layer
 
-Columns:
+### Room
 
 ```
-name TEXT PRIMARY KEY
-count INTEGER DEFAULT 0
-createdAt INTEGER
+entries   uid, content, createdAt, updatedAt, deletedAt,
+          placeName, placeLat, placeLon,
+          weatherSummary, weatherCode, syncedAt
+tags      name, count
+entry_tags  entryUid, tagName          (join table)
+media     uid, entryUid, type, path, thumbnailPath, createdAt
 ```
 
-Used for tracking tag usage counts and sorting by popularity.
+**Sync-ready shape.** `uid` is a UUID that exists on every device. `updatedAt` orders changes.
+`deletedAt` is a tombstone rather than a row removal, so a delete can be replicated. `syncedAt` is
+nullable and reserved for a future cloud layer. Adding sync later needs no migration.
+
+`exportSchema = true`, schemas committed under `core/data/schemas/`, so every schema change is
+reviewable and migration tests have a baseline.
+
+Deleting an entry soft-deletes it. The DAO filters tombstones out of every read, so no screen can
+accidentally show one.
+
+### Search
+
+Room FTS4 with `contentEntity`, indexing entry content and tag names. If FTS proves troublesome
+the fallback is a `LIKE` query behind the same repository interface.
+
+### Settings
+
+DataStore Preferences. `themeMode` and `accentSource` today.
+
+### Backup
+
+JSON, schema `version: 2.0`. Export writes the file, import reads it back after validation.
+This is also the interchange format a future Drive or Dropbox backup will use, so the format does
+not need to change when that arrives.
+
+### Weather and places
+
+Open-Meteo — geocoding and forecast, no API key. The client sits behind an interface so tests
+use a fake. `INTERNET` is the only permission.
 
 ---
 
-# 5. Entry Creation Flow
+## Dependency injection
 
-This section defines exactly how the app must create entries.
+Manual. `DayLogApplication` builds an `AppContainer` and hands it down explicitly.
 
-### Step 1: User types in quick entry bar
-
-The app must immediately create a temporary entry in memory.
-
-### Step 2: Auto-save triggers
-
-Auto-save must trigger when:
-
-- user stops typing
-- user exits the app
-- user navigates away
-
-### Step 3: Save to SQLite
-
-The entry must be saved immediately to SQLite.
-
-### Step 4: Media is attached (if any)
-
-Media must be saved locally first, then linked to the entry.
+A DI framework would add an annotation processor, a runtime, and a learning curve, in exchange for
+solving a problem this app does not have — the graph is a handful of objects. Every dependency is
+visible at the point of use, and a test can substitute its own without a container.
 
 ---
 
-# 6. Editor System Architecture
+## Navigation
 
-The editor must be divided into 3 components.
-
-## 6.1 QuickEntryBar
-
-Purpose:
-
-- fast 1–2 line entry
-- appears at bottom of timeline
+`androidx.navigation.compose`. A `NavHost` in `MainActivity` with the timeline as the start
+destination and the full editor, calendar, search and settings as routes.
 
 ---
 
-## 6.2 ExpandedEditor
+## Performance
 
-Purpose:
+Compose draws directly; there is no bridge and no view inflation.
 
-- appears when text becomes longer
-- still remains on the same screen
-
----
-
-## 6.3 FullScreenEditor
-
-Purpose:
-
-- used for long writing
-- supports full markdown editing
-- supports media attachments
+- `LazyColumn` for the timeline, keyed by entry uid.
+- Room queries return `Flow`, so the list updates without manual refresh.
+- No image decoding on the main thread. Thumbnails are pre-sized on write.
+- Release builds run R8 with `proguard-rules.pro` keeping `kotlinx.serialization` models.
+- `androidx.profileinstaller` ships a baseline profile.
 
 ---
 
-# 7. Media Handling System
+## Where the code runs
 
-Media must be handled using a centralized system.
+The Codespace is the development environment. It has the Android SDK, the Gradle cache and
+enough disk to build; a laptop checkout does not.
 
-## Required features:
+```bash
+gh codespace create -R anik-amd/DayLog \
+  --devcontainer-path .devcontainer/devcontainer.json \
+  -m standardLinux
+```
 
-- Save image locally
-- Save video locally
-- Record audio
-- Store file paths
-- Generate preview thumbnails (if needed)
+`.devcontainer/setup-android.sh` installs the command-line tools and pins `platforms;android-36`
+and `build-tools;36.0.0`, so every rebuild gets the same toolchain.
 
----
-
-# 8. Auto Save System
-
-Auto-save must be implemented using a reusable hook.
-
-Example:
-
-- `useAutoSave()`
-
-Auto-save rules:
-
-- Save after 1–2 seconds of inactivity
-- Save when app goes to background
-- Save when user leaves editor screen
+The loop: write code, sync it with `gh codespace cp`, run `./gradlew` there, commit, push.
 
 ---
 
-# 9. Timeline Rendering System
+## CI
 
-The timeline must:
+| Workflow | Trigger | What it does |
+|---|---|---|
+| `verify.yml` | PR to `dev`/`main`, push to `dev` | `./gradlew test assembleDebug` |
+| `prerelease.yml` | push to `pre-release` | Signed release APK → artifact + draft release |
+| `release.yml` | tag `v*` | Signed release APK → GitHub release |
 
-- load entries from SQLite
-- render using FlatList
-- collapse long entries automatically
-- support media preview
-- load fast even with many entries
+No emulator and no lint gate. Emulator tests are where the minutes and the flakes come from, and
+the logic worth protecting is already covered by JVM tests.
 
----
-
-# 10. Backup System Architecture
-
-Backup must work like this:
-
-### Step 1: Convert entries to JSON
-
-### Step 2: Copy media files
-
-### Step 3: Upload to Google Drive
-
-### Step 4: Allow restore from backup
-
-Backup must never block the main UI thread.
+`gradle/actions/setup-gradle@v4` provides the dependency and build cache. Dependabot proposes
+Gradle bumps as one grouped pull request so the version matrix never moves piecemeal.
 
 ---
 
-# 11. Performance Requirements
+## Signing
 
-The app must:
+The keystore lives in the repository secrets (`SIGNING_KEY`, `SIGNING_KEY_STORE_PASSWORD`,
+`SIGNING_KEY_KEY_PASSWORD`) with alias `upload`. CI decodes the base64 key into a file and points
+`DAYLOG_KEYSTORE_PATH` and friends at it. No signing material is ever in the repository.
 
-- open in under 2 seconds
-- scroll smoothly
-- load entries instantly
-- support large entries without lag
-- support many media files
-
----
-
-# 12. Coding Rules for AI Agents
-
-AI agents must follow these rules:
-
-- Use functional components only
-- Use TypeScript everywhere
-- AI agents MUST always run type checking (e.g., `npx tsc --noEmit`) after updating code to ensure type safety.
-- Avoid class components
-- Avoid unnecessary libraries
-- Avoid large UI frameworks
-- Write modular reusable code
-- Keep logic simple and readable
-- Use hooks whenever possible
+The application id stays `com.anik_amd.daylog` and the key is unchanged, so a new APK installs
+over the existing app in place.
 
 ---
 
-# 13. Future Compatibility
+## Old code
 
-The architecture must support:
-
-- Web version
-- Desktop version
-- Multi-device backup
-- Large number of entries
-- Large media files
-
-Do not write code that only works for Android.
-
----
-
-# 14. Final Technical Goal
-
-The final codebase must be:
-
-- clean
-- scalable
-- minimal
-- offline-first
-- easy for AI agents to continue developing
-
-The system must prioritize simplicity over complexity.
+The React Native app is frozen on `legacy/react-native`. It is there to be read for behaviour, not
+built. `master` and the old `dev` were deleted once that branch existed; the history is continuous
+because `main` was branched from `dev` rather than started fresh.

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The themed (monochrome) launcher icon.
+
+    Android 13+ tints this layer with the system palette, so the mark must be legible as a single
+    silhouette. The rule and the three lines are therefore drawn as one filled shape rather than
+    as strokes of different weights.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:pathData="M36.5,26 L39.5,26 L39.5,82 L36.5,82 Z"
+        android:fillColor="#000000" />
+    <path
+        android:pathData="M46,36 L78,36 L78,40 L46,40 Z"
+        android:fillColor="#000000" />
+    <path
+        android:pathData="M46,52 L74,52 L74,56 L46,56 Z"
+        android:fillColor="#000000" />
+    <path
+        android:pathData="M46,68 L68,68 L68,72 L46,72 Z"
+        android:fillColor="#000000" />
+</vector>

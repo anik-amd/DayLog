@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The launcher mark: a vertical margin rule with three writing lines, drawn on the safe zone.
+
+    This is the app's signature element - the margin that dates hang in - reduced to a single
+    glyph. It is drawn as vectors rather than shipped as bitmaps so it stays sharp at every
+    density and can be tinted for the monochrome (themed icon) slot.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- The margin rule. -->
+    <path
+        android:pathData="M38,28 L38,80"
+        android:strokeColor="#0E6B62"
+        android:strokeWidth="3"
+        android:strokeLineCap="round" />
+
+    <!-- Three writing lines, of decreasing length. -->
+    <path
+        android:pathData="M48,38 L76,38"
+        android:strokeColor="#14161A"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M48,54 L72,54"
+        android:strokeColor="#565C63"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M48,70 L66,70"
+        android:strokeColor="#8A9099"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round" />
+</vector>

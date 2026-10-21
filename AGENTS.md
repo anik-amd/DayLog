@@ -1,539 +1,229 @@
-# Reference Files Location
+# DayLog — Instructions for AI Agents
 
-All project instructions, architecture, and roadmap documents are located in the `/docs` folder.  
+All project instructions live in `/docs`. **Read them before writing any code.**
 
-AI agents **must read and follow** these files before generating or modifying any code:
+- `/docs/SPEC.md` — what the app is and what it does
+- `/docs/TECHNICAL_ARCHITECTURE.md` — how it is built
+- `/docs/FEATURE_ROADMAP.md` — the order work happens in
+- `/docs/DESIGN_SYSTEM.md` — tokens, type, rules
+- `/docs/TESTING.md` — what is tested and what is deliberately not
 
-- `/docs/SPEC.md` – Philosophy & Features
-- `/docs/TECHNICAL_ARCHITECTURE.md` – Technical Architecture
-- `/docs/FEATURE_ROADMAP.md` – Step-by-step Build Order
-
-Agents **must not ignore** these files. Always check here first before writing code.
-
-# DayLog – Master Prompt for AI Agents
-
-This document is the main instruction file for AI agents working on the DayLog project.
-
-The agent must read this file before generating any code.
+These are not optional. A change that contradicts them is a bug.
 
 ---
 
-# 1. Project Overview
+# 1. What DayLog is
 
-You are helping build a mobile diary application called **DayLog**.
+A minimal, offline-first Android diary. The point is to capture a thought in a few seconds, so
+the quick entry bar matters more than any other screen in the app.
 
-DayLog is not a traditional journaling app. It is designed to allow users to **capture thoughts instantly** and organize them automatically in a timeline.
-
-The most important feature of the app is **quick entry**, not complex writing tools.
-
-The application must remain minimal, fast, and distraction-free at all times.
+The app must feel fast, calm, quiet and reliable. Adding a feature is a cost; removing friction is
+a benefit. When in doubt, leave it out.
 
 ---
 
-# 2. Core Philosophy
+# 2. Stack
 
-The agent must follow these rules while generating code:
+Do not introduce anything that is not already in `gradle/libs.versions.toml`.
 
-1. Keep everything minimal
-2. Do not over-engineer
-3. Avoid unnecessary libraries
-4. Prefer simple logic over complex logic
-5. Focus on speed and performance
-6. Always prioritize the quick-entry experience
-7. Do not add features that are not defined in the roadmap
-8. The app must work offline first
+| Piece | Choice |
+|---|---|
+| Language | Kotlin 2.3.20 |
+| UI | Jetpack Compose (BOM 2026.06.01) |
+| Build | AGP 8.13.2, Gradle 8.14.6, JDK 21 |
+| Storage | Room 2.8.5 + DataStore 1.3.0 |
+| Async | Coroutines 1.11.0 |
+| Tests | JUnit4, Robolectric 4.17, Turbine, `kotlinx-coroutines-test` |
 
-If a feature is not required, do not implement it.
+**No `material3` dependency.** Material 3's default type scale, tonal surfaces and elevation are
+exactly the generic look this app exists to replace. Compose `foundation`, `ui` and
+`material-ripple` only.
 
----
+Do not add a DI framework, an image library, a markdown library, a date library, a JSON library or
+a logging framework. The app's dependency list is short on purpose.
 
-# 3. Technology Stack (Must Follow Strictly)
-
-The project must use the following technologies:
-
-- React Native
-- Expo (managed workflow)
-- TypeScript
-- NativeWind (Tailwind for React Native)
-- React Navigation
-- SQLite (local storage)
-- Local file storage for media
-- Markdown-based content system
-
-The agent must not introduce additional UI frameworks such as:
-
-- Material UI
-- Chakra UI
-- DaisyUI
-- Bootstrap-based libraries
-- Any heavy UI library
-
-The UI must be built manually using Tailwind classes.
+Every version is pinned exactly in `gradle/libs.versions.toml`. Never write `"latest"`, `+` or a
+version range.
 
 ---
 
-# 4. Application Goal
+# 3. Module layout
 
-The final application must feel:
+```
+app/          DI wiring, MainActivity, navigation, permissions
+core/common/  Result, dispatchers, date and text helpers      (pure JVM)
+core/model/   Entry, Tag, Media, domain rules                 (pure JVM)
+core/data/    Room, DataStore, repositories, backup, weather
+core/designsystem/  Ink & Margin: tokens, theme, components
+core/testing/ fakes, fixtures, test helpers
+```
 
-- very fast
-- minimal
-- clean
-- calm
-- distraction-free
-- reliable
-- easy to use daily
+Dependency direction is one-way: `app → core:data → core:model ← core:designsystem`, and
+`core:model → core:common`. Nothing in `core:model` or `core:common` may depend on Android — that
+is what keeps their tests running in milliseconds on the JVM.
 
-This is more important than having many features.
-
----
-
-# 5. Feature Priority
-
-The agent must focus on features in this order:
-
-1. Local database ✓
-2. Timeline screen ✓
-3. Quick entry bar ✓
-4. Auto-save system ✓
-5. Full screen editor ✓
-6. Markdown support ✓
-7. Media support (images) ✓
-8. Mini calendar ✓
-9. Tag system ✓
-10. Location & weather ✓
-11. Search screen ✓
-12. Settings page ✓
-13. Map screen (placeholder) ✓
-14. Google Drive backup
-15. Performance optimization
-16. Android widget
-
-Most core features are now implemented. Remaining work focuses on backup, optimization, and widget.
+`core:data` must not depend on `core:designsystem`. Data knows nothing about colour.
 
 ---
 
-# 6. Quick Entry System (Most Important Feature)
+# 4. Coding rules
 
-The quick entry system must work like a messaging input box.
+- Functional and composable style only. No classes where a function does.
+- TypeScript-style explicit types are the Kotlin habit here: name the type where it is not obvious.
+- Keep files short. Under 250 lines. If a file grows past that, it is doing two jobs.
+- One function, one job. Split before you abstract.
+- **UI holds no business logic.** Rules live in `core:model` or `core:data`; composables render
+  state and raise events.
+- Do not rename things or reshape data that already exists unless the change is the task.
+- Assume this code will be changed later. Obvious beats clever.
+- Stability beats speed.
 
-Behaviour rules:
+### Naming
 
-- The user should be able to open the app and start typing immediately
-- A small input bar must appear at the bottom of the screen
-- If the text becomes longer, the input must expand automatically
-- If the user presses the expand arrow, the editor must open in full screen
-- The entry must be auto-saved automatically
-- The user must never need to press a save button
-
-If the quick entry system does not feel fast, the implementation is wrong.
-
----
-
-# 7. Code Structure Rules
-
-The agent must follow a clean folder structure.
-
-Main folders:
-
-- app/ (screens: entries, editor, settings, search, map, navigation)
-- components/ (reusable UI components)
-- database/ (SQLite operations)
-- storage/ (settings persistence)
-- services/ (WeatherService, BackupEngine)
-- themes/ (color schemes)
-- contexts/ (React contexts)
-- hooks/ (custom hooks)
-- types/ (TypeScript types)
-- utils/ (responsive utilities, spacing constants)
-
-The agent must not place everything inside one folder.
+- Composables are PascalCase nouns: `EntryCard`, `TimelineScreen`.
+- State holders are `...ViewModel` or a plain `...State` + reducer.
+- Data classes for immutable state. `data class` everywhere a value is passed around.
+- Extension functions for small additions to a type, not for hiding logic.
 
 ---
 
-# 8. Responsive Design
+# 5. Testing
 
-The app must use responsive design patterns for all screen sizes:
+Write the test first for anything with a rule in it. A phase is not finished until its tests pass
+and `./gradlew assembleDebug` is green in the Codespace.
 
-### Required Patterns
+**Test these** (pure JVM, fast):
+- Domain rules: tag extraction, markdown parsing, date and calendar maths, weather mapping, JSON
+  codecs.
+- ViewModel state, repository behaviour: JUnit4, `kotlinx-coroutines-test`, Turbine, fake DAOs.
+- Room DAOs, FTS and migrations: Robolectric, pinned to one SDK level.
 
-- Use `useResponsive` hook from `src/hooks/useResponsive.ts` to get device information
-- Use `moderateScale()` from `src/utils/responsive.ts` for dimensions
-- Use `spacing` from `src/utils/spacing.ts` for consistent spacing
-- Respect system font scale via `useResponsive().fontScale`
+**Do not test these**:
+- Layout, spacing, colour values you already asserted for in a design-system test.
+- Small composables that only forward callbacks.
+- Anything that needs an emulator.
 
-### Screen Size Handling
+Keep suites small and purposeful — five to ten focused tests beat broad shallow coverage. The goal
+is to prevent data loss and recurring bugs, not to reach a coverage number.
 
-- Check `isTablet`, `isLandscape`, `isPortrait` for layout adjustments
-- Use breakpoints for conditional styling: `xs`, `sm`, `md`, `lg`, `xl`
-- Test on phone, tablet, and landscape orientations
-
-### Never Use Hardcoded Pixel Values
-
-- All sizing must use responsive scaling functions
-- No fixed widths/heights - always scale based on screen dimensions
-
----
-
-# 9. Coding Rules
-
-The agent must:
-
-- Use functional components only
-- Use TypeScript for all files
-- AI agents MUST always run type checking after updating code to ensure type safety.
-- Avoid class components
-- Avoid unnecessary abstraction
-- Avoid very long files
-- Write reusable components when needed
-- Use hooks instead of complex logic
+Tests live next to the code they test: `src/test/java/...`. Test names read as sentences:
+``fun `tags are extracted from the start of the content`() ``.
 
 ---
 
-## Coding Rules & Testing Strategy (Strict Instructions for Agents)
+# 6. Where to work
 
-### Coding Rules
+Development happens in the **GitHub Codespace**, not on a laptop. The Codespace has the Android
+SDK, the Gradle cache and enough disk for the build; a desktop checkout does not.
 
-* Write **small and safe code**, not large rewrites.
-* Modify only the **minimum required part** of the code.
-* Never refactor unrelated files while adding a feature.
-* One feature per response. Do not implement multiple features at once.
-* Keep files under **250 lines** whenever possible.
-* UI must not contain business logic. Business logic must stay in separate files.
-* Each function must do **one clear task only**.
-* Do not change variable names, database structure, or existing logic unless necessary.
-* Always assume the code will be modified later, so keep it simple and readable.
-* Stability is more important than speed.
+- Write code in the Codespace or sync it there with `gh codespace cp`.
+- Run `./gradlew` in the Codespace. Never expect a local machine to have the Android SDK.
+- Commit and push from whichever side holds the change.
 
 ---
 
-### Testing Strategy
+# 7. Git
 
-* Do **not write tests for everything**.
+Branches:
 
-* Write tests only when:
+| Branch | Purpose |
+|---|---|
+| `main` | Production. Releases are cut from here. |
+| `dev` | Integration. Every change lands here first. |
+| `pre-release` | Release candidate. Built and tested by hand before it ships. |
+| `legacy/react-native` | The old React Native app, frozen. Read it for behaviour, never build it. |
 
-  1. A bug is found and fixed (always write a test after fixing a bug).
-  2. A core feature becomes stable (database, auto-save, media, entry logic).
-  3. The feature involves **data safety** (saving, editing, deleting entries).
+```
+dev ──(cut)──▶ pre-release ──(approve)──▶ main
+  ▲                │
+  └──── fix ───────┘
+```
 
-* Do NOT write tests for:
-
-  * UI
-  * styling
-  * layout
-  * small components
-  * experimental features
-
-* Testing must be added **in phases**, not all at once.
-
-* Prefer **small and focused tests** (5–10 important tests are enough).
-
-* The goal of testing is to **prevent data loss and recurring bugs**, not to reach 100% coverage.
-
----
-
-# 9. Performance Rules
-
-The agent must:
-
-- Avoid unnecessary re-renders
-- Use FlatList for the timeline
-- Avoid heavy animations
-- Avoid large dependencies
-- Ensure smooth scrolling
-- Ensure the app opens quickly
+- `main` is protected: `verify` must pass and direct pushes are rejected.
+- One feature per commit. A commit message says what changed and why.
+- Never commit signing material, `local.properties`, or build output.
+- **Never commit or push unless the user explicitly asks.** If the work is done and no commit was
+  requested, stop and report.
 
 ---
 
-# 10. Storage Rules
+# 8. Releasing
 
-The app must be offline-first.
+1. Update `CHANGELOG.md` with the new version and today's date.
+2. Bump `versionName` and `versionCode` in `gradle/libs.versions.toml`.
+   `versionCode` must always increase, or the APK cannot install over the previous one.
+3. Push the change to `dev`.
+4. Cut `pre-release` from `dev` and push it. The workflow builds a signed APK and opens a draft
+   release.
+5. The user installs the candidate on a device and confirms it works.
+6. Merge `pre-release` into `main`, tag `v<version>`, push the tag. The release workflow publishes
+   the APK and the GitHub release.
 
-Required behaviour:
-
-- All entries must be saved locally
-- Media must be saved locally
-- The app must work without internet
-- Internet must only be used for backup
-
----
-
-# 11. Markdown Rules
-
-Entries must be saved as Markdown text.
-
-The agent must not convert Markdown to HTML before saving.
-
-Markdown must remain editable at all times.
+If the candidate is wrong, fix it on `dev` and cut a new one. `main` is never the place to debug.
 
 ---
 
-# 12. What the Agent Must NOT Do
+# 9. Performance
 
-The agent must NOT:
+The app must open fast and scroll smoothly. There is no bridge and no JavaScript thread, so the
+usual React Native costs are gone — but the budget is still real.
 
-- Add unnecessary features
-- Add user accounts
-- Add cloud sync (except Google Drive backup)
-- Add analytics
-- Add notifications
-- Add complex settings
-- Add unnecessary UI animations
-- Add third-party diary features
-- Commit or push code unless explicitly asked by the user
-
-If a feature is not in the roadmap, do not implement it.
-
-# Git Safety Protocol
-- NEVER commit unless the user says "commit it" or similar explicit instruction
-- If you finish work and haven't been asked to commit, just stop and say you're done
-- Never auto-commit after making changes
+- `LazyColumn` for the timeline, with stable keys.
+- Avoid heavy animation. Motion is 120–200ms and only where it explains a change.
+- No work on the main thread. Suspend functions and `Dispatchers.IO` for disk and network.
+- Keep the dependency list short. Every library is startup cost and APK size.
 
 ---
 
-## Git Branch Workflow
+# 10. Storage
 
-This project uses a **two-branch workflow**:
+Everything is local. The app works with no network at all.
 
-### Branches
-- **master**: Production-ready code, auto-builds APK on push
-- **dev**: Active development and testing
+- Entries, tags, media and settings live on the device.
+- The only network use is fetching weather and resolving a place name.
+- Cloud backup is a later phase. The data shape is already sync-ready: `uid`, `updatedAt` and a
+  `deletedAt` tombstone, so adding sync never needs a migration.
+- `INTERNET` is the only permission the app asks for.
 
-### Workflow Steps (After Completing Work on dev)
-When the user says "commit and merge to master":
+---
 
-1. Commit changes to dev branch with descriptive message
-2. Merge dev to master: `git checkout master && git merge dev && git push`
-3. Switch back to dev: `git checkout dev`
+# 11. Markdown
 
-### Example Commands
+Entries are stored as Markdown text and stay editable as Markdown. Never store rendered HTML.
+
+The dialect is small and custom: `**bold**`, `*italic*`, `__underline__`, `#`/`##` headings, `-`
+bullets, `1.` numbered, `` `code` ``. The parser is written by hand — no markdown library.
+
+---
+
+# 12. Design
+
+Read `/docs/DESIGN_SYSTEM.md` before touching a screen. The short version:
+
+- Paper and Night schemes, near-monochrome, one teal accent.
+- Spectral for entry text, Instrument Sans for chrome.
+- **Accent marks data, never chrome.** It is not a button colour and not a navigation colour.
+- Flat surfaces. Separation is a 1dp rule or one tone step. No shadows on cards.
+- The margin rule is the app's signature: dates sit in a 72dp gutter beside a vertical hairline.
+
+---
+
+# 13. Never
+
+- No accounts, no cloud sync, no analytics, no notifications.
+- No iOS, no web, no widget (yet).
+- No Material component defaults, no gradient chrome, no drop shadows on cards.
+- No feature that is not in the roadmap.
+- No rewriting working code to add a feature.
+
+---
+
+# 14. When you are done
+
+Run the type-safe build and the tests in the Codespace:
+
 ```bash
-git add .
-git commit -m "feat: add new feature"
-git checkout master
-git merge dev
-git push
-git checkout dev
+./gradlew test assembleDebug
 ```
 
----
-
-
-
-# 13. How the Agent Should Work
-
-The agent must:
-
-1. Work step-by-step
-2. Implement only one feature at a time
-3. Test basic functionality before moving forward
-4. Avoid rewriting working code unnecessarily
-5. Keep the code clean and readable
-6. Always follow the architecture file
-
----
-
-# 14. Final Objective
-
-The goal is not to build a complex app.
-
-The goal is to build a **fast, minimal diary tool** that people can use every day without effort.
-
-If the app becomes complicated, the implementation has failed.
-
----
-
-# 15. User Alert Protocol
-
-When the agent needs to alert the user (e.g., when tasks are complete or user attention is required), run this PowerShell command to play an audible alert:
-
-```
-powershell -Command "[System.Media.SystemSounds]::Hand.Play()"
-```
-
-This must be used when:
-- All assigned tasks are completed
-- The agent needs user input or confirmation before proceeding
-- Significant work milestones are reached
-
----
-
-# 16. Version Control Workflow
-
-### Version Location
-- App version is stored in `package.json` (version field)
-- Current version: `0.1.1`
-
-### Version Bumping
-Before merging to master, run one of these commands to bump the version:
-
-| Command | Example | When to Use |
-|---------|---------|-------------|
-| `npm version patch` | 0.0.1 → 0.0.2 | Bug fixes, small changes |
-| `npm version minor` | 0.0.1 → 0.1.0 | New features (backward compatible) |
-| `npm version major` | 0.0.1 → 1.0.0 | Breaking changes |
-
-**Recommended:** Use `npm version patch` for most releases until the app reaches stable state (1.0.0).
-
-### Release Process
-
-1. Work on dev branch
-2. Run `npm version patch` locally to bump version
-3. Commit and push changes (includes package.json update)
-4. Merge dev to master
-5. GitHub Actions workflow:
-   - Extracts version from package.json
-   - Creates git tag (e.g., v0.0.2)
-   - Builds APK
-   - Creates GitHub release with tag
-
-### Important Notes
-- Version bump happens in dev branch BEFORE merging to master
-- Both dev and master will have the same version after merge
-- The workflow automatically uses the version from package.json for tagging
-
----
-
-# 17. Changelog Workflow
-
-### Changelog File
-- Location: `CHANGELOG.md` in project root
-- Must be updated **before** every version bump
-
-### When Version Bump is Requested
-When the user requests a version bump (e.g., "bump version" or "release"), the agent MUST:
-
-1. Read the current CHANGELOG.md to understand existing entries
-2. Review commits since the last version to identify user-facing changes:
-   - Run: `git log $(git describe --tags --abbrev=0)..HEAD --oneline` to see commits since last release
-   - Focus only on changes users will instantly recognize (features, fixes, UI improvements)
-   - Skip internal refactoring, code cleanup, dev tooling, and documentation updates
-3. Add a new version section at the top with:
-   - Version number (matching the new version from package.json)
-   - Today's date (YYYY-MM-DD format)
-   - Sections: Added, Changed, Fixed, Removed (only include sections with changes)
-4. Document user-facing changes in clear, conventional format:
-   - Use user-centric language (e.g., "Added dark mode toggle" not "Implemented theme context")
-   - Group by type: Added, Changed, Fixed, Removed
-   - Only include what matters to end users - this is NOT a dev changelog
-5. If unsure about what changed, summarize the main work completed
-
-### Release Process
-1. User requests version bump
-2. Agent updates CHANGELOG.md with new version entry
-3. Agent runs `npm version patch|minor|major`
-4. Agent commits changes (includes package.json + CHANGELOG.md)
-5. Agent merges to master (triggers workflow)
-
-### Important
-- ALWAYS update CHANGELOG.md before running npm version command
-- Changelog updates ONLY happen during version bumps (patch, minor, major)
-- Do not skip this step - the changelog is the release notes for users
-- Focus on user experience, not implementation details
-- Keep entries concise and meaningful
-
-### Example Format
-```markdown
-# Changelog
-
-## [0.1.2] - 2024-01-15
-### Added
-- Quick entry bar on timeline screen
-- Auto-save functionality
-
-### Fixed
-- Loading spinner issue on startup
-```
-
-### User-Centric Language Guide
-
-**Write for users, not developers.** Focus on what users experience, not how you built it.
-
-**Good Examples (User-Facing):**
-- "Added dark mode toggle in settings"
-- "Fixed keyboard covering text on small screens"
-- "Improved search to find entries by location"
-- "Added Nord theme option"
-- "Smoother scrolling in timeline"
-
-**Avoid (Implementation Details):**
-- "Implemented ThemeContext with React Context API"
-- "Fixed KeyboardAvoidingView positioning bug"
-- "Added FTS5 virtual table for location indexing"
-- "Refactored color scheme system architecture"
-- "Optimized FlatList rendering performance"
-
-**Tips:**
-- Use present tense and active voice
-- Describe the benefit, not the mechanism
-- Group related changes together
-- 5-10 meaningful entries per release is plenty
-
-### Current Version
-Check `package.json` for the current version before updating changelog.
-
----
-
-# 18. Color Scheme System
-
-## Overview
-DayLog supports multiple color schemes (themes) that define colors for all UI elements across the app. Each color scheme has both light and dark variants.
-
-## Files Structure
-- `src/themes/colors.ts` - Color scheme definitions
-- `src/hooks/useThemeColors.ts` - Hook to access current theme colors
-- `src/contexts/ColorSchemeContext.tsx` - Global state for color scheme (enables reactive updates)
-- `src/storage/settings.ts` - Storage for persisting selected scheme
-
-### Responsive Utilities
-- `src/hooks/useResponsive.ts` - Hook providing device info (isTablet, isLandscape, fontScale, etc.)
-- `src/utils/responsive.ts` - Scaling functions (moderateScale, scale, breakpoints)
-- `src/utils/spacing.ts` - Pre-defined responsive spacing and font scales
-
-## How Color Schemes Work
-
-### Theme Interface
-Each color scheme contains:
-- **Base colors**: background, surface, surfaceElevated, text, textSecondary, textTertiary
-- **Accent colors**: accent, accentLight
-- **Border colors**: border, borderSubtle
-- **Semantic colors**: success, warning, error
-- **Pill colors**: Dedicated colors for each pill type (tags, date, time, location, weather, photo)
-
-### Using Theme Colors in Components
-```typescript
-import { useThemeColors } from '../../hooks/useThemeColors';
-
-function MyComponent() {
-  const colors = useThemeColors();
-  
-  // Use in styles
-  <View style={{ backgroundColor: colors.surface }}>
-    <Text style={{ color: colors.text }}>
-    <View style={{ backgroundColor: colors.pills.tags.background }}>
-  </View>
-}
-```
-
-### Pill Colors Structure
-Each pill type has:
-- `background` - Background color of the pill
-- `icon` - Color for the icon
-- `text` - Color for the label text
-
-## Creating New Color Schemes
-
-When adding a new color scheme, read `docs/THEME_CREATION.md` for detailed step-by-step instructions.
-
-Key steps:
-1. Add new scheme entry in `src/themes/colors.ts`
-2. Define light and dark variants for all color fields
-3. Test in both light and dark modes
-4. Ensure pills are readable in both modes
-
----
-
-# 19. Theme Creation Guide
-
-For detailed instructions on creating new color schemes, see `instructions/THEME_CREATION.md`.
+If it does not pass, it is not done. Report what changed and what you verified.

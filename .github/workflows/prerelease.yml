@@ -1,0 +1,99 @@
+name: Pre-release APK
+
+# Builds a signed release candidate and attaches it to a draft release.
+#
+# The APK is built from the `pre-release` branch, tested on a real device by hand, and only then
+# merged into `main` for a public release. The version code is offset by the run number so a
+# candidate can always be installed over an earlier one without a reinstall.
+on:
+  push:
+    branches:
+      - pre-release
+
+concurrency:
+  group: prerelease-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  prerelease:
+    name: Build signed APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept SDK licenses
+        run: sdkmanager --licenses <<< $'y\n' || true
+
+      - name: Install SDK platform
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0" "platform-tools"
+
+      - name: Restore signing key
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_KEY_STORE_PASSWORD: ${{ secrets.SIGNING_KEY_STORE_PASSWORD }}
+          SIGNING_KEY_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_KEY_PASSWORD }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/keystore"
+          echo "$SIGNING_KEY" | tr -d '\r\n' | base64 -d > "$RUNNER_TEMP/keystore/upload.keystore"
+          {
+            echo "DAYLOG_KEYSTORE_PATH=$RUNNER_TEMP/keystore/upload.keystore"
+            echo "DAYLOG_STORE_PASSWORD=$SIGNING_KEY_STORE_PASSWORD"
+            echo "DAYLOG_KEY_ALIAS=upload"
+            echo "DAYLOG_KEY_PASSWORD=$SIGNING_KEY_KEY_PASSWORD"
+          } >> "$GITHUB_ENV"
+
+      - name: Read version
+        id: version
+        run: |
+          VERSION=$(grep -E '^versionName\s*=' gradle/libs.versions.toml | head -1 | cut -d'"' -f2)
+          CODE=$(grep -E '^versionCode\s*=' gradle/libs.versions.toml | head -1 | cut -d'"' -f2)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "code=$CODE" >> "$GITHUB_OUTPUT"
+
+      - name: Build release APK
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DayLog-pre-release
+          path: app/build/outputs/apk/release/*.apk
+          retention-days: 30
+
+      - name: Create draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: pre-release-${{ github.run_number }}
+          name: Pre-release ${{ steps.version.outputs.version }} (build ${{ github.run_number }})
+          draft: true
+          prerelease: true
+          body: |
+            ### Pre-release candidate
+
+            Version `${{ steps.version.outputs.version }}` (build ${{ github.run_number }}).
+
+            This is a candidate build for manual testing on a real device. It is not a public
+            release. If it looks right, merge `pre-release` into `main` to publish it.
+
+            | Detail | Value |
+            |---|---|
+            | Version | `${{ steps.version.outputs.version }}` |
+            | Version code | `${{ steps.version.outputs.code }}` + ${{ github.run_number }} |
+            | Commit | `${{ github.sha }}` |
+            | Built | ${{ github.run_started_at }} |
+          files: app/build/outputs/apk/release/*.apk

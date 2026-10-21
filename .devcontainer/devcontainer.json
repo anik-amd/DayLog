@@ -1,0 +1,37 @@
+{
+    "name": "DayLog",
+    "image": "mcr.microsoft.com/devcontainers/java:1-21-bookworm",
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:2": {
+            "installZsh": true,
+            "configureZshAsDefaultShell": true
+        },
+        "ghcr.io/devcontainers/features/github-cli:1": {
+            "version": "latest"
+        }
+    },
+    "onCreateCommand": "bash .devcontainer/setup-android.sh",
+    "remoteEnv": {
+        "ANDROID_HOME": "/usr/local/lib/android/sdk",
+        "ANDROID_SDK_ROOT": "/usr/local/lib/android/sdk",
+        "GRADLE_USER_HOME": "/home/vscode/.gradle"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "jetbrains.kotlin",
+                "vscjava.vscode-gradle"
+            ],
+            "settings": {
+                "gradle.configuration-cache": "on",
+                "files.exclude": {
+                    "**/.gradle": true,
+                    "**/build": true
+                }
+            }
+        }
+    },
+    "hostRequirements": {
+        "storage": "32gb"
+    }
+}

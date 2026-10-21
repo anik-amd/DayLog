@@ -1,376 +1,129 @@
-# DayLog – Feature Development Roadmap
+# DayLog — Feature Roadmap
 
-This document defines the exact order in which the DayLog application must be built.
-
-AI agents must strictly follow the phases below and must not skip phases or implement advanced features before the basic system is stable.
-
-The goal is to build a fast, stable, offline-first diary application step by step.
+Each phase is one focused change. Tests first, `./gradlew test assembleDebug` green in the
+Codespace before the phase is called done. One feature per commit.
 
 ---
 
-# Phase 1 – Project Foundation ✓ DONE
+## P0 — Groundwork
 
-## Objective
+*No feature. The project stands up.*
 
-Create a clean, working React Native (Expo) project with a stable structure.
+- [x] Old React Native code frozen on `legacy/react-native`, deleted from the working tree
+- [x] `main` / `dev` / `pre-release` branch structure, `main` as the default branch
+- [x] Six Gradle modules, version catalog, wrapper
+- [x] `.devcontainer` with the Android SDK pinned to API 36
+- [x] CI: `verify`, `prerelease`, `release`, plus Dependabot
+- [x] Hand-drawn launcher icon (adaptive, monochrome, no bitmap assets)
+- [x] `docs/` and `AGENTS.md` rewritten for the native stack
 
-## Tasks
-
-1. Initialize a new Expo project using TypeScript
-2. Install required base dependencies:
-   - React Navigation
-   - NativeWind (Tailwind for React Native)
-   - SQLite
-
-3. Create the folder structure defined in the architecture document
-4. Create empty screens:
-   - EntriesScreen
-   - SettingsScreen
-
-5. Implement navigation between screens
-6. Implement dark mode as the default theme
-
-## Result of Phase 1
-
-The app should run on Android and show two empty screens with working navigation.
+**Gate:** `./gradlew test assembleDebug` green in the Codespace; `verify` green on the PR.
 
 ---
 
-# Phase 2 – Local Database System ✓ DONE
+## P1 — Design system
 
-## Objective
+*The visual language, before any screen uses it.*
 
-Create a stable offline storage system before building features.
+- [ ] Core components: `DLText`, `Label`, `Button`, `Chip`, `IconButton`, `Hairline`, `Sheet`,
+      `TextField`, `Switch`, `TopBar`
+- [ ] Icon set: back, search, settings, calendar, tag, pin, weather, image, plus, trash, chevron,
+      check — 1.5dp stroke, hand-drawn vectors
+- [ ] Empty states, error states, loading states
+- [ ] `docs/DESIGN_SYSTEM.md` stays in step with the code
 
-## Tasks
-
-1. Set up SQLite
-2. Create the entries table
-3. Create the media table
-4. Create database helper functions:
-   - createEntry()
-   - updateEntry()
-   - deleteEntry()
-   - getAllEntries()
-
-5. Create a test entry on app launch
-6. Display database entries on the screen (simple text list is enough)
-
-## Result of Phase 2
-
-The app must be able to store and load entries locally even after closing and reopening.
+**Gate:** contrast tests green for every pair that carries text; components reviewable in previews.
 
 ---
 
-# Phase 3 – Timeline Screen (Basic Version) ✓ DONE
+## P2 — Data layer
 
-## Objective
+*The storage everything else stands on.*
 
-Create a simple but stable timeline screen.
+- [ ] Room: entities, DAOs, FTS4 index, migrations, committed schemas
+- [ ] Repository layer, `Flow`-based reads
+- [ ] DataStore settings: theme mode, accent source, text scale
+- [ ] JSON backup codec, schema `version: 2.0`, with import validation
+- [ ] Open-Meteo client for places and weather, behind an interface
+- [ ] Soft-delete tombstones wired end to end
 
-## Tasks
-
-1. Replace the test list with a FlatList
-2. Create the EntryCard component
-3. Display:
-   - date
-   - entry preview text
-
-4. Sort entries by newest first
-5. Make sure scrolling is smooth
-6. Ensure large entries do not break layout
-
-## Result of Phase 3
-
-The app should now feel like a working diary (text only).
+**Gate:** DAO tests, migration test, JSON round-trip, weather mapping — all green.
 
 ---
 
-# Phase 4 – Quick Entry System ✓ DONE
+## P3 — Timeline and quick entry
 
-## Objective
+*The core loop. The part the whole app exists for.*
 
-Build the most important feature: quick entry input.
+- [ ] Day-grouped timeline, margin rule with dates in the gutter
+- [ ] Quick entry composer: auto-grow to six lines, autosave 700ms after the last keystroke
+- [ ] Full editor via chevron
+- [ ] Tag extraction on save, tag filter strip with AND logic
+- [ ] Unsaved/pending indicator
+- [ ] Entry read view
 
-## Tasks
-
-1. Create the QuickEntryBar component
-2. Place it at the bottom of the screen
-3. Allow the user to type text quickly
-4. Automatically create an entry when the user starts typing
-5. Implement auto-save
-6. Add basic expand behavior (input grows when text becomes longer)
-
-## Result of Phase 4
-
-The user should be able to open the app and instantly write something without opening another screen.
+**Gate:** ViewModel state, autosave debounce, timeline grouping, and a Compose test that types and
+saves.
 
 ---
 
-# Phase 5 – Full Screen Editor ✓ DONE
+## P4 — Editor and markdown
 
-## Objective
+- [ ] Full-screen editor with a formatting toolbar
+- [ ] Custom markdown parser → `AnnotatedString`: bold, italic, underline, H1, H2, bullets,
+      numbered, code
+- [ ] Live preview toggle
+- [ ] Parser ↔ toolbar round-trip
 
-Allow long-form writing when the user wants it.
-
-## Tasks
-
-1. Create FullScreenEditor component
-2. Add expand button to QuickEntryBar
-3. Pass entry data to the full editor
-4. Support long entries
-5. Support editing old entries
-
-## Result of Phase 5
-
-The app now supports both short notes and long diary entries.
+**Gate:** parser table tests and a round-trip test green.
 
 ---
 
-# Phase 6 – Markdown Support ✓ DONE
+## P5 — Calendar, tags, search
 
-## Objective
+- [ ] Month grid with entry dots
+- [ ] Tap a day → timeline filters to it
+- [ ] Tag strip with AND logic
+- [ ] Full-text search screen over content and tags
 
-Add Markdown writing and rendering.
-
-## Tasks
-
-1. Save entries as Markdown text
-2. Render Markdown inside EntryCard
-3. Support:
-   - headings
-   - lists
-   - bold text
-   - line breaks
-
-4. Ensure performance remains smooth
-
-## Result of Phase 6
-
-Entries now look structured and readable.
+**Gate:** calendar maths, day grouping, tag AND filter, FTS behaviour green.
 
 ---
 
-# Phase 7 – Media Support ✓ DONE
+## P6 — Photos
 
-## Objective
+- [ ] Android Photo Picker — no permission prompt
+- [ ] Copy into app storage, generate a thumbnail
+- [ ] Thumbnail strip on the timeline entry
+- [ ] Entry gallery view
 
-Allow users to attach images.
-
-## Tasks
-
-1. Add image picker
-2. Save media locally
-3. Link media to entries
-4. Show image preview inside EntryCard
-
-## Result of Phase 7
-
-The app supports image attachments.
+**Gate:** path policy, thumbnail sizing, media CRUD green.
 
 ---
 
-# Phase 8 – Mini Calendar ✓ DONE
+## P7 — Settings, backup, migration
 
-## Objective
+- [ ] Theme mode, adaptive accent, text scale
+- [ ] JSON export and import
+- [ ] Statistics
+- [ ] Legacy import from the React Native app's export
+- [ ] Direct probe of the legacy database at `databases/daylog.db` and `databases/SQLite/daylog.db`
 
-Add a small calendar for navigation.
-
-## Tasks
-
-1. Create CalendarStrip component (horizontal strip)
-2. Highlight days that contain entries
-3. Allow clicking a date to filter entries
-4. Auto-scroll to visible date on scroll
-
-## Result of Phase 8
-
-Users can easily navigate old entries.
+**Gate:** settings store, import validation, legacy mapping, stats green.
 
 ---
 
-# Phase 9 – Tag System ✓ DONE
+## P8 — Release readiness
 
-## Objective
-
-Add hashtag-based tag system for organizing entries.
-
-## Tasks
-
-1. Create tags table in SQLite
-2. Extract hashtags (#tag) from entry content
-3. Create TagStrip component on timeline
-4. Create TagSelectorModal for multi-tag filtering
-5. Implement AND logic for tag filtering
-6. Track tag usage counts for sorting
-
-## Result of Phase 9
-
-Users can organize entries with hashtags and filter by tags.
+- [ ] Version bump to `0.2.0`, `CHANGELOG.md`
+- [ ] R8 rules, baseline profile
+- [ ] `pre-release` cut, signed APK built and tested on a real device
+- [ ] Merge to `main`, tag `v0.2.0`, publish the release
 
 ---
 
-# Phase 10 – Location & Weather ✓ DONE
-
-## Objective
-
-Add location and weather data to entries.
-
-## Tasks
-
-1. Integrate expo-location for GPS
-2. Add reverse geocoding for addresses
-3. Integrate Open-Meteo API for weather
-4. Add temperature unit setting (Celsius/Fahrenheit)
-5. Add pills in QuickEntryBar and FullScreenEditor
-
-## Result of Phase 10
-
-Entries can include location and weather metadata.
-
----
-
-# Phase 11 – Search Screen ✓ DONE
-
-## Objective
-
-Add dedicated search screen with full-text and tag search.
-
-## Tasks
-
-1. Create SearchScreen with bottom tab navigation
-2. Implement Fuse.js for fuzzy search
-3. Support content and tag search
-4. Show popular tags when search is empty
-5. Click tag to filter timeline
-
-## Result of Phase 11
-
-Users can quickly find entries by content or tags.
-
----
-
-# Phase 12 – Settings System ✓ DONE
-
-## Objective
-
-Create a minimal settings page.
-
-## Tasks
-
-1. Add theme toggle:
-   - dark
-   - light
-   - system default
-
-2. Add color scheme selection (Default, Dracula, Nord)
-3. Add temperature unit preference
-4. Add Google Drive backup button
-5. Add app statistics display
-
-## Result of Phase 12
-
-The app becomes stable for long-term use.
-
----
-
-# Phase 13 – Map Screen (Placeholder) ✓ DONE
-
-## Objective
-
-Add map screen (placeholder for future implementation).
-
-## Tasks
-
-1. Create MapScreen with bottom tab
-2. Show "Map coming soon" placeholder
-
-## Result of Phase 13
-
-Navigation structure is complete.
-
----
-
-# Phase 14 – Google Drive Backup
-
-## Objective
-
-Allow secure backup of entries to Google Drive.
-
-## Tasks
-
-1. Implement Google OAuth
-2. Create BackupEngine service
-3. Upload SQLite database to Google Drive
-4. Add manual backup button in settings
-
-## Result of Phase 14
-
-Users will not lose their journal data.
-
----
-
-# Phase 15 – Performance Optimization
-
-## Objective
-
-Make the app fast and smooth.
-
-## Tasks
-
-1. Optimize FlatList rendering
-2. Lazy load media previews
-3. Improve scrolling performance
-4. Reduce unnecessary re-renders
-5. Optimize large entries
-
-## Result of Phase 15
-
-The app should feel fast even with many entries.
-
----
-
-# Phase 16 – Android Widget
-
-## Objective
-
-Add a home screen widget for quick entry.
-
-## Tasks
-
-1. Create quick text entry widget
-2. Add quick image capture
-3. Open the quick entry popup from widget
-
-## Result of Phase 16
-
-DayLog becomes a truly fast capture tool.
-
----
-
-# Rules for AI Agents
-
-Agents must follow these rules:
-
-1. Do not implement Phase 7 before Phase 4 is stable
-2. Do not implement backup before the database system is stable
-3. Do not add extra features outside this roadmap
-4. Always test each phase before moving forward
-5. Keep the UI minimal at every stage
-6. Avoid unnecessary libraries
-7. Do not over-engineer
-
----
-
-# Final Goal
-
-The final app should feel:
-
-- fast
-- minimal
-- distraction-free
-- reliable
-- calm
-- easy to use every day
-
-If the app becomes complicated, the project has failed.
+## Later — not started
+
+- [ ] Google Drive / Dropbox backup
+- [ ] Home-screen widget
+- [ ] Map view over the stored coordinates
