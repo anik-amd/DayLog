@@ -51,7 +51,6 @@ fun TimelineRoute(
         Box(modifier = Modifier.weight(1f)) {
             TimelineScreen(
                 groups = state.groups,
-                tags = state.tags,
                 contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp),
             )
         }

@@ -1,19 +1,29 @@
 package app.daylog
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.android.tools.screenshot.PreviewTest
+import androidx.compose.ui.unit.dp
+import app.daylog.core.designsystem.component.DLTopBar
 import app.daylog.core.designsystem.theme.DayLogTheme
 import app.daylog.core.model.DayGroup
+import app.daylog.core.model.DayLogThemeMode
 import app.daylog.core.model.Entry
-import app.daylog.core.model.Tag
+import app.daylog.feature.timeline.QuickEntryBar
 import app.daylog.feature.timeline.TimelineScreen
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 
 /**
- * The timeline, rendered.
+ * The app, rendered.
  *
  * These previews are the only way the design is ever looked at in CI, so they are written
  * against real content rather than lorem ipsum: a long entry, a short one, a tagged one, a place
@@ -60,11 +70,6 @@ private val sampleEntries = listOf(
     ),
 )
 
-private val sampleTags = listOf(
-    Tag(name = "reading", count = 1),
-    Tag(name = "family", count = 1),
-)
-
 private val sampleGroups = listOf(
     DayGroup(
         key = today.toEpochDay(),
@@ -86,13 +91,45 @@ private val sampleGroups = listOf(
     ),
 )
 
+/**
+ * The whole screen: the bar at the top, the timeline, and the line at the bottom.
+ */
+@Composable
+private fun DayLogPreview(dark: Boolean = false) {
+    DayLogTheme(themeMode = if (dark) DayLogThemeMode.Dark else DayLogThemeMode.Light) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(DayLogTheme.colors.background)
+                .statusBarsPadding(),
+        ) {
+            DLTopBar(
+                title = "DayLog",
+                subtitle = "4 entries",
+            )
+
+            Box(modifier = Modifier.weight(1f)) {
+                TimelineScreen(
+                    groups = sampleGroups,
+                    contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp),
+                )
+            }
+
+            QuickEntryBar(
+                value = "",
+                onValueChange = {},
+                onExpand = {},
+                modifier = Modifier.navigationBarsPadding(),
+            )
+        }
+    }
+}
+
 @PreviewTest
 @Preview(name = "Timeline", widthDp = 400, heightDp = 780, showBackground = true)
 @Composable
 fun TimelinePreview() {
-    DayLogTheme {
-        TimelineScreen(groups = sampleGroups, tags = sampleTags)
-    }
+    DayLogPreview()
 }
 
 @PreviewTest
@@ -105,16 +142,30 @@ fun TimelinePreview() {
 )
 @Composable
 fun TimelineNightPreview() {
-    DayLogTheme(themeMode = app.daylog.core.model.DayLogThemeMode.Dark) {
-        TimelineScreen(groups = sampleGroups, tags = sampleTags)
-    }
+    DayLogPreview(dark = true)
 }
 
 @PreviewTest
-@Preview(name = "Timeline - Large text", widthDp = 400, heightDp = 780, showBackground = true, fontScale = 1.5f)
+@Preview(
+    name = "Timeline - Large text",
+    widthDp = 400,
+    heightDp = 780,
+    showBackground = true,
+    fontScale = 1.5f,
+)
 @Composable
 fun TimelineLargeTextPreview() {
-    DayLogTheme {
-        TimelineScreen(groups = sampleGroups, tags = sampleTags)
-    }
+    DayLogPreview()
+}
+
+@PreviewTest
+@Preview(
+    name = "Timeline - Tablet",
+    widthDp = 840,
+    heightDp = 900,
+    showBackground = true,
+)
+@Composable
+fun TimelineTabletPreview() {
+    DayLogPreview()
 }

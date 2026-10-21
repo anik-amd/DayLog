@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.PathBuilder
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
@@ -22,9 +23,14 @@ object DayLogIcons {
 
     private const val Stroke = 1.5f
 
+    /**
+     * The control point offset that turns a cubic Bézier into a quarter circle.
+     */
+    private const val CircleK = 0.5523f
+
     private fun icon(
         name: String,
-        pathBuilder: androidx.compose.ui.graphics.vector.PathBuilder.() -> Unit,
+        pathBuilder: PathBuilder.() -> Unit,
     ): ImageVector = ImageVector.Builder(
         name = name,
         defaultWidth = 24.dp,
@@ -42,6 +48,22 @@ object DayLogIcons {
         )
     }.build()
 
+    /**
+     * A circle, drawn with four Béziers.
+     *
+     * A circle is the one shape an icon cannot do without, and drawing it this way keeps it exact
+     * rather than depending on an arc that has to be got right by eye.
+     */
+    private fun PathBuilder.circle(centerX: Float, centerY: Float, radius: Float) {
+        val k = radius * CircleK
+        moveTo(centerX, centerY - radius)
+        cubicTo(centerX + k, centerY - radius, centerX + radius, centerY - k, centerX + radius, centerY)
+        cubicTo(centerX + radius, centerY + k, centerX + k, centerY + radius, centerX, centerY + radius)
+        cubicTo(centerX - k, centerY + radius, centerX - radius, centerY + k, centerX - radius, centerY)
+        cubicTo(centerX - radius, centerY - k, centerX - k, centerY - radius, centerX, centerY - radius)
+        close()
+    }
+
     /** A chevron pointing left, for going back. */
     val Back: ImageVector = icon("Back") {
         moveTo(15f, 5f)
@@ -51,10 +73,8 @@ object DayLogIcons {
 
     /** A magnifying glass, for search. */
     val Search: ImageVector = icon("Search") {
-        moveTo(11f, 4f)
-        arcTo(7f, 7f, 0f, false, true, 11f, 18f)
-        arcTo(7f, 7f, 0f, false, true, 11f, 4f)
-        moveTo(16f, 16f)
+        circle(10.5f, 10.5f, 6.5f)
+        moveTo(15.5f, 15.5f)
         lineTo(21f, 21f)
     }
 
@@ -64,10 +84,10 @@ object DayLogIcons {
         lineTo(20f, 8f)
         moveTo(4f, 16f)
         lineTo(20f, 16f)
-        moveTo(9f, 6f)
-        lineTo(9f, 10f)
-        moveTo(15f, 14f)
-        lineTo(15f, 18f)
+        moveTo(9f, 5.5f)
+        lineTo(9f, 10.5f)
+        moveTo(15f, 13.5f)
+        lineTo(15f, 18.5f)
     }
 
     /** A calendar page, for the month view. */
@@ -86,41 +106,39 @@ object DayLogIcons {
 
     /** A tag with a hole, for tags. */
     val Tag: ImageVector = icon("Tag") {
-        moveTo(3f, 3f)
-        lineTo(11f, 3f)
-        lineTo(21f, 13f)
-        lineTo(13f, 21f)
-        lineTo(3f, 11f)
+        moveTo(3f, 3.5f)
+        lineTo(11f, 3.5f)
+        lineTo(21f, 13.5f)
+        lineTo(13.5f, 21f)
+        lineTo(3.5f, 11f)
         close()
-        moveTo(7.5f, 7.5f)
-        lineTo(7.6f, 7.5f)
+        circle(7.5f, 7.5f, 0.6f)
     }
 
-    /** A map pin, for a place. */
+    /**
+     * A map pin, for a place.
+     *
+     * A ring over a point: the ring is the place, the two lines down to the tip are the mark that
+     * puts it on a map. It reads at thirteen dots, which a filled teardrop does not.
+     */
     val Pin: ImageVector = icon("Pin") {
-        moveTo(12f, 21f)
-        curveTo(12f, 21f, 19f, 15f, 19f, 10f)
-        arcTo(7f, 7f, 0f, false, true, 5f, 10f)
-        curveTo(5f, 15f, 12f, 21f, 12f, 21f)
-        moveTo(9f, 10f)
-        arcTo(3f, 3f, 0f, false, true, 15f, 10f)
-        arcTo(3f, 3f, 0f, false, true, 9f, 10f)
+        circle(12f, 9.5f, 4.5f)
+        moveTo(8.5f, 13f)
+        lineTo(12f, 21f)
+        lineTo(15.5f, 13f)
     }
 
-    /** A sun behind a cloud, for weather. */
+    /**
+     * A cloud, for weather.
+     *
+     * Two overlapping circles and a base line make a shape that is unmistakably a cloud at any
+     * size, which an arc-built one is not.
+     */
     val Weather: ImageVector = icon("Weather") {
-        moveTo(8f, 3f)
-        lineTo(8f, 5f)
-        moveTo(3f, 8f)
-        lineTo(5f, 8f)
-        moveTo(4.2f, 4.2f)
-        lineTo(5.6f, 5.6f)
-        moveTo(11.8f, 4.2f)
-        lineTo(10.4f, 5.6f)
-        moveTo(17f, 19f)
-        arcTo(4f, 4f, 0f, false, true, 9f, 19f)
-        arcTo(5.5f, 5.5f, 0f, false, true, 4f, 12f)
-        arcTo(3f, 3f, 0f, false, true, 7f, 15f)
+        circle(9.5f, 14f, 3.5f)
+        circle(14.5f, 13f, 4.5f)
+        moveTo(7f, 18.5f)
+        lineTo(17f, 18.5f)
     }
 
     /** A picture frame, for photos. */
@@ -135,8 +153,7 @@ object DayLogIcons {
         lineTo(13f, 15f)
         lineTo(16f, 12f)
         lineTo(21f, 17f)
-        moveTo(15.5f, 9f)
-        lineTo(15.6f, 9f)
+        circle(8f, 9f, 1f)
     }
 
     /** A plus, for adding. */
@@ -204,12 +221,13 @@ object DayLogIcons {
         lineTo(8f, 20f)
         moveTo(8f, 4f)
         lineTo(13f, 4f)
-        arcTo(4f, 4f, 0f, true, true, 13f, 8f)
-        arcTo(4f, 4f, 0f, true, true, 13f, 12f)
+        cubicTo(16f, 4f, 17.5f, 5.5f, 17.5f, 8f)
+        cubicTo(17.5f, 10.5f, 16f, 12f, 13f, 12f)
         lineTo(8f, 12f)
         moveTo(8f, 12f)
-        lineTo(14f, 12f)
-        arcTo(4f, 4f, 0f, true, true, 14f, 20f)
+        lineTo(13.5f, 12f)
+        cubicTo(16.5f, 12f, 18f, 13.5f, 18f, 16f)
+        cubicTo(18f, 18.5f, 16.5f, 20f, 13.5f, 20f)
         lineTo(8f, 20f)
     }
 
@@ -227,7 +245,8 @@ object DayLogIcons {
     val Underline: ImageVector = icon("Underline") {
         moveTo(7f, 4f)
         lineTo(7f, 10f)
-        arcTo(5f, 5f, 0f, true, true, 17f, 10f)
+        cubicTo(7f, 13.5f, 9f, 15f, 12f, 15f)
+        cubicTo(15f, 15f, 17f, 13.5f, 17f, 10f)
         lineTo(17f, 4f)
         moveTo(6f, 20f)
         lineTo(18f, 20f)

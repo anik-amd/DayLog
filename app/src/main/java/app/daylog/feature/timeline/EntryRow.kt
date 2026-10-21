@@ -2,6 +2,7 @@ package app.daylog.feature.timeline
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,17 +20,21 @@ import app.daylog.core.designsystem.component.DLText
 import app.daylog.core.designsystem.icon.DayLogIcons
 import app.daylog.core.designsystem.theme.DayLogTheme
 import app.daylog.core.model.Entry
-import app.daylog.core.model.Tag
 import java.time.ZoneId
 import java.util.Locale
 
 /**
  * The width of the margin the dates sit in.
  *
- * It is wide enough for "Yesterday" and "12 March" to sit against the rule without crowding it,
- * and narrow enough to leave the entry text the room it needs to be read in.
+ * It is wide enough for "Yesterday" and "12 March" to sit against the rule without wrapping, and
+ * narrow enough to leave the entry text the room it needs to be read in.
  */
-val GutterWidth = 72.dp
+val GutterWidth = 80.dp
+
+/**
+ * The space between the margin rule and the entry text.
+ */
+val GutterGap = 16.dp
 
 /**
  * One entry in the timeline.
@@ -41,18 +46,16 @@ val GutterWidth = 72.dp
 @Composable
 fun EntryRow(
     entry: Entry,
-    tags: List<Tag>,
     modifier: Modifier = Modifier,
     zone: ZoneId = ZoneId.systemDefault(),
     locale: Locale = Locale.getDefault(),
-    onClick: (() -> Unit)? = null,
 ) {
     val colors = DayLogTheme.colors
 
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(end = 20.dp, bottom = 20.dp),
+            .padding(start = GutterWidth + GutterGap, end = 20.dp, bottom = 22.dp),
     ) {
         DLMeta(
             text = DayLabels.time(entry.createdAt.toLocalDateTime(zone), locale),
@@ -67,20 +70,18 @@ fun EntryRow(
             color = colors.ink,
         )
 
-        val tags = tags.filter { tag -> entry.content.contains("#${tag.name}") }
+        // A place and the weather are not in the text, so they are shown as chips. A tag is:
+        // it is already written in the entry as "#reading", and a chip that repeats it is noise.
         val placeName = entry.placeName
         val weatherSummary = entry.weatherSummary
 
-        if (tags.isNotEmpty() || placeName != null || weatherSummary != null) {
-            Spacer(Modifier.height(8.dp))
+        if (placeName != null || weatherSummary != null) {
+            Spacer(Modifier.height(10.dp))
             Row(
-                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                tags.forEach { tag ->
-                    DLChip(text = tag.name, selected = true)
-                }
                 if (placeName != null) {
                     DLChip(
                         text = placeName,

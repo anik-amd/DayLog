@@ -25,7 +25,6 @@ import app.daylog.core.designsystem.component.DLText
 import app.daylog.core.designsystem.theme.DayLogTheme
 import app.daylog.core.model.DayGroup
 import app.daylog.core.model.Entry
-import app.daylog.core.model.Tag
 
 /**
  * One thing on the timeline: a day's heading, or an entry.
@@ -44,10 +43,8 @@ private sealed interface TimelineItem {
 @Composable
 fun TimelineScreen(
     groups: List<DayGroup>,
-    tags: List<Tag>,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
-    onEntryClick: (String) -> Unit = {},
 ) {
     val colors = DayLogTheme.colors
     val items = groups.toTimelineItems()
@@ -87,11 +84,7 @@ fun TimelineScreen(
         items(items, key = { itemKey(it) }) { item ->
             when (item) {
                 is TimelineItem.Heading -> DayHeading(item.group)
-                is TimelineItem.Row -> EntryRow(
-                    entry = item.entry,
-                    tags = tags.filter { tag -> item.entry.content.contains("#${tag.name}") },
-                    onClick = { onEntryClick(item.entry.uid) },
-                )
+                is TimelineItem.Row -> EntryRow(entry = item.entry)
             }
         }
     }
@@ -107,21 +100,21 @@ private fun DayHeading(group: DayGroup) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 20.dp, end = 20.dp),
+            .padding(top = 26.dp, end = 20.dp),
         verticalAlignment = Alignment.Top,
     ) {
         // The heading hugs the rule, the way a date is written in the margin of a ledger.
         Box(
             modifier = Modifier
                 .width(GutterWidth)
-                .padding(start = 8.dp, end = 12.dp),
+                .padding(end = 12.dp),
             contentAlignment = Alignment.TopEnd,
         ) {
             DLText(
                 text = group.header,
                 style = DayLogTheme.typography.label,
                 color = colors.ink,
-                maxLines = 2,
+                maxLines = 1,
             )
         }
     }
