@@ -96,22 +96,22 @@ object BackupCodec {
      * read as the old format and converted.
      */
     fun isSupported(version: String): Boolean = version.startsWith("2.")
+}
 
-    /**
-     * The entries of a backup, as the app uses them.
-     */
-    fun BackupFile.toEntries(): List<Entry> = entries.map { entry ->
-        Entry(
-            uid = entry.uid,
-            content = entry.content,
-            createdAt = entry.createdAt,
-            updatedAt = entry.updatedAt,
-            deletedAt = entry.deletedAt,
-            placeName = entry.placeName,
-            placeLat = entry.placeLat,
-            placeLon = entry.placeLon,
-            weatherSummary = entry.weatherSummary,
-            weatherCode = entry.weatherCode,
-        )
-    }
+/**
+ * The entries of a backup, as the app uses them.
+ */
+fun BackupFile.toEntries(): List<Entry> = entries.map { entry ->
+    Entry(
+        uid = entry.uid,
+        content = entry.content,
+        createdAt = entry.createdAt,
+        updatedAt = entry.updatedAt,
+        deletedAt = entry.deletedAt,
+        placeName = entry.placeName,
+        placeLat = entry.placeLat,
+        placeLon = entry.placeLon,
+        weatherSummary = entry.weatherSummary,
+        weatherCode = entry.weatherCode,
+    )
 }

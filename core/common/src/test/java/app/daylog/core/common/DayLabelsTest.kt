@@ -23,7 +23,8 @@ class DayLabelsTest {
 
     @Test
     fun `the rest of the week is called by its weekday`() {
-        assertEquals("Thursday", DayLabels.dayHeader(today.minusDays(3), today, locale))
+        // The 30th of March 2026 is a Monday, so three days earlier is a Friday.
+        assertEquals("Friday", DayLabels.dayHeader(today.minusDays(3), today, locale))
     }
 
     @Test
