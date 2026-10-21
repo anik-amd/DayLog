@@ -52,8 +52,8 @@ object DayLogIcons {
     /** A magnifying glass, for search. */
     val Search: ImageVector = icon("Search") {
         moveTo(11f, 4f)
-        arcToRelative(7f, 7f, 0f, true, true, 0f, 14f)
-        arcToRelative(7f, 7f, 0f, true, true, 0f, -14f)
+        arcTo(7f, 7f, 0f, false, true, 11f, 18f)
+        arcTo(7f, 7f, 0f, false, true, 11f, 4f)
         moveTo(16f, 16f)
         lineTo(21f, 21f)
     }
@@ -100,26 +100,27 @@ object DayLogIcons {
     val Pin: ImageVector = icon("Pin") {
         moveTo(12f, 21f)
         curveTo(12f, 21f, 19f, 15f, 19f, 10f)
-        arcTo(7f, 7f, 0f, true, false, -14f, 0f)
+        arcTo(7f, 7f, 0f, false, true, 5f, 10f)
         curveTo(5f, 15f, 12f, 21f, 12f, 21f)
-        moveTo(12f, 7f)
-        lineTo(12.1f, 7f)
+        moveTo(9f, 10f)
+        arcTo(3f, 3f, 0f, false, true, 15f, 10f)
+        arcTo(3f, 3f, 0f, false, true, 9f, 10f)
     }
 
     /** A sun behind a cloud, for weather. */
     val Weather: ImageVector = icon("Weather") {
-        moveTo(8f, 5f)
-        lineTo(8f, 7f)
-        moveTo(3.5f, 8f)
+        moveTo(8f, 3f)
+        lineTo(8f, 5f)
+        moveTo(3f, 8f)
         lineTo(5f, 8f)
-        moveTo(4.8f, 4.8f)
-        lineTo(5.8f, 5.8f)
-        moveTo(11.2f, 4.8f)
-        lineTo(10.2f, 5.8f)
-        moveTo(16f, 19f)
-        arcToRelative(4f, 4f, 0f, true, true, 0f, -8f)
-        arcTo(5.5f, 5.5f, 0f, true, false, -11f, 2f)
-        arcToRelative(3f, 3f, 0f, true, false, 0f, 6f)
+        moveTo(4.2f, 4.2f)
+        lineTo(5.6f, 5.6f)
+        moveTo(11.8f, 4.2f)
+        lineTo(10.4f, 5.6f)
+        moveTo(17f, 19f)
+        arcTo(4f, 4f, 0f, false, true, 9f, 19f)
+        arcTo(5.5f, 5.5f, 0f, false, true, 4f, 12f)
+        arcTo(3f, 3f, 0f, false, true, 7f, 15f)
     }
 
     /** A picture frame, for photos. */
