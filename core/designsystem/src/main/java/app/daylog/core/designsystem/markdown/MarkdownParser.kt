@@ -2,12 +2,12 @@ package app.daylog.core.designsystem.markdown
 
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.toSpanStyle
 import app.daylog.core.designsystem.color.DayLogColors
 import app.daylog.core.designsystem.theme.DayLogTypography
 
@@ -53,13 +53,13 @@ object MarkdownParser {
     ) {
         when {
             line.startsWith("# ") -> {
-                pushStyle(typography.entryTitle.toSpanStyle())
+                pushStyle(typography.entryTitle.asSpan())
                 appendInline(line.removePrefix("# "), typography, colors)
                 pop()
             }
 
             line.startsWith("## ") -> {
-                pushStyle(typography.entrySubheading.toSpanStyle())
+                pushStyle(typography.entrySubheading.asSpan())
                 appendInline(line.removePrefix("## "), typography, colors)
                 pop()
             }
@@ -159,4 +159,16 @@ object MarkdownParser {
      */
     private fun isMarker(character: Char): Boolean =
         character == '*' || character == '_' || character == '`' || character == '#'
+
+    /**
+     * The part of a text style that can be applied to a run of text.
+     */
+    private fun TextStyle.asSpan(): SpanStyle = SpanStyle(
+        color = color,
+        fontSize = fontSize,
+        fontWeight = fontWeight,
+        fontStyle = fontStyle,
+        fontFamily = fontFamily,
+        letterSpacing = letterSpacing,
+    )
 }
