@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -29,7 +30,7 @@ object Routes {
 @Composable
 fun DayLogNavHost(
     container: AppContainer,
-    modifier: Modifier = androidx.compose.ui.Modifier,
+    modifier: Modifier = Modifier,
 ) {
     val navController = rememberNavController()
     var editorText by remember { mutableStateOf("") }

@@ -75,7 +75,7 @@ fun QuickEntryBar(
                 decorationBox = { innerTextField ->
                     Column {
                         if (value.isEmpty()) {
-                            androidx.compose.foundation.text.BasicText(
+                            app.daylog.core.designsystem.component.DLText(
                                 text = "Write something",
                                 style = DayLogTheme.typography.entryBody,
                                 color = colors.inkFaint,

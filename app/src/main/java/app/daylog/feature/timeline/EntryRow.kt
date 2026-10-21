@@ -67,28 +67,29 @@ fun EntryRow(
             color = colors.ink,
         )
 
-        val chips = buildList {
-            tags.forEach { add(it) }
-        }
-        if (chips.isNotEmpty() || entry.placeName != null || entry.weatherSummary != null) {
+        val tags = tags.filter { tag -> entry.content.contains("#${tag.name}") }
+        val placeName = entry.placeName
+        val weatherSummary = entry.weatherSummary
+
+        if (tags.isNotEmpty() || placeName != null || weatherSummary != null) {
             Spacer(Modifier.height(8.dp))
             Row(
                 horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                chips.forEach { tag ->
+                tags.forEach { tag ->
                     DLChip(text = tag.name, selected = true)
                 }
-                if (entry.placeName != null) {
+                if (placeName != null) {
                     DLChip(
-                        text = entry.placeName,
+                        text = placeName,
                         leadingIcon = DayLogIcons.Pin,
                     )
                 }
-                if (entry.weatherSummary != null) {
+                if (weatherSummary != null) {
                     DLChip(
-                        text = entry.weatherSummary,
+                        text = weatherSummary,
                         leadingIcon = DayLogIcons.Weather,
                     )
                 }

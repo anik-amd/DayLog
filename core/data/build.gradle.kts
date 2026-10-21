@@ -55,7 +55,9 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
 
-    implementation(libs.androidx.room.runtime)
+    // Room is exposed to consumers because DayLogDatabase is part of this module's API: the
+    // supertype has to be on the classpath of anything that holds one.
+    api(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
