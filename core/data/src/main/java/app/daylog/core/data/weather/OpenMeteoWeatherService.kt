@@ -4,7 +4,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -43,8 +42,8 @@ class OpenMeteoWeatherService(
                         obj["admin1"]?.jsonPrimitive?.content,
                         obj["country"]?.jsonPrimitive?.content,
                     ).joinToString(", "),
-                    latitude = obj["latitude"]?.doubleOrNull ?: 0.0,
-                    longitude = obj["longitude"]?.doubleOrNull ?: 0.0,
+                    latitude = obj["latitude"]?.jsonPrimitive?.content?.toDoubleOrNull() ?: 0.0,
+                    longitude = obj["longitude"]?.jsonPrimitive?.content?.toDoubleOrNull() ?: 0.0,
                     country = obj["country"]?.jsonPrimitive?.content,
                 )
             }
@@ -63,7 +62,7 @@ class OpenMeteoWeatherService(
             val code = current?.get("weather_code")?.jsonPrimitive?.content?.toIntOrNull() ?: 0
             Weather(
                 summary = summaryFor(code),
-                temperatureCelsius = current?.get("temperature_2m")?.doubleOrNull ?: 0.0,
+                temperatureCelsius = current?.get("temperature_2m")?.jsonPrimitive?.content?.toDoubleOrNull() ?: 0.0,
                 code = code,
             )
         }.getOrNull()
