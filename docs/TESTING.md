@@ -55,7 +55,7 @@ a demo. Every screen has a preview for Paper, for Night and for a large text sca
 **Always:**
 
 - Anything with a rule in it: tag extraction, markdown parsing, date and calendar maths, weather
-  mapping, JSON codecs, autosave timing, conflict ordering.
+  mapping, JSON codecs, save and discard rules, conflict ordering.
 - Anything that can lose data: saving, editing, deleting an entry, importing a backup.
 - Anything that can corrupt state: migrations, sync-shaped fields, tombstone handling.
 
@@ -97,7 +97,7 @@ real thread:
 
 ```kotlin
 @Test
-fun `autosave waits for the writer to go quiet`() = runTest { ... }
+fun `the save button writes the thought and empties the bar`() = runTest { ... }
 ```
 
 `core:testing` holds `TestDispatchers`, the fakes and the test data, so a test reads as the one
@@ -161,7 +161,8 @@ A newer version is not a reason to bump.
 These need a device and are done in the pre-release phase, not in CI:
 
 - The app opens fast and the timeline scrolls smoothly.
-- The quick entry bar grows, autosaves, and survives backgrounding.
+- The quick entry bar grows, saves on the button, hands its text to the full editor, and survives
+  backgrounding.
 - Photos are copied into app storage and survive a restart.
 - Importing a JSON backup restores everything.
 - The theme follows the system setting and the adaptive accent re-tints correctly.

@@ -33,7 +33,7 @@ Do not introduce anything that is not already in `gradle/libs.versions.toml`.
 | Build | AGP 8.13.2, Gradle 8.14.6, JDK 21 |
 | Storage | Room 2.8.5 + DataStore 1.3.0 |
 | Async | Coroutines 1.11.0 |
-| Type | Inter, bundled as a variable font |
+| Type | Roboto, the platform's own typeface |
 | Tests | JUnit4, Robolectric 4.17, Turbine, `kotlinx-coroutines-test` |
 
 **Material 3 is the design language.** The app is a native Android app: the Material widgets, the
@@ -246,12 +246,13 @@ Read `/docs/DESIGN_SYSTEM.md` before touching a screen. The short version:
 
 - Material 3: tonal surfaces, the platform's own widgets, no shadows.
 - Paper, Night, and a true-black Night. The wallpaper's colours are an option, not the default.
-- One family: Inter.
+- One family: Roboto, the platform's own typeface.
 - **Accent marks data, never chrome.** It is not a button colour and not a navigation colour.
 - The margin rule is the app's signature: dates sit in a gutter beside a vertical hairline, and
   the gutter grows with the text so a day name is never cut off.
-- The composer never takes the writing away: every save updates the same entry, and the text is
-  never cleared out of the field while the writer is still in it.
+- The quick bar saves on its save button, and nothing is written while the writer is still
+  typing. The editor saves on every way out — the back arrow, the system gesture, the save
+  button — so leaving it never takes the writing with it.
 
 ---
 

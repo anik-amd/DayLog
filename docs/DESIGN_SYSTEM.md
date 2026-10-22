@@ -49,11 +49,13 @@ everywhere, it is nowhere.
 
 ## Type
 
-**One family: Inter.** A grotesque with a real weight axis, bundled as a variable font so the
-whole range comes from one file.
+**One family: Roboto.** The platform's own typeface, asked for by name and never bundled — the
+device already has it, and it is the typeface every other app on it is set in, so a diary entry
+reads like something written on this device.
 
-The serif is gone. A diary is read in long stretches, and one well-set sans is quieter than two
-faces fighting each other. The reading is carried by size and line height instead.
+The serif is gone, and so is the bundled grotesque. A diary is read in long stretches, and one
+well-set sans is quieter than two faces fighting each other. The reading is carried by size and
+line height instead.
 
 | Role | Size / line | Weight | Used for |
 |---|---|---|---|
@@ -154,7 +156,7 @@ theme/DayLogTheme.kt       the theme, the modes, the wallpaper option
 theme/DayLogTypography.kt   the type scale, and the Material mapping
 theme/DayLogSpacing.kt     the spacing scale
 theme/DayLogShapes.kt      the radii
-theme/DayLogFonts.kt        Inter
+theme/DayLogFonts.kt        Roboto, the platform's own typeface
 component/                  the widgets
 icon/DayLogIcons.kt         the hand-drawn icons
 markdown/MarkdownParser.kt  the app's markdown

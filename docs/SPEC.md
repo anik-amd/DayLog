@@ -25,7 +25,7 @@ than three seconds, the design has failed regardless of how good the rest looks.
 no network. The only time the internet is touched is to look up a place name or the weather.
 
 **Calm, not empty.** Minimal does not mean stripped. A diary is read often and for a long time, so
-the reading experience gets serif type, generous line height and a quiet chrome. What is removed is
+the reading experience gets generous line height and a quiet chrome. What is removed is
 noise, not care.
 
 **One way to do things.** No modes, no filters that need explaining, no settings that change how
@@ -37,7 +37,7 @@ the app looks unless the user asks for it.
 
 1. Open the app.
 2. Type in the bar at the bottom.
-3. It saves on its own.
+3. Press save.
 
 That is the whole loop. Everything else exists to support it or to let the user look back.
 
@@ -48,20 +48,23 @@ That is the whole loop. Everything else exists to support it or to let the user 
 ### Timeline
 
 Entries grouped by day, newest first. Each day has a date in the left margin beside a vertical
-hairline — the app's signature. Entry text is set in a serif so a long entry stays comfortable to
-read. No cards, no shadows, no coloured headers.
+hairline — the app's signature. No cards, no shadows, no coloured headers.
 
 ### Quick entry
 
-A single line at the bottom of the timeline that expands upward as you type, up to about six
-lines. It saves 700ms after you stop typing. There is no save button, because there is nothing to
-save. A chevron opens the full editor.
+A single line at the bottom of the timeline that expands upward as you type, up to about ten
+lines, and then scrolls. Nothing is saved by itself. The actions sit under the field: a photo, an
+unfold arrow to the full editor, and the save button — the only thing that writes the thought
+down, and the only thing that empties the field. The text carries into the full editor when the
+arrow is tapped, and an entry a photo has already begun is continued there rather than split.
 
 ### Full editor
 
 A full-screen editor for longer writing, with a formatting toolbar (bold, italic, underline, H1,
-H2), a live preview toggle and the same autosave behaviour. Content is stored as Markdown and stays
-editable as Markdown.
+H2), a live preview toggle, the entry's moment (tappable, so a wrong time can be put right), a
+live word count and photos. Every way out saves — the back arrow, the system's back gesture and
+the save button all write the entry first. The menu holds the discard, behind a question. Content
+is stored as Markdown and stays editable as Markdown.
 
 ### Tags
 
