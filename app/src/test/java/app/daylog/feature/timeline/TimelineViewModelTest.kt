@@ -4,6 +4,7 @@ import android.net.Uri
 import app.daylog.core.data.repository.EntryRepository
 import app.daylog.core.testing.FakeEntryDao
 import app.daylog.core.testing.FakeEntryFtsDao
+import app.daylog.core.testing.FakeMediaDao
 import app.daylog.core.testing.FakeMediaStore
 import app.daylog.core.testing.FakeTagDao
 import app.daylog.core.testing.MainDispatcherRule
