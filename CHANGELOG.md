@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.5] - 2026-10-22
+
+### Added
+- A calendar: a month on one screen, a dot on every day you wrote, and tap a day to read what
+  you wrote
+- The calendar is one tap away from the top bar
+
+### Fixed
+- The search results carry the same rule down the margin as the timeline, so a result looks
+  like the entry it is
+
 ## [0.3.4] - 2026-10-22
 
 ### Added

@@ -101,8 +101,8 @@ markers that are not closed.
 
 ## P5 — Calendar, tags, search
 
-- [ ] Month grid with entry dots
-- [ ] Tap a day → timeline filters to it
+- [x] Month grid with entry dots
+- [x] Tap a day → the entries of that day are shown
 - [ ] Tag strip with AND logic
 - [x] Full-text search screen over content and tags
 
