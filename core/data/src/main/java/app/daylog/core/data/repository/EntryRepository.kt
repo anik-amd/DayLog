@@ -116,11 +116,15 @@ class EntryRepository(
      * are read out of the text every time, so a tag that is deleted from an entry goes away with
      * it — the tag list is never a second, stale copy of what the entries say.
      *
+     * @param createdAt the moment the entry happened at, when the writer has chosen one. Left
+     * null, the entry keeps the moment it already has, or receives the current time.
+     *
      * @return the uid of the saved entry.
      */
     suspend fun save(
         content: String,
         uid: String? = null,
+        createdAt: Long? = null,
         placeName: String? = null,
         placeLat: Double? = null,
         placeLon: Double? = null,
@@ -135,7 +139,7 @@ class EntryRepository(
             id = existing?.id ?: 0,
             uid = resolvedUid,
             content = content,
-            createdAt = existing?.createdAt ?: timestamp,
+            createdAt = createdAt ?: existing?.createdAt ?: timestamp,
             updatedAt = timestamp,
             deletedAt = null,
             placeName = placeName ?: existing?.placeName,

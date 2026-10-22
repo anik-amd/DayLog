@@ -14,7 +14,6 @@ import androidx.navigation.navArgument
 import app.daylog.di.AppContainer
 import app.daylog.feature.calendar.CalendarRoute
 import app.daylog.feature.editor.EditorRoute
-import app.daylog.feature.editor.FullScreenEditor
 import app.daylog.feature.entry.EntryDetailRoute
 import app.daylog.feature.search.SearchRoute
 import app.daylog.feature.settings.SettingsRoute
@@ -40,8 +39,10 @@ object Routes {
 /**
  * The app's navigation.
  *
- * Three screens: the timeline, the full editor that opens over it, and the settings. An entry
- * opens in its own screen, because an entry is worth reading on its own terms.
+ * The timeline is home, the calendar stands beside it, and an entry opens in its own screen,
+ * because an entry is worth reading on its own terms. The editor is one screen for the quick
+ * bar's handover and for editing an entry that already exists; the text being handed over waits
+ * in [editorText] between the bar and the editor, and is cleared again on the way out.
  */
 @Composable
 fun DayLogNavHost(
@@ -59,9 +60,13 @@ fun DayLogNavHost(
         composable(Routes.Timeline) {
             TimelineRoute(
                 container = container,
-                onOpenEditor = {
-                    editorText = ""
+                onOpenEditor = { text ->
+                    editorText = text
                     navController.navigate(Routes.Editor)
+                },
+                onOpenEntryEditor = { uid, text ->
+                    editorText = text
+                    navController.navigate("editor?uid=$uid")
                 },
                 onOpenSettings = {
                     navController.navigate(Routes.Settings)
@@ -121,15 +126,23 @@ fun DayLogNavHost(
             EditorRoute(
                 container = container,
                 uid = uid,
-                onBack = { navController.popBackStack() },
+                initialText = editorText,
+                onBack = {
+                    editorText = ""
+                    navController.popBackStack()
+                },
             )
         }
 
         composable(Routes.Editor) {
-            FullScreenEditor(
+            EditorRoute(
+                container = container,
+                uid = null,
                 initialText = editorText,
-                onTextChanged = { editorText = it },
-                onBack = { navController.popBackStack() },
+                onBack = {
+                    editorText = ""
+                    navController.popBackStack()
+                },
             )
         }
 

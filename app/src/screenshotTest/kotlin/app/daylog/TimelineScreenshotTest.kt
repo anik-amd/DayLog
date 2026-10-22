@@ -140,7 +140,9 @@ private fun DayLogPreview(dark: Boolean = false) {
             QuickEntryBar(
                 value = "",
                 onValueChange = {},
+                onSave = {},
                 onExpand = {},
+                onAddPhoto = {},
                 modifier = Modifier.navigationBarsPadding(),
             )
         }

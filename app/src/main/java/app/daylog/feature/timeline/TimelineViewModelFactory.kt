@@ -5,6 +5,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import app.daylog.core.common.AppDispatchers
 import app.daylog.core.data.repository.EntryRepository
+import app.daylog.core.data.repository.MediaStore
 
 /**
  * Builds the timeline's state holder.
@@ -14,11 +15,13 @@ import app.daylog.core.data.repository.EntryRepository
  */
 fun timelineViewModelFactory(
     repository: EntryRepository,
+    mediaStore: MediaStore,
     dispatchers: AppDispatchers,
 ): ViewModelProvider.Factory = viewModelFactory {
     initializer {
         TimelineViewModel(
             repository = repository,
+            mediaStore = mediaStore,
             dispatchers = dispatchers,
         )
     }

@@ -1,6 +1,8 @@
 package app.daylog.feature.editor
 
+import android.text.format.DateFormat
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,11 +13,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,10 +28,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import app.daylog.core.common.wordCount
+import app.daylog.core.designsystem.component.DLConfirmDialog
 import app.daylog.core.designsystem.component.DLIcon
 import app.daylog.core.designsystem.component.DLIconButton
 import app.daylog.core.designsystem.component.DLText
@@ -43,27 +47,38 @@ import app.daylog.core.model.MarkdownToggle
  * The full editor.
  *
  * The whole screen is the writing surface: no title field, no separate body, no toolbar above a
- * box. The text starts near the top and the screen is the paper.
+ * box. The entry's facts sit in one small line — the moment it happened at, which the writer can
+ * tap and put right, and the word count, which answers the oldest question in a diary. Photos
+ * hang under the writing, and the formatting toolbar sits at the bottom, on the same hairline as
+ * the quick entry bar, so the thumb reaches it while the other hand writes.
  *
- * The formatting toolbar is at the bottom, on the same hairline as the quick entry bar, so the
- * thumb reaches it while the other hand writes. Each button works on the selection: it marks the
- * selected words, or takes the mark off again.
+ * Leaving is saving: the back arrow, the system gesture and the save button all ask the route for
+ * the same exit, and the route writes the entry first. The menu holds the exit that throws the
+ * writing away, behind a question.
  */
 @Composable
 fun FullScreenEditor(
-    initialText: String,
+    state: EditorUiState,
     onTextChanged: (String) -> Unit,
-    onBack: () -> Unit,
+    onChangeTime: (Long) -> Unit,
+    onSave: () -> Unit,
+    onDiscard: () -> Unit,
+    onAddPhoto: () -> Unit,
+    onRemovePhoto: (String) -> Unit,
     modifier: Modifier = Modifier,
-    onSave: (() -> Unit)? = null,
 ) {
     val colors = DayLogTheme.colors
-    var value by remember { mutableStateOf(TextFieldValue(initialText)) }
+    var value by remember { mutableStateOf(TextFieldValue(state.text ?: "")) }
     var preview by remember { mutableStateOf(false) }
+    var menuOpen by remember { mutableStateOf(false) }
+    var confirmingDiscard by remember { mutableStateOf(false) }
+    var pickingMoment by remember { mutableStateOf(false) }
 
-    LaunchedEffect(initialText) {
-        if (value.text != initialText) {
-            value = TextFieldValue(initialText)
+    LaunchedEffect(state.text) {
+        // The text comes back from the state holder when it changed somewhere else — when a
+        // discard puts it back — and never when it is what this field last said.
+        if (value.text != state.text) {
+            value = TextFieldValue(state.text)
         }
     }
 
@@ -75,7 +90,7 @@ fun FullScreenEditor(
             DLTopBar(
                 title = "Entry",
                 leadingIcon = DayLogIcons.Back,
-                onLeadingClick = onBack,
+                onLeadingClick = onSave,
                 trailingContent = {
                     DLIconButton(
                         imageVector = DayLogIcons.Eye,
@@ -83,21 +98,69 @@ fun FullScreenEditor(
                         onClick = { preview = !preview },
                         tint = if (preview) colors.accent else colors.inkMuted,
                     )
-                    if (onSave != null) {
+                    DLIconButton(
+                        imageVector = DayLogIcons.Check,
+                        contentDescription = "Save",
+                        onClick = onSave,
+                        tint = colors.ink,
+                    )
+                    Box {
                         DLIconButton(
-                            imageVector = DayLogIcons.Check,
-                            contentDescription = "Save",
-                            onClick = onSave,
-                            tint = colors.accent,
+                            imageVector = DayLogIcons.MoreVert,
+                            contentDescription = "More options",
+                            onClick = { menuOpen = true },
+                            tint = colors.inkMuted,
                         )
+                        DropdownMenu(
+                            expanded = menuOpen,
+                            onDismissRequest = { menuOpen = false },
+                        ) {
+                            DropdownMenuItem(
+                                text = {
+                                    DLText(text = "Discard entry", style = DayLogTheme.typography.label)
+                                },
+                                leadingIcon = {
+                                    DLIcon(imageVector = DayLogIcons.Trash, contentDescription = null)
+                                },
+                                onClick = {
+                                    menuOpen = false
+                                    confirmingDiscard = true
+                                },
+                            )
+                        }
                     }
                 },
             )
 
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                val createdAt = state.createdAt
+                if (createdAt != null) {
+                    val is24Hour = DateFormat.is24HourFormat(LocalConfiguration.current)
+                    DLText(
+                        text = momentLabel(createdAt, is24Hour = is24Hour),
+                        modifier = Modifier.clickable { pickingMoment = true },
+                        style = DayLogTheme.typography.meta,
+                        color = colors.inkMuted,
+                    )
+                }
+                DLText(
+                    text = "${wordCount(value.text)} words",
+                    style = DayLogTheme.typography.meta,
+                    color = colors.inkFaint,
+                )
+            }
+
             if (preview) {
-                androidx.compose.foundation.layout.Box(
+                Box(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .weight(1f)
+                        .fillMaxWidth()
                         .padding(horizontal = 20.dp, vertical = 12.dp),
                 ) {
                     DLText(
@@ -115,13 +178,14 @@ fun FullScreenEditor(
                         onTextChanged(it.text)
                     },
                     modifier = Modifier
-                        .fillMaxSize()
+                        .weight(1f)
+                        .fillMaxWidth()
                         .padding(horizontal = 20.dp, vertical = 12.dp),
                     textStyle = DayLogTheme.typography.entryBody.copy(color = colors.ink),
                     cursorBrush = SolidColor(colors.accent),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Default),
                     decorationBox = { innerTextField ->
-                        Box(modifier = Modifier.fillMaxSize()) {
+                        Box(modifier = Modifier.fillMaxWidth()) {
                             if (value.text.isEmpty()) {
                                 DLText(
                                     text = "Start writing",
@@ -135,13 +199,42 @@ fun FullScreenEditor(
                 )
             }
 
+            if (state.media.isNotEmpty()) {
+                EditorGallery(
+                    media = state.media,
+                    onRemove = onRemovePhoto,
+                )
+            }
+
             EditorToolbar(
                 onBold = { value = value.toggled("**") },
                 onItalic = { value = value.toggled("*") },
                 onUnderline = { value = value.toggled("__") },
                 onHeading = { value = value.heading() },
+                onAddPhoto = onAddPhoto,
             )
         }
+    }
+
+    if (pickingMoment) {
+        MomentPicker(
+            moment = state.createdAt ?: System.currentTimeMillis(),
+            onChange = onChangeTime,
+            onDone = { pickingMoment = false },
+        )
+    }
+
+    if (confirmingDiscard) {
+        DLConfirmDialog(
+            title = "Discard the entry?",
+            body = "The entry as it stands will be gone.",
+            confirmLabel = "Discard",
+            onConfirm = {
+                confirmingDiscard = false
+                onDiscard()
+            },
+            onDismiss = { confirmingDiscard = false },
+        )
     }
 }
 
@@ -149,7 +242,8 @@ fun FullScreenEditor(
  * The formatting toolbar.
  *
  * Four actions and no more. Each one is the markdown shortcut rather than a rich-text command,
- * because the entry is stored as markdown and has to stay editable as markdown.
+ * because the entry is stored as markdown and has to stay editable as markdown. The photo sits
+ * at the end of the row, with the other edits of the entry.
  */
 @Composable
 private fun EditorToolbar(
@@ -157,6 +251,7 @@ private fun EditorToolbar(
     onItalic: () -> Unit,
     onUnderline: () -> Unit,
     onHeading: () -> Unit,
+    onAddPhoto: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = DayLogTheme.colors
@@ -180,6 +275,8 @@ private fun EditorToolbar(
             ToolbarButton(DayLogIcons.Italic, "Italic", onItalic)
             ToolbarButton(DayLogIcons.Underline, "Underline", onUnderline)
             ToolbarButton(DayLogIcons.Format, "Heading", onHeading)
+            Spacer(Modifier.weight(1f))
+            ToolbarButton(DayLogIcons.Image, "Add a photo", onAddPhoto)
         }
     }
 }

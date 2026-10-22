@@ -1,5 +1,8 @@
 package app.daylog.feature.timeline
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,8 +19,6 @@ import app.daylog.core.designsystem.component.DLTopBar
 import app.daylog.core.designsystem.icon.DayLogIcons
 import app.daylog.core.designsystem.theme.DayLogTheme
 import app.daylog.di.AppContainer
-import kotlinx.coroutines.launch
-import androidx.compose.runtime.rememberCoroutineScope
 
 /**
  * The timeline, wired up.
@@ -28,7 +29,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 @Composable
 fun TimelineRoute(
     container: AppContainer,
-    onOpenEditor: () -> Unit,
+    onOpenEditor: (String) -> Unit,
+    onOpenEntryEditor: (String, String) -> Unit,
     onOpenSettings: () -> Unit,
     onOpenEntry: (String) -> Unit,
     onOpenSearch: () -> Unit,
@@ -38,10 +40,17 @@ fun TimelineRoute(
     val viewModel: TimelineViewModel = viewModel(
         factory = timelineViewModelFactory(
             repository = container.entryRepository,
+            mediaStore = container.mediaRepository,
             dispatchers = container.dispatchers,
         ),
     )
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    val photoPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+    ) { picked ->
+        picked?.let(viewModel::addPhoto)
+    }
 
     Column(
         modifier = modifier
@@ -92,7 +101,20 @@ fun TimelineRoute(
         QuickEntryBar(
             value = state.draft,
             onValueChange = viewModel::onDraftChanged,
-            onExpand = onOpenEditor,
+            onSave = viewModel::save,
+            onAddPhoto = {
+                photoPicker.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                )
+            },
+            onExpand = {
+                val handoff = viewModel.handOffDraft()
+                if (handoff.uid != null) {
+                    onOpenEntryEditor(handoff.uid, handoff.text)
+                } else {
+                    onOpenEditor(handoff.text)
+                }
+            },
             isSaving = state.isSaving,
         )
     }

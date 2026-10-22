@@ -1,19 +1,19 @@
 package app.daylog.feature.timeline
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.daylog.core.common.AppDispatchers
 import app.daylog.core.data.repository.EntryRepository
+import app.daylog.core.data.repository.MediaStore
 import app.daylog.core.model.DayGroup
 import app.daylog.core.model.DayGrouper
 import app.daylog.core.model.Entry
 import app.daylog.core.model.Media
 import app.daylog.core.model.Tag
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -39,16 +39,26 @@ data class TimelineUiState(
 )
 
 /**
+ * A thought leaving the quick bar for the full editor.
+ */
+data class DraftHandoff(
+    val text: String,
+    /** The entry that already exists for this thought, when one has been started. */
+    val uid: String?,
+)
+
+/**
  * The timeline's state holder.
  *
- * The rule about autosave lives here rather than in the composable, because it is a rule: the
- * draft is written shortly after the writer stops typing. The composable only reports what was
- * typed and shows what came back.
+ * The quick bar saves when the writer says so: the save button writes the thought down, and
+ * nothing is written while they are still typing. The composables only report what was typed and
+ * show what came back.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class TimelineViewModel(
     private val repository: EntryRepository,
-    private val dispatchers: AppDispatchers,
+    private val mediaStore: MediaStore,
+    dispatchers: AppDispatchers,
     private val locale: Locale = Locale.getDefault(),
 ) : ViewModel() {
 
@@ -56,15 +66,12 @@ class TimelineViewModel(
     private val saving = MutableStateFlow(false)
 
     /**
-     * The entry the draft belongs to.
+     * The entry a photo has already started.
      *
-     * Every save updates this same entry, so a pause in the middle of a thought does not split it
-     * into two entries. It is cleared when the writer empties the field, which is how they ask
-     * for a fresh one.
+     * A photo needs an entry to hang on, so attaching one begins the thought without writing it
+     * down as finished. The save button is still the only thing that closes it.
      */
     private var draftUid: String? = null
-
-    private var saveJob: Job? = null
 
     /**
      * The tags the writer has chosen to filter by.
@@ -134,39 +141,71 @@ class TimelineViewModel(
     /**
      * The writer typed something.
      *
-     * The save is put off until they stop, and every keystroke pushes it back. The work is
-     * cancelled and restarted rather than queued, so only the final text is ever written.
-     *
-     * The text is never taken out of the field. A writer who pauses to think should find their
-     * sentence still there when they come back.
+     * Nothing is saved here. An empty field makes room for the next thought; a thought that a
+     * photo has already begun keeps its entry while the field is being emptied around it.
      */
     fun onDraftChanged(text: String) {
         draft.value = text
 
-        saveJob?.cancel()
-
         if (text.isBlank()) {
-            // An empty field is the writer asking for a fresh entry. The one they wrote stays in
-            // the timeline; only the link to it is dropped.
             draftUid = null
-            return
-        }
-
-        saveJob = viewModelScope.launch {
-            delay(AUTOSAVE_DELAY_MS)
-            write(text)
         }
     }
 
     /**
-     * Writes the draft now, without waiting.
+     * The writer pressed save.
+     *
+     * The thought is written to the database and the bar is cleared for the next one: the save is
+     * the end of the thought, so it is the only thing that empties the field.
      */
-    fun saveNow() {
-        saveJob?.cancel()
+    fun save() {
         val text = draft.value
-        if (text.isBlank()) return
 
-        viewModelScope.launch { write(text) }
+        viewModelScope.launch {
+            saving.value = true
+            try {
+                if (text.isNotBlank() || draftUid != null) {
+                    draftUid = repository.save(text, uid = draftUid)
+                    draft.value = ""
+                    draftUid = null
+                }
+            } finally {
+                saving.value = false
+            }
+        }
+    }
+
+    /**
+     * Attaches a photo to the thought.
+     *
+     * An entry comes into being if the photo is the first thing in this thought, and whatever
+     * text there is stays in the field: the save button remains the only thing that closes it.
+     */
+    fun addPhoto(uri: Uri) {
+        viewModelScope.launch {
+            saving.value = true
+            try {
+                val uid = repository.save(draft.value, uid = draftUid)
+                draftUid = uid
+                mediaStore.addMedia(uid, uri)
+            } finally {
+                saving.value = false
+            }
+        }
+    }
+
+    /**
+     * Hands the writing over to the full editor.
+     *
+     * The bar gives up the text — the entry is another screen's to finish — and the entry's uid
+     * goes with it when one has already begun, so the editor continues the same thought.
+     */
+    fun handOffDraft(): DraftHandoff {
+        val handedText = draft.value
+        val handedUid = draftUid
+        draft.value = ""
+        draftUid = null
+        return DraftHandoff(text = handedText, uid = handedUid)
     }
 
     /**
@@ -176,24 +215,5 @@ class TimelineViewModel(
         viewModelScope.launch {
             repository.delete(uid)
         }
-    }
-
-    private suspend fun write(text: String) {
-        saving.value = true
-        try {
-            draftUid = repository.save(text, uid = draftUid)
-        } finally {
-            saving.value = false
-        }
-    }
-
-    companion object {
-        /**
-         * How long the writer has to stop typing before the entry is written.
-         *
-         * Long enough that a pause mid-sentence does not cause a write, short enough that the
-         * entry is safely on disk before the app is likely to be closed.
-         */
-        const val AUTOSAVE_DELAY_MS = 700L
     }
 }

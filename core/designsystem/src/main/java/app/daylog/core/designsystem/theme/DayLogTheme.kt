@@ -101,7 +101,7 @@ fun DayLogTheme(
     }
 
     val typography = remember {
-        DayLogTypography.standard(family = DayLogFonts.Inter)
+        DayLogTypography.standard(family = DayLogFonts.system)
     }
 
     CompositionLocalProvider(

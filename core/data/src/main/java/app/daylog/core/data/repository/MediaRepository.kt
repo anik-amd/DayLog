@@ -17,6 +17,34 @@ import java.io.FileOutputStream
 import java.util.UUID
 
 /**
+ * The photos of an entry, as the state holders see them.
+ *
+ * The state holders read the store rather than the repository class, so a test can hand them a
+ * store without a device behind it.
+ */
+interface MediaStore {
+    /** The photos of one entry, in the order they were added. */
+    fun observeMedia(entryUid: String): Flow<List<Media>>
+
+    /**
+     * Copies a photo into the app and attaches it to an entry.
+     *
+     * @return the uid of the new media row.
+     */
+    suspend fun addMedia(entryUid: String, uri: Uri): String
+
+    /**
+     * Removes a photo.
+     */
+    suspend fun removeMedia(mediaUid: String)
+
+    /**
+     * Removes every photo of an entry.
+     */
+    suspend fun removeMediaForEntry(entryUid: String)
+}
+
+/**
  * The photos of an entry.
  *
  * The photos are copied into the app's own storage rather than referenced where they were picked
@@ -27,10 +55,10 @@ class MediaRepository(
     private val context: Context,
     private val mediaDao: MediaDao,
     private val now: () -> Long = System::currentTimeMillis,
-) {
+) : MediaStore {
 
     /** The photos of an entry, in the order they were added. */
-    fun observeMedia(entryUid: String): Flow<List<Media>> =
+    override fun observeMedia(entryUid: String): Flow<List<Media>> =
         mediaDao.observeForEntry(entryUid).map { entities -> entities.map { it.toMedia() } }
 
     /**
@@ -38,7 +66,7 @@ class MediaRepository(
      *
      * @return the uid of the new media row.
      */
-    suspend fun addMedia(entryUid: String, uri: Uri): String = withContext(Dispatchers.IO) {
+    override suspend fun addMedia(entryUid: String, uri: Uri): String = withContext(Dispatchers.IO) {
         val uid = UUID.randomUUID().toString()
         val directory = File(context.filesDir, "media/$entryUid")
         directory.mkdirs()
@@ -69,17 +97,17 @@ class MediaRepository(
     /**
      * Removes a photo and deletes its files.
      */
-    suspend fun removeMedia(uid: String) = withContext(Dispatchers.IO) {
-        val row = mediaDao.findByUid(uid) ?: return@withContext
+    override suspend fun removeMedia(mediaUid: String) = withContext(Dispatchers.IO) {
+        val row = mediaDao.findByUid(mediaUid) ?: return@withContext
         runCatching { File(row.path).delete() }
         row.thumbnailPath?.let { runCatching { File(it).delete() } }
-        mediaDao.deleteByUid(uid)
+        mediaDao.deleteByUid(mediaUid)
     }
 
     /**
      * Removes every photo of an entry. Used when an entry is deleted.
      */
-    suspend fun removeMediaForEntry(entryUid: String) = withContext(Dispatchers.IO) {
+    override suspend fun removeMediaForEntry(entryUid: String) = withContext(Dispatchers.IO) {
         mediaDao.observeForEntry(entryUid).collect { rows ->
             // Collecting here is just to read the current rows; the delete below is by entry.
         }

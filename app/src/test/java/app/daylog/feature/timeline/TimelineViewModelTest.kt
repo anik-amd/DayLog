@@ -1,19 +1,22 @@
 package app.daylog.feature.timeline
 
+import android.net.Uri
 import app.daylog.core.data.repository.EntryRepository
 import app.daylog.core.testing.FakeEntryDao
 import app.daylog.core.testing.FakeEntryFtsDao
-import app.daylog.core.testing.FakeMediaDao
+import app.daylog.core.testing.FakeMediaStore
 import app.daylog.core.testing.FakeTagDao
 import app.daylog.core.testing.MainDispatcherRule
 import app.daylog.core.testing.TestDispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -28,6 +31,7 @@ class TimelineViewModelTest {
     private val tagDao = FakeTagDao()
     private val mediaDao = FakeMediaDao()
     private val entryFtsDao = FakeEntryFtsDao()
+    private val mediaStore = FakeMediaStore()
 
     private val repository = EntryRepository(
         entryDao = entryDao,
@@ -39,97 +43,58 @@ class TimelineViewModelTest {
 
     private fun viewModel() = TimelineViewModel(
         repository = repository,
+        mediaStore = mediaStore,
         dispatchers = TestDispatchers(mainDispatcherRule.dispatcher),
     )
 
     @Test
-    fun `the draft is not written before the writer stops typing`() =
+    fun `nothing is written while the writer is typing`() =
         runTest(mainDispatcherRule.dispatcher) {
             val viewModel = viewModel()
 
             viewModel.onDraftChanged("a thought")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS - 1)
+            advanceUntilIdle()
 
             assertEquals(0, entryDao.stored.size)
         }
 
     @Test
-    fun `the draft is written once the writer stops typing`() =
-        runTest(mainDispatcherRule.dispatcher) {
-            val viewModel = viewModel()
-
-            viewModel.onDraftChanged("a thought")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
-
-            assertEquals(1, entryDao.stored.size)
-            assertEquals("a thought", entryDao.stored.first().content)
-        }
-
-    @Test
-    fun `only the last text is written when the writer keeps typing`() =
-        runTest(mainDispatcherRule.dispatcher) {
-            val viewModel = viewModel()
-
-            viewModel.onDraftChanged("a")
-            advance(300)
-            viewModel.onDraftChanged("a th")
-            advance(300)
-            viewModel.onDraftChanged("a thought")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
-
-            assertEquals(1, entryDao.stored.size)
-            assertEquals("a thought", entryDao.stored.first().content)
-        }
-
-    @Test
-    fun `the text stays in the bar when the entry is written`() =
+    fun `the save button writes the thought and empties the bar`() =
         runTest(mainDispatcherRule.dispatcher) {
             val viewModel = viewModel()
             watchState(viewModel)
 
             viewModel.onDraftChanged("a thought")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
-
-            // The writing is never taken out from under the writer.
-            assertEquals("a thought", viewModel.state.value.draft)
-        }
-
-    @Test
-    fun `a pause in the writing updates the same entry rather than starting another`() =
-        runTest(mainDispatcherRule.dispatcher) {
-            val viewModel = viewModel()
-
-            viewModel.onDraftChanged("a thought")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
-            viewModel.onDraftChanged("a thought that grew")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            viewModel.save()
+            advanceUntilIdle()
 
             assertEquals(1, entryDao.stored.size)
-            assertEquals("a thought that grew", entryDao.stored.first().content)
+            assertEquals("a thought", entryDao.stored.first().content)
+            assertEquals("", viewModel.state.value.draft)
         }
 
     @Test
-    fun `emptying the bar leaves the entry in the timeline and makes room for a new one`() =
+    fun `the next save starts a new entry`() =
         runTest(mainDispatcherRule.dispatcher) {
             val viewModel = viewModel()
 
             viewModel.onDraftChanged("a thought")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
-            viewModel.onDraftChanged("")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            viewModel.save()
             viewModel.onDraftChanged("another thought")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            viewModel.save()
+            advanceUntilIdle()
 
             assertEquals(2, entryDao.stored.size)
         }
 
     @Test
-    fun `an empty draft is not written`() =
+    fun `a blank save writes nothing`() =
         runTest(mainDispatcherRule.dispatcher) {
             val viewModel = viewModel()
 
             viewModel.onDraftChanged("   ")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            viewModel.save()
+            advanceUntilIdle()
 
             assertEquals(0, entryDao.stored.size)
         }
@@ -140,9 +105,72 @@ class TimelineViewModelTest {
             val viewModel = viewModel()
 
             viewModel.onDraftChanged("a thought #work")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            viewModel.save()
+            advanceUntilIdle()
 
             assertEquals(listOf("work"), tagDao.tagsForEntry(entryDao.stored.first().uid))
+        }
+
+    @Test
+    fun `a photo begins the entry when the bar is empty`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val viewModel = viewModel()
+
+            viewModel.addPhoto(Uri.parse("content://gallery/one"))
+            advanceUntilIdle()
+
+            assertEquals(1, entryDao.stored.size)
+            val entry = entryDao.stored.first()
+            assertEquals(1, mediaStore.observeMedia(entry.uid).first().size)
+        }
+
+    @Test
+    fun `a photo keeps writing open and the save button closes it`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val viewModel = viewModel()
+            watchState(viewModel)
+
+            viewModel.onDraftChanged("a thought")
+            viewModel.addPhoto(Uri.parse("content://gallery/one"))
+            advanceUntilIdle()
+
+            // Whatever is typed stays in the bar until the writer says save.
+            assertEquals("a thought", viewModel.state.value.draft)
+            assertEquals(1, entryDao.stored.size)
+
+            viewModel.save()
+            advanceUntilIdle()
+
+            assertEquals("a thought", entryDao.stored.first().content)
+            assertEquals("", viewModel.state.value.draft)
+        }
+
+    @Test
+    fun `handing off takes the text and empties the bar`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val viewModel = viewModel()
+            watchState(viewModel)
+
+            viewModel.onDraftChanged("a thought")
+            val handoff = viewModel.handOffDraft()
+
+            assertEquals("a thought", handoff.text)
+            assertNull(handoff.uid)
+            assertEquals("", viewModel.state.value.draft)
+        }
+
+    @Test
+    fun `handing off continues an entry that a photo began`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val viewModel = viewModel()
+
+            viewModel.addPhoto(Uri.parse("content://gallery/one"))
+            advanceUntilIdle()
+            val uid = entryDao.stored.first().uid
+
+            val handoff = viewModel.handOffDraft()
+
+            assertEquals(uid, handoff.uid)
         }
 
     @Test
@@ -150,11 +178,12 @@ class TimelineViewModelTest {
         runTest(mainDispatcherRule.dispatcher) {
             val viewModel = viewModel()
             viewModel.onDraftChanged("a thought")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            viewModel.save()
+            advanceUntilIdle()
             val uid = entryDao.stored.first().uid
 
             viewModel.deleteEntry(uid)
-            runCurrent()
+            advanceUntilIdle()
 
             assertEquals(1, entryDao.stored.size)
             assertTrue(entryDao.stored.first().deletedAt != null)
@@ -167,11 +196,12 @@ class TimelineViewModelTest {
             watchState(viewModel)
 
             viewModel.onDraftChanged("a thought")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            viewModel.save()
+            advanceUntilIdle()
             val uid = entryDao.stored.first().uid
 
             viewModel.deleteEntry(uid)
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            advanceUntilIdle()
 
             val groups = viewModel.state.value.groups
             assertEquals(0, groups.sumOf { it.entries.size })
@@ -187,7 +217,7 @@ class TimelineViewModelTest {
             watchState(viewModel)
 
             viewModel.toggleTag("work")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            advanceUntilIdle()
 
             val entries = viewModel.state.value.groups.flatMap { it.entries }
             assertEquals(1, entries.size)
@@ -204,7 +234,7 @@ class TimelineViewModelTest {
 
             viewModel.toggleTag("work")
             viewModel.toggleTag("idea")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            advanceUntilIdle()
 
             val entries = viewModel.state.value.groups.flatMap { it.entries }
             assertEquals(1, entries.size)
@@ -220,9 +250,9 @@ class TimelineViewModelTest {
             watchState(viewModel)
 
             viewModel.toggleTag("work")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            advanceUntilIdle()
             viewModel.toggleTag("work")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            advanceUntilIdle()
 
             val entries = viewModel.state.value.groups.flatMap { it.entries }
             assertEquals(2, entries.size)
@@ -237,24 +267,13 @@ class TimelineViewModelTest {
             watchState(viewModel)
 
             viewModel.toggleTag("work")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            advanceUntilIdle()
             viewModel.clearTags()
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            advanceUntilIdle()
 
             val entries = viewModel.state.value.groups.flatMap { it.entries }
             assertEquals(2, entries.size)
         }
-
-    /**
-     * Moves the virtual clock and runs whatever is due.
-     *
-     * `advanceTimeBy` alone does not run the work that was scheduled for exactly the moment it
-     * reached, so the clock is followed by `runCurrent`.
-     */
-    private fun kotlinx.coroutines.test.TestScope.advance(millis: Long) {
-        advanceTimeBy(millis)
-        runCurrent()
-    }
 
     /**
      * Watches the state, so the flow is running while the test moves time.

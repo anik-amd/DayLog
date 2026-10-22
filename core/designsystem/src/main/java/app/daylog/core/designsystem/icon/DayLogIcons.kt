@@ -264,4 +264,43 @@ object DayLogIcons {
         moveTo(6f, 20f)
         lineTo(18f, 20f)
     }
+
+    /** Two chevrons opening outward, for taking the writing to the full editor. */
+    val UnfoldMore: ImageVector = icon("UnfoldMore") {
+        moveTo(7f, 9f)
+        lineTo(12f, 3.5f)
+        lineTo(17f, 9f)
+        moveTo(7f, 15f)
+        lineTo(12f, 20.5f)
+        lineTo(17f, 15f)
+    }
+
+    /** Three dots in a column, for the overflow menu. */
+    val MoreVert: ImageVector = filledIcon("MoreVert") {
+        circle(12f, 5.5f, 1.6f)
+        circle(12f, 12f, 1.6f)
+        circle(12f, 18.5f, 1.6f)
+    }
+
+    /**
+     * A filled icon.
+     *
+     * A dot has no inside a stroke can leave hollow, so the shapes that are nothing but weight
+     * are drawn filled and tinted whole.
+     */
+    private fun filledIcon(
+        name: String,
+        pathBuilder: PathBuilder.() -> Unit,
+    ): ImageVector = ImageVector.Builder(
+        name = name,
+        defaultWidth = 24.dp,
+        defaultHeight = 24.dp,
+        viewportWidth = 24f,
+        viewportHeight = 24f,
+    ).apply {
+        path(
+            fill = SolidColor(Color.Black),
+            pathBuilder = pathBuilder,
+        )
+    }.build()
 }

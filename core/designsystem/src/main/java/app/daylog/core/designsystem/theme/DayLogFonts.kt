@@ -1,52 +1,21 @@
 package app.daylog.core.designsystem.theme
 
-import androidx.compose.ui.text.ExperimentalTextApi
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.font.FontVariation
-import app.daylog.core.designsystem.R
 
 /**
  * The app's typeface.
  *
- * One family: Inter, the grotesque that most of the modern web and a growing number of native
- * apps are set in. It is a variable font, so the whole weight range comes from one file and the
- * weights are real rather than synthesised.
+ * The system's own family — Roboto in the handheld's current build. Nothing is bundled, so there
+ * is no font file to load and nothing to shape before the first frame, and the text is set in the
+ * same glyphs the rest of the phone uses. An app that opens fast is typed in the type the device
+ * already has.
  *
- * A diary is read in long stretches, so the type is tuned for reading rather than for density:
- * generous line height, open counters, and a size that does not fight the screen.
+ * A diary is read in long stretches, so the sizes and line heights are still tuned for reading
+ * even though the family is handed over: generous line height and a size that does not fight the
+ * screen.
  */
 object DayLogFonts {
 
-    /**
-     * Inter, with its weight axis.
-     *
-     * The axis is set explicitly on each weight because a variable font has to be told where to
-     * stand; without this the file's default instance is used for every weight and the hierarchy
-     * disappears.
-     */
-    @OptIn(ExperimentalTextApi::class)
-    val Inter: FontFamily = FontFamily(
-        Font(
-            resId = R.font.inter_variable,
-            weight = FontWeight.Normal,
-            variationSettings = FontVariation.Settings(FontVariation.weight(400)),
-        ),
-        Font(
-            resId = R.font.inter_variable,
-            weight = FontWeight.Medium,
-            variationSettings = FontVariation.Settings(FontVariation.weight(500)),
-        ),
-        Font(
-            resId = R.font.inter_variable,
-            weight = FontWeight.SemiBold,
-            variationSettings = FontVariation.Settings(FontVariation.weight(600)),
-        ),
-        Font(
-            resId = R.font.inter_variable,
-            weight = FontWeight.Bold,
-            variationSettings = FontVariation.Settings(FontVariation.weight(700)),
-        ),
-    )
+    /** The system's family, named so a call site reads as a decision rather than an omission. */
+    val system: FontFamily = FontFamily.Default
 }

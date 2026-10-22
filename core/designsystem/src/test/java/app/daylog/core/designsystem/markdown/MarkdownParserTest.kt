@@ -6,7 +6,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import app.daylog.core.designsystem.color.DayLogColors
 import app.daylog.core.designsystem.color.NightScheme
 import app.daylog.core.designsystem.color.PaperScheme
-import app.daylog.core.designsystem.theme.DayLogFonts
 import app.daylog.core.designsystem.theme.DayLogTypography
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -14,7 +13,7 @@ import org.junit.Test
 
 class MarkdownParserTest {
 
-    private val typography = DayLogTypography.standard(DayLogFonts.Inter)
+    private val typography = DayLogTypography.standard(DayLogFonts.system)
     private val colors = DayLogColors.from(PaperScheme)
 
     private fun parse(text: String) = MarkdownParser.parse(text, typography, colors)
@@ -131,3 +130,4 @@ class MarkdownParserTest {
         assertTrue(result.spanStyles.any { it.item.background == night.surfaceRaised })
     }
 }
+
