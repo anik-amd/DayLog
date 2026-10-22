@@ -18,6 +18,9 @@ interface MediaDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(media: MediaEntity)
 
+    @Query("SELECT * FROM media WHERE uid = :uid")
+    suspend fun findByUid(uid: String): MediaEntity?
+
     @Query("DELETE FROM media WHERE uid = :uid")
     suspend fun deleteByUid(uid: String)
 

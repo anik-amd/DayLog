@@ -6,6 +6,7 @@ import app.daylog.core.common.DefaultAppDispatchers
 import app.daylog.core.data.backup.BackupCodec
 import app.daylog.core.data.local.DayLogDatabase
 import app.daylog.core.data.repository.EntryRepository
+import app.daylog.core.data.repository.MediaRepository
 import app.daylog.core.data.settings.SettingsStore
 
 /**
@@ -31,6 +32,10 @@ class AppContainer(private val context: Context) {
             mediaDao = database.mediaDao(),
             entryFtsDao = database.entryFtsDao(),
         )
+    }
+
+    val mediaRepository: MediaRepository by lazy {
+        MediaRepository(context = context, mediaDao = database.mediaDao())
     }
 
     val settingsStore: SettingsStore by lazy { SettingsStore(context) }
