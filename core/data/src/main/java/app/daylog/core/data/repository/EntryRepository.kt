@@ -3,6 +3,8 @@ package app.daylog.core.data.repository
 import app.daylog.core.common.toLocalDateTime
 import app.daylog.core.data.local.EntryDao
 import app.daylog.core.data.local.EntryEntity
+import app.daylog.core.data.local.EntryFtsDao
+import app.daylog.core.data.local.EntryFtsEntity
 import app.daylog.core.data.local.EntryTagEntity
 import app.daylog.core.data.local.MediaDao
 import app.daylog.core.data.local.MediaEntity
@@ -14,6 +16,7 @@ import app.daylog.core.model.MediaType
 import app.daylog.core.model.Tag
 import app.daylog.core.model.TagExtractor
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import java.util.UUID
 
@@ -28,6 +31,7 @@ class EntryRepository(
     private val entryDao: EntryDao,
     private val tagDao: TagDao,
     private val mediaDao: MediaDao,
+    private val entryFtsDao: EntryFtsDao,
     private val now: () -> Long = System::currentTimeMillis,
 ) {
 
@@ -36,6 +40,28 @@ class EntryRepository(
      */
     fun observeEntries(): Flow<List<Entry>> =
         entryDao.observeEntries().map { entities -> entities.map { it.toEntry() } }
+
+    /**
+     * The entries matching a search, newest first.
+     *
+     * The words are matched as words, and a prefix matches the start of one, so typing "read"
+     * finds "reading" but "rea" does not find "read" in the middle of a word.
+     */
+    fun search(query: String): Flow<List<Entry>> {
+        val match = query.trim()
+        if (match.isEmpty()) return flowOf(emptyList())
+
+        // Every word must be present, and each may be a prefix. The quotes keep a word with a
+        # punctuation mark in it from being read as an operator.
+        val expression = match
+            .split(Regex("\\s+"))
+            .filter { it.isNotEmpty() }
+            .joinToString(" AND ") { "\"${it.replace("\"", "\"\"")}\"*" }
+
+        if (expression.isEmpty()) return flowOf(emptyList())
+
+        return entryDao.search(expression).map { entities -> entities.map { it.toEntry() } }
+    }
 
     /**
      * One entry, or null if it has been deleted.
@@ -93,6 +119,7 @@ class EntryRepository(
 
         entryDao.upsert(entity)
         syncTags(resolvedUid, TagExtractor.extract(content))
+        indexFor(entity, tags = TagExtractor.extract(content))
         return resolvedUid
     }
 
@@ -106,6 +133,9 @@ class EntryRepository(
         val timestamp = now()
         entryDao.softDelete(uid, deletedAt = timestamp, updatedAt = timestamp)
         tagDao.deleteLinksForEntry(uid)
+
+        // The index is dropped as well, so a deleted entry cannot be found by searching for it.
+        entryDao.findByUid(uid)?.let { entryFtsDao.delete(it.id) }
     }
 
     /**
@@ -152,6 +182,20 @@ class EntryRepository(
 
         tagDao.recountAll()
         tagDao.deleteUnusedTags()
+    }
+
+    /**
+     * Writes an entry into the search index.
+     */
+    private suspend fun indexFor(entity: EntryEntity, tags: List<String>) {
+        entryFtsDao.upsert(
+            EntryFtsEntity(
+                rowid = entity.id,
+                uid = entity.uid,
+                content = entity.content,
+                tags = tags.joinToString(" "),
+            ),
+        )
     }
 }
 

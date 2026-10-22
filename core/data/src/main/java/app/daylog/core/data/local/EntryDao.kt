@@ -56,4 +56,20 @@ interface EntryDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertLinks(links: List<EntryTagEntity>)
+
+    /**
+     * The entries whose content or tags match a search.
+     *
+     * The query is an FTS4 match expression, so the words are matched as words rather than as
+     * fragments, and a prefix matches the start of a word.
+     */
+    @Query(
+        """
+        SELECT e.* FROM entries e
+        INNER JOIN entries_fts f ON f.rowid = e.id
+        WHERE entries_fts MATCH :query AND e.deletedAt IS NULL
+        ORDER BY e.createdAt DESC
+        """,
+    )
+    fun search(query: String): Flow<List<EntryEntity>>
 }

@@ -12,7 +12,13 @@ import androidx.room.RoomDatabase
  * change is reviewable and migration tests have a baseline to compare against.
  */
 @Database(
-    entities = [EntryEntity::class, TagEntity::class, EntryTagEntity::class, MediaEntity::class],
+    entities = [
+        EntryEntity::class,
+        TagEntity::class,
+        EntryTagEntity::class,
+        MediaEntity::class,
+        EntryFtsEntity::class,
+    ],
     version = 1,
     exportSchema = true,
 )
@@ -21,6 +27,7 @@ abstract class DayLogDatabase : RoomDatabase() {
     abstract fun entryDao(): EntryDao
     abstract fun tagDao(): TagDao
     abstract fun mediaDao(): MediaDao
+    abstract fun entryFtsDao(): EntryFtsDao
 
     companion object {
         private const val DATABASE_NAME = "daylog.db"
