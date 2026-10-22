@@ -1,123 +1,228 @@
 package app.daylog.feature.calendar
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import app.daylog.core.common.CalendarMath
-import app.daylog.core.data.repository.EntryRepository
-import app.daylog.core.model.DayGroup
-import app.daylog.core.model.DayGrouper
+import app.daylog.core.common.DayLabels
+import app.daylog.core.designsystem.component.DLEmptyState
+import app.daylog.core.designsystem.component.DLText
+import app.daylog.core.designsystem.component.DLTopBar
+import app.daylog.core.designsystem.icon.DayLogIcons
+import app.daylog.core.designsystem.theme.DayLogTheme
 import app.daylog.core.model.Entry
-import app.daylog.di.AppContainer
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import java.time.LocalDate
+import java.time.ZoneId
 import java.util.Locale
 
 /**
- * One month on a single screen, wired up.
+ * A month on a single screen.
+ *
+ * The month grid is the screen's idea: a diary's calendar is not a date picker, it is a map of
+ * the writing. Each day with an entry carries a dot, and tapping a day shows what was written
+ * there.
  */
 @Composable
-fun CalendarRoute(
-    container: AppContainer,
+fun CalendarScreen(
+    year: Int,
+    month: Int,
+    entryDays: Set<Int>,
+    selectedDay: Int?,
+    onDaySelected: (Int) -> Unit,
+    onPreviousMonth: () -> Unit,
+    onNextMonth: () -> Unit,
     onBack: () -> Unit,
+    selectedEntries: List<Entry>,
     modifier: Modifier = Modifier,
+    zone: ZoneId = ZoneId.systemDefault(),
+    locale: Locale = Locale.getDefault(),
+    today: LocalDate = LocalDate.now(zone),
 ) {
-    val viewModel: CalendarViewModel = viewModel(
-        factory = calendarViewModelFactory(container.entryRepository),
-    )
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val colors = DayLogTheme.colors
+    val cells = CalendarMath.monthCells(year, month)
+    val weekdays = CalendarMath.weekdayLabels(locale)
 
-    CalendarScreen(
-        year = state.year,
-        month = state.month,
-        entryDays = state.entryDays,
-        selectedDay = state.selectedDay,
-        onDaySelected = viewModel::selectDay,
-        onPreviousMonth = viewModel::previousMonth,
-        onNextMonth = viewModel::nextMonth,
-        onBack = onBack,
-        selectedEntries = state.selectedEntries,
+    Surface(
         modifier = modifier,
-    )
-}
-
-class CalendarViewModel(
-    private val repository: EntryRepository,
-) : ViewModel() {
-
-    private var year by mutableIntStateOf(LocalDate.now().year)
-    private var month by mutableIntStateOf(LocalDate.now().monthValue)
-    private var selectedDay by mutableStateOf<Int?>(null)
-
-    val state: StateFlow<CalendarUiState> =
-        repository.observeEntries()
-            .map { list ->
-                    val entryDays = list
-                        .map { java.time.Instant.ofEpochMilli(it.createdAt).atZone(java.time.ZoneId.systemDefault()).toLocalDate() }
-                        .filter { it.year == year && it.monthValue == month }
-                        .map { it.dayOfMonth }
-                        .toSet()
-
-                    val selectedEntries = if (selectedDay == null) {
-                        emptyList()
-                    } else {
-                        val date = LocalDate.of(year, month, selectedDay!!)
-                        list.filter {
-                            java.time.Instant.ofEpochMilli(it.createdAt).atZone(java.time.ZoneId.systemDefault()).toLocalDate() == date
-                        }
-                    }
-
-                    CalendarUiState(
-                        year = year,
-                        month = month,
-                        entryDays = entryDays,
-                        selectedDay = selectedDay,
-                        selectedEntries = selectedEntries,
+        color = colors.background,
+    ) {
+        Column {
+            DLTopBar(
+                title = CalendarMath.monthName(year, month, locale),
+                leadingIcon = DayLogIcons.Back,
+                onLeadingClick = onBack,
+                trailingContent = {
+                    DLIconButton(
+                        imageVector = DayLogIcons.ChevronRight,
+                        contentDescription = "Previous month",
+                        onClick = onPreviousMonth,
+                        tint = colors.inkMuted,
                     )
-                }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = CalendarUiState(),
+                    DLIconButton(
+                        imageVector = DayLogIcons.ChevronDown,
+                        contentDescription = "Next month",
+                        onClick = onNextMonth,
+                        tint = colors.inkMuted,
+                    )
+                },
             )
 
-    fun selectDay(day: Int) { selectedDay = day }
-    fun previousMonth() {
-        val ym = java.time.YearMonth.of(year, month).minusMonths(1)
-        year = ym.year; month = ym.monthValue; selectedDay = null
-    }
-    fun nextMonth() {
-        val ym = java.time.YearMonth.of(year, month).plusMonths(1)
-        year = ym.year; month = ym.monthValue; selectedDay = null
+            // The weekday header.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceAround,
+            ) {
+                weekdays.forEach { label ->
+                    DLText(
+                        text = label,
+                        style = DayLogTheme.typography.meta,
+                        color = colors.inkFaint,
+                        modifier = Modifier.weight(1f),
+                        maxLines = 1,
+                    )
+                }
+            }
+
+            // The grid.
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+            ) {
+                cells.chunked(7).forEach { week ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceAround,
+                    ) {
+                        week.forEach { day ->
+                            DayCell(
+                                day = day,
+                                selected = day != null && day == selectedDay,
+                                hasEntry = day != null && day in entryDays,
+                                isToday = day != null &&
+                                    year == today.year && month == today.monthValue && day == today.dayOfMonth,
+                                onClick = { if (day != null) onDaySelected(day) },
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                    }
+                }
+            }
+
+            // The entries of the selected day.
+            if (selectedDay != null && selectedEntries.isNotEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp, start = 20.dp, end = 20.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    DLText(
+                        text = DayLabels.dayHeader(
+                            date = LocalDate.of(year, month, selectedDay),
+                            today = today,
+                            locale = locale,
+                        ),
+                        style = DayLogTheme.typography.label,
+                        color = colors.ink,
+                    )
+                    selectedEntries.forEach { entry ->
+                        DLText(
+                            text = entry.content,
+                            style = DayLogTheme.typography.entryBody,
+                            color = colors.ink,
+                            annotated = true,
+                        )
+                    }
+                }
+            } else if (selectedDay != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(48.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    DLEmptyState(
+                        title = "Nothing that day",
+                        body = "No entry was written then.",
+                    )
+                }
+            }
+        }
     }
 }
 
-data class CalendarUiState(
-    val year: Int = LocalDate.now().year,
-    val month: Int = LocalDate.now().monthValue,
-    val entryDays: Set<Int> = emptySet(),
-    val selectedDay: Int? = null,
-    val selectedEntries: List<Entry> = emptyList(),
-)
+@Composable
+private fun DayCell(
+    day: Int?,
+    selected: Boolean,
+    hasEntry: Boolean,
+    isToday: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = DayLogTheme.colors
 
-fun calendarViewModelFactory(repository: EntryRepository): ViewModelProvider.Factory =
-    viewModelFactory {
-        initializer {
-            CalendarViewModel(repository = repository)
+    Box(
+        modifier = modifier
+            .padding(vertical = 4.dp)
+            .size(40.dp)
+            .then(
+                if (day != null) {
+                    Modifier.pressable(onClick = onClick)
+                } else {
+                    Modifier
+                },
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (day != null) {
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .then(
+                        if (selected) {
+                            Modifier.background(colors.accent, androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
+                        } else {
+                            Modifier
+                        },
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                DLText(
+                    text = day.toString(),
+                    style = DayLogTheme.typography.label,
+                    color = if (selected) colors.onAccent else if (isToday) colors.accent else colors.ink,
+                )
+            }
+
+            if (hasEntry) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 2.dp)
+                        .size(4.dp)
+                        .background(
+                            if (selected) colors.onAccent else colors.accent,
+                            DayLogShapes.pill,
+                        ),
+                )
+            }
         }
     }
+}
