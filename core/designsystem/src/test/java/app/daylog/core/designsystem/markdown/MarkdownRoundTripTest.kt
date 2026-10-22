@@ -3,7 +3,9 @@ package app.daylog.core.designsystem.markdown
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextDecoration
-import app.daylog.core.designsystem.color.PaperColors
+import app.daylog.core.designsystem.color.DayLogColors
+import app.daylog.core.designsystem.color.PaperScheme
+import app.daylog.core.designsystem.theme.DayLogFonts
 import app.daylog.core.designsystem.theme.DayLogTypography
 import app.daylog.core.model.MarkdownToggle
 import org.junit.Assert.assertEquals
@@ -20,7 +22,7 @@ import org.junit.Test
 class MarkdownRoundTripTest {
 
     private val typography = DayLogTypography.standard(DayLogFonts.Inter)
-    private val colors = PaperColors
+    private val colors = DayLogColors.from(PaperScheme)
     private val parser = MarkdownParser
 
     private fun parse(text: String) = parser.parse(text, typography, colors)
