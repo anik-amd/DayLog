@@ -178,6 +178,85 @@ class TimelineViewModelTest {
             assertFalse(groups.any { group -> group.entries.any { it.uid == uid } })
         }
 
+    @Test
+    fun `choosing a tag narrows the timeline to the entries that carry it`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val viewModel = viewModel()
+            watchState(viewModel)
+
+            viewModel.onDraftChanged("a thought #work")
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            viewModel.onDraftChanged("another thought #idea")
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+
+            viewModel.toggleTag("work")
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+
+            val entries = viewModel.state.value.groups.flatMap { it.entries }
+            assertEquals(1, entries.size)
+            assertEquals("a thought #work", entries.first().content)
+        }
+
+    @Test
+    fun `two tags chosen show only the entries that carry both`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val viewModel = viewModel()
+            watchState(viewModel)
+
+            viewModel.onDraftChanged("a thought #work #idea")
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            viewModel.onDraftChanged("another thought #work")
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+
+            viewModel.toggleTag("work")
+            viewModel.toggleTag("idea")
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+
+            val entries = viewModel.state.value.groups.flatMap { it.entries }
+            assertEquals(1, entries.size)
+            assertEquals("a thought #work #idea", entries.first().content)
+        }
+
+    @Test
+    fun `turning a tag off again brings the other entries back`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val viewModel = viewModel()
+            watchState(viewModel)
+
+            viewModel.onDraftChanged("a thought #work")
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            viewModel.onDraftChanged("another thought #idea")
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+
+            viewModel.toggleTag("work")
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            viewModel.toggleTag("work")
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+
+            val entries = viewModel.state.value.groups.flatMap { it.entries }
+            assertEquals(2, entries.size)
+        }
+
+    @Test
+    fun `clearing the filters brings everything back`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val viewModel = viewModel()
+            watchState(viewModel)
+
+            viewModel.onDraftChanged("a thought #work")
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            viewModel.onDraftChanged("another thought #idea")
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+
+            viewModel.toggleTag("work")
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            viewModel.clearTags()
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+
+            val entries = viewModel.state.value.groups.flatMap { it.entries }
+            assertEquals(2, entries.size)
+        }
+
     /**
      * Moves the virtual clock and runs whatever is due.
      *

@@ -115,13 +115,6 @@ private fun DayLogPreview(dark: Boolean = false) {
                 subtitle = "4 entries",
             )
 
-            Box(modifier = Modifier.weight(1f)) {
-                TimelineScreen(
-                    groups = sampleGroups,
-                    contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp),
-                )
-            }
-
             TagFilterStrip(
                 tags = listOf(
                     app.daylog.core.model.Tag("reading", 4),
@@ -132,6 +125,13 @@ private fun DayLogPreview(dark: Boolean = false) {
                 onToggle = {},
                 onClear = {},
             )
+
+            Box(modifier = Modifier.weight(1f)) {
+                TimelineScreen(
+                    groups = sampleGroups,
+                    contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp),
+                )
+            }
 
             QuickEntryBar(
                 value = "",
