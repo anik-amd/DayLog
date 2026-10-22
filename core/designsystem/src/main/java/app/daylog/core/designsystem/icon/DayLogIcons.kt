@@ -203,6 +203,19 @@ object DayLogIcons {
         lineTo(19f, 7f)
     }
 
+    /** An eye, for the preview toggle. */
+    val Eye: ImageVector = icon("Eye") {
+        // The outline of the eye.
+        moveTo(2f, 12f)
+        curveTo(2f, 12f, 6f, 5f, 12f, 5f)
+        curveTo(18f, 5f, 22f, 12f, 22f, 12f)
+        curveTo(22f, 12f, 18f, 19f, 12f, 19f)
+        curveTo(6f, 19f, 2f, 12f, 2f, 12f)
+        close()
+        // The pupil.
+        circle(12f, 12f, 3f)
+    }
+
     /** A brush, for the formatting toolbar. */
     val Format: ImageVector = icon("Format") {
         moveTo(4f, 20f)

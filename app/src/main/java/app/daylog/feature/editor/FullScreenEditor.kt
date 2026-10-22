@@ -59,6 +59,7 @@ fun FullScreenEditor(
 ) {
     val colors = DayLogTheme.colors
     var value by remember { mutableStateOf(TextFieldValue(initialText)) }
+    var preview by remember { mutableStateOf(false) }
 
     LaunchedEffect(initialText) {
         if (value.text != initialText) {
@@ -76,6 +77,12 @@ fun FullScreenEditor(
                 leadingIcon = DayLogIcons.Back,
                 onLeadingClick = onBack,
                 trailingContent = {
+                    DLIconButton(
+                        imageVector = DayLogIcons.Eye,
+                        contentDescription = if (preview) "Stop preview" else "Preview",
+                        onClick = { preview = !preview },
+                        tint = if (preview) colors.accent else colors.inkMuted,
+                    )
                     if (onSave != null) {
                         DLIconButton(
                             imageVector = DayLogIcons.Check,
@@ -87,31 +94,46 @@ fun FullScreenEditor(
                 },
             )
 
-            BasicTextField(
-                value = value,
-                onValueChange = {
-                    value = it
-                    onTextChanged(it.text)
-                },
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 20.dp, vertical = 12.dp),
-                textStyle = DayLogTheme.typography.entryBody.copy(color = colors.ink),
-                cursorBrush = SolidColor(colors.accent),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Default),
-                decorationBox = { innerTextField ->
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        if (value.text.isEmpty()) {
-                            DLText(
-                                text = "Start writing",
-                                style = DayLogTheme.typography.entryBody,
-                                color = colors.inkFaint,
-                            )
+            if (preview) {
+                androidx.compose.foundation.layout.Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 20.dp, vertical = 12.dp),
+                ) {
+                    DLText(
+                        text = value.text,
+                        style = DayLogTheme.typography.entryBody,
+                        color = colors.ink,
+                        annotated = true,
+                    )
+                }
+            } else {
+                BasicTextField(
+                    value = value,
+                    onValueChange = {
+                        value = it
+                        onTextChanged(it.text)
+                    },
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 20.dp, vertical = 12.dp),
+                    textStyle = DayLogTheme.typography.entryBody.copy(color = colors.ink),
+                    cursorBrush = SolidColor(colors.accent),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Default),
+                    decorationBox = { innerTextField ->
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            if (value.text.isEmpty()) {
+                                DLText(
+                                    text = "Start writing",
+                                    style = DayLogTheme.typography.entryBody,
+                                    color = colors.inkFaint,
+                                )
+                            }
+                            innerTextField()
                         }
-                        innerTextField()
-                    }
-                },
-            )
+                    },
+                )
+            }
 
             EditorToolbar(
                 onBold = { value = value.toggled("**") },
