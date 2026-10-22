@@ -1,6 +1,7 @@
 package app.daylog.feature.editor
 
 import android.net.Uri
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.daylog.core.data.repository.EntryRepository
 import app.daylog.core.testing.FakeEntryDao
 import app.daylog.core.testing.FakeEntryFtsDao
@@ -18,10 +19,20 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
 
 private const val NOW = 1_700_000_000_000L
 
+/**
+ * The editor's state holder.
+ *
+ * The photo tests need a Uri, which comes from the device's picker, so the class runs on
+ * Robolectric; the rest answer on the plain JVM.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(AndroidJUnit4::class)
+@Config(sdk = [34])
 class EditorViewModelTest {
 
     @get:Rule

@@ -1,6 +1,7 @@
 package app.daylog.feature.timeline
 
 import android.net.Uri
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.daylog.core.data.repository.EntryRepository
 import app.daylog.core.testing.FakeEntryDao
 import app.daylog.core.testing.FakeEntryFtsDao
@@ -21,8 +22,18 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
 
+/**
+ * The timeline's state holder.
+ *
+ * The photo tests run on Robolectric, because a Uri comes from the device — the rest answer on
+ * the plain JVM.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(AndroidJUnit4::class)
+@Config(sdk = [34])
 class TimelineViewModelTest {
 
     @get:Rule
