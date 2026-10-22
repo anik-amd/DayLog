@@ -67,6 +67,15 @@ fun DLButton(
 ) {
     val shape = DayLogShapes.chip
 
+    // The colour of the label is worked out here rather than left to the button, so the text is
+    // always legible on whatever the button is filled with.
+    val label = when {
+        !enabled -> DayLogTheme.colors.inkFaint
+        contentColor != null -> contentColor
+        style == DLButtonStyle.Filled -> DayLogTheme.colors.background
+        else -> DayLogTheme.colors.ink
+    }
+
     when (style) {
         DLButtonStyle.Filled -> Button(
             onClick = onClick,
@@ -83,7 +92,7 @@ fun DLButton(
                 disabledContentColor = DayLogTheme.colors.inkFaint,
             ),
         ) {
-            ButtonContent(text, leadingIcon)
+            ButtonContent(text, leadingIcon, label)
         }
 
         DLButtonStyle.Outlined -> OutlinedButton(
@@ -93,10 +102,10 @@ fun DLButton(
             shape = shape,
             border = BorderStroke(1.dp, DayLogTheme.colorScheme.outline),
             colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = contentColor ?: DayLogTheme.colors.ink,
+                contentColor = label,
             ),
         ) {
-            ButtonContent(text, leadingIcon)
+            ButtonContent(text, leadingIcon, label)
         }
 
         DLButtonStyle.Text -> TextButton(
@@ -105,25 +114,26 @@ fun DLButton(
             enabled = enabled,
             shape = shape,
             colors = ButtonDefaults.textButtonColors(
-                contentColor = contentColor ?: DayLogTheme.colors.ink,
+                contentColor = label,
             ),
         ) {
-            ButtonContent(text, leadingIcon)
+            ButtonContent(text, leadingIcon, label)
         }
     }
 }
 
 @Composable
-private fun ButtonContent(text: String, leadingIcon: ImageVector?) {
+private fun ButtonContent(text: String, leadingIcon: ImageVector?, color: Color) {
     if (leadingIcon != null) {
         DLIcon(
             imageVector = leadingIcon,
             contentDescription = null,
+            tint = color,
             modifier = Modifier.size(18.dp),
         )
         Spacer(Modifier.width(8.dp))
     }
-    DLLabel(text = text)
+    DLLabel(text = text, color = color)
 }
 
 /**
