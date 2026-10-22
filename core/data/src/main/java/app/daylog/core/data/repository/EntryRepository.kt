@@ -180,6 +180,18 @@ class EntryRepository(
         mediaDao.observeForEntry(uid).map { entities -> entities.map { it.toMedia() } }
 
     /**
+     * Every photo, grouped by the entry it belongs to.
+     *
+     * The timeline shows a thumbnail on the entries that have one, and that is a question about all
+     * the photos rather than about one entry.
+     */
+    fun observeMediaByEntry(): Flow<Map<String, List<Media>>> =
+        mediaDao.observeAll().map { entities ->
+            entities.groupBy { it.entryUid }
+                .mapValues { (_, rows) -> rows.map { it.toMedia() } }
+        }
+
+    /**
      * Adds a photo to an entry.
      */
     suspend fun addMedia(entryUid: String, path: String, thumbnailPath: String? = null): String {

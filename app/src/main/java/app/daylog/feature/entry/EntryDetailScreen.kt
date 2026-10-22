@@ -54,6 +54,7 @@ fun EntryDetailScreen(
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
+    mediaRepository: app.daylog.core.data.repository.MediaRepository? = null,
     zone: ZoneId = ZoneId.systemDefault(),
     locale: Locale = Locale.getDefault(),
 ) {
@@ -107,6 +108,13 @@ fun EntryDetailScreen(
 
                     val place = entry.placeName
                     val weather = entry.weatherSummary
+                    if (mediaRepository != null) {
+                        Spacer(Modifier.height(14.dp))
+                        app.daylog.feature.photo.PhotoStrip(
+                            entryUid = entry.uid,
+                            mediaRepository = mediaRepository,
+                        )
+                    }
                     if (tags.isNotEmpty() || place != null || weather != null) {
                         Spacer(Modifier.height(16.dp))
                         Row(

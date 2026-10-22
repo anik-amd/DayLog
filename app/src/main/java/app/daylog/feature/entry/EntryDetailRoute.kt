@@ -46,6 +46,7 @@ fun EntryDetailRoute(
             viewModel.delete()
             onDeleted()
         },
+        mediaRepository = container.mediaRepository,
         modifier = modifier,
     )
 }

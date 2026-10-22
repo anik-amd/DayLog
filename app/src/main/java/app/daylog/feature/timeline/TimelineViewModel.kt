@@ -7,6 +7,7 @@ import app.daylog.core.data.repository.EntryRepository
 import app.daylog.core.model.DayGroup
 import app.daylog.core.model.DayGrouper
 import app.daylog.core.model.Entry
+import app.daylog.core.model.Media
 import app.daylog.core.model.Tag
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -27,6 +28,8 @@ import java.util.Locale
 data class TimelineUiState(
     val groups: List<DayGroup> = emptyList(),
     val tags: List<Tag> = emptyList(),
+    /** The photos of every entry, so a row can show a thumbnail. */
+    val media: Map<String, List<Media>> = emptyMap(),
     /** The tags the writer has chosen to filter by. */
     val selectedTags: Set<String> = emptySet(),
     /** The text in the quick entry bar. */
@@ -83,13 +86,15 @@ class TimelineViewModel(
         combine(
             shownEntries,
             repository.observeTags(),
+            repository.observeMediaByEntry(),
             selectedTags,
             draft,
             saving,
-        ) { entries, tags, chosen, draftText, isSaving ->
+        ) { entries, tags, media, chosen, draftText, isSaving ->
             TimelineUiState(
                 groups = DayGrouper.group(entries, locale = locale),
                 tags = tags,
+                media = media,
                 selectedTags = chosen,
                 draft = draftText,
                 isSaving = isSaving,

@@ -84,6 +84,7 @@ fun TimelineRoute(
             TimelineScreen(
                 groups = state.groups,
                 contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp),
+                media = state.media,
                 onEntryClick = onOpenEntry,
             )
         }

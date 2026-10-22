@@ -23,6 +23,11 @@ import app.daylog.core.designsystem.component.pressable
 import app.daylog.core.designsystem.icon.DayLogIcons
 import app.daylog.core.designsystem.theme.DayLogTheme
 import app.daylog.core.model.Entry
+import app.daylog.core.model.Media
+import coil3.compose.AsyncImage
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.shape.RoundedCornerShape
 import java.time.ZoneId
 import java.util.Locale
 
@@ -59,6 +64,7 @@ val GutterGap = 16.dp
 fun EntryRow(
     entry: Entry,
     modifier: Modifier = Modifier,
+    media: List<Media> = emptyList(),
     zone: ZoneId = ZoneId.systemDefault(),
     locale: Locale = Locale.getDefault(),
     onClick: (() -> Unit)? = null,
@@ -90,6 +96,25 @@ fun EntryRow(
             color = colors.ink,
             annotated = true,
         )
+
+        // The photos, if the entry has any. A thumbnail strip, not a gallery: the entry is read
+        // in a list and the full size belongs on the entry's own screen.
+        if (media.isNotEmpty()) {
+            Spacer(Modifier.height(10.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                media.take(4).forEach { item ->
+                    AsyncImage(
+                        model = item.thumbnailPath ?: item.path,
+                        contentDescription = "Photo",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(52.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(colors.surfaceContainerHigh),
+                    )
+                }
+            }
+        }
 
         // A place and the weather are not in the text, so they are shown as chips. A tag is:
         // it is already written in the entry as "#reading", and a chip that repeats it is noise.

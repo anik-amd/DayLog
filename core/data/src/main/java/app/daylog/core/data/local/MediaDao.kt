@@ -15,6 +15,10 @@ interface MediaDao {
     @Query("SELECT COUNT(*) FROM media")
     fun observeCount(): Flow<Int>
 
+    /** Every photo, so the timeline can show a thumbnail on the entries that have one. */
+    @Query("SELECT * FROM media ORDER BY createdAt ASC")
+    fun observeAll(): Flow<List<MediaEntity>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(media: MediaEntity)
 

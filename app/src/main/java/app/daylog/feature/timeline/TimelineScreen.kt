@@ -27,6 +27,7 @@ import app.daylog.core.designsystem.component.pressable
 import app.daylog.core.designsystem.theme.DayLogTheme
 import app.daylog.core.model.DayGroup
 import app.daylog.core.model.Entry
+import app.daylog.core.model.Media
 
 /**
  * One thing on the timeline: a day's heading, or an entry.
@@ -47,6 +48,7 @@ fun TimelineScreen(
     groups: List<DayGroup>,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
+    media: Map<String, List<Media>> = emptyMap(),
     onEntryClick: (String) -> Unit = {},
 ) {
     val colors = DayLogTheme.colors
@@ -79,6 +81,7 @@ fun TimelineScreen(
                 is TimelineItem.Heading -> DayHeading(item.group, Modifier.marginRule())
                 is TimelineItem.Row -> EntryRow(
                     entry = item.entry,
+                    media = media[item.entry.uid].orEmpty(),
                     modifier = Modifier
                         .marginRule()
                         .pressable { onEntryClick(item.entry.uid) },
