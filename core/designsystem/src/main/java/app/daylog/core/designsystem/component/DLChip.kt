@@ -45,17 +45,32 @@ fun DLChip(
             modifier = modifier,
             enabled = enabled,
             shape = shape,
-            label = { DLLabel(text = text) },
+            label = { DLLabel(text = text, color = if (selected) DayLogTheme.colors.ink else DayLogTheme.colors.inkMuted) },
             leadingIcon = leadingIcon?.let {
                 {
                     DLIcon(
                         imageVector = it,
                         contentDescription = null,
-                        tint = DayLogTheme.colorScheme.onSurfaceVariant,
+                        tint = if (selected) DayLogTheme.colors.accent else DayLogTheme.colors.inkMuted,
                         modifier = Modifier.size(16.dp),
                     )
                 }
             },
+            // A selected chip is data, so it is the one place the accent is allowed to appear.
+            colors = FilterChipDefaults.filterChipColors(
+                selectedContainerColor = DayLogTheme.colors.accentSoft,
+                selectedLabelColor = DayLogTheme.colors.ink,
+                selectedLeadingIconColor = DayLogTheme.colors.accent,
+                containerColor = Color.Transparent,
+                labelColor = DayLogTheme.colors.inkMuted,
+                leadingIconColor = DayLogTheme.colors.inkMuted,
+            ),
+            border = FilterChipDefaults.filterChipBorder(
+                enabled = enabled,
+                selected = selected,
+                borderColor = DayLogTheme.colors.rule,
+                selectedBorderColor = Color.Transparent,
+            ),
         )
         return
     }

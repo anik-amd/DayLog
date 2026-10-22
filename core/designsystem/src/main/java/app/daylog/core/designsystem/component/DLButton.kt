@@ -70,6 +70,14 @@ fun DLButton(
             enabled = enabled,
             shape = shape,
             contentPadding = ButtonDefaults.ContentPadding,
+            // The filled button is the ink, not the accent. The accent marks data in this app,
+            // and a coloured button would spend it on chrome.
+            colors = ButtonDefaults.buttonColors(
+                containerColor = DayLogTheme.colors.ink,
+                contentColor = DayLogTheme.colors.background,
+                disabledContainerColor = DayLogTheme.colors.surfaceContainerHigh,
+                disabledContentColor = DayLogTheme.colors.inkFaint,
+            ),
         ) {
             ButtonContent(text, leadingIcon)
         }
@@ -80,6 +88,9 @@ fun DLButton(
             enabled = enabled,
             shape = shape,
             border = BorderStroke(1.dp, DayLogTheme.colorScheme.outline),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = DayLogTheme.colors.ink,
+            ),
         ) {
             ButtonContent(text, leadingIcon)
         }
@@ -89,6 +100,9 @@ fun DLButton(
             modifier = modifier,
             enabled = enabled,
             shape = shape,
+            colors = ButtonDefaults.textButtonColors(
+                contentColor = DayLogTheme.colors.ink,
+            ),
         ) {
             ButtonContent(text, leadingIcon)
         }

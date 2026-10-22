@@ -16,6 +16,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -29,6 +30,7 @@ import app.daylog.core.data.settings.DayLogSettings
 import app.daylog.core.data.settings.SettingsStore
 import app.daylog.core.designsystem.component.DLTopBar
 import app.daylog.core.designsystem.icon.DayLogIcons
+import app.daylog.core.designsystem.theme.DayLogTheme
 import app.daylog.core.model.DayLogAccentSource
 import app.daylog.core.model.DayLogThemeMode
 
@@ -191,6 +193,18 @@ private fun SwitchRow(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            // A switch is chrome, so it is the ink rather than the accent. The accent is for data.
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = DayLogTheme.colors.background,
+                checkedTrackColor = DayLogTheme.colors.ink,
+                checkedBorderColor = DayLogTheme.colors.ink,
+                uncheckedThumbColor = DayLogTheme.colors.inkMuted,
+                uncheckedTrackColor = DayLogTheme.colors.surfaceContainerHigh,
+                uncheckedBorderColor = DayLogTheme.colors.rule,
+            ),
+        )
     }
 }

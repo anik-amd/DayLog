@@ -16,12 +16,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.daylog.core.common.DayLabels
 import app.daylog.core.common.toLocalDateTime
+import app.daylog.core.designsystem.component.DLButton
+import app.daylog.core.designsystem.component.DLButtonStyle
 import app.daylog.core.designsystem.component.DLChip
+import app.daylog.core.designsystem.component.DLConfirmDialog
 import app.daylog.core.designsystem.component.DLIconButton
 import app.daylog.core.designsystem.component.DLMeta
 import app.daylog.core.designsystem.component.DLText
@@ -52,6 +58,7 @@ fun EntryDetailScreen(
     locale: Locale = Locale.getDefault(),
 ) {
     val colors = DayLogTheme.colors
+    var confirmingDelete by remember { mutableStateOf(false) }
 
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -62,8 +69,6 @@ fun EntryDetailScreen(
                 title = "",
                 leadingIcon = DayLogIcons.Back,
                 onLeadingClick = onBack,
-                trailingIcon = DayLogIcons.Trash,
-                onTrailingClick = onDelete,
             )
 
             Row(
@@ -122,15 +127,38 @@ fun EntryDetailScreen(
 
             Spacer(Modifier.weight(1f))
 
-            Box(
+            // The destructive action goes last, says what it does, and asks first. A diary is the
+            // one thing here that cannot be written again.
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp),
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                app.daylog.core.designsystem.component.DLButton(
+                DLButton(
                     text = "Edit",
                     onClick = onEdit,
                     modifier = Modifier.fillMaxWidth(),
+                )
+                DLButton(
+                    text = "Delete this entry",
+                    onClick = { confirmingDelete = true },
+                    style = DLButtonStyle.Text,
+                    modifier = Modifier.fillMaxWidth(),
+                    contentColor = colors.danger,
+                )
+            }
+
+            if (confirmingDelete) {
+                DLConfirmDialog(
+                    title = "Delete this entry?",
+                    body = "It will be removed from your diary. This cannot be undone.",
+                    confirmLabel = "Delete",
+                    onConfirm = {
+                        confirmingDelete = false
+                        onDelete()
+                    },
+                    onDismiss = { confirmingDelete = false },
                 )
             }
         }
