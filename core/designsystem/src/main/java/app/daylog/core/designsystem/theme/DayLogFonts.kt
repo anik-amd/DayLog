@@ -1,5 +1,6 @@
 package app.daylog.core.designsystem.theme
 
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -25,26 +26,27 @@ object DayLogFonts {
      * stand; without this the file's default instance is used for every weight and the hierarchy
      * disappears.
      */
+    @OptIn(ExperimentalTextApi::class)
     val Inter: FontFamily = FontFamily(
         Font(
             resId = R.font.inter_variable,
             weight = FontWeight.Normal,
-            variationSettings = FontVariation.Settings(FontVariation.weight(400f)),
+            variationSettings = FontVariation.Settings(FontVariation.weight(400)),
         ),
         Font(
             resId = R.font.inter_variable,
             weight = FontWeight.Medium,
-            variationSettings = FontVariation.Settings(FontVariation.weight(500f)),
+            variationSettings = FontVariation.Settings(FontVariation.weight(500)),
         ),
         Font(
             resId = R.font.inter_variable,
             weight = FontWeight.SemiBold,
-            variationSettings = FontVariation.Settings(FontVariation.weight(600f)),
+            variationSettings = FontVariation.Settings(FontVariation.weight(600)),
         ),
         Font(
             resId = R.font.inter_variable,
             weight = FontWeight.Bold,
-            variationSettings = FontVariation.Settings(FontVariation.weight(700f)),
+            variationSettings = FontVariation.Settings(FontVariation.weight(700)),
         ),
     )
 }
