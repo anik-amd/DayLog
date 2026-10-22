@@ -76,7 +76,7 @@ rendered previews, not only in code.
 - [x] Unsaved/pending indicator
 - [x] Entry read view
 - [x] Tapping an entry opens it
-- [ ] Tag filter strip with AND logic
+- [x] Tag filter strip with AND logic
 - [x] ViewModel state and autosave debounce tests
 
 **Gate:** ViewModel state, autosave debounce, timeline grouping, and a Compose test that types and
@@ -104,7 +104,7 @@ markers that are not closed.
 - [ ] Month grid with entry dots
 - [ ] Tap a day → timeline filters to it
 - [ ] Tag strip with AND logic
-- [ ] Full-text search screen over content and tags
+- [x] Full-text search screen over content and tags
 
 **Gate:** calendar maths, day grouping, tag AND filter, FTS behaviour green.
 

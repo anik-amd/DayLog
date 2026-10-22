@@ -1,11 +1,20 @@
 # Changelog
 
+## [0.3.2] - 2026-10-22
+
+### Added
+- Search: find any entry by a word in it, or by one of its tags, from the magnifying glass at the
+  top of the timeline
+- A strip of the tags you have used, under the top bar. Choose one to filter by it, or two to see
+  only the entries that carry both
+- The search results are in the same margin as your timeline, so a result looks like the entry it
+  is
+
 ## [0.3.1] - 2026-10-22
 
 ### Added
 - Tap any entry to open it: the date in the margin, the entry as you wrote it, its tags and place,
   and a way to edit or delete it
-- Search: find entries by any word in them or in their tags, as you type
 - The formatting toolbar now works on the words you have selected, and pressing a button twice
   takes the mark off again
 - A delete that asks first and says what it will do
