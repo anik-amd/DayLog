@@ -3,9 +3,20 @@ package app.daylog.feature.calendar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.lifecycle.viewmodel.compose.viewModel
+import app.daylog.core.common.CalendarMath
 import app.daylog.core.data.repository.EntryRepository
+import app.daylog.core.model.Entry
 import app.daylog.di.AppContainer
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -13,6 +24,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import java.time.Instant
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.ZoneId
 import java.util.Locale
 
@@ -83,11 +95,11 @@ class CalendarViewModel(
 
     fun selectDay(day: Int) { selectedDay = day }
     fun previousMonth() {
-        val ym = java.time.YearMonth.of(year, month).minusMonths(1)
+        val ym = YearMonth.of(year, month).minusMonths(1)
         year = ym.year; month = ym.monthValue; selectedDay = null
     }
     fun nextMonth() {
-        val ym = java.time.YearMonth.of(year, month).plusMonths(1)
+        val ym = YearMonth.of(year, month).plusMonths(1)
         year = ym.year; month = ym.monthValue; selectedDay = null
     }
 }
