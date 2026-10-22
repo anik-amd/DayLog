@@ -20,11 +20,13 @@ object DayLogMigrations {
      */
     val MIGRATION_1_2 = object : Migration(1, 2) {
         override fun migrate(db: SupportSQLiteDatabase) {
+            // The table is created exactly as Room creates it, because Room checks the shape of
+            // the database against the schema it expects and refuses to open one that differs.
+            // The row id is the index's own row id, not a column of its own.
             db.execSQL(
-                """
-                CREATE VIRTUAL TABLE IF NOT EXISTS `entries_fts`
-                USING FTS4(`rowid`, `uid`, `content`, `tags`, tokenize=unicode61)
-                """.trimIndent(),
+                "CREATE VIRTUAL TABLE IF NOT EXISTS `entries_fts` " +
+                    "USING FTS4(`uid` TEXT NOT NULL, `content` TEXT NOT NULL, " +
+                    "`tags` TEXT NOT NULL, tokenize=unicode61)",
             )
 
             db.execSQL(
