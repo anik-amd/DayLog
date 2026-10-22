@@ -37,12 +37,18 @@ object MarkdownToggle {
             text.substring(end, end + marker.length.coerceAtMost(text.length - end)) == marker
 
         if (alreadyMarked) {
-            val withoutStart = start - marker.length
-            val withoutEnd = end + marker.length
+            // The two markers are taken off separately. Taking off one range would take the
+            // selected words with them.
+            val withoutClosing = text.removeRange(end, end + marker.length)
+            val newText = withoutClosing.removeRange(
+                start - marker.length,
+                start,
+            )
+
             return Result(
-                text = text.removeRange(withoutStart, withoutEnd),
-                selectionStart = withoutStart,
-                selectionEnd = withoutEnd - marker.length * 2,
+                text = newText,
+                selectionStart = start - marker.length,
+                selectionEnd = end - marker.length,
             )
         }
 

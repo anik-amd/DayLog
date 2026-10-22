@@ -29,10 +29,13 @@ class MarkdownToggleTest {
     }
 
     @Test
-    fun `nothing selected puts the marker at the caret`() {
+    fun `nothing selected leaves the cursor between a pair of markers`() {
         val result = MarkdownToggle.toggle("ab", 1, 1, "*")
 
-        assertEquals("a*b", result.text)
+        // A pair of markers with the cursor between them, so the words can be typed in.
+        assertEquals("a**b", result.text)
+        assertEquals(2, result.selectionStart)
+        assertEquals(2, result.selectionEnd)
     }
 
     @Test
