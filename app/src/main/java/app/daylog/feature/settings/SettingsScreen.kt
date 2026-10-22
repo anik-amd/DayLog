@@ -20,9 +20,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import app.daylog.core.data.settings.DayLogSettings
 import app.daylog.core.data.settings.SettingsStore
 import app.daylog.core.designsystem.component.DLTopBar
@@ -44,6 +46,7 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
 ) {
     val settings by settingsStore.settings.collectAsState(initial = DayLogSettings())
+    val scope = rememberCoroutineScope()
 
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -73,7 +76,7 @@ fun SettingsScreen(
                                 DayLogThemeMode.Dark -> "Dark"
                             }
                         },
-                        onSelect = { mode -> settingsStore.setThemeMode(mode) },
+                        onSelect = { mode -> scope.launch { settingsStore.setThemeMode(mode) } },
                     )
                 }
 
@@ -87,7 +90,7 @@ fun SettingsScreen(
                                 DayLogAccentSource.Wallpaper -> "Wallpaper"
                             }
                         },
-                        onSelect = { source -> settingsStore.setAccentSource(source) },
+                        onSelect = { source -> scope.launch { settingsStore.setAccentSource(source) } },
                     )
                 }
 
@@ -99,7 +102,9 @@ fun SettingsScreen(
                             title = "Pure black",
                             description = "Turn the dark theme's background off completely.",
                             checked = settings.pureBlack,
-                            onCheckedChange = { settingsStore.setPureBlack(it) },
+                            onCheckedChange = { enabled ->
+                                scope.launch { settingsStore.setPureBlack(enabled) }
+                            },
                         )
                     }
                 }
