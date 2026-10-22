@@ -155,4 +155,35 @@ class EntryRepositoryTest {
 
         assertEquals(0, found.size)
     }
+
+    @Test
+    fun `no tags chosen shows everything`() = runTest {
+        repository.save("a thought #work")
+        repository.save("another thought #idea")
+
+        assertEquals(2, repository.observeEntriesWithAllTags(emptyList()).first().size)
+    }
+
+    @Test
+    fun `one tag chosen shows the entries that carry it`() = runTest {
+        repository.save("a thought #work")
+        repository.save("another thought #idea")
+
+        val found = repository.observeEntriesWithAllTags(listOf("work")).first()
+
+        assertEquals(1, found.size)
+        assertEquals("a thought #work", found.first().content)
+    }
+
+    @Test
+    fun `two tags chosen show only the entries that carry both`() = runTest {
+        repository.save("a thought #work #idea")
+        repository.save("another thought #work")
+        repository.save("a third thought #idea")
+
+        val found = repository.observeEntriesWithAllTags(listOf("work", "idea")).first()
+
+        assertEquals(1, found.size)
+        assertEquals("a thought #work #idea", found.first().content)
+    }
 }

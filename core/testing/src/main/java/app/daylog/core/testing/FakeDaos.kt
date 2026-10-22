@@ -72,10 +72,11 @@ class FakeEntryDao : EntryDao {
 
     override suspend fun insertLinks(links: List<EntryTagEntity>) = Unit
 
-    override suspend fun findByUids(uids: List<String>): List<EntryEntity> =
-        entries.value
-            .filter { it.uid in uids && it.deletedAt == null }
-            .sortedByDescending { it.createdAt }
+    override suspend fun findByUids(uids: List<String>): Flow<List<EntryEntity>> =
+        entries.map { list ->
+            list.filter { it.uid in uids && it.deletedAt == null }
+                .sortedByDescending { it.createdAt }
+        }
 }
 
 /**
@@ -97,10 +98,12 @@ class FakeTagDao : TagDao {
     override fun observeTagsInUse(): Flow<List<TagEntity>> =
         tags.map { list -> list.sortedWith(compareByDescending<TagEntity> { it.count }.thenBy { it.name }) }
 
-    override fun observeEntriesWithAllTags(tags: List<String>, tagCount: Int): Flow<List<String>> =
+    override fun observeEntriesWithAllTags(tags: List<String>, tagCount: Int): Flow<List<EntryEntity>> =
         links.map { list ->
             list.groupBy { it.entryUid }
-                .filter { (_, entryLinks) -> entryLinks.map { it.tagName }.toSet().containsAll(tags) }
+                .filter { (_, entryLinks) ->
+                    entryLinks.map { it.tagName }.toSet().containsAll(tags)
+                }
                 .keys
                 .toList()
         }

@@ -19,6 +19,7 @@ import app.daylog.core.common.toLocalDateTime
 import app.daylog.core.designsystem.component.DLChip
 import app.daylog.core.designsystem.component.DLMeta
 import app.daylog.core.designsystem.component.DLText
+import app.daylog.core.designsystem.component.pressable
 import app.daylog.core.designsystem.icon.DayLogIcons
 import app.daylog.core.designsystem.theme.DayLogTheme
 import app.daylog.core.model.Entry
@@ -60,13 +61,21 @@ fun EntryRow(
     modifier: Modifier = Modifier,
     zone: ZoneId = ZoneId.systemDefault(),
     locale: Locale = Locale.getDefault(),
+    onClick: (() -> Unit)? = null,
 ) {
     val colors = DayLogTheme.colors
 
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = gutterWidth() + GutterGap, end = 20.dp, bottom = 22.dp),
+            .padding(start = gutterWidth() + GutterGap, end = 20.dp, bottom = 22.dp)
+            .then(
+                if (onClick != null) {
+                    Modifier.pressable(onClick = onClick)
+                } else {
+                    Modifier
+                },
+            ),
     ) {
         DLMeta(
             text = DayLabels.time(entry.createdAt.toLocalDateTime(zone), locale),

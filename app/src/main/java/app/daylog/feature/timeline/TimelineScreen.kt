@@ -107,8 +107,13 @@ private fun Modifier.marginRule(gutter: Dp, color: Color): Modifier = drawBehind
 /**
  * The day's name, in the margin.
  */
+/**
+ * The day's name, in the margin.
+ *
+ * Shared with the search screen, so a result looks like the entry it is.
+ */
 @Composable
-private fun DayHeading(group: DayGroup, modifier: Modifier = Modifier) {
+fun DayHeading(group: DayGroup, modifier: Modifier = Modifier) {
     val colors = DayLogTheme.colors
 
     Row(

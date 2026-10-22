@@ -15,7 +15,10 @@ import app.daylog.core.model.Media
 import app.daylog.core.model.MediaType
 import app.daylog.core.model.Tag
 import app.daylog.core.model.TagExtractor
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -28,6 +31,7 @@ import java.util.UUID
  * shape the rest of the app uses. Everything above it works with [Entry] and never with a Room
  * entity.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class EntryRepository(
     private val entryDao: EntryDao,
     private val tagDao: TagDao,
@@ -70,8 +74,22 @@ class EntryRepository(
 
         return flow {
             val uids = entryFtsDao.search(expression)
-            emit(entryDao.findByUids(uids).map { it.toEntry() })
+            emitAll(entryDao.findByUids(uids).map { list -> list.map { it.toEntry() } })
         }
+    }
+
+    /**
+     * The entries carrying every one of the given tags, newest first.
+     *
+     * Selecting two tags shows the entries that carry both, not the entries that carry either.
+     * An empty selection shows everything.
+     */
+    fun observeEntriesWithAllTags(tags: List<String>): Flow<List<Entry>> {
+        if (tags.isEmpty()) return observeEntries()
+
+        return tagDao.observeEntriesWithAllTags(tags, tags.size)
+            .flatMapLatest { uids -> entryDao.findByUids(uids) }
+            .map { entities -> entities.map { it.toEntry() } }
     }
 
     /**

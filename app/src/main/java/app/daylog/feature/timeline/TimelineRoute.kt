@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import app.daylog.core.designsystem.component.DLIconButton
 import app.daylog.core.designsystem.component.DLTopBar
 import app.daylog.core.designsystem.icon.DayLogIcons
 import app.daylog.core.designsystem.theme.DayLogTheme
@@ -28,6 +29,7 @@ fun TimelineRoute(
     onOpenEditor: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenEntry: (String) -> Unit,
+    onOpenSearch: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val viewModel: TimelineViewModel = viewModel(
@@ -46,8 +48,27 @@ fun TimelineRoute(
         DLTopBar(
             title = "DayLog",
             subtitle = entryCountLabel(state.groups.sumOf { it.entries.size }),
-            trailingIcon = DayLogIcons.Settings,
-            onTrailingClick = onOpenSettings,
+            trailingContent = {
+                DLIconButton(
+                    imageVector = DayLogIcons.Search,
+                    contentDescription = "Search",
+                    onClick = onOpenSearch,
+                    tint = DayLogTheme.colors.inkMuted,
+                )
+                DLIconButton(
+                    imageVector = DayLogIcons.Settings,
+                    contentDescription = "Settings",
+                    onClick = onOpenSettings,
+                    tint = DayLogTheme.colors.inkMuted,
+                )
+            },
+        )
+
+        TagFilterStrip(
+            tags = state.tags,
+            selected = state.selectedTags,
+            onToggle = viewModel::toggleTag,
+            onClear = viewModel::clearTags,
         )
 
         Box(modifier = Modifier.weight(1f)) {

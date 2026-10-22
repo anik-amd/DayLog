@@ -61,5 +61,23 @@ interface EntryDao {
      * The live entries with these uids, newest first.
      */
     @Query("SELECT * FROM entries WHERE uid IN (:uids) AND deletedAt IS NULL ORDER BY createdAt DESC")
-    suspend fun findByUids(uids: List<String>): List<EntryEntity>
+    fun findByUids(uids: List<String>): Flow<List<EntryEntity>>
+
+    /**
+     * The entries carrying every one of the given tags.
+     *
+     * The count is what makes it an AND rather than an OR: an entry has to carry all of the tags
+     * to come back, not just one of them.
+     */
+    @Query(
+        """
+        SELECT e.* FROM entries e
+        INNER JOIN entry_tags et ON et.entryUid = e.uid
+        WHERE e.deletedAt IS NULL AND et.tagName IN (:tags)
+        GROUP BY e.uid
+        HAVING COUNT(DISTINCT et.tagName) = :tagCount
+        ORDER BY e.createdAt DESC
+        """,
+    )
+    fun observeEntriesWithAllTags(tags: List<String>, tagCount: Int): Flow<List<EntryEntity>>
 }

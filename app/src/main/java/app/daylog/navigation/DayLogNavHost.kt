@@ -14,6 +14,7 @@ import androidx.navigation.navArgument
 import app.daylog.di.AppContainer
 import app.daylog.feature.editor.FullScreenEditor
 import app.daylog.feature.entry.EntryDetailRoute
+import app.daylog.feature.search.SearchRoute
 import app.daylog.feature.settings.SettingsScreen
 import app.daylog.feature.timeline.TimelineRoute
 
@@ -24,6 +25,7 @@ object Routes {
     const val Timeline = "timeline"
     const val Editor = "editor"
     const val Settings = "settings"
+    const val Search = "search"
     const val Entry = "entry/{uid}"
 
     /** The route of one entry. */
@@ -62,6 +64,17 @@ fun DayLogNavHost(
                 onOpenEntry = { uid ->
                     navController.navigate(Routes.entry(uid))
                 },
+                onOpenSearch = {
+                    navController.navigate(Routes.Search)
+                },
+            )
+        }
+
+        composable(Routes.Search) {
+            SearchRoute(
+                container = container,
+                onEntryClick = { uid -> navController.navigate(Routes.entry(uid)) },
+                onBack = { navController.popBackStack() },
             )
         }
 
