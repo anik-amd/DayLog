@@ -9,7 +9,7 @@ class WordCountTest {
     fun `words are whatever the whitespace separates`() {
         assertEquals(2, wordCount("hello there"))
         assertEquals(3, wordCount("a thought #work"))
-        assertEquals(4, wordCount("  spaced   out   text  "))
+        assertEquals(3, wordCount("  spaced   out   text  "))
     }
 
     @Test
