@@ -135,6 +135,7 @@ fun DayLogNavHost(
             SettingsScreen(
                 settingsStore = container.settingsStore,
                 onBack = { navController.popBackStack() },
+                legacyImporter = container.legacyImporter,
             )
         }
     }

@@ -1,5 +1,6 @@
 package app.daylog.feature.settings
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,13 +22,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import app.daylog.core.data.settings.DayLogSettings
 import app.daylog.core.data.settings.SettingsStore
+import app.daylog.core.designsystem.component.DLMeta
 import app.daylog.core.designsystem.component.DLTopBar
 import app.daylog.core.designsystem.icon.DayLogIcons
 import app.daylog.core.designsystem.theme.DayLogTheme
@@ -46,9 +50,12 @@ fun SettingsScreen(
     settingsStore: SettingsStore,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    legacyImporter: app.daylog.core.data.legacy.LegacyImporter? = null,
 ) {
     val settings by settingsStore.settings.collectAsState(initial = DayLogSettings())
     val scope = rememberCoroutineScope()
+    var importing by remember { mutableStateOf(false) }
+    var importMessage by remember { mutableStateOf<String?>(null) }
 
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -110,6 +117,32 @@ fun SettingsScreen(
                         )
                     }
                 }
+
+                if (legacyImporter != null) {
+                    SettingSection(title = "Your data") {
+                        ActionRow(
+                            title = "Import from the previous version",
+                            description = "Bring across the entries you wrote in the earlier " +
+                                "version of DayLog. Nothing is overwritten.",
+                            enabled = !importing,
+                            onClick = {
+                                scope.launch {
+                                    importing = true
+                                    val result = legacyImporter.import()
+                                    importMessage = result.message
+                                    importing = false
+                                }
+                            },
+                        )
+                        if (importMessage != null) {
+                            DLMeta(
+                                text = importMessage,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp),
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -161,6 +194,38 @@ private fun <T> ChoiceRow(
             ) {
                 Text(label(option))
             }
+        }
+    }
+}
+
+/**
+ * A row that does something.
+ */
+@Composable
+private fun ActionRow(
+    title: String,
+    description: String,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(enabled = enabled, onClick = onClick)
+            .padding(horizontal = 20.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }

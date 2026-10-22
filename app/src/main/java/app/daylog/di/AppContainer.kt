@@ -7,6 +7,7 @@ import app.daylog.core.data.backup.BackupCodec
 import app.daylog.core.data.local.DayLogDatabase
 import app.daylog.core.data.repository.EntryRepository
 import app.daylog.core.data.repository.MediaRepository
+import app.daylog.core.data.legacy.LegacyImporter
 import app.daylog.core.data.settings.SettingsStore
 
 /**
@@ -36,6 +37,15 @@ class AppContainer(private val context: Context) {
 
     val mediaRepository: MediaRepository by lazy {
         MediaRepository(context = context, mediaDao = database.mediaDao())
+    }
+
+    val legacyImporter: LegacyImporter by lazy {
+        LegacyImporter(
+            context = context,
+            entryDao = database.entryDao(),
+            tagDao = database.tagDao(),
+            mediaDao = database.mediaDao(),
+        )
     }
 
     val settingsStore: SettingsStore by lazy { SettingsStore(context) }
