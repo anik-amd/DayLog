@@ -95,8 +95,9 @@ fun DayLogTheme(
         DayLogThemeMode.Dark -> true
     }
 
+    val context = LocalContext.current
     val colorScheme = remember(themeMode, accentSource, pureBlack, isDark) {
-        resolveColorScheme(isDark, accentSource, pureBlack)
+        resolveColorScheme(isDark, accentSource, pureBlack, context)
     }
 
     val typography = remember {
@@ -127,14 +128,13 @@ fun DayLogTheme(
  * behaviour and it is what most of Android looks like now, so it is offered rather than assumed:
  * a diary is a reading app and the app's own palette is part of its character.
  */
-@Composable
 private fun resolveColorScheme(
     isDark: Boolean,
     accentSource: DayLogAccentSource,
     pureBlack: Boolean,
+    context: android.content.Context,
 ): ColorScheme {
     if (accentSource == DayLogAccentSource.Wallpaper && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        val context = LocalContext.current
         return if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
     }
 
