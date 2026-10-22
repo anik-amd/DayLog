@@ -41,6 +41,13 @@ data class BackupEntry(
     val placeLon: Double? = null,
     val weatherSummary: String? = null,
     val weatherCode: Int? = null,
+    /**
+     * The tags of the entry.
+     *
+     * They are written out rather than read back out of the text, so the tags come across exactly
+     * as they were, even if a future version lets a tag be attached without a `#` in the writing.
+     */
+    val tags: List<String> = emptyList(),
 )
 
 @Serializable

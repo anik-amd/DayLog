@@ -42,16 +42,21 @@ import app.daylog.core.model.DayLogThemeMode
 /**
  * The settings.
  *
- * Three decisions and nothing else: how the app is themed, whether it follows the wallpaper, and
- * whether the dark theme is on true black. A settings screen that lists twenty things is a
- * settings screen nobody reads.
+ * A few decisions and nothing else: how the app is themed, whether it follows the wallpaper,
+ * whether the dark theme is on true black, and where the writing is kept. A settings screen that
+ * lists twenty things is a settings screen nobody reads.
  */
 @Composable
 fun SettingsScreen(
     settingsStore: SettingsStore,
     onBack: () -> Unit,
+    onOpenStatistics: () -> Unit,
+    onExport: () -> Unit,
+    onImport: () -> Unit,
     modifier: Modifier = Modifier,
     legacyImporter: app.daylog.core.data.legacy.LegacyImporter? = null,
+    busy: Boolean = false,
+    message: String? = null,
 ) {
     val settings by settingsStore.settings.collectAsState(initial = DayLogSettings())
     val scope = rememberCoroutineScope()
@@ -115,6 +120,36 @@ fun SettingsScreen(
                             onCheckedChange = { enabled ->
                                 scope.launch { settingsStore.setPureBlack(enabled) }
                             },
+                        )
+                    }
+                }
+
+                SettingSection(title = "Your writing") {
+                    ActionRow(
+                        title = "Statistics",
+                        description = "How much you have written, and when.",
+                        onClick = onOpenStatistics,
+                    )
+                    ActionRow(
+                        title = "Export",
+                        description = "Write everything into one file you can keep or send to " +
+                            "yourself. Your photos go with it.",
+                        enabled = !busy,
+                        onClick = onExport,
+                    )
+                    ActionRow(
+                        title = "Import",
+                        description = "Bring a file back in. Nothing you have written since is " +
+                            "overwritten.",
+                        enabled = !busy,
+                        onClick = onImport,
+                    )
+                    val note = message
+                    if (note != null) {
+                        DLMeta(
+                            text = note,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp),
                         )
                     }
                 }

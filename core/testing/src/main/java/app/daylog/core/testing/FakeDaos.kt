@@ -77,6 +77,9 @@ class FakeEntryDao : EntryDao {
             list.filter { it.uid in uids && it.deletedAt == null }
                 .sortedByDescending { it.createdAt }
         }
+
+    override suspend fun findAll(): List<EntryEntity> =
+        entries.value.sortedBy { it.createdAt }
 }
 
 /**
@@ -149,6 +152,10 @@ class FakeTagDao : TagDao {
         tags.forEach { insertTag(it) }
         insertLinks(links)
     }
+
+    override suspend fun findAll(): List<TagEntity> = tags.value.sortedBy { it.name }
+
+    override suspend fun findAllLinks(): List<EntryTagEntity> = links.value
 }
 
 /**
@@ -222,6 +229,9 @@ class FakeMediaDao : MediaDao {
 
     override suspend fun findByUid(uid: String): MediaEntity? =
         media.value.firstOrNull { it.uid == uid }
+
+    override suspend fun findAll(): List<MediaEntity> =
+        media.value.sortedBy { it.createdAt }
 
     override suspend fun deleteByUid(uid: String) {
         media.value = media.value.filterNot { it.uid == uid }

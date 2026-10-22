@@ -17,7 +17,8 @@ import app.daylog.feature.editor.EditorRoute
 import app.daylog.feature.editor.FullScreenEditor
 import app.daylog.feature.entry.EntryDetailRoute
 import app.daylog.feature.search.SearchRoute
-import app.daylog.feature.settings.SettingsScreen
+import app.daylog.feature.settings.SettingsRoute
+import app.daylog.feature.stats.StatisticsRoute
 import app.daylog.feature.timeline.TimelineRoute
 
 /**
@@ -29,6 +30,7 @@ object Routes {
     const val Settings = "settings"
     const val Search = "search"
     const val Calendar = "calendar"
+    const val Statistics = "statistics"
     const val Entry = "entry/{uid}"
 
     /** The route of one entry. */
@@ -132,10 +134,17 @@ fun DayLogNavHost(
         }
 
         composable(Routes.Settings) {
-            SettingsScreen(
-                settingsStore = container.settingsStore,
+            SettingsRoute(
+                container = container,
                 onBack = { navController.popBackStack() },
-                legacyImporter = container.legacyImporter,
+                onOpenStatistics = { navController.navigate(Routes.Statistics) },
+            )
+        }
+
+        composable(Routes.Statistics) {
+            StatisticsRoute(
+                container = container,
+                onBack = { navController.popBackStack() },
             )
         }
     }

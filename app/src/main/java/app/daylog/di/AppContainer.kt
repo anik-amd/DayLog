@@ -3,7 +3,7 @@ package app.daylog.di
 import android.content.Context
 import app.daylog.core.common.AppDispatchers
 import app.daylog.core.common.DefaultAppDispatchers
-import app.daylog.core.data.backup.BackupCodec
+import app.daylog.core.data.backup.BackupService
 import app.daylog.core.data.local.DayLogDatabase
 import app.daylog.core.data.repository.EntryRepository
 import app.daylog.core.data.repository.MediaRepository
@@ -50,5 +50,12 @@ class AppContainer(private val context: Context) {
 
     val settingsStore: SettingsStore by lazy { SettingsStore(context) }
 
-    val backupCodec: BackupCodec by lazy { BackupCodec }
+    val backupService: BackupService by lazy {
+        BackupService(
+            entryDao = database.entryDao(),
+            tagDao = database.tagDao(),
+            mediaDao = database.mediaDao(),
+            entryFtsDao = database.entryFtsDao(),
+        )
+    }
 }

@@ -58,6 +58,18 @@ interface TagDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertLinks(links: List<EntryTagEntity>)
 
+    /**
+     * Every tag, with its count.
+     */
+    @Query("SELECT * FROM tags ORDER BY name ASC")
+    suspend fun findAll(): List<TagEntity>
+
+    /**
+     * Every link between an entry and a tag.
+     */
+    @Query("SELECT * FROM entry_tags")
+    suspend fun findAllLinks(): List<EntryTagEntity>
+
     @Query("DELETE FROM entry_tags WHERE entryUid = :entryUid")
     suspend fun deleteLinksForEntry(entryUid: String)
 

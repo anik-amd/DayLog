@@ -62,4 +62,13 @@ interface EntryDao {
      */
     @Query("SELECT * FROM entries WHERE uid IN (:uids) AND deletedAt IS NULL ORDER BY createdAt DESC")
     fun findByUids(uids: List<String>): Flow<List<EntryEntity>>
+
+    /**
+     * Every entry, deleted ones included, oldest first.
+     *
+     * This is what an export reads, because a backup that leaves out the deletions cannot restore
+     * the app to the state it was in.
+     */
+    @Query("SELECT * FROM entries ORDER BY createdAt ASC")
+    suspend fun findAll(): List<EntryEntity>
 }

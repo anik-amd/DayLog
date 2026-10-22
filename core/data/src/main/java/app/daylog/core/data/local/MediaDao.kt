@@ -19,6 +19,10 @@ interface MediaDao {
     @Query("SELECT * FROM media ORDER BY createdAt ASC")
     fun observeAll(): Flow<List<MediaEntity>>
 
+    /** Every photo, for an export. */
+    @Query("SELECT * FROM media ORDER BY createdAt ASC")
+    suspend fun findAll(): List<MediaEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(media: MediaEntity)
 
