@@ -135,9 +135,10 @@ fun SettingsScreen(
                                 }
                             },
                         )
-                        if (importMessage != null) {
+                        val message = importMessage
+                        if (message != null) {
                             DLMeta(
-                                text = importMessage,
+                                text = message,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp),
                             )
