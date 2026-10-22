@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import app.daylog.core.data.settings.DayLogSettings
 import app.daylog.core.designsystem.theme.DayLogTheme
 import app.daylog.navigation.DayLogNavHost
 
@@ -26,11 +27,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val container = (application as DayLogApplication).container
-        val settings by container.settingsStore.settings.collectAsState(
-            initial = app.daylog.core.data.settings.DayLogSettings(),
-        )
 
         setContent {
+            val settings by container.settingsStore.settings.collectAsState(
+                initial = DayLogSettings(),
+            )
+
             DayLogTheme(
                 themeMode = settings.themeMode,
                 accentSource = settings.accentSource,
