@@ -52,12 +52,19 @@ class EntryRepository(
         val match = query.trim()
         if (match.isEmpty()) return flowOf(emptyList())
 
-        // Every word must be present, and each may be a prefix. The quotes keep a word with a
-        // punctuation mark in it from being read as an operator.
+        // Every word must be present, and each may be a prefix. A plain word is written bare with a
+        // trailing star, because that is the form SQLite's index understands; a word with
+        // punctuation in it is quoted, because a bare one would be read as an operator.
         val expression = match
             .split(Regex("\\s+"))
             .filter { it.isNotEmpty() }
-            .joinToString(" AND ") { "\"${it.replace("\"", "\"\"")}\"*" }
+            .joinToString(" AND ") { word ->
+                if (SIMPLE_WORD.matches(word)) {
+                    "$word*"
+                } else {
+                    "\"${word.replace("\"", "\"\"")}\""
+                }
+            }
 
         if (expression.isEmpty()) return flowOf(emptyList())
 
@@ -206,6 +213,13 @@ class EntryRepository(
                 tags = tags.joinToString(" "),
             ),
         )
+    }
+
+    companion object {
+        /**
+         * A word the index can take bare, with a trailing star to match the start of a word.
+         */
+        private val SIMPLE_WORD = Regex("[\\p{L}\\p{N}_]+")
     }
 }
 

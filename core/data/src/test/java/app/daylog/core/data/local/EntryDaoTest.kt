@@ -94,7 +94,7 @@ class EntryDaoTest {
     fun `the full-text index finds an entry by a word in it`() = runTest {
         insert("a thought about the rain")
 
-        val found = fts.search("\"rain\"*")
+        val found = fts.search("rain*")
 
         assertEquals(listOf("entry-1"), found)
     }
@@ -103,14 +103,14 @@ class EntryDaoTest {
     fun `the full-text index matches the start of a word`() = runTest {
         insert("reading in the train")
 
-        assertEquals(listOf("entry-1"), fts.search("\"read\"*"))
+        assertEquals(listOf("entry-1"), fts.search("read*"))
     }
 
     @Test
     fun `the full-text index does not match the middle of a word`() = runTest {
         insert("reading in the train")
 
-        assertEquals(emptyList<String>(), fts.search("\"adi\"*"))
+        assertEquals(emptyList<String>(), fts.search("adi*"))
     }
 
     @Test
@@ -118,7 +118,7 @@ class EntryDaoTest {
         insert("a thought about the rain")
         insert("a thought about the sun", uid = "entry-2")
 
-        val found = fts.search("\"rain\"* AND \"sun\"*")
+        val found = fts.search("rain* AND sun*")
 
         assertEquals(emptyList<String>(), found)
     }
@@ -135,7 +135,7 @@ class EntryDaoTest {
             ),
         )
 
-        assertEquals(listOf("entry-1"), fts.search("\"weather\"*"))
+        assertEquals(listOf("entry-1"), fts.search("weather*"))
     }
 
     @Test
@@ -143,7 +143,7 @@ class EntryDaoTest {
         val saved = insert("a thought")
 
         assertEquals(1, fts.count())
-        assertEquals(saved.id, fts.search("\"thought\"*").size.toLong())
+        assertEquals(saved.id, fts.search("thought*").size.toLong())
     }
 
     @Test
@@ -166,6 +166,7 @@ class EntryDaoTest {
 
     @Test
     fun `the tag counts are read from the entries that carry them`() = runTest {
+        insert("a thought")
         tags.insertTag(TagEntity(name = "work"))
         tags.insertLinks(listOf(EntryTagEntity(entryUid = "entry-1", tagName = "work")))
 
