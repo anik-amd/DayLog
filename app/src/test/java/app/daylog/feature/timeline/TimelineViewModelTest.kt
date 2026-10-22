@@ -79,7 +79,7 @@ class TimelineViewModelTest {
         }
 
     @Test
-    fun `the bar empties once the entry is written`() =
+    fun `the text stays in the bar when the entry is written`() =
         runTest(mainDispatcherRule.dispatcher) {
             val viewModel = viewModel()
             watchState(viewModel)
@@ -87,7 +87,37 @@ class TimelineViewModelTest {
             viewModel.onDraftChanged("a thought")
             advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
 
-            assertEquals("", viewModel.state.value.draft)
+            // The writing is never taken out from under the writer.
+            assertEquals("a thought", viewModel.state.value.draft)
+        }
+
+    @Test
+    fun `a pause in the writing updates the same entry rather than starting another`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val viewModel = viewModel()
+
+            viewModel.onDraftChanged("a thought")
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            viewModel.onDraftChanged("a thought that grew")
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+
+            assertEquals(1, entryDao.stored.size)
+            assertEquals("a thought that grew", entryDao.stored.first().content)
+        }
+
+    @Test
+    fun `emptying the bar leaves the entry in the timeline and makes room for a new one`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val viewModel = viewModel()
+
+            viewModel.onDraftChanged("a thought")
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            viewModel.onDraftChanged("")
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+            viewModel.onDraftChanged("another thought")
+            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
+
+            assertEquals(2, entryDao.stored.size)
         }
 
     @Test
