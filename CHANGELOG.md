@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.4] - 2026-10-22
+
+### Added
+- A live preview in the editor, toggled from the top bar
+- The formatting toolbar works on the words you have selected, and pressing a button twice takes
+  the mark off again
+
+### Fixed
+- The label of a button could not be read on the ink button
+- The accent is for data, not for chrome: buttons and switches are the ink, and only a selected
+  chip carries the accent
+
 ## [0.3.3] - 2026-10-22
 
 ### Added
