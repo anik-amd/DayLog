@@ -74,14 +74,14 @@ class EditorViewModelTest {
     @Test
     fun `an editor given an entry loads its text, moment and photos`() =
         runTest(mainDispatcherRule.dispatcher) {
-            val uid = repository.save("a thought", createdAt = 1_234_000)
+            val uid = repository.save("a thought", createdAt = 1_234_000L)
             mediaStore.addMedia(uid, Uri.parse("content://gallery/one"))
 
             val viewModel = viewModel(uid = uid)
             val state = viewModel.state.first { it.media.isNotEmpty() }
 
             assertEquals("a thought", state.text)
-            assertEquals(1_234_000, state.createdAt)
+            assertEquals(1_234_000L, state.createdAt)
             assertEquals(1, state.media.size)
         }
 
@@ -129,7 +129,7 @@ class EditorViewModelTest {
             viewModel.save()
             advanceUntilIdle()
 
-            assertEquals(1_500_000, entryDao.stored.first().createdAt)
+            assertEquals(1_500_000L, entryDao.stored.first().createdAt)
         }
 
     @Test
@@ -167,6 +167,8 @@ class EditorViewModelTest {
             val uid = repository.save("the original")
 
             val viewModel = viewModel(uid = uid, initialText = "the original, rewritten")
+            // The load has to finish before the writer can act on what it loaded.
+            viewModel.state.first { it.text != null }
             viewModel.onTextChanged("the original, rewritten")
             viewModel.save()
             advanceUntilIdle()

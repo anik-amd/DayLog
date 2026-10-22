@@ -58,24 +58,30 @@ class EditorViewModel(
     private var createdHere = false
 
     init {
-        viewModelScope.launch {
-            val loaded = if (uid == null) null else repository.observeEntry(uid).firstOrNull()
-            text.value = when {
-                loaded == null -> initialText
-                // The quick entry bar may have handed over writing that was never saved; it is
-                // the newest version, so it stands.
-                initialText.isNotEmpty() && initialText != loaded.content -> initialText
-                else -> loaded.content
+        if (uid == null) {
+            // A new entry needs nothing from disk, so it is seeded here, before anything can
+            // interrupt: no gap between the writer opening the editor and being on the page.
+            text.value = initialText
+            moment.value = now()
+            entryUid.value = null
+            savedText = null
+            createdHere = true
+        } else {
+            viewModelScope.launch {
+                val loaded = repository.observeEntry(uid).firstOrNull()
+                text.value = when {
+                    loaded == null -> initialText
+                    // The quick entry bar may have handed over writing that was never saved; it
+                    // is the newest version, so it stands.
+                    initialText.isNotEmpty() && initialText != loaded.content -> initialText
+                    else -> loaded.content
+                }
+                moment.value = loaded?.createdAt ?: now()
+                photos.value = mediaStore.observeMedia(uid).first()
+                savedText = loaded?.content
+                createdHere = false
+                entryUid.value = uid
             }
-            moment.value = loaded?.createdAt ?: now()
-            photos.value = if (uid == null) {
-                emptyList()
-            } else {
-                mediaStore.observeMedia(uid).first()
-            }
-            savedText = loaded?.content
-            createdHere = loaded == null
-            entryUid.value = uid
         }
     }
 
