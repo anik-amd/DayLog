@@ -23,6 +23,9 @@ import app.daylog.feature.timeline.TimelineScreen
 import app.daylog.feature.calendar.CalendarScreen
 import app.daylog.feature.entry.EntryDetailScreen
 import app.daylog.feature.search.SearchScreen
+import app.daylog.feature.stats.StatisticsScreen
+import app.daylog.core.model.Tag
+import app.daylog.core.model.calculateStatistics
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -241,6 +244,28 @@ fun CalendarPreview() {
             onNextMonth = {},
             onBack = {},
             selectedEntries = listOf(sampleEntries[0]),
+        )
+    }
+}
+
+@PreviewTest
+@Preview(name = "Statistics", widthDp = 400, heightDp = 780, showBackground = true)
+@Composable
+fun StatisticsPreview() {
+    DayLogTheme {
+        StatisticsScreen(
+            statistics = calculateStatistics(
+                entries = sampleEntries,
+                tags = listOf(
+                    Tag("reading", 4),
+                    Tag("family", 2),
+                    Tag("work", 7),
+                ),
+                today = today,
+                zone = zone,
+            ),
+            isEmpty = false,
+            onBack = {},
         )
     }
 }

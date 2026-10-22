@@ -124,8 +124,8 @@ markers that are not closed.
 ## P7 — Settings, backup, migration
 
 - [x] Theme mode, the wallpaper option, pure black
-- [ ] JSON export and import
-- [ ] Statistics
+- [x] JSON export and import, with the photos in the same file
+- [x] Statistics
 - [x] Legacy import from the previous version
 - [x] The old database is read from `files/SQLite/daylog.db`, where the old app kept it
 

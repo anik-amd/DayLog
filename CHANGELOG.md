@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.8] - 2026-10-22
+
+### Added
+- Statistics: how much you have written, how many days you wrote on, your streak, and the last
+  thirty days as a small chart. Settings, then Statistics
+- Export: everything in one file you can keep or send to yourself. The writing is plain JSON and
+  the photos go with it, so a backup does not quietly leave the pictures behind
+- Import: bring a file back in. It merges rather than replaces, so nothing you have written since
+  is lost, and where both have the same entry the newer one wins
+
 ## [0.3.7] - 2026-10-22
 
 ### Added
