@@ -93,6 +93,12 @@ androidComponents {
     beforeVariants(selector().withBuildType("release")) { variant ->
         variant.enableUnitTest = false
     }
+
+    // The app's own startup path goes into the baseline profile, so Android prepares it ahead of
+    // time rather than the first time the app is opened.
+    onVariants(selector().all()) { variant ->
+        variant.sources.baselineProfiles?.addStaticSourceDirectory("src/main/baselineprofile")
+    }
 }
 
 dependencies {

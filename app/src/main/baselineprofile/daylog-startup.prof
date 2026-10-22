@@ -1,0 +1,9 @@
+# The app's own startup path.
+#
+# Android's profile installer reads this from the app and asks the compiler to prepare these
+# classes ahead of time, so the first frame does not wait for the compiler to catch up.
+#
+# The wildcard covers the whole app. The app is small — under a megabyte of its own code — so
+# preparing all of it costs a moment at install time and saves the wait every time the app is
+# opened. The libraries bring their own profiles, which AGP merges with this one.
+HSPLapp/daylog/**;->**(**)**
