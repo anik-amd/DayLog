@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import java.util.Locale
 
@@ -45,16 +47,12 @@ class SearchViewModel(
             .distinctUntilChanged()
             .flatMapLatest { text ->
                 if (text.isBlank()) {
-                    kotlinx.coroutines.flow.flowOf(emptyList())
+                    flowOf(emptyList())
                 } else {
                     repository.search(text)
                 }
             }
-            .let { entries ->
-                kotlinx.coroutines.flow.map(entries) { list ->
-                    DayGrouper.group(list, locale = locale)
-                }
-            }
+            .map { entries -> DayGrouper.group(entries, locale = locale) }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
