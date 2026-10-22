@@ -112,10 +112,10 @@ markers that are not closed.
 
 ## P6 — Photos
 
-- [ ] Android Photo Picker — no permission prompt
-- [ ] Copy into app storage, generate a thumbnail
-- [ ] Thumbnail strip on the timeline entry
-- [ ] Entry gallery view
+- [x] Android Photo Picker — no permission prompt
+- [x] Copy into app storage, generate a thumbnail
+- [x] Thumbnail strip on the timeline entry
+- [x] Entry gallery view
 
 **Gate:** path policy, thumbnail sizing, media CRUD green.
 

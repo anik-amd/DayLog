@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.6] - 2026-10-22
+
+### Added
+- Photos: attach them to an entry with the system photo picker, so there is no permission prompt
+  and nothing is asked for that the app does not need
+- The photos are copied into the app, so the entry keeps them even if you delete the original from
+  your gallery
+- A small photo on the timeline for the entries that have one
+
 ## [0.3.5] - 2026-10-22
 
 ### Added
