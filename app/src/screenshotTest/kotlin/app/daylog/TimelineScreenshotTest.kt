@@ -17,15 +17,19 @@ import app.daylog.core.designsystem.theme.DayLogTheme
 import app.daylog.core.model.DayGroup
 import app.daylog.core.model.DayLogThemeMode
 import app.daylog.core.model.Entry
+import app.daylog.core.model.OnThisDayYear
 import app.daylog.feature.timeline.QuickEntryBar
 import app.daylog.feature.timeline.TagFilterStrip
 import app.daylog.feature.timeline.TimelineScreen
 import app.daylog.feature.calendar.CalendarScreen
 import app.daylog.feature.entry.EntryDetailScreen
+import app.daylog.feature.onthisday.OnThisDayScreen
 import app.daylog.feature.search.SearchScreen
 import app.daylog.feature.stats.StatisticsScreen
 import app.daylog.core.model.Tag
 import app.daylog.core.model.calculateStatistics
+import app.daylog.navigation.DayLogBottomBar
+import app.daylog.navigation.Routes
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -143,7 +147,11 @@ private fun DayLogPreview(dark: Boolean = false) {
                 onSave = {},
                 onExpand = {},
                 onAddPhoto = {},
-                modifier = Modifier.navigationBarsPadding(),
+            )
+
+            DayLogBottomBar(
+                current = Routes.Timeline,
+                onTab = {},
             )
         }
     }
@@ -236,16 +244,71 @@ fun SearchPreview() {
 @Composable
 fun CalendarPreview() {
     DayLogTheme {
-        CalendarScreen(
-            year = 2026,
-            month = 3,
-            entryDays = setOf(1, 4, 9, 15, 22, 28),
-            selectedDay = 9,
-            onDaySelected = {},
-            onPreviousMonth = {},
-            onNextMonth = {},
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(DayLogTheme.colors.background),
+        ) {
+            CalendarScreen(
+                year = 2026,
+                month = 3,
+                entryDays = setOf(1, 4, 9, 15, 22, 28),
+                selectedDay = 9,
+                onDaySelected = {},
+                onPreviousMonth = {},
+                onNextMonth = {},
+                onOpenOnThisDay = {},
+                selectedEntries = listOf(sampleEntries[0]),
+                onOpenEntry = {},
+                modifier = Modifier.weight(1f),
+            )
+
+            DayLogBottomBar(
+                current = Routes.Calendar,
+                onTab = {},
+            )
+        }
+    }
+}
+
+@PreviewTest
+@Preview(name = "On this day", widthDp = 400, heightDp = 780, showBackground = true)
+@Composable
+fun OnThisDayPreview() {
+    DayLogTheme {
+        OnThisDayScreen(
+            years = listOf(
+                OnThisDayYear(
+                    year = today.minusYears(1).year,
+                    entries = listOf(
+                        Entry(
+                            uid = "m1",
+                            content = "The train was late, but the book was good. #reading",
+                            createdAt = at(today.minusYears(1), 9, 14),
+                            updatedAt = at(today.minusYears(1), 9, 14),
+                        ),
+                    ),
+                ),
+                OnThisDayYear(
+                    year = today.minusYears(3).year,
+                    entries = listOf(
+                        Entry(
+                            uid = "m2",
+                            content = "Rain all afternoon. Finished the second chapter.",
+                            createdAt = at(today.minusYears(3), 18, 2),
+                            updatedAt = at(today.minusYears(3), 18, 2),
+                        ),
+                        Entry(
+                            uid = "m3",
+                            content = "Called Mum. She is well. #family",
+                            createdAt = at(today.minusYears(3), 21, 30),
+                            updatedAt = at(today.minusYears(3), 21, 30),
+                        ),
+                    ),
+                ),
+            ),
             onBack = {},
-            selectedEntries = listOf(sampleEntries[0]),
+            onOpenEntry = {},
         )
     }
 }

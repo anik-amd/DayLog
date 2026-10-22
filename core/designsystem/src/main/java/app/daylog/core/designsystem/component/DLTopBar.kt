@@ -36,6 +36,7 @@ fun DLTopBar(
     subtitle: String? = null,
     leadingIcon: ImageVector? = null,
     onLeadingClick: (() -> Unit)? = null,
+    leadingContentDescription: String = "Back",
     trailingIcon: ImageVector? = null,
     onTrailingClick: (() -> Unit)? = null,
     trailingContent: (@Composable () -> Unit)? = null,
@@ -64,7 +65,7 @@ fun DLTopBar(
                 IconButton(onClick = onLeadingClick) {
                     Icon(
                         imageVector = leadingIcon,
-                        contentDescription = "Back",
+                        contentDescription = leadingContentDescription,
                         tint = DayLogTheme.colorScheme.onSurfaceVariant,
                     )
                 }

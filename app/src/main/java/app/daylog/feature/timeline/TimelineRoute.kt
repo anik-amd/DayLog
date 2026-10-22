@@ -34,7 +34,6 @@ fun TimelineRoute(
     onOpenSettings: () -> Unit,
     onOpenEntry: (String) -> Unit,
     onOpenSearch: () -> Unit,
-    onOpenCalendar: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val viewModel: TimelineViewModel = viewModel(
@@ -61,12 +60,6 @@ fun TimelineRoute(
             title = "DayLog",
             subtitle = entryCountLabel(state.groups.sumOf { it.entries.size }),
             trailingContent = {
-                DLIconButton(
-                    imageVector = DayLogIcons.Calendar,
-                    contentDescription = "Calendar",
-                    onClick = onOpenCalendar,
-                    tint = DayLogTheme.colors.inkMuted,
-                )
                 DLIconButton(
                     imageVector = DayLogIcons.Search,
                     contentDescription = "Search",

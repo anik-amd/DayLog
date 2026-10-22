@@ -196,6 +196,31 @@ object DayLogIcons {
         lineTo(9f, 18f)
     }
 
+    /** A chevron pointing left, for the month before. */
+    val ChevronLeft: ImageVector = icon("ChevronLeft") {
+        moveTo(15f, 6f)
+        lineTo(9f, 12f)
+        lineTo(15f, 18f)
+    }
+
+    /** The lines of the timeline, for the tab the writing lives on. */
+    val Timeline: ImageVector = icon("Timeline") {
+        moveTo(4f, 6f)
+        lineTo(20f, 6f)
+        moveTo(4f, 12f)
+        lineTo(14f, 12f)
+        moveTo(4f, 18f)
+        lineTo(17f, 18f)
+    }
+
+    /** A clock face, for this day in the years before. */
+    val History: ImageVector = icon("History") {
+        circle(12f, 12f, 8.5f)
+        moveTo(12f, 7.5f)
+        lineTo(12f, 12f)
+        lineTo(15.5f, 14f)
+    }
+
     /** A tick, for a confirmed action. */
     val Check: ImageVector = icon("Check") {
         moveTo(5f, 12.5f)

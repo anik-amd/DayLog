@@ -28,10 +28,17 @@ import java.time.YearMonth
 import java.time.ZoneId
 import java.util.Locale
 
+/**
+ * The calendar, wired up.
+ *
+ * The calendar is a tab, not a detour: nothing above it to go back to, the month's own chevrons
+ * beside its name, and the clock face in the corner leading to this day in past years.
+ */
 @Composable
 fun CalendarRoute(
     container: AppContainer,
-    onBack: () -> Unit,
+    onOpenOnThisDay: () -> Unit,
+    onOpenEntry: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val viewModel: CalendarViewModel = viewModel(
@@ -47,8 +54,9 @@ fun CalendarRoute(
         onDaySelected = viewModel::selectDay,
         onPreviousMonth = viewModel::previousMonth,
         onNextMonth = viewModel::nextMonth,
-        onBack = onBack,
+        onOpenOnThisDay = onOpenOnThisDay,
         selectedEntries = state.selectedEntries,
+        onOpenEntry = onOpenEntry,
         modifier = modifier,
     )
 }

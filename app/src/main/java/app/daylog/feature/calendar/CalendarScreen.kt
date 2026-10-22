@@ -14,10 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.daylog.core.common.CalendarMath
-import app.daylog.core.common.DayLabels
 import app.daylog.core.designsystem.component.DLEmptyState
 import app.daylog.core.designsystem.component.DLIconButton
 import app.daylog.core.designsystem.component.DLText
@@ -36,7 +34,8 @@ import java.util.Locale
  *
  * The month grid is the screen's idea: a diary's calendar is not a date picker, it is a map of
  * the writing. Each day with an entry carries a dot, and tapping a day shows what was written
- * there.
+ * there. The month's own chevrons sit beside its name, and the clock face in the corner leads to
+ * this day in past years.
  */
 @Composable
 fun CalendarScreen(
@@ -47,8 +46,9 @@ fun CalendarScreen(
     onDaySelected: (Int) -> Unit,
     onPreviousMonth: () -> Unit,
     onNextMonth: () -> Unit,
-    onBack: () -> Unit,
+    onOpenOnThisDay: () -> Unit,
     selectedEntries: List<Entry>,
+    onOpenEntry: (String) -> Unit,
     modifier: Modifier = Modifier,
     zone: ZoneId = ZoneId.systemDefault(),
     locale: Locale = Locale.getDefault(),
@@ -65,17 +65,18 @@ fun CalendarScreen(
         Column {
             DLTopBar(
                 title = CalendarMath.monthName(year, month, locale),
-                leadingIcon = DayLogIcons.Back,
-                onLeadingClick = onBack,
+                leadingIcon = DayLogIcons.History,
+                onLeadingClick = onOpenOnThisDay,
+                leadingContentDescription = "On this day",
                 trailingContent = {
                     DLIconButton(
-                        imageVector = DayLogIcons.ChevronRight,
+                        imageVector = DayLogIcons.ChevronLeft,
                         contentDescription = "Previous month",
                         onClick = onPreviousMonth,
                         tint = colors.inkMuted,
                     )
                     DLIconButton(
-                        imageVector = DayLogIcons.ChevronDown,
+                        imageVector = DayLogIcons.ChevronRight,
                         contentDescription = "Next month",
                         onClick = onNextMonth,
                         tint = colors.inkMuted,
@@ -129,30 +130,15 @@ fun CalendarScreen(
 
             // The entries of the selected day.
             if (selectedDay != null && selectedEntries.isNotEmpty()) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp, start = 20.dp, end = 20.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    DLText(
-                        text = DayLabels.dayHeader(
-                            date = LocalDate.of(year, month, selectedDay),
-                            today = today,
-                            locale = locale,
-                        ),
-                        style = DayLogTheme.typography.label,
-                        color = colors.ink,
-                    )
-                    selectedEntries.forEach { entry ->
-                        DLText(
-                            text = entry.content,
-                            style = DayLogTheme.typography.entryBody,
-                            color = colors.ink,
-                            annotated = true,
-                        )
-                    }
-                }
+                SelectedDayEntries(
+                    year = year,
+                    month = month,
+                    day = selectedDay,
+                    entries = selectedEntries,
+                    onOpenEntry = onOpenEntry,
+                    today = today,
+                    locale = locale,
+                )
             } else if (selectedDay != null) {
                 Box(
                     modifier = Modifier
