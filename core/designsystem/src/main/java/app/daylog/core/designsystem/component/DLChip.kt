@@ -63,13 +63,7 @@ fun DLChip(
                 selectedLeadingIconColor = DayLogTheme.colors.accent,
                 containerColor = Color.Transparent,
                 labelColor = DayLogTheme.colors.inkMuted,
-                leadingIconColor = DayLogTheme.colors.inkMuted,
-            ),
-            border = FilterChipDefaults.filterChipBorder(
-                enabled = enabled,
-                selected = selected,
-                borderColor = DayLogTheme.colors.rule,
-                selectedBorderColor = Color.Transparent,
+                iconColor = DayLogTheme.colors.inkMuted,
             ),
         )
         return
