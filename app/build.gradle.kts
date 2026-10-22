@@ -110,6 +110,10 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.profileinstaller)
 
+    // Photos: load thumbnails without holding the whole image in memory.
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
+
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)

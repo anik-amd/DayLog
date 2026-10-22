@@ -74,7 +74,13 @@ fun PhotoStrip(
         DLIconButton(
             imageVector = DayLogIcons.Image,
             contentDescription = "Add a photo",
-            onClick = { picker.launch(ActivityResultContracts.PickVisualMedia.ImageOnly) },
+            onClick = {
+                picker.launch(
+                    androidx.activity.result.PickVisualMediaRequest(
+                        ActivityResultContracts.PickVisualMedia.ImageOnly,
+                    ),
+                )
+            },
             tint = DayLogTheme.colors.inkMuted,
         )
 

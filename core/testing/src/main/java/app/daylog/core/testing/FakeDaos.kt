@@ -217,6 +217,9 @@ class FakeMediaDao : MediaDao {
         this.media.value = this.media.value + media
     }
 
+    override suspend fun findByUid(uid: String): MediaEntity? =
+        media.value.firstOrNull { it.uid == uid }
+
     override suspend fun deleteByUid(uid: String) {
         media.value = media.value.filterNot { it.uid == uid }
     }
