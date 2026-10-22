@@ -18,8 +18,10 @@ import app.daylog.core.model.DayGroup
 import app.daylog.core.model.DayLogThemeMode
 import app.daylog.core.model.Entry
 import app.daylog.feature.timeline.QuickEntryBar
+import app.daylog.feature.timeline.TagFilterStrip
 import app.daylog.feature.timeline.TimelineScreen
 import app.daylog.feature.entry.EntryDetailScreen
+import app.daylog.feature.search.SearchScreen
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -120,6 +122,17 @@ private fun DayLogPreview(dark: Boolean = false) {
                 )
             }
 
+            TagFilterStrip(
+                tags = listOf(
+                    app.daylog.core.model.Tag("reading", 4),
+                    app.daylog.core.model.Tag("family", 2),
+                    app.daylog.core.model.Tag("work", 7),
+                ),
+                selected = setOf("reading"),
+                onToggle = {},
+                onClear = {},
+            )
+
             QuickEntryBar(
                 value = "",
                 onValueChange = {},
@@ -186,6 +199,28 @@ fun EntryDetailPreview() {
             onBack = {},
             onEdit = {},
             onDelete = {},
+        )
+    }
+}
+
+@PreviewTest
+@Preview(name = "Search", widthDp = 400, heightDp = 780, showBackground = true)
+@Composable
+fun SearchPreview() {
+    DayLogTheme {
+        SearchScreen(
+            query = "rain",
+            onQueryChanged = {},
+            groups = listOf(
+                DayGroup(
+                    key = today.toEpochDay(),
+                    date = today,
+                    header = "Today",
+                    entries = sampleEntries.take(1),
+                ),
+            ),
+            onEntryClick = {},
+            onBack = {},
         )
     }
 }
