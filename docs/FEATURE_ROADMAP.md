@@ -27,16 +27,16 @@ Codespace before the phase is called done. One feature per commit.
 
 *The visual language, before any screen uses it.*
 
-- [x] Colour ramps: Paper and Night, one hue
-- [x] Type scale: Spectral for content, Instrument Sans for chrome
+- [x] Material 3: tonal surfaces, the platform's own widgets, no shadows
+- [x] Paper, Night and a true-black Night; the wallpaper's colours as an option
+- [x] Type scale on Inter, a variable font, one family
 - [x] Spacing and shape tokens
-- [x] Theme, modes, adaptive accent
 - [x] Core components: `DLText`, `DLLabel`, `DLButton`, `DLChip`, `DLIcon`, `DLIconButton`,
-      `DLTextField`, `DLTopBar`, `DLRule`, `DLEmptyState`
+      `DLTextField`, `DLTopBar`, `DLRule`, `DLDivider`, `DLEmptyState`, `DLPendingDot`
 - [x] Icon set: back, search, settings, calendar, tag, pin, weather, image, plus, trash, chevron,
       check, bold, italic, underline — 1.5dp stroke, hand-drawn vectors
-- [ ] A switch, a segmented control, a sheet
-- [ ] `docs/DESIGN_SYSTEM.md` stays in step with the code
+- [ ] A switch and a segmented control of our own, once they are needed
+- [x] `docs/DESIGN_SYSTEM.md` stays in step with the code
 
 **Gate:** contrast tests green for every pair that carries text; the components are reviewed in
 rendered previews, not only in code.
@@ -119,7 +119,7 @@ markers that are not closed.
 
 ## P7 — Settings, backup, migration
 
-- [ ] Theme mode, adaptive accent, text scale
+- [x] Theme mode, the wallpaper option, pure black
 - [ ] JSON export and import
 - [ ] Statistics
 - [ ] Legacy import from the React Native app's export
