@@ -122,8 +122,14 @@ class EntryRepository(
         )
 
         entryDao.upsert(entity)
-        syncTags(resolvedUid, TagExtractor.extract(content))
-        indexFor(entity, tags = TagExtractor.extract(content))
+
+        // The row id is assigned by the database when the entry is new, so the entry is read back
+        // before it is indexed. Indexing the id the caller had would point every new entry at the
+        // same row.
+        val saved = entryDao.findByUid(resolvedUid) ?: entity
+        val tags = TagExtractor.extract(content)
+        syncTags(resolvedUid, tags)
+        indexFor(saved, tags)
         return resolvedUid
     }
 

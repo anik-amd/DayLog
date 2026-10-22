@@ -41,7 +41,8 @@ class FakeEntryDao : EntryDao {
     override suspend fun upsert(entry: EntryEntity) {
         val existing = entries.value.indexOfFirst { it.uid == entry.uid }
         entries.value = if (existing >= 0) {
-            entries.value.toMutableList().apply { this[existing] = entry }
+            // The row keeps the id it was given, the way a real table does.
+            entries.value.toMutableList().apply { this[existing] = entry.copy(id = this[existing].id) }
         } else {
             entries.value + entry.copy(id = (entries.value.maxOfOrNull { it.id } ?: 0L) + 1)
         }
@@ -182,7 +183,7 @@ class FakeEntryFtsDao : EntryFtsDao {
     override suspend fun search(query: String): List<String> {
         val words = query
             .split(" AND ")
-            .map { it.trim().trim('"').removeSuffix("*") }
+            .map { it.trim().removeSuffix("*").trim('"') }
             .filter { it.isNotEmpty() }
 
         if (words.isEmpty()) return emptyList()
