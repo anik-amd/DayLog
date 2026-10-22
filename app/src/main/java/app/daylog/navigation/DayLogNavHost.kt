@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import app.daylog.di.AppContainer
+import app.daylog.feature.calendar.CalendarRoute
 import app.daylog.feature.editor.EditorRoute
 import app.daylog.feature.editor.FullScreenEditor
 import app.daylog.feature.entry.EntryDetailRoute
@@ -27,6 +28,7 @@ object Routes {
     const val Editor = "editor"
     const val Settings = "settings"
     const val Search = "search"
+    const val Calendar = "calendar"
     const val Entry = "entry/{uid}"
 
     /** The route of one entry. */
@@ -68,6 +70,9 @@ fun DayLogNavHost(
                 onOpenSearch = {
                     navController.navigate(Routes.Search)
                 },
+                onOpenCalendar = {
+                    navController.navigate(Routes.Calendar)
+                },
             )
         }
 
@@ -75,6 +80,13 @@ fun DayLogNavHost(
             SearchRoute(
                 container = container,
                 onEntryClick = { uid -> navController.navigate(Routes.entry(uid)) },
+                onBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(Routes.Calendar) {
+            CalendarRoute(
+                container = container,
                 onBack = { navController.popBackStack() },
             )
         }

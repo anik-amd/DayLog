@@ -16,6 +16,8 @@ import app.daylog.core.designsystem.component.DLTopBar
 import app.daylog.core.designsystem.icon.DayLogIcons
 import app.daylog.core.designsystem.theme.DayLogTheme
 import app.daylog.di.AppContainer
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 
 /**
  * The timeline, wired up.
@@ -30,6 +32,7 @@ fun TimelineRoute(
     onOpenSettings: () -> Unit,
     onOpenEntry: (String) -> Unit,
     onOpenSearch: () -> Unit,
+    onOpenCalendar: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val viewModel: TimelineViewModel = viewModel(
@@ -49,6 +52,12 @@ fun TimelineRoute(
             title = "DayLog",
             subtitle = entryCountLabel(state.groups.sumOf { it.entries.size }),
             trailingContent = {
+                DLIconButton(
+                    imageVector = DayLogIcons.Calendar,
+                    contentDescription = "Calendar",
+                    onClick = onOpenCalendar,
+                    tint = DayLogTheme.colors.inkMuted,
+                )
                 DLIconButton(
                     imageVector = DayLogIcons.Search,
                     contentDescription = "Search",
@@ -83,6 +92,7 @@ fun TimelineRoute(
             value = state.draft,
             onValueChange = viewModel::onDraftChanged,
             onExpand = onOpenEditor,
+            isSaving = state.isSaving,
         )
     }
 }
