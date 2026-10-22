@@ -20,6 +20,7 @@ import app.daylog.core.model.Entry
 import app.daylog.feature.timeline.QuickEntryBar
 import app.daylog.feature.timeline.TagFilterStrip
 import app.daylog.feature.timeline.TimelineScreen
+import app.daylog.feature.calendar.CalendarScreen
 import app.daylog.feature.entry.EntryDetailScreen
 import app.daylog.feature.search.SearchScreen
 import java.time.LocalDate
@@ -221,6 +222,25 @@ fun SearchPreview() {
             ),
             onEntryClick = {},
             onBack = {},
+        )
+    }
+}
+
+@PreviewTest
+@Preview(name = "Calendar", widthDp = 400, heightDp = 780, showBackground = true)
+@Composable
+fun CalendarPreview() {
+    DayLogTheme {
+        CalendarScreen(
+            year = 2026,
+            month = 3,
+            entryDays = setOf(1, 4, 9, 15, 22, 28),
+            selectedDay = 9,
+            onDaySelected = {},
+            onPreviousMonth = {},
+            onNextMonth = {},
+            onBack = {},
+            selectedEntries = listOf(sampleEntries[0]),
         )
     }
 }
