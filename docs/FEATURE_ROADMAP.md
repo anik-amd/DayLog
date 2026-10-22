@@ -47,16 +47,17 @@ rendered previews, not only in code.
 
 *The storage everything else stands on.*
 
-- [x] Room: entities, DAOs, committed schemas, tombstones
+- [x] Room: entities, DAOs, FTS4 index, migrations, committed schemas
 - [x] Repository layer, `Flow`-based reads
-- [x] DataStore settings: theme mode, accent source
+- [x] DataStore settings: theme mode, the wallpaper option, pure black
 - [x] JSON backup codec, schema `version: 2.0`, with validation
-- [x] `WeatherService` behind an interface
-- [ ] The Open-Meteo client itself: geocoding and forecast
-- [ ] FTS4 index for search
-- [ ] Room DAO tests and a migration test
+- [x] The Open-Meteo client: geocoding and forecast, no key
+- [x] The database is upgraded in place, not replaced: version 1 → 2 builds the index from the
+      entries that are already there
+- [x] DAO tests against the real database and the real index, and a migration test that starts
+      from the version 1 shape
 
-**Gate:** DAO tests, migration test, JSON round-trip, weather mapping — all green.
+**Gate:** DAO tests, migration test, JSON round-trip, weather mapping — all green. 108 tests.
 
 ---
 
@@ -67,13 +68,16 @@ rendered previews, not only in code.
 - [x] Day-grouped timeline, margin rule with dates in the gutter
 - [x] The margin grows with the text, so a day name is never cut off
 - [x] Quick entry composer: auto-grow to six lines, autosave 700ms after the last keystroke
+- [x] The composer never takes the writing away: every save updates the same entry, and the text
+      is never cleared while the writer is in it
+- [x] The bar rides above the keyboard
 - [x] Full editor via chevron
 - [x] Tag extraction on save
 - [x] Unsaved/pending indicator
 - [ ] Entry read view
 - [ ] Tapping an entry opens it
 - [ ] Tag filter strip with AND logic
-- [ ] ViewModel state and autosave debounce tests
+- [x] ViewModel state and autosave debounce tests
 
 **Gate:** ViewModel state, autosave debounce, timeline grouping, and a Compose test that types and
 saves.
