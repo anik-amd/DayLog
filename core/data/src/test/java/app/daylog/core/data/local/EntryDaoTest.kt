@@ -151,7 +151,7 @@ class EntryDaoTest {
         insert("older", uid = "old", createdAt = 1)
         insert("newer", uid = "new", createdAt = 2)
 
-        val found = entries.findByUids(listOf("old", "new"))
+        val found = entries.findByUids(listOf("old", "new")).first()
 
         assertEquals(listOf("new", "old"), found.map { it.uid })
     }
@@ -161,7 +161,7 @@ class EntryDaoTest {
         insert("a thought")
         entries.softDelete("entry-1", deletedAt = 1, updatedAt = 1)
 
-        assertEquals(0, entries.findByUids(listOf("entry-1")).size)
+        assertEquals(0, entries.findByUids(listOf("entry-1")).first().size)
     }
 
     @Test
