@@ -8,19 +8,21 @@
 - New type: a single modern sans for the whole app, sized for long reading
 - The timeline is a ledger's margin: the dates sit against a rule down the left of the page
 - Your entries can be written in markdown — bold, italic, headings and lists — and are shown as written
-- Photos, weather, tags and search all keep working, now stored locally in the app's own database
 
 ### Added
 - Paper (light) and Night (dark) themes, or follow your system setting
 - An optional theme that takes its colours from your wallpaper
-- Backup and restore as a JSON file
-- Import your entries from the previous version of DayLog
+- A settings screen for the theme choices
 
 ### Fixed
 - The quick entry no longer takes the writing away from you: a pause no longer splits a thought in two, and the text stays where you left it
 - The quick entry now sits above the keyboard instead of behind it
 - Entries no longer group into the wrong day when the device changes time zone
 - Scrolling the timeline no longer stutters on long entries
+
+### Not in this release
+Photos, search, a calendar, a place and weather, and importing your entries from the previous
+version of DayLog are not in 0.2.0. They are the next release.
 
 ## [0.1.2] - 2026-03-30
 
