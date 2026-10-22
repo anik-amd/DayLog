@@ -10,15 +10,20 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import app.daylog.core.common.CalendarMath
 import app.daylog.core.data.repository.EntryRepository
 import app.daylog.core.model.DayGroup
 import app.daylog.core.model.DayGrouper
+import app.daylog.core.model.Entry
 import app.daylog.di.AppContainer
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import java.time.LocalDate
 import java.util.Locale
@@ -61,8 +66,7 @@ class CalendarViewModel(
 
     val state: StateFlow<CalendarUiState> =
         repository.observeEntries()
-            .let { entries ->
-                kotlinx.coroutines.flow.map(entries) { list ->
+            .map { list ->
                     val entryDays = list
                         .map { java.time.Instant.ofEpochMilli(it.createdAt).atZone(java.time.ZoneId.systemDefault()).toLocalDate() }
                         .filter { it.year == year && it.monthValue == month }
@@ -86,7 +90,6 @@ class CalendarViewModel(
                         selectedEntries = selectedEntries,
                     )
                 }
-            }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
@@ -112,9 +115,9 @@ data class CalendarUiState(
     val selectedEntries: List<Entry> = emptyList(),
 )
 
-fun calendarViewModelFactory(repository: EntryRepository): androidx.lifecycle.ViewModelProvider.Factory =
-    androidx.lifecycle.viewmodel.viewModelFactory {
-        androidx.lifecycle.viewmodel.initializer {
+fun calendarViewModelFactory(repository: EntryRepository): ViewModelProvider.Factory =
+    viewModelFactory {
+        initializer {
             CalendarViewModel(repository = repository)
         }
     }
