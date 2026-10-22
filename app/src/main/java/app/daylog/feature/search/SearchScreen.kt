@@ -22,11 +22,13 @@ import androidx.compose.ui.unit.dp
 import app.daylog.core.designsystem.component.DLEmptyState
 import app.daylog.core.designsystem.component.DLTextField
 import app.daylog.core.designsystem.component.DLTopBar
+import app.daylog.core.designsystem.component.pressable
 import app.daylog.core.designsystem.icon.DayLogIcons
 import app.daylog.core.designsystem.theme.DayLogTheme
 import app.daylog.core.model.DayGroup
 import app.daylog.feature.timeline.DayHeading
 import app.daylog.feature.timeline.EntryRow
+import app.daylog.feature.timeline.marginRule
 
 /**
  * Finding an entry.
@@ -103,12 +105,14 @@ fun SearchScreen(
                 ) {
                     groups.forEach { group ->
                         item(key = "day-${group.key}") {
-                            DayHeading(group)
+                            DayHeading(group, Modifier.marginRule())
                         }
                         items(group.entries, key = { it.uid }) { entry ->
                             EntryRow(
                                 entry = entry,
-                                onClick = { onEntryClick(entry.uid) },
+                                modifier = Modifier
+                                    .marginRule()
+                                    .pressable { onEntryClick(entry.uid) },
                             )
                         }
                     }

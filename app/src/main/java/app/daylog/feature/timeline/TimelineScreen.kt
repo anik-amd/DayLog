@@ -75,16 +75,13 @@ fun TimelineScreen(
         contentPadding = contentPadding,
     ) {
         items(items, key = { itemKey(it) }) { item ->
-            // The rule is drawn a piece at a time, by each row, so it begins with the first day
-            // and ends with the last entry. A rule that ran on past the writing into the empty
-            // space below would be a line to nothing.
-            val rule = Modifier.marginRule(gutter, colors.rule)
-
             when (item) {
-                is TimelineItem.Heading -> DayHeading(item.group, rule)
+                is TimelineItem.Heading -> DayHeading(item.group, Modifier.marginRule())
                 is TimelineItem.Row -> EntryRow(
                     entry = item.entry,
-                    modifier = rule.pressable { onEntryClick(item.entry.uid) },
+                    modifier = Modifier
+                        .marginRule()
+                        .pressable { onEntryClick(item.entry.uid) },
                 )
             }
         }
@@ -93,20 +90,26 @@ fun TimelineScreen(
 
 /**
  * Draws the margin rule down a row.
+ *
+ * The rule is drawn a piece at a time, by each row, so it begins with the first day and ends
+ * with the last entry. A rule that ran on past the writing into the empty space below would be a
+ * line to nothing.
  */
-private fun Modifier.marginRule(gutter: Dp, color: Color): Modifier = drawBehind {
-    val x = gutter.toPx()
-    drawLine(
-        color = color,
-        start = Offset(x, 0f),
-        end = Offset(x, size.height),
-        strokeWidth = 1f,
-    )
+@Composable
+fun Modifier.marginRule(): Modifier {
+    val gutter = gutterWidth()
+    val color = DayLogTheme.colors.rule
+    return this.drawBehind {
+        val x = gutter.toPx()
+        drawLine(
+            color = color,
+            start = Offset(x, 0f),
+            end = Offset(x, size.height),
+            strokeWidth = 1f,
+        )
+    }
 }
 
-/**
- * The day's name, in the margin.
- */
 /**
  * The day's name, in the margin.
  *
