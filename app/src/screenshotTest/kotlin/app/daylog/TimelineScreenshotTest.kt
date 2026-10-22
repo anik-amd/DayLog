@@ -19,6 +19,7 @@ import app.daylog.core.model.DayLogThemeMode
 import app.daylog.core.model.Entry
 import app.daylog.feature.timeline.QuickEntryBar
 import app.daylog.feature.timeline.TimelineScreen
+import app.daylog.feature.entry.EntryDetailScreen
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -172,4 +173,19 @@ fun TimelineLargeTextPreview() {
 @Composable
 fun TimelineTabletPreview() {
     DayLogPreview()
+}
+
+@PreviewTest
+@Preview(name = "One entry", widthDp = 400, heightDp = 780, showBackground = true)
+@Composable
+fun EntryDetailPreview() {
+    DayLogTheme {
+        EntryDetailScreen(
+            entry = sampleEntries[0],
+            tags = listOf(app.daylog.core.model.Tag("reading")),
+            onBack = {},
+            onEdit = {},
+            onDelete = {},
+        )
+    }
 }

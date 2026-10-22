@@ -176,17 +176,34 @@ dev ──(cut)──▶ pre-release ──(approve)──▶ main
 
 # 8. Releasing
 
-1. Update `CHANGELOG.md` with the new version and today's date.
-2. Bump `versionName` and `versionCode` in `gradle/libs.versions.toml`.
-   `versionCode` must always increase, or the APK cannot install over the previous one.
-3. Push the change to `dev`.
-4. Cut `pre-release` from `dev` and push it. The workflow builds a signed APK and opens a draft
-   release.
-5. The user installs the candidate on a device and confirms it works.
-6. Merge `pre-release` into `main`, tag `v<version>`, push the tag. The release workflow publishes
-   the APK and the GitHub release.
+The rewrite is released in **stages, one patch version at a time**: `0.3.0`, `0.3.1`, `0.3.2` and
+so on, until the roadmap is done. Each stage is a release.
 
-If the candidate is wrong, fix it on `dev` and cut a new one. `main` is never the place to debug.
+1. Finish the stage, and make sure the build and the tests are green.
+2. Bump the version:
+
+   ```bash
+   bash .devcontainer/bump-version.sh
+   ```
+
+   It raises `versionName` by a patch and `versionCode` by one, and says what to do next. The
+   version code has to keep rising or the APK cannot install over the last one.
+3. Write the `CHANGELOG.md` entry for the new version, in the words of the thing the reader can
+   see. Not a list of commits.
+4. Commit, push, and tag:
+
+   ```bash
+   git push origin main
+   git tag -a v0.3.1 -m "DayLog 0.3.1"
+   git push origin v0.3.1
+   ```
+
+   The tag starts the release workflow, which builds the signed APK and publishes it with the
+   changelog.
+5. A candidate can also be cut for testing before it ships: push the `pre-release` branch and the
+   workflow opens a draft release with the APK on it.
+
+If a stage is wrong, fix it and bump again. The version line only ever goes up.
 
 ---
 
