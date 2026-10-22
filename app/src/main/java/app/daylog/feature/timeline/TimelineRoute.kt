@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -40,8 +38,7 @@ fun TimelineRoute(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(DayLogTheme.colors.background)
-            .statusBarsPadding(),
+            .background(DayLogTheme.colors.background),
     ) {
         DLTopBar(
             title = "DayLog",
@@ -59,8 +56,6 @@ fun TimelineRoute(
             value = state.draft,
             onValueChange = viewModel::onDraftChanged,
             onExpand = onOpenEditor,
-            isSaving = state.isSaving,
-            modifier = Modifier.navigationBarsPadding(),
         )
     }
 }

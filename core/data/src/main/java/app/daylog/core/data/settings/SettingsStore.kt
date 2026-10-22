@@ -3,6 +3,7 @@ package app.daylog.core.data.settings
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -19,6 +20,8 @@ private val Context.settingsStore: DataStore<Preferences> by preferencesDataStor
 data class DayLogSettings(
     val themeMode: DayLogThemeMode = DayLogThemeMode.System,
     val accentSource: DayLogAccentSource = DayLogAccentSource.Teal,
+    /** Whether the dark scheme is on true black. */
+    val pureBlack: Boolean = false,
 )
 
 /**
@@ -29,6 +32,7 @@ class SettingsStore(private val context: Context) {
     private object Keys {
         val themeMode = stringPreferencesKey("theme_mode")
         val accentSource = stringPreferencesKey("accent_source")
+        val pureBlack = booleanPreferencesKey("pure_black")
     }
 
     val settings: Flow<DayLogSettings> = context.settingsStore.data.map { prefs ->
@@ -39,6 +43,7 @@ class SettingsStore(private val context: Context) {
             accentSource = prefs[Keys.accentSource]
                 ?.let { runCatching { DayLogAccentSource.valueOf(it) }.getOrNull() }
                 ?: DayLogAccentSource.Teal,
+            pureBlack = prefs[Keys.pureBlack] ?: false,
         )
     }
 
@@ -48,5 +53,9 @@ class SettingsStore(private val context: Context) {
 
     suspend fun setAccentSource(source: DayLogAccentSource) {
         context.settingsStore.edit { it[Keys.accentSource] = source.name }
+    }
+
+    suspend fun setPureBlack(enabled: Boolean) {
+        context.settingsStore.edit { it[Keys.pureBlack] = enabled }
     }
 }

@@ -3,8 +3,9 @@ package app.daylog.core.designsystem.markdown
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-import app.daylog.core.designsystem.color.NightColors
-import app.daylog.core.designsystem.color.PaperColors
+import app.daylog.core.designsystem.color.DayLogColors
+import app.daylog.core.designsystem.color.NightScheme
+import app.daylog.core.designsystem.color.PaperScheme
 import app.daylog.core.designsystem.theme.DayLogFonts
 import app.daylog.core.designsystem.theme.DayLogTypography
 import org.junit.Assert.assertEquals
@@ -13,11 +14,8 @@ import org.junit.Test
 
 class MarkdownParserTest {
 
-    private val typography = DayLogTypography.standard(
-        bodyFamily = DayLogFonts.Spectral,
-        chromeFamily = DayLogFonts.InstrumentSans,
-    )
-    private val colors = PaperColors
+    private val typography = DayLogTypography.standard(DayLogFonts.Inter)
+    private val colors = DayLogColors.from(PaperScheme)
 
     private fun parse(text: String) = MarkdownParser.parse(text, typography, colors)
 
@@ -127,8 +125,9 @@ class MarkdownParserTest {
 
     @Test
     fun `the night palette is used when it is asked for`() {
-        val result = MarkdownParser.parse("a `word`", typography, NightColors)
+        val night = DayLogColors.from(NightScheme)
+        val result = MarkdownParser.parse("a `word`", typography, night)
 
-        assertTrue(result.spanStyles.any { it.item.background == NightColors.surfaceRaised })
+        assertTrue(result.spanStyles.any { it.item.background == night.surfaceRaised })
     }
 }

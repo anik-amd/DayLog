@@ -1,12 +1,19 @@
 package app.daylog.core.designsystem.component
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,10 +24,11 @@ import app.daylog.core.designsystem.theme.DayLogTheme
 /**
  * The bar at the top of a screen.
  *
- * A quiet bar: the title in the chrome face, an action on the right, and a hairline under it.
- * There is no large title and no elevation — the title belongs to the screen it heads, so it is
- * the same size on every screen.
+ * The Material top bar, because that is the bar Android expects: it carries the scroll behaviour,
+ * the insets and the title treatment the platform defines. The title is the app's name, because a
+ * screen whose product cannot be named reads as a template.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DLTopBar(
     title: String,
@@ -32,58 +40,69 @@ fun DLTopBar(
     onTrailingClick: (() -> Unit)? = null,
     trailingContent: (@Composable () -> Unit)? = null,
 ) {
-    val colors = DayLogTheme.colors
-
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(colors.background),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 4.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            if (leadingIcon != null && onLeadingClick != null) {
-                DLIconButton(
-                    imageVector = leadingIcon,
-                    contentDescription = "Back",
-                    onClick = onLeadingClick,
-                )
-            }
-
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = if (leadingIcon != null) 4.dp else 12.dp),
-                verticalArrangement = Arrangement.spacedBy(1.dp),
-            ) {
-                DLText(
+    TopAppBar(
+        modifier = modifier,
+        title = {
+            Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
+                Text(
                     text = title,
                     style = DayLogTheme.typography.chromeTitle,
-                    color = colors.ink,
                     maxLines = 1,
                 )
                 if (subtitle != null) {
-                    DLMeta(text = subtitle, maxLines = 1)
+                    Text(
+                        text = subtitle,
+                        style = DayLogTheme.typography.meta,
+                        color = DayLogTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                    )
                 }
             }
-
+        },
+        navigationIcon = {
+            if (leadingIcon != null && onLeadingClick != null) {
+                IconButton(onClick = onLeadingClick) {
+                    Icon(
+                        imageVector = leadingIcon,
+                        contentDescription = "Back",
+                        tint = DayLogTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        },
+        actions = {
             if (trailingContent != null) {
                 trailingContent()
             } else if (trailingIcon != null && onTrailingClick != null) {
-                DLIconButton(
-                    imageVector = trailingIcon,
-                    contentDescription = title,
-                    onClick = onTrailingClick,
-                )
+                IconButton(onClick = onTrailingClick) {
+                    Icon(
+                        imageVector = trailingIcon,
+                        contentDescription = title,
+                        tint = DayLogTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
-        }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = DayLogTheme.colorScheme.surface,
+            titleContentColor = DayLogTheme.colorScheme.onSurface,
+        ),
+    )
+}
 
-        DLRule()
-    }
+/**
+ * A hairline.
+ */
+@Composable
+fun DLDivider(
+    modifier: Modifier = Modifier,
+    color: androidx.compose.ui.graphics.Color = DayLogTheme.colors.rule,
+) {
+    HorizontalDivider(
+        modifier = modifier,
+        thickness = 1.dp,
+        color = color,
+    )
 }
 
 /**
@@ -98,8 +117,6 @@ fun DLEmptyState(
     body: String,
     modifier: Modifier = Modifier,
 ) {
-    val colors = DayLogTheme.colors
-
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -110,14 +127,15 @@ fun DLEmptyState(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            DLText(
+            Text(
                 text = title,
                 style = DayLogTheme.typography.chromeTitle,
-                color = colors.inkMuted,
+                color = DayLogTheme.colorScheme.onSurfaceVariant,
             )
-            DLMeta(
+            Text(
                 text = body,
-                color = colors.inkFaint,
+                style = DayLogTheme.typography.meta,
+                color = DayLogTheme.colorScheme.outline,
             )
         }
     }

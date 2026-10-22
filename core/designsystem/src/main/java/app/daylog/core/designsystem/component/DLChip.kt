@@ -1,28 +1,31 @@
 package app.daylog.core.designsystem.component
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import app.daylog.core.designsystem.icon.DayLogIcons
 import app.daylog.core.designsystem.theme.DayLogShapes
 import app.daylog.core.designsystem.theme.DayLogTheme
 
 /**
  * A chip: a tag, a place, a weather reading, a filter.
  *
- * The chip is where the accent is allowed to appear, because a chip is data. A selected chip takes
- * the soft accent fill; an unselected one is a hairline on the ground. There is no accent on the
- * label of an unselected chip, so a screen full of chips stays quiet until one is chosen.
+ * These are the Material chips. A chip that carries data is an assist chip; a chip that can be
+ * turned on and off is a filter chip, and the selected one takes the accent. The accent is
+ * allowed here because a chip *is* data.
  */
 @Composable
 fun DLChip(
@@ -33,51 +36,53 @@ fun DLChip(
     leadingIcon: ImageVector? = null,
     onClick: (() -> Unit)? = null,
 ) {
-    val colors = DayLogTheme.colors
-    val press = rememberPressState(onClick = { onClick?.invoke() }, enabled = enabled)
+    val shape = DayLogShapes.chip
 
-    val background = when {
-        selected -> colors.accentSoft
-        press.isPressed -> colors.ink.copy(alpha = 0.06f)
-        else -> Color.Transparent
-    }
-    val foreground = when {
-        !enabled -> colors.inkFaint
-        selected -> colors.ink
-        else -> colors.inkMuted
-    }
-    val border = if (selected) Color.Transparent else colors.rule
-
-    Row(
-        modifier = modifier
-            .background(background, DayLogShapes.chip)
-            .border(1.dp, border, DayLogShapes.chip)
-            .then(
-                if (onClick != null) {
-                    Modifier.clickable(
-                        enabled = enabled,
-                        interactionSource = press.interactionSource,
-                        indication = null,
-                        onClick = { onClick() },
+    if (onClick != null) {
+        FilterChip(
+            selected = selected,
+            onClick = onClick,
+            modifier = modifier,
+            enabled = enabled,
+            shape = shape,
+            label = { DLLabel(text = text) },
+            leadingIcon = leadingIcon?.let {
+                {
+                    DLIcon(
+                        imageVector = it,
+                        contentDescription = null,
+                        tint = DayLogTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(16.dp),
                     )
-                } else {
-                    Modifier
-                },
-            )
-            .padding(horizontal = 10.dp, vertical = 5.dp),
-        horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (leadingIcon != null) {
-            DLIcon(
-                imageVector = leadingIcon,
-                contentDescription = null,
-                tint = if (selected) colors.accent else foreground,
-                modifier = Modifier.size(13.dp),
-            )
-        }
-        DLLabel(text = text, color = foreground)
+                }
+            },
+        )
+        return
     }
+
+    AssistChip(
+        onClick = {},
+        modifier = modifier,
+        enabled = enabled,
+        shape = shape,
+        label = { DLLabel(text = text) },
+        leadingIcon = leadingIcon?.let {
+            {
+                DLIcon(
+                    imageVector = it,
+                    contentDescription = null,
+                    tint = DayLogTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(16.dp),
+                )
+            }
+        },
+        colors = AssistChipDefaults.assistChipColors(
+            containerColor = DayLogTheme.colorScheme.surfaceContainerHigh,
+            labelColor = DayLogTheme.colorScheme.onSurfaceVariant,
+            leadingIconContentColor = DayLogTheme.colorScheme.onSurfaceVariant,
+        ),
+        border = null,
+    )
 }
 
 /**
@@ -95,4 +100,21 @@ fun DLPendingDot(
             .size(6.dp)
             .background(color, DayLogShapes.pill),
     )
+}
+
+/**
+ * A row of chips.
+ */
+@Composable
+fun DLChipRow(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        content()
+    }
 }

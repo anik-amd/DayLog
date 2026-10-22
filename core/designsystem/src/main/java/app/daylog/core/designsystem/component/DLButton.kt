@@ -2,8 +2,8 @@ package app.daylog.core.designsystem.component
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,7 +15,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,15 +34,10 @@ import app.daylog.core.designsystem.theme.DayLogTheme
  * How prominent a button is.
  */
 enum class DLButtonStyle {
-    /**
-     * Filled with ink, in the paper colour's inverse.
-     *
-     * The primary action is near-black rather than the accent: the accent marks data in this app,
-     * and a coloured button would spend it on chrome. One of these per screen.
-     */
+    /** Filled. The one primary action on a screen. */
     Filled,
 
-    /** An outlined button: a hairline and the ink label. */
+    /** An outlined button: a hairline and the label. */
     Outlined,
 
     /** A text button with no container. */
@@ -46,8 +47,9 @@ enum class DLButtonStyle {
 /**
  * A button.
  *
- * Flat by design. There is no shadow, no gradient and no scale-on-press: the fill changes and
- * that is all.
+ * These are the Material buttons, because the Material button *is* the Android button: it carries
+ * the press animation, the shape and the tonal behaviour the platform expects. The app's own
+ * shape scale decides how round they are.
  */
 @Composable
 fun DLButton(
@@ -57,55 +59,52 @@ fun DLButton(
     style: DLButtonStyle = DLButtonStyle.Filled,
     enabled: Boolean = true,
     leadingIcon: ImageVector? = null,
-    contentColor: Color? = null,
 ) {
-    val colors = DayLogTheme.colors
-    val press = rememberPressState(onClick = onClick, enabled = enabled)
+    val shape = DayLogShapes.chip
 
-    val background = when {
-        !enabled -> Color.Transparent
-        style == DLButtonStyle.Filled ->
-            if (press.isPressed) colors.ink.copy(alpha = 0.82f) else colors.ink
-        press.isPressed -> colors.ink.copy(alpha = 0.06f)
-        else -> Color.Transparent
-    }
-    val foreground = when {
-        !enabled -> colors.inkFaint
-        style == DLButtonStyle.Filled -> colors.background
-        else -> colors.ink
-    }
-
-    Row(
-        modifier = modifier
-            .defaultMinSize(minHeight = 40.dp)
-            .background(background, DayLogShapes.chip)
-            .then(
-                if (style == DLButtonStyle.Outlined) {
-                    Modifier.border(BorderStroke(1.dp, colors.rule), DayLogShapes.chip)
-                } else {
-                    Modifier
-                },
-            )
-            .clickable(
-                enabled = enabled,
-                interactionSource = press.interactionSource,
-                indication = null,
-                onClick = onClick,
-            )
-            .padding(horizontal = 16.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (leadingIcon != null) {
-            DLIcon(
-                imageVector = leadingIcon,
-                contentDescription = null,
-                tint = contentColor ?: foreground,
-                modifier = Modifier.size(16.dp),
-            )
+    when (style) {
+        DLButtonStyle.Filled -> Button(
+            onClick = onClick,
+            modifier = modifier,
+            enabled = enabled,
+            shape = shape,
+            contentPadding = ButtonDefaults.ContentPadding,
+        ) {
+            ButtonContent(text, leadingIcon)
         }
-        DLLabel(text = text, color = contentColor ?: foreground)
+
+        DLButtonStyle.Outlined -> OutlinedButton(
+            onClick = onClick,
+            modifier = modifier,
+            enabled = enabled,
+            shape = shape,
+            border = BorderStroke(1.dp, DayLogTheme.colorScheme.outline),
+        ) {
+            ButtonContent(text, leadingIcon)
+        }
+
+        DLButtonStyle.Text -> TextButton(
+            onClick = onClick,
+            modifier = modifier,
+            enabled = enabled,
+            shape = shape,
+        ) {
+            ButtonContent(text, leadingIcon)
+        }
     }
+}
+
+@Composable
+private fun ButtonContent(text: String, leadingIcon: ImageVector?) {
+    if (leadingIcon != null) {
+        DLIcon(
+            imageVector = leadingIcon,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+        )
+        Spacer(Modifier.width(8.dp))
+    }
+    DLLabel(text = text)
 }
 
 /**
@@ -117,30 +116,18 @@ fun DLIconButton(
     contentDescription: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    tint: Color = DayLogTheme.colors.ink,
+    tint: Color = DayLogTheme.colorScheme.onSurfaceVariant,
     enabled: Boolean = true,
 ) {
-    val press = rememberPressState(onClick = onClick, enabled = enabled)
-
-    Box(
-        modifier = modifier
-            .size(40.dp)
-            .background(
-                if (press.isPressed) DayLogTheme.colors.ink.copy(alpha = 0.06f) else Color.Transparent,
-                DayLogShapes.pill,
-            )
-            .clickable(
-                enabled = enabled,
-                interactionSource = press.interactionSource,
-                indication = null,
-                onClick = onClick,
-            ),
-        contentAlignment = Alignment.Center,
+    IconButton(
+        onClick = onClick,
+        modifier = modifier,
+        enabled = enabled,
     ) {
         DLIcon(
             imageVector = imageVector,
             contentDescription = contentDescription,
-            tint = if (enabled) tint else DayLogTheme.colors.inkFaint,
+            tint = if (enabled) tint else DayLogTheme.colorScheme.outline,
             modifier = Modifier.size(20.dp),
         )
     }
@@ -148,9 +135,6 @@ fun DLIconButton(
 
 /**
  * A horizontal rule.
- *
- * The only separator the app uses. Cards are not lifted off the page with a shadow; they are
- * separated by a line or by one step in tone.
  */
 @Composable
 fun DLRule(
@@ -190,3 +174,25 @@ object DLPadding {
     val chip = PaddingValues(horizontal = 10.dp, vertical = 5.dp)
     val field = PaddingValues(horizontal = 12.dp, vertical = 10.dp)
 }
+
+/**
+ * A tappable row that shows no ripple.
+ *
+ * Used where the surface itself is the affordance — a list row that opens something — so the
+ * whole row can be pressed without a ripple being drawn over the text.
+ */
+@Composable
+fun Modifier.pressable(
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+): Modifier = clickable(
+    enabled = enabled,
+    interactionSource = remember { MutableInteractionSource() },
+    indication = null,
+    onClick = onClick,
+)
+
+/**
+ * Arranged with the app's own spacing.
+ */
+internal val ButtonRowSpacing = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)

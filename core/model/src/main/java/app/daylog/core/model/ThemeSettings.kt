@@ -19,16 +19,17 @@ enum class DayLogThemeMode {
 }
 
 /**
- * Where the accent colour comes from.
+ * Where the colours come from.
  *
- * The accent marks data — today's date, the selected chip, a pending change — and never chrome.
- * Adaptive takes it from the wallpaper on Android 12+ and only shifts the accent ramp; the paper,
- * the ink and the rules stay put.
+ * The app has its own tonal palette, seeded with a deep teal. On Android 12 and later the
+ * wallpaper's colours can be used instead, which is what most of Android looks like now.
+ *
+ * The app's own palette is the default: a diary is a reading app, and the reading is the point.
  */
 enum class DayLogAccentSource {
-    /** The fixed Ink & Margin teal. */
+    /** The app's own tonal palette. */
     Teal,
 
-    /** The wallpaper's colour, on Android 12+. */
-    Adaptive,
+    /** The wallpaper's colours, on Android 12 and later. */
+    Wallpaper,
 }

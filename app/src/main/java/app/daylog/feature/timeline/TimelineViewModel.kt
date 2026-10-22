@@ -45,6 +45,15 @@ class TimelineViewModel(
     private val draft = MutableStateFlow("")
     private val saving = MutableStateFlow(false)
 
+    /**
+     * The entry the draft belongs to.
+     *
+     * Every save updates this same entry, so a pause in the middle of a thought does not split it
+     * into two entries. It is cleared when the writer empties the field, which is how they ask
+     * for a fresh one.
+     */
+    private var draftUid: String? = null
+
     private var saveJob: Job? = null
 
     val state: StateFlow<TimelineUiState> =
@@ -71,12 +80,21 @@ class TimelineViewModel(
      *
      * The save is put off until they stop, and every keystroke pushes it back. The work is
      * cancelled and restarted rather than queued, so only the final text is ever written.
+     *
+     * The text is never taken out of the field. A writer who pauses to think should find their
+     * sentence still there when they come back.
      */
     fun onDraftChanged(text: String) {
         draft.value = text
 
         saveJob?.cancel()
-        if (text.isBlank()) return
+
+        if (text.isBlank()) {
+            // An empty field is the writer asking for a fresh entry. The one they wrote stays in
+            // the timeline; only the link to it is dropped.
+            draftUid = null
+            return
+        }
 
         saveJob = viewModelScope.launch {
             delay(AUTOSAVE_DELAY_MS)
@@ -107,10 +125,7 @@ class TimelineViewModel(
     private suspend fun write(text: String) {
         saving.value = true
         try {
-            repository.save(text)
-            // The entry is in the timeline now, so the bar empties and the writer can start the
-            // next one without thinking about it.
-            draft.value = ""
+            draftUid = repository.save(text, uid = draftUid)
         } finally {
             saving.value = false
         }
