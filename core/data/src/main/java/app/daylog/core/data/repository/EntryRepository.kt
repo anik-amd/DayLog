@@ -60,7 +60,10 @@ class EntryRepository(
 
         if (expression.isEmpty()) return flowOf(emptyList())
 
-        return entryDao.search(expression).map { entities -> entities.map { it.toEntry() } }
+        return flow {
+            val uids = entryFtsDao.search(expression)
+            emit(entryDao.findByUids(uids).map { it.toEntry() })
+        }
     }
 
     /**

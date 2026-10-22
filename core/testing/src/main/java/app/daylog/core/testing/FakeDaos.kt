@@ -2,6 +2,8 @@ package app.daylog.core.testing
 
 import app.daylog.core.data.local.EntryDao
 import app.daylog.core.data.local.EntryEntity
+import app.daylog.core.data.local.EntryFtsDao
+import app.daylog.core.data.local.EntryFtsEntity
 import app.daylog.core.data.local.EntryTagEntity
 import app.daylog.core.data.local.MediaDao
 import app.daylog.core.data.local.MediaEntity
@@ -68,6 +70,11 @@ class FakeEntryDao : EntryDao {
     }
 
     override suspend fun insertLinks(links: List<EntryTagEntity>) = Unit
+
+    override suspend fun findByUids(uids: List<String>): List<EntryEntity> =
+        entries.value
+            .filter { it.uid in uids && it.deletedAt == null }
+            .sortedByDescending { it.createdAt }
 }
 
 /**
@@ -141,10 +148,60 @@ class FakeTagDao : TagDao {
 }
 
 /**
+ * The search index, answered from memory.
+ *
+ * The real one is an FTS4 table, which SQLite does for us. This one matches on the words of the
+ * content and the tags, so a test can ask the same question the app asks.
+ */
+class FakeEntryFtsDao : EntryFtsDao {
+
+    private val rows = MutableStateFlow<List<EntryFtsEntity>>(emptyList())
+
+    val indexed: List<EntryFtsEntity> get() = rows.value
+
+    override suspend fun upsert(entity: EntryFtsEntity) {
+        rows.value = rows.value.filterNot { it.rowid == entity.rowid } + entity
+    }
+
+    override suspend fun delete(rowid: Long) {
+        rows.value = rows.value.filterNot { it.rowid == rowid }
+    }
+
+    override suspend fun clear() {
+        rows.value = emptyList()
+    }
+
+    override suspend fun count(): Int = rows.value.size
+
+    /**
+     * The uids matching a search, the way the real index would.
+     *
+     * The query is an FTS4 match expression: words joined by AND, each quoted and each with a
+     * trailing star so it matches the start of a word.
+     */
+    override suspend fun search(query: String): List<String> {
+        val words = query
+            .split(" AND ")
+            .map { it.trim().trim('"').removeSuffix("*") }
+            .filter { it.isNotEmpty() }
+
+        if (words.isEmpty()) return emptyList()
+
+        return rows.value.filter { row ->
+            val tokens = "${row.content} ${row.tags}"
+                .lowercase()
+                .split(Regex("[^\\p{L}\\p{N}_]+"))
+                .filter { it.isNotEmpty() }
+
+            words.all { word -> tokens.any { it.startsWith(word.lowercase()) } }
+        }.map { it.uid }
+    }
+}
+
+/**
  * The media DAO, answered from memory.
  */
 class FakeMediaDao : MediaDao {
-
     private val media = MutableStateFlow<List<MediaEntity>>(emptyList())
 
     override fun observeForEntry(entryUid: String): Flow<List<MediaEntity>> =

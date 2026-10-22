@@ -29,6 +29,7 @@ class AppContainer(private val context: Context) {
             entryDao = database.entryDao(),
             tagDao = database.tagDao(),
             mediaDao = database.mediaDao(),
+            entryFtsDao = database.entryFtsDao(),
         )
     }
 

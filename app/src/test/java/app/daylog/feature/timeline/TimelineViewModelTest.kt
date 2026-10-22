@@ -2,6 +2,7 @@ package app.daylog.feature.timeline
 
 import app.daylog.core.data.repository.EntryRepository
 import app.daylog.core.testing.FakeEntryDao
+import app.daylog.core.testing.FakeEntryFtsDao
 import app.daylog.core.testing.FakeMediaDao
 import app.daylog.core.testing.FakeTagDao
 import app.daylog.core.testing.MainDispatcherRule
@@ -26,11 +27,13 @@ class TimelineViewModelTest {
     private val entryDao = FakeEntryDao()
     private val tagDao = FakeTagDao()
     private val mediaDao = FakeMediaDao()
+    private val entryFtsDao = FakeEntryFtsDao()
 
     private val repository = EntryRepository(
         entryDao = entryDao,
         tagDao = tagDao,
         mediaDao = mediaDao,
+        entryFtsDao = entryFtsDao,
         now = { 1_700_000_000_000 },
     )
 

@@ -25,4 +25,13 @@ interface EntryFtsDao {
 
     @Query("SELECT COUNT(*) FROM entries_fts")
     suspend fun count(): Int
+
+    /**
+     * The uids of the entries matching a search.
+     *
+     * The query is an FTS4 match expression. The index answers with uids rather than rows, so the
+     * entries themselves are read from the table that owns them.
+     */
+    @Query("SELECT uid FROM entries_fts WHERE entries_fts MATCH :query")
+    suspend fun search(query: String): List<String>
 }
