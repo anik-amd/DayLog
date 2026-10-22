@@ -60,6 +60,10 @@ fun DLButton(
     style: DLButtonStyle = DLButtonStyle.Filled,
     enabled: Boolean = true,
     leadingIcon: ImageVector? = null,
+    /**
+     * The colour of the label. Only the text style uses it, for a destructive action.
+     */
+    contentColor: Color? = null,
 ) {
     val shape = DayLogShapes.chip
 
@@ -89,7 +93,7 @@ fun DLButton(
             shape = shape,
             border = BorderStroke(1.dp, DayLogTheme.colorScheme.outline),
             colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = DayLogTheme.colors.ink,
+                contentColor = contentColor ?: DayLogTheme.colors.ink,
             ),
         ) {
             ButtonContent(text, leadingIcon)
@@ -101,7 +105,7 @@ fun DLButton(
             enabled = enabled,
             shape = shape,
             colors = ButtonDefaults.textButtonColors(
-                contentColor = DayLogTheme.colors.ink,
+                contentColor = contentColor ?: DayLogTheme.colors.ink,
             ),
         ) {
             ButtonContent(text, leadingIcon)
