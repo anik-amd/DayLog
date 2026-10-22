@@ -46,6 +46,7 @@ fun TimelineScreen(
     groups: List<DayGroup>,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
+    onEntryClick: (String) -> Unit = {},
 ) {
     val colors = DayLogTheme.colors
     val items = groups.toTimelineItems()
@@ -82,7 +83,7 @@ fun TimelineScreen(
                 is TimelineItem.Heading -> DayHeading(item.group, rule)
                 is TimelineItem.Row -> EntryRow(
                     entry = item.entry,
-                    modifier = rule,
+                    modifier = rule.pressable { onEntryClick(item.entry.uid) },
                 )
             }
         }

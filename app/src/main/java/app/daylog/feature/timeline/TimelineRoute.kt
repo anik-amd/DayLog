@@ -27,6 +27,7 @@ fun TimelineRoute(
     container: AppContainer,
     onOpenEditor: () -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenEntry: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val viewModel: TimelineViewModel = viewModel(
@@ -53,6 +54,7 @@ fun TimelineRoute(
             TimelineScreen(
                 groups = state.groups,
                 contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp),
+                onEntryClick = onOpenEntry,
             )
         }
 
