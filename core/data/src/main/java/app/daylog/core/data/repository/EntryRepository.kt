@@ -16,6 +16,7 @@ import app.daylog.core.model.MediaType
 import app.daylog.core.model.Tag
 import app.daylog.core.model.TagExtractor
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import java.util.UUID
