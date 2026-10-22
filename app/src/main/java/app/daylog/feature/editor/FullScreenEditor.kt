@@ -68,7 +68,8 @@ fun FullScreenEditor(
     modifier: Modifier = Modifier,
 ) {
     val colors = DayLogTheme.colors
-    var value by remember { mutableStateOf(TextFieldValue(state.text ?: "")) }    var preview by remember { mutableStateOf(false) }
+    var value by remember { mutableStateOf(TextFieldValue(state.text ?: "")) }
+    var preview by remember { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
     var confirmingDiscard by remember { mutableStateOf(false) }
     var pickingMoment by remember { mutableStateOf(false) }

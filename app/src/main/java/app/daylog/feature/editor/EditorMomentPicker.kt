@@ -16,7 +16,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import app.daylog.core.common.toLocalDateTimeimport app.daylog.core.designsystem.theme.DayLogShapes
+import app.daylog.core.common.toLocalDateTime
+import app.daylog.core.designsystem.theme.DayLogShapes
 import app.daylog.core.designsystem.theme.DayLogTheme
 import java.time.Instant
 import java.time.LocalDate
@@ -121,6 +122,9 @@ internal fun MomentPicker(
                 title = {
                     Text("Time", style = DayLogTheme.typography.chromeTitle)
                 },
+                text = {
+                    TimePicker(state = timeState)
+                },
                 confirmButton = {
                     TextButton(onClick = {
                         val day = current.localDate(zone)
@@ -140,9 +144,7 @@ internal fun MomentPicker(
                     }
                 },
                 shape = DayLogShapes.sheet,
-            ) {
-                TimePicker(state = timeState)
-            }
+            )
         }
     }
 }
