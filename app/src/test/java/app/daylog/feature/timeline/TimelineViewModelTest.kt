@@ -181,13 +181,10 @@ class TimelineViewModelTest {
     @Test
     fun `choosing a tag narrows the timeline to the entries that carry it`() =
         runTest(mainDispatcherRule.dispatcher) {
+            repository.save("a thought #work")
+            repository.save("another thought #idea")
             val viewModel = viewModel()
             watchState(viewModel)
-
-            viewModel.onDraftChanged("a thought #work")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
-            viewModel.onDraftChanged("another thought #idea")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
 
             viewModel.toggleTag("work")
             advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
@@ -200,13 +197,10 @@ class TimelineViewModelTest {
     @Test
     fun `two tags chosen show only the entries that carry both`() =
         runTest(mainDispatcherRule.dispatcher) {
+            repository.save("a thought #work #idea")
+            repository.save("another thought #work")
             val viewModel = viewModel()
             watchState(viewModel)
-
-            viewModel.onDraftChanged("a thought #work #idea")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
-            viewModel.onDraftChanged("another thought #work")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
 
             viewModel.toggleTag("work")
             viewModel.toggleTag("idea")
@@ -220,13 +214,10 @@ class TimelineViewModelTest {
     @Test
     fun `turning a tag off again brings the other entries back`() =
         runTest(mainDispatcherRule.dispatcher) {
+            repository.save("a thought #work")
+            repository.save("another thought #idea")
             val viewModel = viewModel()
             watchState(viewModel)
-
-            viewModel.onDraftChanged("a thought #work")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
-            viewModel.onDraftChanged("another thought #idea")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
 
             viewModel.toggleTag("work")
             advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
@@ -240,13 +231,10 @@ class TimelineViewModelTest {
     @Test
     fun `clearing the filters brings everything back`() =
         runTest(mainDispatcherRule.dispatcher) {
+            repository.save("a thought #work")
+            repository.save("another thought #idea")
             val viewModel = viewModel()
             watchState(viewModel)
-
-            viewModel.onDraftChanged("a thought #work")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
-            viewModel.onDraftChanged("another thought #idea")
-            advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
 
             viewModel.toggleTag("work")
             advance(TimelineViewModel.AUTOSAVE_DELAY_MS)
