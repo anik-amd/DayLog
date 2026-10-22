@@ -5,8 +5,10 @@ import androidx.room.Room
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -78,10 +80,12 @@ class MigrationTest {
 
         try {
             val tables = mutableSetOf<String>()
-            database.query("SELECT name FROM sqlite_master WHERE type = 'table'", emptyArray())
-                .use { cursor ->
-                    while (cursor.moveToNext()) tables += cursor.getString(0)
-                }
+            withContext(Dispatchers.IO) {
+                database.query("SELECT name FROM sqlite_master WHERE type = 'table'", emptyArray())
+                    .use { cursor ->
+                        while (cursor.moveToNext()) tables += cursor.getString(0)
+                    }
+            }
 
             assertTrue(tables.contains("entries"))
             assertTrue(tables.contains("entries_fts"))
@@ -118,6 +122,14 @@ class MigrationTest {
                 "`createdAt` INTEGER NOT NULL, PRIMARY KEY(`uid`), FOREIGN KEY(`entryUid`) " +
                 "REFERENCES `entries`(`uid`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         )
+
+        // The indices version 1 had. The upgrade does not touch them, so they have to be here for
+        // the upgraded database to be the shape the app expects.
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_entries_uid` ON `entries` (`uid`)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_entries_updatedAt` ON `entries` (`updatedAt`)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_entries_deletedAt` ON `entries` (`deletedAt`)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_entry_tags_tagName` ON `entry_tags` (`tagName`)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_media_entryUid` ON `media` (`entryUid`)")
 
         db.execSQL(
             "INSERT INTO `entries` (`uid`, `content`, `createdAt`, `updatedAt`) " +
