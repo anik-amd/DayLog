@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Fts4
 import androidx.room.FtsOptions
+import androidx.room.PrimaryKey
 
 /**
  * The full-text index over the entries.
@@ -18,6 +19,7 @@ import androidx.room.FtsOptions
 @Fts4(tokenizer = FtsOptions.TOKENIZER_UNICODE61)
 @Entity(tableName = "entries_fts")
 data class EntryFtsEntity(
+    @PrimaryKey
     @ColumnInfo(name = "rowid") val rowid: Long,
     @ColumnInfo(name = "uid") val uid: String,
     @ColumnInfo(name = "content") val content: String,
