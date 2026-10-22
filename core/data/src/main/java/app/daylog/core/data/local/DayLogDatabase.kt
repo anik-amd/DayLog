@@ -19,7 +19,7 @@ import androidx.room.RoomDatabase
         MediaEntity::class,
         EntryFtsEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 abstract class DayLogDatabase : RoomDatabase() {
@@ -34,6 +34,7 @@ abstract class DayLogDatabase : RoomDatabase() {
 
         fun create(context: Context): DayLogDatabase =
             Room.databaseBuilder(context, DayLogDatabase::class.java, DATABASE_NAME)
+                .addMigrations(*DayLogMigrations.ALL)
                 .build()
 
         fun createInMemory(context: Context): DayLogDatabase =
