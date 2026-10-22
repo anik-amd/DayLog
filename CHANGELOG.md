@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.3] - 2026-10-22
+
+### Added
+- Tap any entry to open it: the date in the margin, the entry as you wrote it, its tags and place,
+  and a way to edit or delete it
+- Editing an existing entry loads it rather than starting a new one
+- The formatting toolbar now works on the words you have selected, and pressing a button twice
+  takes the mark off again
+- A delete that asks first and says what it will do
+
+### Fixed
+- The accent is for data, not for chrome: buttons and switches are the ink, and only a selected
+  chip carries the accent
+- The label of a button could not be read on the ink button
+
 ## [0.3.2] - 2026-10-22
 
 ### Added
