@@ -27,7 +27,9 @@ class FakeMediaStore : MediaStore {
             uid = uid,
             entryUid = entryUid,
             type = MediaType.Image,
-            path = uri.toString(),
+            // A Uri stub on the JVM may answer nothing when asked for its text; the store is
+            // only interested in having something to name the photo by.
+            path = runCatching { uri.toString() }.getOrDefault("photo"),
             createdAt = 0L,
         )
         return uid
