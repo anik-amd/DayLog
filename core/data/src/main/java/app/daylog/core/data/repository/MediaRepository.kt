@@ -107,12 +107,11 @@ class MediaRepository(
     /**
      * Removes every photo of an entry. Used when an entry is deleted.
      */
-    override suspend fun removeMediaForEntry(entryUid: String) = withContext(Dispatchers.IO) {
-        mediaDao.observeForEntry(entryUid).collect { rows ->
-            // Collecting here is just to read the current rows; the delete below is by entry.
+    override suspend fun removeMediaForEntry(entryUid: String) {
+        withContext(Dispatchers.IO) {
+            mediaDao.deleteForEntry(entryUid)
+            File(context.filesDir, "media/$entryUid").deleteRecursively()
         }
-        mediaDao.deleteForEntry(entryUid)
-        File(context.filesDir, "media/$entryUid").deleteRecursively()
     }
 
     /**

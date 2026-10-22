@@ -6,6 +6,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import app.daylog.core.designsystem.color.DayLogColors
 import app.daylog.core.designsystem.color.PaperScheme
 import app.daylog.core.designsystem.theme.DayLogTypography
+import app.daylog.core.designsystem.theme.DayLogFonts
 import app.daylog.core.model.MarkdownToggle
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -85,4 +86,6 @@ class MarkdownRoundTripTest {
         assertEquals("a * b", result.text)
     }
 }
+
+
 

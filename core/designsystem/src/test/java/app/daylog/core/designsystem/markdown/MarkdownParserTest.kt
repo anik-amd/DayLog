@@ -7,6 +7,7 @@ import app.daylog.core.designsystem.color.DayLogColors
 import app.daylog.core.designsystem.color.NightScheme
 import app.daylog.core.designsystem.color.PaperScheme
 import app.daylog.core.designsystem.theme.DayLogTypography
+import app.daylog.core.designsystem.theme.DayLogFonts
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -130,4 +131,6 @@ class MarkdownParserTest {
         assertTrue(result.spanStyles.any { it.item.background == night.surfaceRaised })
     }
 }
+
+
 
