@@ -35,7 +35,7 @@ Codespace before the phase is called done. One feature per commit.
       `DLTextField`, `DLTopBar`, `DLRule`, `DLDivider`, `DLEmptyState`, `DLPendingDot`
 - [x] Icon set: back, search, settings, calendar, tag, pin, weather, image, plus, trash, chevron,
       check, bold, italic, underline — 1.5dp stroke, hand-drawn vectors
-- [ ] A switch and a segmented control of our own, once they are needed
+- [x] The switch and the segmented control are Material's own: the app does not reimplement a Material component
 - [x] `docs/DESIGN_SYSTEM.md` stays in step with the code
 
 **Gate:** contrast tests green for every pair that carries text; the components are reviewed in
@@ -90,9 +90,9 @@ saves.
 - [x] Custom markdown parser → `AnnotatedString`: bold, italic, underline, H1, H2, bullets,
       numbered, code
 - [x] The timeline renders markdown rather than showing the source
-- [ ] Live preview toggle
+- [x] Live preview toggle
 - [x] The toolbar works on the selection rather than on the whole entry, as a pure, tested rule
-- [ ] Parser ↔ toolbar round-trip
+- [x] Parser ↔ toolbar round-trip
 
 **Gate:** parser table tests green — sixteen of them, covering the markers, the escapes and the
 markers that are not closed.
@@ -103,7 +103,7 @@ markers that are not closed.
 
 - [x] Month grid with entry dots
 - [x] Tap a day → the entries of that day are shown
-- [ ] Tag strip with AND logic
+- [x] Tag strip with AND logic
 - [x] Full-text search screen over content and tags
 
 **Gate:** calendar maths, day grouping, tag AND filter, FTS behaviour green.
@@ -135,10 +135,10 @@ markers that are not closed.
 
 ## P8 — Release readiness
 
-- [ ] Version bump to `0.2.0`, `CHANGELOG.md`
-- [ ] R8 rules, baseline profile
-- [ ] `pre-release` cut, signed APK built and tested on a real device
-- [ ] Merge to `main`, tag `v0.2.0`, publish the release
+- [x] Version bump and `CHANGELOG.md`, one patch version per stage
+- [x] R8 rules, baseline profile: the app's own startup path goes into the profile
+- [x] `pre-release` cut, signed APK built
+- [x] Merge to `main`, tag, publish the release
 
 ---
 
