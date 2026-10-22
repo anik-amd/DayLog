@@ -153,8 +153,8 @@ class EditorViewModel(
     /**
      * The discard.
      *
-     * An entry that came into being in this session is deleted; an older one is put back how it
-     * was read from disk.
+     * An entry that came into being in this session is deleted; an older one is written back the
+     * way it was read from disk, so what stays behind is what was there before the editor opened.
      */
     suspend fun discard() {
         val current = entryUid.value
@@ -164,7 +164,13 @@ class EditorViewModel(
                 mediaStore.removeMediaForEntry(current)
                 entryUid.value = null
             }
-            current != null -> text.value = savedText ?: ""
+            current != null -> {
+                val restored = savedText ?: ""
+                text.value = restored
+                if (restored.isNotBlank()) {
+                    repository.save(restored, uid = current)
+                }
+            }
             else -> text.value = ""
         }
     }

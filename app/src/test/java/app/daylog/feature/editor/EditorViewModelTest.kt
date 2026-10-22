@@ -157,7 +157,9 @@ class EditorViewModelTest {
             viewModel.discard()
             advanceUntilIdle()
 
-            assertEquals(0, entryDao.stored.size)
+            // An entry is tombstoned rather than removed; the photo goes with it.
+            assertEquals(1, entryDao.stored.size)
+            assertTrue(entryDao.stored.single().deletedAt != null)
             assertEquals(0, mediaStore.stored.value.size)
         }
 
