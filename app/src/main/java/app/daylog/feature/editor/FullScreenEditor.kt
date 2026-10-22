@@ -28,7 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
@@ -68,8 +68,7 @@ fun FullScreenEditor(
     modifier: Modifier = Modifier,
 ) {
     val colors = DayLogTheme.colors
-    var value by remember { mutableStateOf(TextFieldValue(state.text ?: "")) }
-    var preview by remember { mutableStateOf(false) }
+    var value by remember { mutableStateOf(TextFieldValue(state.text ?: "")) }    var preview by remember { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
     var confirmingDiscard by remember { mutableStateOf(false) }
     var pickingMoment by remember { mutableStateOf(false) }
@@ -78,7 +77,7 @@ fun FullScreenEditor(
         // The text comes back from the state holder when it changed somewhere else — when a
         // discard puts it back — and never when it is what this field last said.
         if (value.text != state.text) {
-            value = TextFieldValue(state.text)
+            value = TextFieldValue(state.text ?: "")
         }
     }
 
@@ -141,7 +140,7 @@ fun FullScreenEditor(
             ) {
                 val createdAt = state.createdAt
                 if (createdAt != null) {
-                    val is24Hour = DateFormat.is24HourFormat(LocalConfiguration.current)
+                    val is24Hour = DateFormat.is24HourFormat(LocalContext.current)
                     DLText(
                         text = momentLabel(createdAt, is24Hour = is24Hour),
                         modifier = Modifier.clickable { pickingMoment = true },
