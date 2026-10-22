@@ -52,7 +52,7 @@ class EntryRepository(
         if (match.isEmpty()) return flowOf(emptyList())
 
         // Every word must be present, and each may be a prefix. The quotes keep a word with a
-        # punctuation mark in it from being read as an operator.
+        // punctuation mark in it from being read as an operator.
         val expression = match
             .split(Regex("\\s+"))
             .filter { it.isNotEmpty() }

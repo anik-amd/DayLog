@@ -43,8 +43,8 @@ class OpenMeteoWeatherService(
                         obj["admin1"]?.jsonPrimitive?.content,
                         obj["country"]?.jsonPrimitive?.content,
                     ).joinToString(", "),
-                    latitude = obj["latitude"]?.doubleOrNull() ?: 0.0,
-                    longitude = obj["longitude"]?.doubleOrNull() ?: 0.0,
+                    latitude = obj["latitude"]?.doubleOrNull ?: 0.0,
+                    longitude = obj["longitude"]?.doubleOrNull ?: 0.0,
                     country = obj["country"]?.jsonPrimitive?.content,
                 )
             }
@@ -63,7 +63,7 @@ class OpenMeteoWeatherService(
             val code = current?.get("weather_code")?.jsonPrimitive?.content?.toIntOrNull() ?: 0
             Weather(
                 summary = summaryFor(code),
-                temperatureCelsius = current?.get("temperature_2m")?.doubleOrNull() ?: 0.0,
+                temperatureCelsius = current?.get("temperature_2m")?.doubleOrNull ?: 0.0,
                 code = code,
             )
         }.getOrNull()
