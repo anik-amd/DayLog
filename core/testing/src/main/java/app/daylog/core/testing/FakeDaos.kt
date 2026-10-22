@@ -213,6 +213,9 @@ class FakeMediaDao : MediaDao {
 
     override fun observeCount(): Flow<Int> = media.map { it.size }
 
+    override fun observeAll(): Flow<List<MediaEntity>> =
+        media.map { rows -> rows.sortedBy { it.createdAt } }
+
     override suspend fun insert(media: MediaEntity) {
         this.media.value = this.media.value + media
     }

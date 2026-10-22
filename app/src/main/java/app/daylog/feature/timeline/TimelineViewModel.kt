@@ -82,15 +82,22 @@ class TimelineViewModel(
             repository.observeEntriesWithAllTags(tags.toList())
         }
 
+    /**
+     * The content of the timeline: the entries, the tags and the photos.
+     */
+    private val content = combine(
+        shownEntries,
+        repository.observeTags(),
+        repository.observeMediaByEntry(),
+    ) { entries, tags, media -> Triple(entries, tags, media) }
+
     val state: StateFlow<TimelineUiState> =
         combine(
-            shownEntries,
-            repository.observeTags(),
-            repository.observeMediaByEntry(),
+            content,
             selectedTags,
             draft,
             saving,
-        ) { entries, tags, media, chosen, draftText, isSaving ->
+        ) { (entries, tags, media), chosen, draftText, isSaving ->
             TimelineUiState(
                 groups = DayGrouper.group(entries, locale = locale),
                 tags = tags,
