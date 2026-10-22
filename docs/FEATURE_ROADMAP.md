@@ -74,8 +74,8 @@ rendered previews, not only in code.
 - [x] Full editor via chevron
 - [x] Tag extraction on save
 - [x] Unsaved/pending indicator
-- [ ] Entry read view
-- [ ] Tapping an entry opens it
+- [x] Entry read view
+- [x] Tapping an entry opens it
 - [ ] Tag filter strip with AND logic
 - [x] ViewModel state and autosave debounce tests
 
@@ -86,12 +86,12 @@ saves.
 
 ## P4 — Editor and markdown
 
-- [x] Full-screen editor with a formatting toolbar *(the screen exists; the toolbar is a first cut)*
+- [x] Full-screen editor with a formatting toolbar
 - [x] Custom markdown parser → `AnnotatedString`: bold, italic, underline, H1, H2, bullets,
       numbered, code
 - [x] The timeline renders markdown rather than showing the source
 - [ ] Live preview toggle
-- [ ] The toolbar works on the selection rather than on the whole entry
+- [x] The toolbar works on the selection rather than on the whole entry, as a pure, tested rule
 - [ ] Parser ↔ toolbar round-trip
 
 **Gate:** parser table tests green — sixteen of them, covering the markers, the escapes and the

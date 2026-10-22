@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.3.1] - 2026-10-22
+
+### Added
+- Tap any entry to open it: the date in the margin, the entry as you wrote it, its tags and place,
+  and a way to edit or delete it
+- Search: find entries by any word in them or in their tags, as you type
+- The formatting toolbar now works on the words you have selected, and pressing a button twice
+  takes the mark off again
+- A delete that asks first and says what it will do
+
+### Fixed
+- The accent colour is no longer spent on buttons and switches. It is used only where there is
+  data, so the screen stays quiet
+- The search finds the start of a word as you type, not only whole words
+- Your existing entries are kept when the app is updated, and the search index is built from them,
+  so the whole diary can be searched straight away
+
 ## [0.2.0] - 2026-10-22
 
 ### Changed
