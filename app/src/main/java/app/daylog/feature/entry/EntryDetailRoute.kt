@@ -3,8 +3,11 @@ package app.daylog.feature.entry
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import app.daylog.core.data.repository.EntryRepository
 import app.daylog.di.AppContainer
 
@@ -53,9 +56,8 @@ fun EntryDetailRoute(
 fun entryDetailViewModelFactory(
     repository: EntryRepository,
     uid: String,
-): androidx.lifecycle.ViewModelProvider.Factory =
-    androidx.lifecycle.viewmodel.viewModelFactory {
-        androidx.lifecycle.viewmodel.initializer {
-            EntryDetailViewModel(repository = repository, uid = uid)
-        }
+): ViewModelProvider.Factory = viewModelFactory {
+    initializer {
+        EntryDetailViewModel(repository = repository, uid = uid)
     }
+}

@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import app.daylog.core.designsystem.component.DLEmptyState
 import app.daylog.core.designsystem.component.DLMeta
 import app.daylog.core.designsystem.component.DLText
+import app.daylog.core.designsystem.component.pressable
 import app.daylog.core.designsystem.theme.DayLogTheme
 import app.daylog.core.model.DayGroup
 import app.daylog.core.model.Entry
