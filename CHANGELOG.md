@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.7] - 2026-10-22
+
+### Added
+- Bring the entries you wrote in the previous version of DayLog across: Settings, then "Import
+  from the previous version". Your tags, your place and your photos come across too, and nothing
+  is overwritten
+
 ## [0.3.6] - 2026-10-22
 
 ### Added

@@ -126,8 +126,8 @@ markers that are not closed.
 - [x] Theme mode, the wallpaper option, pure black
 - [ ] JSON export and import
 - [ ] Statistics
-- [ ] Legacy import from the React Native app's export
-- [ ] Direct probe of the legacy database at `databases/daylog.db` and `databases/SQLite/daylog.db`
+- [x] Legacy import from the previous version
+- [x] The old database is read from `files/SQLite/daylog.db`, where the old app kept it
 
 **Gate:** settings store, import validation, legacy mapping, stats green.
 
