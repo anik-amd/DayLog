@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import app.daylog.di.AppContainer
+import app.daylog.feature.editor.EditorRoute
 import app.daylog.feature.editor.FullScreenEditor
 import app.daylog.feature.entry.EntryDetailRoute
 import app.daylog.feature.search.SearchRoute
@@ -88,10 +89,25 @@ fun DayLogNavHost(
                 uid = uid,
                 onBack = { navController.popBackStack() },
                 onEdit = {
-                    editorText = ""
-                    navController.navigate(Routes.Editor)
+                    navController.navigate("editor?uid=$uid")
                 },
                 onDeleted = { navController.popBackStack() },
+            )
+        }
+
+        composable(
+            route = "editor?uid={uid}",
+            arguments = listOf(navArgument("uid") {
+                type = NavType.StringType
+                defaultValue = ""
+                nullable = true
+            }),
+        ) { backStackEntry ->
+            val uid = backStackEntry.arguments?.getString("uid")?.takeIf { it.isNotEmpty() }
+            EditorRoute(
+                container = container,
+                uid = uid,
+                onBack = { navController.popBackStack() },
             )
         }
 
