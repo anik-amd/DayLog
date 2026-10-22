@@ -4,19 +4,22 @@
 
 ### Changed
 - Rebuilt the app natively for Android with Kotlin and Jetpack Compose — the app now opens faster and scrolls more smoothly
-- New look: a ledger-inspired timeline with dates set in the margin, a serif for your writing and a quieter interface
-- Entry text is now set in Spectral, a typeface designed for long-form reading
+- New look, built on Material 3: tonal surfaces, the platform's own buttons and chips, and an optional true-black dark mode
+- New type: a single modern sans for the whole app, sized for long reading
+- The timeline is a ledger's margin: the dates sit against a rule down the left of the page
+- Your entries can be written in markdown — bold, italic, headings and lists — and are shown as written
 - Photos, weather, tags and search all keep working, now stored locally in the app's own database
 
 ### Added
 - Paper (light) and Night (dark) themes, or follow your system setting
-- Optional accent colour taken from your wallpaper
+- An optional theme that takes its colours from your wallpaper
 - Backup and restore as a JSON file
 - Import your entries from the previous version of DayLog
 
 ### Fixed
+- The quick entry no longer takes the writing away from you: a pause no longer splits a thought in two, and the text stays where you left it
+- The quick entry now sits above the keyboard instead of behind it
 - Entries no longer group into the wrong day when the device changes time zone
-- The keyboard no longer pushes the quick entry bar off screen
 - Scrolling the timeline no longer stutters on long entries
 
 ## [0.1.2] - 2026-03-30

@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import app.daylog.di.AppContainer
 import app.daylog.feature.editor.FullScreenEditor
+import app.daylog.feature.settings.SettingsScreen
 import app.daylog.feature.timeline.TimelineRoute
 
 /**
@@ -19,6 +20,7 @@ import app.daylog.feature.timeline.TimelineRoute
 object Routes {
     const val Timeline = "timeline"
     const val Editor = "editor"
+    const val Settings = "settings"
 }
 
 /**
@@ -47,6 +49,16 @@ fun DayLogNavHost(
                     editorText = ""
                     navController.navigate(Routes.Editor)
                 },
+                onOpenSettings = {
+                    navController.navigate(Routes.Settings)
+                },
+            )
+        }
+
+        composable(Routes.Settings) {
+            SettingsScreen(
+                settingsStore = container.settingsStore,
+                onBack = { navController.popBackStack() },
             )
         }
 

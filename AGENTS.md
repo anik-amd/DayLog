@@ -29,15 +29,16 @@ Do not introduce anything that is not already in `gradle/libs.versions.toml`.
 | Piece | Choice |
 |---|---|
 | Language | Kotlin 2.3.20 |
-| UI | Jetpack Compose (BOM 2026.06.01) |
+| UI | Jetpack Compose (BOM 2026.06.01), Material 3 |
 | Build | AGP 8.13.2, Gradle 8.14.6, JDK 21 |
 | Storage | Room 2.8.5 + DataStore 1.3.0 |
 | Async | Coroutines 1.11.0 |
+| Type | Inter, bundled as a variable font |
 | Tests | JUnit4, Robolectric 4.17, Turbine, `kotlinx-coroutines-test` |
 
-**No `material3` dependency.** Material 3's default type scale, tonal surfaces and elevation are
-exactly the generic look this app exists to replace. Compose `foundation`, `ui` and
-`material-ripple` only.
+**Material 3 is the design language.** The app is a native Android app: the Material widgets, the
+tonal surfaces and the platform's own behaviour. Do not reimplement a Material component to look
+like something else, and do not add a second UI library.
 
 Do not add a DI framework, an image library, a markdown library, a date library, a JSON library or
 a logging framework. The app's dependency list is short on purpose.
@@ -226,12 +227,14 @@ bullets, `1.` numbered, `` `code` ``. The parser is written by hand — no markd
 
 Read `/docs/DESIGN_SYSTEM.md` before touching a screen. The short version:
 
-- Paper and Night schemes, near-monochrome, one teal accent.
-- Spectral for entry text, Instrument Sans for chrome.
+- Material 3: tonal surfaces, the platform's own widgets, no shadows.
+- Paper, Night, and a true-black Night. The wallpaper's colours are an option, not the default.
+- One family: Inter.
 - **Accent marks data, never chrome.** It is not a button colour and not a navigation colour.
-- Flat surfaces. Separation is a 1dp rule or one tone step. No shadows on cards.
 - The margin rule is the app's signature: dates sit in a gutter beside a vertical hairline, and
   the gutter grows with the text so a day name is never cut off.
+- The composer never takes the writing away: every save updates the same entry, and the text is
+  never cleared out of the field while the writer is still in it.
 
 ---
 
