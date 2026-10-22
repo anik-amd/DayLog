@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -34,13 +35,16 @@ fun EditorRoute(
     val text = state.text
     if (text == null) return
 
+    val scope = rememberCoroutineScope()
     FullScreenEditor(
         initialText = text,
         onTextChanged = viewModel::onTextChanged,
         onBack = onBack,
         onSave = {
-            viewModel.save()
-            onBack()
+            scope.launch {
+                viewModel.save()
+                onBack()
+            }
         },
         modifier = modifier,
     )
