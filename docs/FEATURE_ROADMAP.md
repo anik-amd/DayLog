@@ -199,9 +199,11 @@ here is the timeline's own layout and the viewer's fullness.*
 - [x] The preview is the first few lines, plain text — no markdown on the timeline (P9b)
 - [x] No empty lines in the timeline's preview of an entry (P9b)
 - [x] Edit and delete are icons in the reader's top bar (P9b)
-- [ ] Dates horizontal, entries under them, closer together
-- [ ] The viewer's facts line gains the word count — words, tags, place, weather, photos, all in
-      one small voice
+- [x] The timeline reads as a notebook: the date is a heading across the page, the entries sit
+      under it, and the spacing is the design system's scale, not an eyeballed dp — the same
+      shape carries the search results and the day lists
+- [x] The viewer's facts line carries the word count beside the date, the time and the place —
+      and the editor's does too
 
 ### P9d — Places
 
