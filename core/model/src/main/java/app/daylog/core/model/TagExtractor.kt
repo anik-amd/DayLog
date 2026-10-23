@@ -49,4 +49,32 @@ object TagExtractor {
         }
         return found.toList()
     }
+
+    /**
+     * Takes one tag out of the content.
+     *
+     * The tag is only removed where it stands on its own — a hash on a boundary, ending on one —
+     * so removing `#work` from `name#work` does nothing. The space next to the tag goes with it,
+     * so what is left reads without a hole.
+     */
+    fun remove(content: String, name: String): String {
+        val token = "#$name"
+        if (token.length > content.length) return content
+
+        var search = 0
+        while (search <= content.length - token.length) {
+            val at = content.indexOf(token, search)
+            if (at < 0) return content
+
+            val end = at + token.length
+            val onStartBoundary = at == 0 || content[at - 1].isWhitespace()
+            val onEndBoundary = end == content.length || content[end].isWhitespace()
+            if (onStartBoundary && onEndBoundary) {
+                val skip = if (at == 0) 0 else 1
+                return content.substring(0, at - skip) + content.substring(end)
+            }
+            search = at + 1
+        }
+        return content
+    }
 }

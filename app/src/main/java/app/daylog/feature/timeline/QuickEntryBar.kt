@@ -31,6 +31,7 @@ import app.daylog.core.designsystem.icon.DayLogIcons
 import app.daylog.core.designsystem.theme.DayLogShapes
 import app.daylog.core.designsystem.theme.DayLogTheme
 import app.daylog.core.model.Tag
+import app.daylog.core.model.TagExtractor
 import app.daylog.feature.place.PlaceDialog
 import app.daylog.feature.tag.TagPickerDialog
 
@@ -176,7 +177,9 @@ fun QuickEntryBar(
     if (pickingTag) {
         TagPickerDialog(
             tags = tags,
+            current = TagExtractor.extract(value).toSet(),
             onPick = insertTag,
+            onRemove = { name -> onValueChange(TagExtractor.remove(value, name)) },
             onDismiss = { pickingTag = false },
         )
     }

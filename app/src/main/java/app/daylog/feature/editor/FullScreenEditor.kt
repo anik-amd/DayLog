@@ -43,6 +43,7 @@ import app.daylog.core.designsystem.component.DLTopBar
 import app.daylog.core.designsystem.icon.DayLogIcons
 import app.daylog.core.designsystem.theme.DayLogTheme
 import app.daylog.core.model.MarkdownToggle
+import app.daylog.core.model.TagExtractor
 import app.daylog.feature.place.PlaceDialog
 import app.daylog.feature.tag.TagPickerDialog
 
@@ -269,9 +270,15 @@ fun FullScreenEditor(
     if (pickingTag) {
         TagPickerDialog(
             tags = state.tags,
+            current = TagExtractor.extract(value.text).toSet(),
             onPick = { name ->
                 addTag(name)
                 onAddTag(name)
+            },
+            onRemove = { name ->
+                val cleaned = TagExtractor.remove(value.text, name)
+                value = TextFieldValue(cleaned, selection = TextRange(cleaned.length))
+                onTextChanged(cleaned)
             },
             onDismiss = { pickingTag = false },
         )
@@ -302,7 +309,7 @@ fun FullScreenEditor(
 /**
  * The formatting toolbar.
  *
- * Six actions and no more: the markdown shortcuts, a tag, a place and a photo. Each one is the
+ * Seven actions and no more: four markdown shortcuts, a tag, a place and a photo. Each one is the
  * written kind of the thing rather than a command — a tag is written in the entry, the place is
  * named — because the entry is stored as text, and has to stay editable as text. The photo sits
  * at the end of the row, with the other edits of the entry.

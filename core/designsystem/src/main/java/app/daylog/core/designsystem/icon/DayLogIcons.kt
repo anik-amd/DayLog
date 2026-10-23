@@ -118,14 +118,17 @@ object DayLogIcons {
     /**
      * A map pin, for a place.
      *
-     * A ring over a point: the ring is the place, the two lines down to the tip are the mark that
-     * puts it on a map. It reads at thirteen dots, which a filled teardrop does not.
+     * A teardrop with a hole in its round end: the shape every map has taught the world to read
+     * as "here". The tip points at the place, so the pin is drawn falling towards the point.
      */
     val Pin: ImageVector = icon("Pin") {
-        circle(12f, 9.5f, 4.5f)
-        moveTo(8.5f, 13f)
-        lineTo(12f, 21f)
-        lineTo(15.5f, 13f)
+        moveTo(12f, 22f)
+        curveTo(8f, 19.5f, 5.5f, 14f, 5.5f, 9.5f)
+        curveTo(5.5f, 9.5f - 3.59f, 12f - 3.59f, 3f, 12f, 3f)
+        curveTo(12f + 3.59f, 3f, 18.5f, 9.5f - 3.59f, 18.5f, 9.5f)
+        curveTo(18.5f, 14f, 16f, 19.5f, 12f, 22f)
+        close()
+        circle(12f, 9.5f, 2.75f)
     }
 
     /**

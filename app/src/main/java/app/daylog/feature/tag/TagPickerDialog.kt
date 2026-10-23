@@ -24,24 +24,45 @@ import app.daylog.core.designsystem.component.DLEmptyState
 import app.daylog.core.model.Tag
 
 /**
- * Picking a tag to put on the entry.
+ * Choosing the tags an entry carries.
  *
- * The tags in use are chips, and a new one can be typed. Choosing — by chip or by word — answers
- * with the tag's name; the picker does not know where the tag goes, that is the caller's writing.
+ * The tags already on the entry are the filled chips — tapping one takes it off. The tags in use
+ * elsewhere and a new word are the ways to put one on. The picker only answers; what is done with
+ * the name is the caller's writing, because a tag is written in the entry, not kept beside it.
  */
 @Composable
 fun TagPickerDialog(
+    /** The tags in use across the diary, to choose from. */
     tags: List<Tag>,
+    /** The tags the entry already carries. */
+    current: Set<String> = emptySet(),
     onPick: (String) -> Unit,
+    /** Answers when a tag that is on the entry is taken off. */
+    onRemove: (String) -> Unit = {},
     onDismiss: () -> Unit,
 ) {
     var typed by remember { mutableStateOf("") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add a tag") },
+        title = { Text("Tags") },
         text = {
             Column {
+                if (current.isNotEmpty()) {
+                    Text("On this entry")
+                    Column(
+                        modifier = Modifier.padding(bottom = 8.dp),
+                    ) {
+                        current.sorted().forEach { name ->
+                            FilterChip(
+                                selected = true,
+                                onClick = { onRemove(name) },
+                                label = { Text("#$name") },
+                            )
+                        }
+                    }
+                }
+
                 OutlinedTextField(
                     value = typed,
                     onValueChange = { typed = it.filterNot { c -> c.isWhitespace() || c == '#' } },
@@ -60,14 +81,15 @@ fun TagPickerDialog(
                         .padding(bottom = 12.dp),
                 )
 
-                if (tags.isEmpty()) {
+                val eligible = tags.filter { it.name !in current }
+                if (eligible.isEmpty()) {
                     DLEmptyState(
                         title = "No tags yet",
                         body = "Tags you have used appear here.",
                     )
                 } else {
                     LazyColumn {
-                        items(tags) { tag ->
+                        items(eligible) { tag ->
                             FilterChip(
                                 selected = false,
                                 onClick = {
@@ -82,16 +104,7 @@ fun TagPickerDialog(
             }
         },
         confirmButton = {
-            TextButton(
-                enabled = typed.isNotBlank(),
-                onClick = {
-                    onPick(typed.trim())
-                    onDismiss()
-                },
-            ) { Text("Add") }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text("Done") }
         },
     )
 }

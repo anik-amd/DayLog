@@ -57,4 +57,29 @@ class TagExtractorTest {
     fun `returns nothing for content without tags`() {
         assertEquals(emptyList<String>(), TagExtractor.extract("just a plain entry"))
     }
+
+    @Test
+    fun `removes a tag and the space next to it`() {
+        assertEquals("a walk", TagExtractor.remove("a #work walk", "work"))
+    }
+
+    @Test
+    fun `removes a tag at the very start`() {
+        assertEquals("walk", TagExtractor.remove("#work walk", "work"))
+    }
+
+    @Test
+    fun `removes a tag at the very end`() {
+        assertEquals("a walk", TagExtractor.remove("a walk #work", "work"))
+    }
+
+    @Test
+    fun `removes nothing when the word is not a tag`() {
+        assertEquals("name#work", TagExtractor.remove("name#work", "work"))
+    }
+
+    @Test
+    fun `removes nothing when the name does not match`() {
+        assertEquals("a #work walk", TagExtractor.remove("a #work walk", "rest"))
+    }
 }
