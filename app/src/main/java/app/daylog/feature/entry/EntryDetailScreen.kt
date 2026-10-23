@@ -40,9 +40,8 @@ import java.util.Locale
 /**
  * One entry, opened.
  *
- * The reading view of a single entry: the date it was written, the entry itself, and whatever was
- * attached to it. It is the same margin the timeline uses, so an entry looks the same wherever it
- * is read.
+ * The reading view of a single entry: a small line with the date and time, the entry itself, and
+ * whatever was attached to it. The chrome stays out of the way; the writing is the screen.
  */
 @Composable
 fun EntryDetailScreen(
@@ -84,62 +83,59 @@ fun EntryDetailScreen(
                 },
             )
 
+            // The date and time sit above the entry, small and quiet, so the writing is the screen.
             Row(
+                modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                DLMeta(
+                    text = DayLabels.dayHeader(
+                        date = entry.createdAt.toLocalDateTime(zone).toLocalDate(),
+                        today = java.time.LocalDate.now(zone),
+                        locale = locale,
+                    ),
+                    color = colors.inkMuted,
+                )
+                Spacer(Modifier.width(8.dp))
+                DLMeta(
+                    text = DayLabels.time(entry.createdAt.toLocalDateTime(zone), locale),
+                    color = colors.inkMuted,
+                )
+            }
+
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 20.dp, end = 20.dp, top = 8.dp),
-                verticalAlignment = Alignment.Top,
+                    .padding(start = 20.dp, end = 20.dp, top = 6.dp),
             ) {
-                // The date in the margin, as on the timeline.
-                Column(
-                    modifier = Modifier.width(64.dp),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
-                ) {
-                    DLMeta(
-                        text = DayLabels.dayHeader(
-                            date = entry.createdAt.toLocalDateTime(zone).toLocalDate(),
-                            today = java.time.LocalDate.now(zone),
-                            locale = locale,
-                        ),
-                        color = colors.ink,
-                    )
-                    DLMeta(
-                        text = DayLabels.time(entry.createdAt.toLocalDateTime(zone), locale),
+                DLText(
+                    text = entry.content,
+                    style = DayLogTheme.typography.entryBody,
+                    color = colors.ink,
+                    annotated = true,
+                )
+
+                val place = entry.placeName
+                val weather = entry.weatherSummary
+                if (mediaRepository != null) {
+                    Spacer(Modifier.height(14.dp))
+                    app.daylog.feature.photo.PhotoStrip(
+                        entryUid = entry.uid,
+                        mediaRepository = mediaRepository,
                     )
                 }
-
-                Spacer(Modifier.width(16.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    DLText(
-                        text = entry.content,
-                        style = DayLogTheme.typography.entryBody,
-                        color = colors.ink,
-                        annotated = true,
-                    )
-
-                    val place = entry.placeName
-                    val weather = entry.weatherSummary
-                    if (mediaRepository != null) {
-                        Spacer(Modifier.height(14.dp))
-                        app.daylog.feature.photo.PhotoStrip(
-                            entryUid = entry.uid,
-                            mediaRepository = mediaRepository,
-                        )
-                    }
-                    if (tags.isNotEmpty() || place != null || weather != null) {
-                        Spacer(Modifier.height(16.dp))
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            tags.forEach { tag -> DLChip(text = tag.name) }
-                            if (place != null) {
-                                DLChip(text = place, leadingIcon = DayLogIcons.Pin)
-                            }
-                            if (weather != null) {
-                                DLChip(text = weather, leadingIcon = DayLogIcons.Weather)
-                            }
+                if (tags.isNotEmpty() || place != null || weather != null) {
+                    Spacer(Modifier.height(16.dp))
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        tags.forEach { tag -> DLChip(text = tag.name) }
+                        if (place != null) {
+                            DLChip(text = place, leadingIcon = DayLogIcons.Pin)
+                        }
+                        if (weather != null) {
+                            DLChip(text = weather, leadingIcon = DayLogIcons.Weather)
                         }
                     }
                 }
