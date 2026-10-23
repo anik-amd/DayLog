@@ -167,7 +167,7 @@ private fun DayLogPreview(dark: Boolean = false) {
             }
 
             Box(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 72.dp),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 112.dp),
             ) {
                 QuickEntryBar(
                     value = "",

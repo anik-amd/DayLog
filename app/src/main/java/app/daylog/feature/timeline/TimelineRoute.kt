@@ -166,7 +166,7 @@ fun TimelineRoute(
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(horizontal = 16.dp, vertical = 24.dp),
+                .padding(horizontal = 16.dp, vertical = 32.dp),
         ) {
             AnimatedVisibility(
                 visible = barExpanded,
@@ -198,7 +198,7 @@ fun TimelineRoute(
         Box(
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(24.dp),
+                .padding(32.dp),
         ) {
             AnimatedVisibility(
                 visible = !barExpanded,
