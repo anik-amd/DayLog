@@ -90,7 +90,11 @@ animation, which is the only motion that is not explaining a change.
 
 The timeline reads as a notebook: each day is a heading across the page in the label face, and the
 entries of the day sit under it, close together, each with its time in the muted face above the
-text. The date is not in a margin any more — the writing has the room.
+text. The days are separated by a subtle hairline across the page — the line is not chrome, it is
+the notebook's own margin between two dates — and the gap under the line is smaller than the gap
+under the heading, so the days read apart and the entries read together.
+
+The first day of the page carries no line: the page starts, it does not follow.
 
 The search results carry the same shape, so a result looks like the entry it is.
 

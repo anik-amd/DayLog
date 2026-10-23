@@ -8,12 +8,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import app.daylog.core.designsystem.component.DLDivider
 import app.daylog.core.designsystem.component.DLEmptyState
 import app.daylog.core.designsystem.component.DLText
 import app.daylog.core.designsystem.component.pressable
@@ -72,9 +73,13 @@ fun TimelineScreen(
             .background(colors.background),
         contentPadding = contentPadding,
     ) {
-        items(items, key = { itemKey(it) }) { item ->
+        itemsIndexed(items, key = { _, item -> itemKey(item) }) { index, item ->
             when (item) {
-                is TimelineItem.Heading -> DayHeading(item.group)
+                is TimelineItem.Heading -> DayHeading(
+                    group = item.group,
+                    // The first day needs no line above it: the page starts, it does not follow.
+                    showRule = index != 0,
+                )
                 is TimelineItem.Row -> EntryRow(
                     entry = item.entry,
                     media = media[item.entry.uid].orEmpty(),
@@ -88,29 +93,36 @@ fun TimelineScreen(
 /**
  * The day's heading, across the page.
  *
- * A day starts with air: the gap to the day above it is bigger than the gap under the heading
- * itself, so the days read apart and the entries read together. Shared with the search screen,
- * so a result looks like the entry it is.
+ * A day starts with a subtle hairline and a little air: the gap to the day above it is bigger
+ * than the gap under the heading itself, so the days read apart and the entries read together.
+ * Shared with the search screen, so a result looks like the entry it is.
  */
 @Composable
-fun DayHeading(group: DayGroup, modifier: Modifier = Modifier) {
+fun DayHeading(
+    group: DayGroup,
+    modifier: Modifier = Modifier,
+    showRule: Boolean = true,
+) {
     val colors = DayLogTheme.colors
     val spacing = DayLogTheme.spacing
 
-    DLText(
-        text = group.header,
-        style = DayLogTheme.typography.label,
-        color = colors.ink,
-        maxLines = 1,
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(
+    Column(modifier = modifier.fillMaxWidth()) {
+        if (showRule) {
+            DLDivider(modifier = Modifier.padding(horizontal = spacing.xl))
+        }
+        DLText(
+            text = group.header,
+            style = DayLogTheme.typography.label,
+            color = colors.ink,
+            maxLines = 1,
+            modifier = Modifier.padding(
                 start = spacing.xl,
                 end = spacing.xl,
-                top = spacing.xxxl,
+                top = if (showRule) spacing.sm else spacing.xxl,
                 bottom = spacing.md,
             ),
-    )
+        )
+    }
 }
 
 /**
