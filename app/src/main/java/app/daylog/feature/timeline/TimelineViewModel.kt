@@ -223,7 +223,7 @@ class TimelineViewModel(
                     draftUid = repository.save(
                         content = text,
                         uid = draftUid,
-                        placeName = place.takeIf { it.isNotBlank() },
+                        placeName = place?.takeIf { it.isNotBlank() },
                         placeCleared = place == "",
                     )
                     draft.value = ""

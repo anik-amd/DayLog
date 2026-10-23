@@ -173,7 +173,7 @@ class EditorViewModel(
             content = content,
             uid = entryUid.value,
             createdAt = moment.value,
-            placeName = named.takeIf { it.isNotBlank() },
+            placeName = named?.takeIf { it.isNotBlank() },
             // Only a place the writer took off clears the one the entry has.
             placeCleared = placeTouched && named.isNullOrBlank(),
         )
