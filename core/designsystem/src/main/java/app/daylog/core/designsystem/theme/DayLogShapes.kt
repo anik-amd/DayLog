@@ -12,13 +12,16 @@ import androidx.compose.ui.unit.dp
  */
 object DayLogShapes {
     /** Chips, small controls. */
-    val chipRadius = 6.dp
+    val chipRadius = 8.dp
 
     /** Cards and grouped content. */
-    val cardRadius = 10.dp
+    val cardRadius = 12.dp
 
     /** Sheets and large surfaces. */
     val sheetRadius = 16.dp
+
+    /** The quick entry bar, floating like a bubble. */
+    val bubbleRadius = 24.dp
 
     /** Date pills in the timeline margin. */
     val pillRadius = 999.dp
@@ -31,6 +34,9 @@ object DayLogShapes {
 
     /** Sheets and large surfaces. */
     val sheet: Shape = RoundedCornerShape(sheetRadius)
+
+    /** The quick entry bar, floating like a bubble. */
+    val bubble: Shape = RoundedCornerShape(bubbleRadius)
 
     /** Date pills in the timeline margin. */
     val pill: Shape = RoundedCornerShape(pillRadius)

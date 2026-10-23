@@ -23,6 +23,7 @@ import app.daylog.core.designsystem.component.DLIconButton
 import app.daylog.core.designsystem.component.DLPendingDot
 import app.daylog.core.designsystem.component.DLText
 import app.daylog.core.designsystem.icon.DayLogIcons
+import app.daylog.core.designsystem.theme.DayLogShapes
 import app.daylog.core.designsystem.theme.DayLogTheme
 
 /**
@@ -50,8 +51,10 @@ fun QuickEntryBar(
 
     Surface(
         modifier = modifier.fillMaxWidth(),
+        shape = DayLogShapes.bubble,
         color = colors.surfaceContainer,
         contentColor = colors.ink,
+        tonalElevation = 2.dp,
     ) {
         Column(
             modifier = Modifier

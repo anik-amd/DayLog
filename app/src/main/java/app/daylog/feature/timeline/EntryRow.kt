@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.daylog.core.common.DayLabels
+import app.daylog.core.common.plainPreview
 import app.daylog.core.common.toLocalDateTime
 import app.daylog.core.designsystem.component.DLChip
 import app.daylog.core.designsystem.component.DLMeta
@@ -93,10 +94,10 @@ fun EntryRow(
         Spacer(Modifier.height(3.dp))
 
         DLText(
-            text = entry.content,
+            text = plainPreview(entry.content),
             style = DayLogTheme.typography.entryBody,
             color = colors.ink,
-            annotated = true,
+            annotated = false,
         )
 
         // The photos, if the entry has any. A thumbnail strip, not a gallery: the entry is read

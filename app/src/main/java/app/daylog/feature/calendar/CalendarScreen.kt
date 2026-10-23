@@ -66,14 +66,6 @@ fun CalendarScreen(
             DLTopBar(
                 title = CalendarMath.monthName(year, month, locale),
                 trailingContent = {
-                    if (selectedDay == null) {
-                        DLText(
-                            text = "On this day",
-                            style = DayLogTheme.typography.label,
-                            color = colors.inkMuted,
-                            modifier = Modifier.pressable(onClick = onOpenOnThisDay),
-                        )
-                    }
                     DLIconButton(
                         imageVector = DayLogIcons.ChevronLeft,
                         contentDescription = "Previous month",
@@ -130,6 +122,23 @@ fun CalendarScreen(
                             )
                         }
                     }
+                }
+            }
+
+            // A link to this day in past years, shown only when no day is filtered.
+            if (selectedDay == null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    DLText(
+                        text = "On this day",
+                        style = DayLogTheme.typography.label,
+                        color = colors.inkMuted,
+                        modifier = Modifier.pressable(onClick = onOpenOnThisDay),
+                    )
                 }
             }
 
