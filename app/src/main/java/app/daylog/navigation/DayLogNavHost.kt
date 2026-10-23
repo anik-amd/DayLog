@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import app.daylog.core.data.place.PickedPlace
 import app.daylog.di.AppContainer
 import app.daylog.feature.calendar.CalendarRoute
 import app.daylog.feature.editor.EditorRoute
@@ -60,7 +61,7 @@ fun DayLogNavHost(
 ) {
     val navController = rememberNavController()
     var editorText by remember { mutableStateOf("") }
-    var editorPlace by remember { mutableStateOf<String?>(null) }
+    var editorPlace by remember { mutableStateOf<PickedPlace?>(null) }
 
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route

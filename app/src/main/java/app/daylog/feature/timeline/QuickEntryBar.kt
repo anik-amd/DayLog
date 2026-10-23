@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import app.daylog.core.data.place.PickedPlace
 import app.daylog.core.designsystem.component.DLDivider
 import app.daylog.core.designsystem.component.DLIconButton
 import app.daylog.core.designsystem.component.DLPendingDot
@@ -58,8 +59,11 @@ fun QuickEntryBar(
     modifier: Modifier = Modifier,
     isSaving: Boolean = false,
     tags: List<Tag> = emptyList(),
-    place: String? = null,
-    onPlaceChange: (String?) -> Unit = {},
+    /** The place the thought carries, when one was picked. */
+    place: PickedPlace? = null,
+    /** The place names already in use, handed to the picker for tapping instead of typing. */
+    usedNames: List<String> = emptyList(),
+    onPlaceChange: (PickedPlace?) -> Unit = {},
 ) {
     val colors = DayLogTheme.colors
     var pickingTag by remember { mutableStateOf(false) }
@@ -137,7 +141,7 @@ fun QuickEntryBar(
                     )
                     if (place != null) {
                         DLText(
-                            text = place,
+                            text = place.name,
                             style = DayLogTheme.typography.meta,
                             color = colors.inkMuted,
                             maxLines = 1,
@@ -187,6 +191,7 @@ fun QuickEntryBar(
     if (pickingPlace) {
         PlaceDialog(
             place = place,
+            usedNames = usedNames,
             onSet = onPlaceChange,
             onDismiss = { pickingPlace = false },
         )

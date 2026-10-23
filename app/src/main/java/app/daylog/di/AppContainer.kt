@@ -7,6 +7,7 @@ import app.daylog.core.data.backup.BackupService
 import app.daylog.core.data.local.DayLogDatabase
 import app.daylog.core.data.repository.EntryRepository
 import app.daylog.core.data.repository.MediaRepository
+import app.daylog.core.data.weather.OpenMeteoWeatherService
 import app.daylog.core.data.legacy.LegacyImporter
 import app.daylog.core.data.settings.SettingsStore
 
@@ -49,6 +50,11 @@ class AppContainer(private val context: Context) {
     }
 
     val settingsStore: SettingsStore by lazy { SettingsStore(context) }
+
+    /**
+     * The place geocoder and the weather, straight from Open-Meteo. No key, no server.
+     */
+    val weatherService: OpenMeteoWeatherService by lazy { OpenMeteoWeatherService() }
 
     val backupService: BackupService by lazy {
         BackupService(

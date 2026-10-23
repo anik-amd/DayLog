@@ -110,6 +110,11 @@ class EntryRepository(
         tagDao.observeTagsInUse().map { entities -> entities.map { Tag(it.name, it.count) } }
 
     /**
+     * The place names in use, most recently written-to first.
+     */
+    fun observeUsedPlaceNames(): Flow<List<String>> = entryDao.observeUsedPlaceNames()
+
+    /**
      * Saves an entry.
      *
      * A new entry is created when [uid] is null, otherwise the existing one is updated. The tags

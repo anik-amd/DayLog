@@ -178,6 +178,25 @@ class EntryDaoTest {
     }
 
     @Test
+    fun `the used place names come back newest first, without repeats`() = runTest {
+        fun withPlace(uid: String, updatedAt: Long, name: String) = EntryEntity(
+            uid = uid,
+            content = "a thought",
+            createdAt = updatedAt,
+            updatedAt = updatedAt,
+            placeName = name,
+        )
+        entries.upsert(withPlace("e-1", 1, "the harbour"))
+        entries.upsert(withPlace("e-2", 2, "home"))
+        entries.upsert(withPlace("e-3", 3, "the harbour"))
+        entries.upsert(withPlace("e-4", 4, "gone").copy(deletedAt = 9))
+
+        val names = entries.observeUsedPlaceNames().first()
+
+        assertEquals(listOf("the harbour", "home"), names)
+    }
+
+    @Test
     fun `the database has the tables the app needs`() = runTest {
         insert("a thought")
 

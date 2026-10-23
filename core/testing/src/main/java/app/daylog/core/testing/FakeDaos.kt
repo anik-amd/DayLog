@@ -80,6 +80,16 @@ class FakeEntryDao : EntryDao {
 
     override suspend fun findAll(): List<EntryEntity> =
         entries.value.sortedBy { it.createdAt }
+
+    override fun observeUsedPlaceNames(): Flow<List<String>> =
+        entries.map { list ->
+            list.asSequence()
+                .filter { it.deletedAt == null && it.placeName != null }
+                .sortedByDescending { it.updatedAt }
+                .map { it.placeName as String }
+                .distinct()
+                .toList()
+        }
 }
 
 /**

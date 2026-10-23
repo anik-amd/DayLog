@@ -44,6 +44,7 @@ import app.daylog.core.designsystem.icon.DayLogIcons
 import app.daylog.core.designsystem.theme.DayLogTheme
 import app.daylog.core.model.MarkdownToggle
 import app.daylog.core.model.TagExtractor
+import app.daylog.core.data.place.PickedPlace
 import app.daylog.feature.place.PlaceDialog
 import app.daylog.feature.tag.TagPickerDialog
 
@@ -71,8 +72,8 @@ fun FullScreenEditor(
     onRemovePhoto: (String) -> Unit,
     /** Answers with the tag's name; the editor writes it into the text. */
     onAddTag: (String) -> Unit = {},
-    /** Answers with the place's name, or null when it is taken off. */
-    onSetPlace: (String?) -> Unit = {},
+    /** Answers with the picked place, or null when it is taken off. */
+    onSetPlace: (PickedPlace?) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val colors = DayLogTheme.colors
@@ -168,7 +169,7 @@ fun FullScreenEditor(
                     val is24Hour = DateFormat.is24HourFormat(LocalContext.current)
                     val momentText = buildString {
                         append(momentLabel(createdAt, is24Hour = is24Hour))
-                        if (state.place != null) append("  ·  ${state.place}")
+                        if (state.place != null) append("  ·  ${state.place.name}")
                         append("  ·  ${wordCount(value.text)} words")
                     }
                     // The moment is tappable, and the pencil says so: a date you can put right
@@ -288,6 +289,7 @@ fun FullScreenEditor(
     if (pickingPlace) {
         PlaceDialog(
             place = state.place,
+            usedNames = state.places,
             onSet = onSetPlace,
             onDismiss = { pickingPlace = false },
         )

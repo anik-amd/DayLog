@@ -237,11 +237,13 @@ usual React Native costs are gone — but the budget is still real.
 
 Everything is local. The app works with no network at all.
 
-- Entries, tags, media and settings live on the device.
+- Entries, tags, media, places and settings live on the device.
 - The only network use is fetching weather and resolving a place name.
 - Cloud backup is a later phase. The data shape is already sync-ready: `uid`, `updatedAt` and a
   `deletedAt` tombstone, so adding sync never needs a migration.
-- `INTERNET` is the only permission the app asks for.
+- The app asks for two permissions: `INTERNET`, and `ACCESS_COARSE_LOCATION` — asked on the tap
+  of "My location" in the place picker, for the last known fix, and for nothing else. A fix is
+  read, named, and stored on the entry; it is never sent anywhere.
 
 ---
 

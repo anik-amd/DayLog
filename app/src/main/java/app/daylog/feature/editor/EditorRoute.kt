@@ -13,6 +13,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import app.daylog.core.data.place.PickedPlace
+import app.daylog.core.data.place.resolvePlace
 import app.daylog.core.data.repository.EntryRepository
 import app.daylog.core.data.repository.MediaStore
 import app.daylog.di.AppContainer
@@ -33,7 +35,7 @@ fun EditorRoute(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     initialText: String = "",
-    initialPlace: String? = null,
+    initialPlace: PickedPlace? = null,
 ) {
     val viewModel: EditorViewModel = viewModel(
         key = uid ?: "new",
@@ -83,7 +85,15 @@ fun EditorRoute(
         state = state,
         onTextChanged = viewModel::onTextChanged,
         onChangeTime = viewModel::setTime,
-        onSetPlace = viewModel::setPlace,
+        onSetPlace = { picked ->
+            if (picked == null || picked.latitude != null || picked.name.isBlank()) {
+                viewModel.setPlace(picked)
+            } else {
+                scope.launch {
+                    viewModel.setPlace(resolvePlace(container.weatherService, picked.name))
+                }
+            }
+        },
         onAddPhoto = {
             picker.launch(
                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
@@ -106,7 +116,7 @@ fun editorViewModelFactory(
     mediaStore: MediaStore,
     uid: String?,
     initialText: String,
-    initialPlace: String? = null,
+    var initialPlace: PickedPlace? = null,
 ): ViewModelProvider.Factory = viewModelFactory {
     initializer {
         EditorViewModel(

@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.daylog.core.common.AppDispatchers
+import app.daylog.core.data.place.PickedPlace
 import app.daylog.core.data.repository.EntryRepository
 import app.daylog.core.data.repository.MediaStore
 import app.daylog.core.model.DayGroup
@@ -41,9 +42,15 @@ data class TimelineUiState(
     /** True while the draft is being written to the database. */
     val isSaving: Boolean = false,
     /** The place the quick bar's thought carries, when one was picked. */
-    val draftPlace: String? = null,
+    val draftPlace: PickedPlace? = null,
     /** How many entries were written on this day in past years. */
     val onThisDayCount: Int = 0,
+    /**
+     * The place names in use, for picking and for filtering.
+     */
+    val places: List<String> = emptyList(),
+    /** The places the writer has chosen to filter by. */
+    val selectedPlaces: Set<String> = emptySet(),
 )
 
 /**
@@ -54,7 +61,7 @@ data class DraftHandoff(
     /** The entry that already exists for this thought, when one has been started. */
     val uid: String?,
     /** The place the thought was given, when one was picked. */
-    val place: String? = null,
+    val place: PickedPlace? = null,
 )
 
 /**
@@ -78,10 +85,10 @@ class TimelineViewModel(
     /**
      * The place the thought in the quick bar happened at.
      *
-     * Null is "not picked", the empty string is "picked and then taken off again" — the difference
-     * decides whether the save leaves whatever place the entry already has.
+     * Null is "not picked", and a name that is blank is "picked and then taken off again" — the
+     * difference decides whether the save leaves whatever place the entry already has.
      */
-    private val draftPlace = MutableStateFlow<String?>(null)
+    private val draftPlace = MutableStateFlow<PickedPlace?>(null)
 
     /**
      * The entry a photo has already started.
@@ -97,15 +104,28 @@ class TimelineViewModel(
     private val selectedTags = MutableStateFlow<Set<String>>(emptySet())
 
     /**
+     * The places the writer has chosen to filter by.
+     */
+    private val selectedPlaces = MutableStateFlow<Set<String>>(emptySet())
+
+    /**
      * The entries the timeline shows.
      *
-     * With no tags chosen that is everything; with tags chosen it is the entries that carry all
-     * of them.
+     * With no tags and no places chosen that is everything; with tags chosen it is the entries
+     * that carry all of them; with places chosen it is the ones at any of them. The tags and the
+     * places work together.
      */
     private val shownEntries: Flow<List<Entry>> =
-        selectedTags.flatMapLatest { tags ->
-            repository.observeEntriesWithAllTags(tags.toList())
-        }
+        combine(selectedTags, selectedPlaces) { tags, places -> tags to places }
+            .flatMapLatest { (tags, places) ->
+                repository.observeEntriesWithAllTags(tags.toList()).map { entries ->
+                    if (places.isEmpty()) {
+                        entries
+                    } else {
+                        entries.filter { it.placeName in places }
+                    }
+                }
+            }
 
     /**
      * Every entry, for the "on this day" count — that one is not filtered by the chosen tags.
@@ -113,13 +133,23 @@ class TimelineViewModel(
     private val allEntries: Flow<List<Entry>> = repository.observeEntries()
 
     /**
-     * The content of the timeline: the entries, the tags and the photos.
+     * The content of the timeline: the entries, the tags, the places and the photos.
      */
     private val content = combine(
         shownEntries,
         repository.observeTags(),
         repository.observeMediaByEntry(),
-    ) { entries, tags, media -> Triple(entries, tags, media) }
+        repository.observeUsedPlaceNames(),
+    ) { entries, tags, media, places ->
+        Content(entries, tags, media, places)
+    }
+
+    private data class Content(
+        val entries: List<Entry>,
+        val tags: List<Tag>,
+        val media: Map<String, List<Media>>,
+        val places: List<String>,
+    )
 
     /**
      * How many entries were written on this day in past years, for the badge on the top bar.
@@ -134,7 +164,7 @@ class TimelineViewModel(
     private data class DraftBits(
         val text: String,
         val isSaving: Boolean,
-        val place: String?,
+        val place: PickedPlace?,
     )
 
     private val draftBits = combine(draft, saving, draftPlace) { text, isSaving, place ->
@@ -145,18 +175,21 @@ class TimelineViewModel(
         combine(
             content,
             selectedTags,
+            selectedPlaces,
             draftBits,
             onThisDayCountFlow,
-        ) { (entries, tags, media), chosen, bits, count ->
+        ) { content, chosenTags, chosenPlaces, bits, count ->
             TimelineUiState(
-                groups = DayGrouper.group(entries, locale = locale),
-                tags = tags,
-                media = media,
-                selectedTags = chosen,
+                groups = DayGrouper.group(content.entries, locale = locale),
+                tags = content.tags,
+                media = content.media,
+                selectedTags = chosenTags,
+                places = content.places,
+                selectedPlaces = chosenPlaces,
                 draft = bits.text,
                 isSaving = bits.isSaving,
                 // "Picked and removed" reads as no place, as far as the screen is concerned.
-                draftPlace = bits.place?.takeIf { it.isNotBlank() },
+                draftPlace = bits.place?.takeIf { it.name.isNotBlank() },
                 onThisDayCount = count,
             )
         }.stateIn(
@@ -185,6 +218,25 @@ class TimelineViewModel(
     }
 
     /**
+     * Turns a place filter on or off.
+     *
+     * Two places chosen together show the entries at either of them — a place is where something
+     * happened, and it happened in only one.
+     */
+    fun togglePlace(name: String) {
+        selectedPlaces.value = selectedPlaces.value.let { chosen ->
+            if (name in chosen) chosen - name else chosen + name
+        }
+    }
+
+    /**
+     * Takes off every place filter.
+     */
+    fun clearPlaces() {
+        selectedPlaces.value = emptySet()
+    }
+
+    /**
      * The writer typed something.
      *
      * Nothing is saved here. An empty field makes room for the next thought; a thought that a
@@ -202,8 +254,8 @@ class TimelineViewModel(
     /**
      * The place the thought happened at, or null when it is taken off.
      */
-    fun setDraftPlace(name: String?) {
-        draftPlace.value = name ?: ""
+    fun setDraftPlace(place: PickedPlace?) {
+        draftPlace.value = place ?: PickedPlace(name = "")
     }
 
     /**
@@ -220,11 +272,14 @@ class TimelineViewModel(
             saving.value = true
             try {
                 if (text.isNotBlank() || draftUid != null) {
+                    val takingPlaceOff = place != null && place.name.isBlank()
                     draftUid = repository.save(
                         content = text,
                         uid = draftUid,
-                        placeName = place?.takeIf { it.isNotBlank() },
-                        placeCleared = place == "",
+                        placeName = place?.name?.takeIf { it.isNotBlank() },
+                        placeLat = place?.latitude,
+                        placeLon = place?.longitude,
+                        placeCleared = takingPlaceOff,
                     )
                     draft.value = ""
                     draftUid = null
@@ -264,7 +319,7 @@ class TimelineViewModel(
     fun handOffDraft(): DraftHandoff {
         val handedText = draft.value
         val handedUid = draftUid
-        val handedPlace = draftPlace.value?.takeIf { it.isNotBlank() }
+        val handedPlace = draftPlace.value?.takeIf { it.name.isNotBlank() }
         draft.value = ""
         draftUid = null
         draftPlace.value = null

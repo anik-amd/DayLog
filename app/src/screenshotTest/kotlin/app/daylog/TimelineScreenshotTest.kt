@@ -17,6 +17,7 @@ import com.android.tools.screenshot.PreviewTest
 import app.daylog.core.designsystem.component.DLIconButton
 import app.daylog.core.designsystem.component.DLTopBar
 import app.daylog.core.designsystem.theme.DayLogTheme
+import app.daylog.core.data.place.PickedPlace
 import app.daylog.core.model.DayGroup
 import app.daylog.core.model.DayLogThemeMode
 import app.daylog.core.model.Entry
@@ -172,11 +173,12 @@ private fun DayLogPreview(dark: Boolean = false) {
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 96.dp),
             ) {
                 QuickEntryBar(
-                    value = "",
+                    value = "A thought at the water",
                     onValueChange = {},
                     onSave = {},
                     onExpand = {},
                     onAddPhoto = {},
+                    place = PickedPlace(name = "the harbour"),
                 )
             }
         }

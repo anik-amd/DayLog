@@ -287,6 +287,74 @@ class TimelineViewModelTest {
             assertEquals(2, entries.size)
         }
 
+    @Test
+    fun `choosing a place narrows the timeline to the entries that were written there`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            repository.save("at the sea", placeName = "the harbour")
+            repository.save("at the desk", placeName = "home")
+            repository.save("nowhere in particular")
+            val viewModel = viewModel()
+            watchState(viewModel)
+
+            viewModel.togglePlace("the harbour")
+            advanceUntilIdle()
+
+            val entries = viewModel.state.value.groups.flatMap { it.entries }
+            assertEquals(1, entries.size)
+            assertEquals("at the sea", entries.first().content)
+        }
+
+    @Test
+    fun `two places chosen together show the entries at either of them`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            repository.save("at the sea", placeName = "the harbour")
+            repository.save("at the desk", placeName = "home")
+            val viewModel = viewModel()
+            watchState(viewModel)
+
+            viewModel.togglePlace("the harbour")
+            viewModel.togglePlace("home")
+            advanceUntilIdle()
+
+            val entries = viewModel.state.value.groups.flatMap { it.entries }
+            assertEquals(2, entries.size)
+        }
+
+    @Test
+    fun `a place filter and a tag filter work together`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            repository.save("a stormy walk #sea", placeName = "the harbour")
+            repository.save("a calm walk #sea", placeName = "home")
+            repository.save("a walk with no tag", placeName = "the harbour")
+            val viewModel = viewModel()
+            watchState(viewModel)
+
+            viewModel.toggleTag("sea")
+            viewModel.togglePlace("the harbour")
+            advanceUntilIdle()
+
+            val entries = viewModel.state.value.groups.flatMap { it.entries }
+            assertEquals(1, entries.size)
+            assertEquals("a stormy walk #sea", entries.first().content)
+        }
+
+    @Test
+    fun `clearing the places brings everything back`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            repository.save("at the sea", placeName = "the harbour")
+            repository.save("at the desk", placeName = "home")
+            val viewModel = viewModel()
+            watchState(viewModel)
+
+            viewModel.togglePlace("the harbour")
+            advanceUntilIdle()
+            viewModel.clearPlaces()
+            advanceUntilIdle()
+
+            val entries = viewModel.state.value.groups.flatMap { it.entries }
+            assertEquals(2, entries.size)
+        }
+
     /**
      * Watches the state, so the flow is running while the test moves time.
      *

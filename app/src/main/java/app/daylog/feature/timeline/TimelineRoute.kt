@@ -35,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -42,6 +43,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import app.daylog.core.data.place.PickedPlace
+import app.daylog.core.data.place.resolvePlace
 import app.daylog.core.designsystem.component.DLEmptyState
 import app.daylog.core.designsystem.component.DLIconButton
 import app.daylog.core.designsystem.component.DLTopBar
@@ -49,6 +52,7 @@ import app.daylog.core.designsystem.icon.DayLogIcons
 import app.daylog.core.designsystem.theme.DayLogTheme
 import app.daylog.core.model.Tag
 import app.daylog.di.AppContainer
+import kotlinx.coroutines.launch
 
 /**
  * The timeline, wired up.
@@ -60,9 +64,9 @@ import app.daylog.di.AppContainer
 fun TimelineRoute(
     container: AppContainer,
     /** Opens the full editor with the text and the place the quick bar handed over. */
-    onOpenEditor: (String, String?) -> Unit,
+    onOpenEditor: (String, PickedPlace?) -> Unit,
     /** Opens the editor on an entry that already exists, with the handover alongside it. */
-    onOpenEntryEditor: (String, String, String?) -> Unit,
+    onOpenEntryEditor: (String, String, PickedPlace?) -> Unit,
     onOpenSettings: () -> Unit,
     onOpenEntry: (String) -> Unit,
     onOpenSearch: () -> Unit,
@@ -85,6 +89,21 @@ fun TimelineRoute(
     }
 
     var filterOpen by remember { mutableStateOf(false) }
+
+    /**
+     * A typed name wants its coordinates; a device fix already has them. The resolve is the
+     * route's to make, so the state holder never touches the network.
+     */
+    val scope = rememberCoroutineScope()
+    val setPlace: (PickedPlace?) -> Unit = { picked ->
+        if (picked == null || picked.latitude != null || picked.name.isBlank()) {
+            viewModel.setDraftPlace(picked)
+        } else {
+            scope.launch {
+                viewModel.setDraftPlace(resolvePlace(container.weatherService, picked.name))
+            }
+        }
+    }
 
     val listState = rememberLazyListState()
     var barExpanded by remember { mutableStateOf(true) }
@@ -131,7 +150,7 @@ fun TimelineRoute(
                         imageVector = DayLogIcons.Tag,
                         contentDescription = "Filter",
                         onClick = { filterOpen = true },
-                        tint = if (state.selectedTags.isEmpty()) {
+                        tint = if (state.selectedTags.isEmpty() && state.selectedPlaces.isEmpty()) {
                             DayLogTheme.colors.inkMuted
                         } else {
                             DayLogTheme.colors.accent
@@ -195,7 +214,8 @@ fun TimelineRoute(
                     isSaving = state.isSaving,
                     tags = state.tags,
                     place = state.draftPlace,
-                    onPlaceChange = viewModel::setDraftPlace,
+                    usedNames = state.places,
+                    onPlaceChange = setPlace,
                 )
             }
         }
@@ -229,19 +249,44 @@ fun TimelineRoute(
             onDismissRequest = { filterOpen = false },
             title = { Text("Filter") },
             text = {
-                if (state.tags.isEmpty()) {
+                if (state.tags.isEmpty() && state.places.isEmpty()) {
                     DLEmptyState(
-                        title = "No tags yet",
-                        body = "Tags appear once you write #tagged entries.",
+                        title = "Nothing to filter by yet",
+                        body = "Tags and places appear once you write entries that carry them.",
                     )
                 } else {
                     LazyColumn {
-                        items(state.tags) { tag: Tag ->
-                            FilterChip(
-                                selected = tag.name in state.selectedTags,
-                                onClick = { viewModel.toggleTag(tag.name) },
-                                label = { Text("#${tag.name} (${tag.count})") },
-                            )
+                        if (state.tags.isNotEmpty()) {
+                            item {
+                                Text(
+                                    "Tags",
+                                    style = DayLogTheme.typography.label,
+                                    color = DayLogTheme.colors.inkMuted,
+                                )
+                            }
+                            items(state.tags) { tag: Tag ->
+                                FilterChip(
+                                    selected = tag.name in state.selectedTags,
+                                    onClick = { viewModel.toggleTag(tag.name) },
+                                    label = { Text("#${tag.name} (${tag.count})") },
+                                )
+                            }
+                        }
+                        if (state.places.isNotEmpty()) {
+                            item {
+                                Text(
+                                    "Places",
+                                    style = DayLogTheme.typography.label,
+                                    color = DayLogTheme.colors.inkMuted,
+                                )
+                            }
+                            items(state.places) { name ->
+                                FilterChip(
+                                    selected = name in state.selectedPlaces,
+                                    onClick = { viewModel.togglePlace(name) },
+                                    label = { Text(name) },
+                                )
+                            }
                         }
                     }
                 }
@@ -252,6 +297,7 @@ fun TimelineRoute(
             dismissButton = {
                 TextButton(onClick = {
                     viewModel.clearTags()
+                    viewModel.clearPlaces()
                     filterOpen = false
                 }) { Text("Clear") }
             },

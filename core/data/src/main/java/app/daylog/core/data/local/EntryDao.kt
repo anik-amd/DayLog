@@ -18,6 +18,19 @@ interface EntryDao {
     @Query("SELECT * FROM entries WHERE deletedAt IS NULL ORDER BY createdAt DESC")
     fun observeEntries(): Flow<List<EntryEntity>>
 
+    /**
+     * The place names in use, most recently written-to first.
+     *
+     * This is what a place picker offers for reuse: the names the writer has already given, so a
+     * thought about the same corner of the world does not have to be spelled out again.
+     */
+    @Query(
+        "SELECT placeName AS name FROM entries " +
+            "WHERE deletedAt IS NULL AND placeName IS NOT NULL " +
+            "GROUP BY placeName ORDER BY MAX(updatedAt) DESC",
+    )
+    fun observeUsedPlaceNames(): Flow<List<String>>
+
     @Query("SELECT * FROM entries WHERE uid = :uid AND deletedAt IS NULL")
     fun observeEntry(uid: String): Flow<EntryEntity?>
 

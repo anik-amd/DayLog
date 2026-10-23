@@ -2,6 +2,7 @@ package app.daylog.feature.editor
 
 import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.daylog.core.data.place.PickedPlace
 import app.daylog.core.data.repository.EntryRepository
 import app.daylog.core.testing.FakeEntryDao
 import app.daylog.core.testing.FakeEntryFtsDao
@@ -55,7 +56,7 @@ class EditorViewModelTest {
     private fun viewModel(
         uid: String? = null,
         initialText: String = "",
-        initialPlace: String? = null,
+        initialPlace: PickedPlace? = null,
     ) = EditorViewModel(
         repository = repository,
         mediaStore = mediaStore,
@@ -130,11 +131,13 @@ class EditorViewModelTest {
         runTest(mainDispatcherRule.dispatcher) {
             val viewModel = viewModel(initialText = "a thought")
 
-            viewModel.setPlace("the harbour")
+            viewModel.setPlace(PickedPlace(name = "the harbour", latitude = 11.0, longitude = 76.9))
             viewModel.save()
             advanceUntilIdle()
 
             assertEquals("the harbour", entryDao.stored.first().placeName)
+            assertEquals(11.0, entryDao.stored.first().placeLat)
+            assertEquals(76.9, entryDao.stored.first().placeLon)
         }
 
     @Test
@@ -168,10 +171,10 @@ class EditorViewModelTest {
     @Test
     fun `a place handed over by the quick bar goes with the new entry`() =
         runTest(mainDispatcherRule.dispatcher) {
-            val viewModel = viewModel(initialText = "a thought", initialPlace = "the harbour")
+            val viewModel = viewModel(initialText = "a thought", initialPlace = PickedPlace(name = "the harbour"))
             val state = viewModel.state.first { it.text != null }
 
-            assertEquals("the harbour", state.place)
+            assertEquals("the harbour", state.place?.name)
         }
 
     @Test

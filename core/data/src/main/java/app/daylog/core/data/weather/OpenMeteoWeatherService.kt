@@ -37,11 +37,10 @@ class OpenMeteoWeatherService(
             json.parseToJsonElement(body).jsonObject["results"]?.jsonArray.orEmpty().map { result ->
                 val obj = result.jsonObject
                 Place(
-                    name = listOfNotNull(
-                        obj["name"]?.jsonPrimitive?.content,
-                        obj["admin1"]?.jsonPrimitive?.content,
-                        obj["country"]?.jsonPrimitive?.content,
-                    ).joinToString(", "),
+                    // The trimmed name is what a chip shows: "Coimbatore", not a full postal
+                    // address. The country rides along for a picker that wants to disambiguate
+                    // two towns that share a name.
+                    name = obj["name"]?.jsonPrimitive?.content ?: trimmed,
                     latitude = obj["latitude"]?.jsonPrimitive?.content?.toDoubleOrNull() ?: 0.0,
                     longitude = obj["longitude"]?.jsonPrimitive?.content?.toDoubleOrNull() ?: 0.0,
                     country = obj["country"]?.jsonPrimitive?.content,

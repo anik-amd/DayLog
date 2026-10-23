@@ -3,6 +3,9 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Asked on the tap that wants it, for the last-known fix that names where a thought happened. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
     <application
         android:name=".DayLogApplication"
         android:allowBackup="true"
