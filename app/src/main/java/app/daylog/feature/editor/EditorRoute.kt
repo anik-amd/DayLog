@@ -116,7 +116,7 @@ fun editorViewModelFactory(
     mediaStore: MediaStore,
     uid: String?,
     initialText: String,
-    var initialPlace: PickedPlace? = null,
+    initialPlace: PickedPlace? = null,
 ): ViewModelProvider.Factory = viewModelFactory {
     initializer {
         EditorViewModel(
