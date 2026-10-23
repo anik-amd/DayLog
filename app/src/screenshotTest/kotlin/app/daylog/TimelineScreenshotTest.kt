@@ -24,6 +24,8 @@ import app.daylog.core.model.OnThisDayYear
 import app.daylog.feature.timeline.QuickEntryBar
 import app.daylog.feature.timeline.TimelineScreen
 import app.daylog.feature.calendar.CalendarScreen
+import app.daylog.feature.editor.EditorUiState
+import app.daylog.feature.editor.FullScreenEditor
 import app.daylog.feature.entry.EntryDetailScreen
 import app.daylog.feature.onthisday.OnThisDayScreen
 import app.daylog.feature.search.SearchScreen
@@ -337,9 +339,27 @@ fun OnThisDayPreview() {
 }
 
 @PreviewTest
-@Preview(name = "Statistics", widthDp = 400, heightDp = 780, showBackground = true)
+@Preview(name = "Editor", widthDp = 400, heightDp = 780, showBackground = true)
 @Composable
-fun StatisticsPreview() {
+fun EditorPreview() {
+    DayLogTheme {
+        FullScreenEditor(
+            state = EditorUiState(
+                text = "# The train was late\n" +
+                    "So I read the whole of the essay on the way in and arrived with something to think " +
+                    "about. **That** was the best part of the morning. #reading",
+                uid = "1",
+                createdAt = at(today, 9, 14),
+            ),
+            onTextChanged = {},
+            onChangeTime = {},
+            onSave = {},
+            onDiscard = {},
+            onAddPhoto = {},
+            onRemovePhoto = {},
+        )
+    }
+}
     DayLogTheme {
         StatisticsScreen(
             statistics = calculateStatistics(

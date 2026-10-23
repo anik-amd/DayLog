@@ -1,5 +1,6 @@
 package app.daylog.feature.timeline
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -55,6 +56,7 @@ fun QuickEntryBar(
         color = colors.surfaceContainer,
         contentColor = colors.ink,
         tonalElevation = 2.dp,
+        border = BorderStroke(1.dp, colors.rule),
     ) {
         Column(
             modifier = Modifier
