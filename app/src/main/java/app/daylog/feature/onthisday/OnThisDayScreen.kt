@@ -12,6 +12,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import app.daylog.core.common.plainPreview
 import app.daylog.core.common.toLocalDateTime
 import app.daylog.core.designsystem.component.DLEmptyState
 import app.daylog.core.designsystem.component.DLText
@@ -121,10 +122,12 @@ private fun MemoryRow(
             color = colors.inkFaint,
         )
         DLText(
-            text = entry.content,
+            // This day is read as a glance, like the timeline's rows: the writing without its
+            // markdown clothing, and nothing glowing.
+            text = plainPreview(entry.content, maxLines = null),
             style = DayLogTheme.typography.entryBody,
             color = colors.ink,
-            annotated = true,
+            annotated = false,
         )
     }
 }

@@ -114,6 +114,19 @@ object MarkdownParser {
                 continue
             }
 
+            // A tag is read where it is written: a `#word` on its own gets the accent, so the
+            // filing shows through the prose. The rules are the TagExtractor's, so what is
+            // highlighted is what is tagged.
+            if (opensTag(text, index)) {
+                val end = tagEnd(text, index + 1)
+                flush()
+                pushStyle(SpanStyle(color = colors.accent))
+                append(text.substring(index, end))
+                pop()
+                index = end
+                continue
+            }
+
             val marker = MARKERS.firstOrNull { text.startsWith(it, index) }
             if (marker != null && opensHere(text, index)) {
                 val close = text.indexOf(marker, index + marker.length)
@@ -172,6 +185,30 @@ object MarkdownParser {
      */
     private fun opensHere(text: String, index: Int): Boolean =
         index == 0 || !text[index - 1].isLetterOrDigit()
+
+    /**
+     * Whether a tag starts at [index]: a hash on a boundary, followed by a first character a tag
+     * can carry. The same bounds the extractor reads, so the highlight and the tag agree.
+     */
+    private fun opensTag(text: String, index: Int): Boolean {
+        if (text[index] != '#') return false
+        val onBoundary = index == 0 || text[index - 1].isWhitespace()
+        if (!onBoundary) return false
+        val first = text.getOrNull(index + 1) ?: return false
+        return first.isLetter() || first == '_'
+    }
+
+    /**
+     * The index just past the last character of a tag that begins at [start].
+     */
+    private fun tagEnd(text: String, start: Int): Int {
+        var end = start
+        while (end < text.length) {
+            val character = text[end]
+            if (character.isLetterOrDigit() || character == '_' || character == '-') end++ else break
+        }
+        return end
+    }
 
     /**
      * Whether a marker may end here.

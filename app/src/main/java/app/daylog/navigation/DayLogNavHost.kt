@@ -60,6 +60,7 @@ fun DayLogNavHost(
 ) {
     val navController = rememberNavController()
     var editorText by remember { mutableStateOf("") }
+    var editorPlace by remember { mutableStateOf<String?>(null) }
 
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
@@ -73,12 +74,14 @@ fun DayLogNavHost(
             composable(Routes.Timeline) {
                 TimelineRoute(
                     container = container,
-                    onOpenEditor = { text ->
+                    onOpenEditor = { text, place ->
                         editorText = text
+                        editorPlace = place
                         navController.navigate(Routes.Editor)
                     },
-                    onOpenEntryEditor = { uid, text ->
+                    onOpenEntryEditor = { uid, text, place ->
                         editorText = text
+                        editorPlace = place
                         navController.navigate("editor?uid=$uid")
                     },
                     onOpenSettings = {
@@ -152,8 +155,10 @@ fun DayLogNavHost(
                     container = container,
                     uid = uid,
                     initialText = editorText,
+                    initialPlace = editorPlace,
                     onBack = {
                         editorText = ""
+                        editorPlace = null
                         navController.popBackStack()
                     },
                 )
@@ -164,8 +169,10 @@ fun DayLogNavHost(
                     container = container,
                     uid = null,
                     initialText = editorText,
+                    initialPlace = editorPlace,
                     onBack = {
                         editorText = ""
+                        editorPlace = null
                         navController.popBackStack()
                     },
                 )

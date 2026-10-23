@@ -33,6 +33,7 @@ fun EditorRoute(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     initialText: String = "",
+    initialPlace: String? = null,
 ) {
     val viewModel: EditorViewModel = viewModel(
         key = uid ?: "new",
@@ -41,6 +42,7 @@ fun EditorRoute(
             mediaStore = container.mediaRepository,
             uid = uid,
             initialText = initialText,
+            initialPlace = initialPlace,
         ),
     )
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -81,6 +83,7 @@ fun EditorRoute(
         state = state,
         onTextChanged = viewModel::onTextChanged,
         onChangeTime = viewModel::setTime,
+        onSetPlace = viewModel::setPlace,
         onAddPhoto = {
             picker.launch(
                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
@@ -103,6 +106,7 @@ fun editorViewModelFactory(
     mediaStore: MediaStore,
     uid: String?,
     initialText: String,
+    initialPlace: String? = null,
 ): ViewModelProvider.Factory = viewModelFactory {
     initializer {
         EditorViewModel(
@@ -110,6 +114,7 @@ fun editorViewModelFactory(
             mediaStore = mediaStore,
             uid = uid,
             initialText = initialText,
+            initialPlace = initialPlace,
         )
     }
 }

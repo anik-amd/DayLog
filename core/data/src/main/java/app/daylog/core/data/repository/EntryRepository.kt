@@ -128,6 +128,7 @@ class EntryRepository(
         placeName: String? = null,
         placeLat: Double? = null,
         placeLon: Double? = null,
+        placeCleared: Boolean = false,
         weatherSummary: String? = null,
         weatherCode: Int? = null,
     ): String {
@@ -142,9 +143,11 @@ class EntryRepository(
             createdAt = createdAt ?: existing?.createdAt ?: timestamp,
             updatedAt = timestamp,
             deletedAt = null,
-            placeName = placeName ?: existing?.placeName,
-            placeLat = placeLat ?: existing?.placeLat,
-            placeLon = placeLon ?: existing?.placeLon,
+            // Taking the place off means taking the coordinates with it: a name without
+            // coordinates is not a place.
+            placeName = if (placeCleared) null else placeName ?: existing?.placeName,
+            placeLat = if (placeCleared) null else placeLat ?: existing?.placeLat,
+            placeLon = if (placeCleared) null else placeLon ?: existing?.placeLon,
             weatherSummary = weatherSummary ?: existing?.weatherSummary,
             weatherCode = weatherCode ?: existing?.weatherCode,
             syncedAt = existing?.syncedAt,

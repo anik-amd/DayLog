@@ -52,11 +52,16 @@ class EditorViewModelTest {
         now = { NOW },
     )
 
-    private fun viewModel(uid: String? = null, initialText: String = "") = EditorViewModel(
+    private fun viewModel(
+        uid: String? = null,
+        initialText: String = "",
+        initialPlace: String? = null,
+    ) = EditorViewModel(
         repository = repository,
         mediaStore = mediaStore,
         uid = uid,
         initialText = initialText,
+        initialPlace = initialPlace,
         now = { NOW },
     )
 
@@ -118,6 +123,55 @@ class EditorViewModelTest {
             advanceUntilIdle()
 
             assertEquals(0, entryDao.stored.size)
+        }
+
+    @Test
+    fun `a place the editor names is kept by the save`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val viewModel = viewModel(initialText = "a thought")
+
+            viewModel.setPlace("the harbour")
+            viewModel.save()
+            advanceUntilIdle()
+
+            assertEquals("the harbour", entryDao.stored.first().placeName)
+        }
+
+    @Test
+    fun `a place the editor takes off is cleared by the save`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val uid = repository.save("a thought", placeName = "the harbour")
+
+            val viewModel = viewModel(uid = uid)
+            advanceUntilIdle()
+            viewModel.setPlace(null)
+            viewModel.save()
+            advanceUntilIdle()
+
+            assertNull(entryDao.stored.first().placeName)
+        }
+
+    @Test
+    fun `a place the editor never touches is left as it was`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val uid = repository.save("a thought", placeName = "the harbour")
+
+            val viewModel = viewModel(uid = uid)
+            advanceUntilIdle()
+            viewModel.onTextChanged("a thought, edited")
+            viewModel.save()
+            advanceUntilIdle()
+
+            assertEquals("the harbour", entryDao.stored.first().placeName)
+        }
+
+    @Test
+    fun `a place handed over by the quick bar goes with the new entry`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val viewModel = viewModel(initialText = "a thought", initialPlace = "the harbour")
+            val state = viewModel.state.first { it.text != null }
+
+            assertEquals("the harbour", state.place)
         }
 
     @Test

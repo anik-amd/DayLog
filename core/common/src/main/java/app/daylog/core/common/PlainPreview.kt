@@ -6,8 +6,10 @@ package app.daylog.core.common
  * The timeline is read at a glance, so it shows the words without their markdown clothing: the
  * markers, the heading hashes and the bullet dashes are taken off, and the blank lines between
  * them, so what is left reads like a sentence rather than like source.
+ *
+ * [maxLines] trims the preview; null keeps the whole of the writing.
  */
-fun plainPreview(content: String, maxLines: Int = 4): String {
+fun plainPreview(content: String, maxLines: Int? = 4): String {
     val stripped = content.lines().map { line ->
         var s = line.trim()
         // Headings.
@@ -23,5 +25,6 @@ fun plainPreview(content: String, maxLines: Int = 4): String {
         s
     }.filter { it.isNotBlank() }
 
-    return stripped.take(maxLines).joinToString("\n")
+    return maxLines?.let(stripped::take)?.joinToString("\n")
+        ?: stripped.joinToString("\n")
 }

@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.daylog.core.common.DayLabels
+import app.daylog.core.common.plainPreview
 import app.daylog.core.designsystem.component.DLText
 import app.daylog.core.designsystem.component.pressable
 import app.daylog.core.designsystem.theme.DayLogTheme
@@ -50,11 +51,13 @@ internal fun SelectedDayEntries(
             color = colors.ink,
         )
         entries.forEach { entry ->
+            // The grid's entries read as a glance, like the timeline's do: the writing without
+            // its markdown clothing, and nothing glowing.
             DLText(
-                text = entry.content,
+                text = plainPreview(entry.content, maxLines = null),
                 style = DayLogTheme.typography.entryBody,
                 color = colors.ink,
-                annotated = true,
+                annotated = false,
                 modifier = Modifier
                     .fillMaxWidth()
                     .pressable(onClick = { onOpenEntry(entry.uid) }),

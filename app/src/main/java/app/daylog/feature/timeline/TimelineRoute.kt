@@ -59,8 +59,10 @@ import app.daylog.di.AppContainer
 @Composable
 fun TimelineRoute(
     container: AppContainer,
-    onOpenEditor: (String) -> Unit,
-    onOpenEntryEditor: (String, String) -> Unit,
+    /** Opens the full editor with the text and the place the quick bar handed over. */
+    onOpenEditor: (String, String?) -> Unit,
+    /** Opens the editor on an entry that already exists, with the handover alongside it. */
+    onOpenEntryEditor: (String, String, String?) -> Unit,
     onOpenSettings: () -> Unit,
     onOpenEntry: (String) -> Unit,
     onOpenSearch: () -> Unit,
@@ -185,12 +187,15 @@ fun TimelineRoute(
                     onExpand = {
                         val handoff = viewModel.handOffDraft()
                         if (handoff.uid != null) {
-                            onOpenEntryEditor(handoff.uid, handoff.text)
+                            onOpenEntryEditor(handoff.uid, handoff.text, handoff.place)
                         } else {
-                            onOpenEditor(handoff.text)
+                            onOpenEditor(handoff.text, handoff.place)
                         }
                     },
                     isSaving = state.isSaving,
+                    tags = state.tags,
+                    place = state.draftPlace,
+                    onPlaceChange = viewModel::setDraftPlace,
                 )
             }
         }

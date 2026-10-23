@@ -40,6 +40,8 @@ data class TimelineUiState(
     val draft: String = "",
     /** True while the draft is being written to the database. */
     val isSaving: Boolean = false,
+    /** The place the quick bar's thought carries, when one was picked. */
+    val draftPlace: String? = null,
     /** How many entries were written on this day in past years. */
     val onThisDayCount: Int = 0,
 )
@@ -51,6 +53,8 @@ data class DraftHandoff(
     val text: String,
     /** The entry that already exists for this thought, when one has been started. */
     val uid: String?,
+    /** The place the thought was given, when one was picked. */
+    val place: String? = null,
 )
 
 /**
@@ -70,6 +74,14 @@ class TimelineViewModel(
 
     private val draft = MutableStateFlow("")
     private val saving = MutableStateFlow(false)
+
+    /**
+     * The place the thought in the quick bar happened at.
+     *
+     * Null is "not picked", the empty string is "picked and then taken off again" — the difference
+     * decides whether the save leaves whatever place the entry already has.
+     */
+    private val draftPlace = MutableStateFlow<String?>(null)
 
     /**
      * The entry a photo has already started.
@@ -116,21 +128,35 @@ class TimelineViewModel(
         onThisDay(entries, LocalDate.now(), ZoneId.systemDefault()).sumOf { it.entries.size }
     }
 
+    /**
+     * The bar's small state, bundled so the big combine fits.
+     */
+    private data class DraftBits(
+        val text: String,
+        val isSaving: Boolean,
+        val place: String?,
+    )
+
+    private val draftBits = combine(draft, saving, draftPlace) { text, isSaving, place ->
+        DraftBits(text, isSaving, place)
+    }
+
     val state: StateFlow<TimelineUiState> =
         combine(
             content,
             selectedTags,
-            draft,
-            saving,
+            draftBits,
             onThisDayCountFlow,
-        ) { (entries, tags, media), chosen, draftText, isSaving, count ->
+        ) { (entries, tags, media), chosen, bits, count ->
             TimelineUiState(
                 groups = DayGrouper.group(entries, locale = locale),
                 tags = tags,
                 media = media,
                 selectedTags = chosen,
-                draft = draftText,
-                isSaving = isSaving,
+                draft = bits.text,
+                isSaving = bits.isSaving,
+                // "Picked and removed" reads as no place, as far as the screen is concerned.
+                draftPlace = bits.place?.takeIf { it.isNotBlank() },
                 onThisDayCount = count,
             )
         }.stateIn(
@@ -169,7 +195,15 @@ class TimelineViewModel(
 
         if (text.isBlank()) {
             draftUid = null
+            draftPlace.value = null
         }
+    }
+
+    /**
+     * The place the thought happened at, or null when it is taken off.
+     */
+    fun setDraftPlace(name: String?) {
+        draftPlace.value = name ?: ""
     }
 
     /**
@@ -180,14 +214,21 @@ class TimelineViewModel(
      */
     fun save() {
         val text = draft.value
+        val place = draftPlace.value
 
         viewModelScope.launch {
             saving.value = true
             try {
                 if (text.isNotBlank() || draftUid != null) {
-                    draftUid = repository.save(text, uid = draftUid)
+                    draftUid = repository.save(
+                        content = text,
+                        uid = draftUid,
+                        placeName = place.takeIf { it.isNotBlank() },
+                        placeCleared = place == "",
+                    )
                     draft.value = ""
                     draftUid = null
+                    draftPlace.value = null
                 }
             } finally {
                 saving.value = false
@@ -223,9 +264,11 @@ class TimelineViewModel(
     fun handOffDraft(): DraftHandoff {
         val handedText = draft.value
         val handedUid = draftUid
+        val handedPlace = draftPlace.value?.takeIf { it.isNotBlank() }
         draft.value = ""
         draftUid = null
-        return DraftHandoff(text = handedText, uid = handedUid)
+        draftPlace.value = null
+        return DraftHandoff(text = handedText, uid = handedUid, place = handedPlace)
     }
 
     /**

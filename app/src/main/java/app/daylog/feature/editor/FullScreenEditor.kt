@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -42,6 +43,8 @@ import app.daylog.core.designsystem.component.DLTopBar
 import app.daylog.core.designsystem.icon.DayLogIcons
 import app.daylog.core.designsystem.theme.DayLogTheme
 import app.daylog.core.model.MarkdownToggle
+import app.daylog.feature.place.PlaceDialog
+import app.daylog.feature.tag.TagPickerDialog
 
 /**
  * The full editor.
@@ -65,6 +68,10 @@ fun FullScreenEditor(
     onDiscard: () -> Unit,
     onAddPhoto: () -> Unit,
     onRemovePhoto: (String) -> Unit,
+    /** Answers with the tag's name; the editor writes it into the text. */
+    onAddTag: (String) -> Unit = {},
+    /** Answers with the place's name, or null when it is taken off. */
+    onSetPlace: (String?) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val colors = DayLogTheme.colors
@@ -73,6 +80,22 @@ fun FullScreenEditor(
     var menuOpen by remember { mutableStateOf(false) }
     var confirmingDiscard by remember { mutableStateOf(false) }
     var pickingMoment by remember { mutableStateOf(false) }
+    var pickingTag by remember { mutableStateOf(false) }
+    var pickingPlace by remember { mutableStateOf(false) }
+
+    /**
+     * Writes a tag into the text where the cursor is, with the space around it that a tag
+     * is read between.
+     */
+    val addTag: (String) -> Unit = { name ->
+        val at = value.selection.min.coerceIn(0, value.text.length)
+        val token = if (at == 0) "#$name " else " #$name "
+        value = TextFieldValue(
+            text = value.text.substring(0, at) + token + value.text.substring(at),
+            selection = TextRange(at + token.length),
+        )
+        onTextChanged(value.text)
+    }
 
     LaunchedEffect(state.text) {
         // The text comes back from the state holder when it changed somewhere else — when a
@@ -142,12 +165,28 @@ fun FullScreenEditor(
                 val createdAt = state.createdAt
                 if (createdAt != null) {
                     val is24Hour = DateFormat.is24HourFormat(LocalContext.current)
-                    DLText(
-                        text = momentLabel(createdAt, is24Hour = is24Hour),
+                    val momentText = buildString {
+                        append(momentLabel(createdAt, is24Hour = is24Hour))
+                        if (state.place != null) append("  ·  ${state.place}")
+                    }
+                    // The moment is tappable, and the pencil says so: a date you can put right
+                    // should not have to be guessed at.
+                    Row(
                         modifier = Modifier.clickable { pickingMoment = true },
-                        style = DayLogTheme.typography.meta,
-                        color = colors.inkMuted,
-                    )
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        DLText(
+                            text = momentText,
+                            style = DayLogTheme.typography.meta,
+                            color = colors.inkMuted,
+                        )
+                        DLIcon(
+                            imageVector = DayLogIcons.Edit,
+                            contentDescription = null,
+                            modifier = Modifier.padding(start = 6.dp),
+                            tint = colors.inkFaint,
+                        )
+                    }
                 }
                 DLText(
                     text = "${wordCount(value.text)} words",
@@ -212,6 +251,9 @@ fun FullScreenEditor(
                 onUnderline = { value = value.toggled("__") },
                 onHeading = { value = value.heading() },
                 onAddPhoto = onAddPhoto,
+                onAddTag = { pickingTag = true },
+                onPickPlace = { pickingPlace = true },
+                hasPlace = state.place != null,
             )
         }
     }
@@ -221,6 +263,25 @@ fun FullScreenEditor(
             moment = state.createdAt ?: System.currentTimeMillis(),
             onChange = onChangeTime,
             onDone = { pickingMoment = false },
+        )
+    }
+
+    if (pickingTag) {
+        TagPickerDialog(
+            tags = state.tags,
+            onPick = { name ->
+                addTag(name)
+                onAddTag(name)
+            },
+            onDismiss = { pickingTag = false },
+        )
+    }
+
+    if (pickingPlace) {
+        PlaceDialog(
+            place = state.place,
+            onSet = onSetPlace,
+            onDismiss = { pickingPlace = false },
         )
     }
 
@@ -241,8 +302,9 @@ fun FullScreenEditor(
 /**
  * The formatting toolbar.
  *
- * Four actions and no more. Each one is the markdown shortcut rather than a rich-text command,
- * because the entry is stored as markdown and has to stay editable as markdown. The photo sits
+ * Six actions and no more: the markdown shortcuts, a tag, a place and a photo. Each one is the
+ * written kind of the thing rather than a command — a tag is written in the entry, the place is
+ * named — because the entry is stored as text, and has to stay editable as text. The photo sits
  * at the end of the row, with the other edits of the entry.
  */
 @Composable
@@ -252,6 +314,9 @@ private fun EditorToolbar(
     onUnderline: () -> Unit,
     onHeading: () -> Unit,
     onAddPhoto: () -> Unit,
+    onAddTag: () -> Unit,
+    onPickPlace: () -> Unit,
+    hasPlace: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val colors = DayLogTheme.colors
@@ -275,6 +340,13 @@ private fun EditorToolbar(
             ToolbarButton(DayLogIcons.Italic, "Italic", onItalic)
             ToolbarButton(DayLogIcons.Underline, "Underline", onUnderline)
             ToolbarButton(DayLogIcons.Format, "Heading", onHeading)
+            ToolbarButton(DayLogIcons.Tag, "Add a tag", onAddTag)
+            ToolbarButton(
+                imageVector = DayLogIcons.Pin,
+                contentDescription = if (hasPlace) "Change the location" else "Add a location",
+                onClick = onPickPlace,
+                tint = if (hasPlace) colors.accent else colors.inkMuted,
+            )
             Spacer(Modifier.weight(1f))
             ToolbarButton(DayLogIcons.Image, "Add a photo", onAddPhoto)
         }
@@ -283,15 +355,16 @@ private fun EditorToolbar(
 
 @Composable
 private fun ToolbarButton(
-    icon: ImageVector,
+    imageVector: ImageVector,
     contentDescription: String,
     onClick: () -> Unit,
+    tint: Color = DayLogTheme.colors.inkMuted,
 ) {
     DLIconButton(
-        imageVector = icon,
+        imageVector = imageVector,
         contentDescription = contentDescription,
         onClick = onClick,
-        tint = DayLogTheme.colors.inkMuted,
+        tint = tint,
     )
 }
 

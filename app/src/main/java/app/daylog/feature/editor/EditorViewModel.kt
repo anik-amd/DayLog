@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import app.daylog.core.data.repository.EntryRepository
 import app.daylog.core.data.repository.MediaStore
 import app.daylog.core.model.Media
+import app.daylog.core.model.Tag
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -25,8 +26,12 @@ data class EditorUiState(
     val uid: String? = null,
     /** The moment the entry happened at, which the writer may put back. */
     val createdAt: Long? = null,
+    /** The place the entry carries, when one was named. */
+    val place: String? = null,
     /** The photos of the entry. */
     val media: List<Media> = emptyList(),
+    /** The tags in use, so a tag can be chosen rather than only typed. */
+    val tags: List<Tag> = emptyList(),
 )
 
 /**
@@ -43,6 +48,8 @@ class EditorViewModel(
     private val uid: String?,
     /** The text handed over by the quick entry bar, when there was one. */
     private val initialText: String = "",
+    /** The place handed over by the quick entry bar, when there was one. */
+    private val initialPlace: String? = null,
     private val now: () -> Long = System::currentTimeMillis,
 ) : ViewModel() {
 
@@ -50,6 +57,15 @@ class EditorViewModel(
     private val entryUid = MutableStateFlow<String?>(null)
     private val moment = MutableStateFlow<Long?>(null)
     private val photos = MutableStateFlow<List<Media>>(emptyList())
+
+    /**
+     * The place the entry carries.
+     *
+     * Null is "not yet touched" and the empty string is "touched and taken off" — the difference
+     * decides whether a save keeps the place the entry already has.
+     */
+    private val place = MutableStateFlow<String?>(null)
+    private var placeTouched = false
 
     /** The entry as it was last read from disk, for the discard to go back to. */
     private var savedText: String? = null
@@ -64,6 +80,7 @@ class EditorViewModel(
             text.value = initialText
             moment.value = now()
             entryUid.value = null
+            place.value = initialPlace ?: ""
             savedText = null
             createdHere = true
         } else {
@@ -77,6 +94,7 @@ class EditorViewModel(
                     else -> loaded.content
                 }
                 moment.value = loaded?.createdAt ?: now()
+                place.value = loaded?.placeName ?: initialPlace ?: ""
                 photos.value = mediaStore.observeMedia(uid).first()
                 savedText = loaded?.content
                 createdHere = false
@@ -85,13 +103,33 @@ class EditorViewModel(
         }
     }
 
+    /**
+     * The editor's small state, bundled so the big combine fits.
+     */
+    private data class EntryBits(
+        val text: String?,
+        val uid: String?,
+        val createdAt: Long?,
+        val place: String?,
+    )
+
+    private val entryBits = combine(text, entryUid, moment, place) { text, uid, createdAt, place ->
+        EntryBits(text, uid, createdAt, place)
+    }
+
     val state: StateFlow<EditorUiState> = combine(
-        text,
-        entryUid,
-        moment,
+        entryBits,
         photos,
-    ) { text, uid, createdAt, media ->
-        EditorUiState(text = text, uid = uid, createdAt = createdAt, media = media)
+        repository.observeTags(),
+    ) { bits, media, tags ->
+        EditorUiState(
+            text = bits.text,
+            uid = bits.uid,
+            createdAt = bits.createdAt,
+            place = bits.place?.takeIf { it.isNotBlank() },
+            media = media,
+            tags = tags,
+        )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
@@ -113,6 +151,14 @@ class EditorViewModel(
     }
 
     /**
+     * The writer named the place, or took it off with null.
+     */
+    fun setPlace(name: String?) {
+        placeTouched = true
+        place.value = name ?: ""
+    }
+
+    /**
      * Writes the draft to the database and returns the uid of the entry.
      *
      * A blank draft is not written unless the entry already exists, so an opened-and-abandoned
@@ -122,7 +168,15 @@ class EditorViewModel(
         val content = text.value ?: return null
         if (content.isBlank() && entryUid.value == null) return null
 
-        val saved = repository.save(content, uid = entryUid.value, createdAt = moment.value)
+        val named = place.value
+        val saved = repository.save(
+            content = content,
+            uid = entryUid.value,
+            createdAt = moment.value,
+            placeName = named.takeIf { it.isNotBlank() },
+            // Only a place the writer took off clears the one the entry has.
+            placeCleared = placeTouched && named.isNullOrBlank(),
+        )
         if (entryUid.value == null) createdHere = true
         entryUid.value = saved
         return saved

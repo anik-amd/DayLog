@@ -14,6 +14,10 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
@@ -26,6 +30,9 @@ import app.daylog.core.designsystem.component.DLText
 import app.daylog.core.designsystem.icon.DayLogIcons
 import app.daylog.core.designsystem.theme.DayLogShapes
 import app.daylog.core.designsystem.theme.DayLogTheme
+import app.daylog.core.model.Tag
+import app.daylog.feature.place.PlaceDialog
+import app.daylog.feature.tag.TagPickerDialog
 
 /**
  * The quick entry bar.
@@ -34,9 +41,11 @@ import app.daylog.core.designsystem.theme.DayLogTheme
  * The field grows upward as the writing grows, up to ten lines, and then it stops growing and
  * scrolls.
  *
- * Nothing is saved by itself. The actions sit under the field, where the thumb rests: a photo, a
- * way up to the full editor, and the save button — the only thing that writes the thought down.
- * Saving is also what empties the field, so the bar is honest about when it is done.
+ * Nothing is saved by itself. The actions sit under the field, where the thumb rests: a tag, a
+ * place, a photo, a way up to the full editor, and the save button — the only thing that writes
+ * the thought down. A tag is written where tags are written, in the text itself; the place is
+ * kept on the thought until it is saved away. Saving is also what empties the field, so the bar
+ * is honest about when it is done.
  */
 @Composable
 fun QuickEntryBar(
@@ -47,8 +56,22 @@ fun QuickEntryBar(
     onAddPhoto: () -> Unit,
     modifier: Modifier = Modifier,
     isSaving: Boolean = false,
+    tags: List<Tag> = emptyList(),
+    place: String? = null,
+    onPlaceChange: (String?) -> Unit = {},
 ) {
     val colors = DayLogTheme.colors
+    var pickingTag by remember { mutableStateOf(false) }
+    var pickingPlace by remember { mutableStateOf(false) }
+
+    /**
+     * Puts a tag into the writing, on the boundary its own space is, where the extractor reads it.
+     */
+    val insertTag: (String) -> Unit = { name ->
+        onValueChange(
+            if (value.isBlank()) "#$name " else "${value.trimEnd()} #$name ",
+        )
+    }
 
     Surface(
         modifier = modifier.fillMaxWidth(),
@@ -100,6 +123,26 @@ fun QuickEntryBar(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     DLIconButton(
+                        imageVector = DayLogIcons.Tag,
+                        contentDescription = "Add a tag",
+                        onClick = { pickingTag = true },
+                        tint = colors.inkMuted,
+                    )
+                    DLIconButton(
+                        imageVector = DayLogIcons.Pin,
+                        contentDescription = if (place == null) "Add a location" else "Change the location",
+                        onClick = { pickingPlace = true },
+                        tint = if (place == null) colors.inkMuted else colors.accent,
+                    )
+                    if (place != null) {
+                        DLText(
+                            text = place,
+                            style = DayLogTheme.typography.meta,
+                            color = colors.inkMuted,
+                            maxLines = 1,
+                        )
+                    }
+                    DLIconButton(
                         imageVector = DayLogIcons.Image,
                         contentDescription = "Add a photo",
                         onClick = onAddPhoto,
@@ -128,5 +171,21 @@ fun QuickEntryBar(
                 }
             }
         }
+    }
+
+    if (pickingTag) {
+        TagPickerDialog(
+            tags = tags,
+            onPick = insertTag,
+            onDismiss = { pickingTag = false },
+        )
+    }
+
+    if (pickingPlace) {
+        PlaceDialog(
+            place = place,
+            onSet = onPlaceChange,
+            onDismiss = { pickingPlace = false },
+        )
     }
 }

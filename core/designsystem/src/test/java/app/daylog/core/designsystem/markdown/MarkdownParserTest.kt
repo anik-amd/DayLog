@@ -124,6 +124,23 @@ class MarkdownParserTest {
     }
 
     @Test
+    fun `a tag is set in the accent`() {
+        val result = parse("read the essay about #reading today")
+
+        assertTrue(result.spanStyles.any {
+            it.item.color == colors.accent && result.text.substring(it.start, it.end) == "#reading"
+        })
+    }
+
+    @Test
+    fun `a hash that does not start a tag is left alone`() {
+        val result = parse("it costs #5 to get in")
+
+        assertEquals("it costs #5 to get in", result.text)
+        assertTrue(result.spanStyles.none { it.item.color == colors.accent })
+    }
+
+    @Test
     fun `the night palette is used when it is asked for`() {
         val night = DayLogColors.from(NightScheme)
         val result = MarkdownParser.parse("a `word`", typography, night)
