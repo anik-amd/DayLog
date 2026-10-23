@@ -365,6 +365,7 @@ fun EditorPreview() {
 @Composable
 fun StatisticsPreview() {
     DayLogTheme {
+        StatisticsScreen(
             statistics = calculateStatistics(
                 entries = sampleEntries,
                 tags = listOf(
