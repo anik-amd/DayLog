@@ -28,8 +28,8 @@ compileSdk = "36"
 targetSdk = "36"
 minSdk = "26"
 buildTools = "36.0.0"
-versionName = "0.4.0"
-versionCode = "12"
+versionName = "0.4.1"
+versionCode = "13"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
