@@ -18,8 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import app.daylog.core.designsystem.component.DLButton
-import app.daylog.core.designsystem.component.DLButtonStyle
 import app.daylog.core.designsystem.component.DLDivider
 import app.daylog.core.designsystem.component.DLIconButton
 import app.daylog.core.designsystem.component.DLPendingDot
@@ -115,12 +113,11 @@ fun QuickEntryBar(
                         DLPendingDot()
                         Spacer(Modifier.width(8.dp))
                     }
-                    DLButton(
-                        text = "Save",
-                        onClick = onSave,
-                        enabled = value.isNotBlank(),
-                        style = DLButtonStyle.Filled,
-                        modifier = Modifier.padding(vertical = 2.dp),
+                    DLIconButton(
+                        imageVector = DayLogIcons.Check,
+                        contentDescription = "Save",
+                        onClick = { if (value.isNotBlank()) onSave() },
+                        tint = if (value.isNotBlank()) colors.ink else colors.inkFaint,
                     )
                 }
             }

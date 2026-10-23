@@ -19,7 +19,6 @@ import app.daylog.core.model.DayLogThemeMode
 import app.daylog.core.model.Entry
 import app.daylog.core.model.OnThisDayYear
 import app.daylog.feature.timeline.QuickEntryBar
-import app.daylog.feature.timeline.TagFilterStrip
 import app.daylog.feature.timeline.TimelineScreen
 import app.daylog.feature.calendar.CalendarScreen
 import app.daylog.feature.entry.EntryDetailScreen
@@ -121,17 +120,26 @@ private fun DayLogPreview(dark: Boolean = false) {
             DLTopBar(
                 title = "DayLog",
                 subtitle = "4 entries",
-            )
-
-            TagFilterStrip(
-                tags = listOf(
-                    app.daylog.core.model.Tag("reading", 4),
-                    app.daylog.core.model.Tag("family", 2),
-                    app.daylog.core.model.Tag("work", 7),
-                ),
-                selected = setOf("reading"),
-                onToggle = {},
-                onClear = {},
+                trailingContent = {
+                    DLIconButton(
+                        imageVector = app.daylog.core.designsystem.icon.DayLogIcons.Tag,
+                        contentDescription = "Filter",
+                        onClick = {},
+                        tint = DayLogTheme.colors.inkMuted,
+                    )
+                    DLIconButton(
+                        imageVector = app.daylog.core.designsystem.icon.DayLogIcons.Search,
+                        contentDescription = "Search",
+                        onClick = {},
+                        tint = DayLogTheme.colors.inkMuted,
+                    )
+                    DLIconButton(
+                        imageVector = app.daylog.core.designsystem.icon.DayLogIcons.Settings,
+                        contentDescription = "Settings",
+                        onClick = {},
+                        tint = DayLogTheme.colors.inkMuted,
+                    )
+                },
             )
 
             Box(modifier = Modifier.weight(1f)) {

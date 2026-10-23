@@ -179,7 +179,21 @@ dev ──(cut)──▶ pre-release ──(approve)──▶ main
 The rewrite is released in **stages, one patch version at a time**: `0.3.0`, `0.3.1`, `0.3.2` and
 so on, until the roadmap is done. Each stage is a release.
 
-1. Finish the stage, and make sure the build and the tests are green.
+1. Finish the stage, and make sure the build and the tests are green. If the stage changed how
+   something looks, regenerate the reference images and look at them before committing them:
+
+   ```bash
+   ./gradlew updateDebugScreenshotTest
+   ```
+
+   Pull them out of the Codespace with
+
+   ```bash
+   gh cs cp -e -r -c <codespace> -- remote:".../screenshotTestDebug/reference/**/*.png" ./review/
+   ```
+
+   and open them. They are the only way the design is ever seen, so a blind update makes them
+   worthless. Commit them only once they look right.
 2. Bump the version:
 
    ```bash

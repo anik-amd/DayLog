@@ -168,11 +168,17 @@ reference images regenerated and reviewed.
 
 ### P9b — Bottom tabs and the calendar
 
-- [ ] Bottom tabs: Timeline, Calendar — Material's own `NavigationBar`
-- [ ] The calendar icon leaves the timeline's top bar
-- [ ] Tapping a day shows that day's entries under the grid
-- [ ] "On this day": the same date in past years, reached from the calendar
-- [ ] Search stays where it is, at the top
+- [x] Bottom tabs: Timeline, Calendar — Material's own `NavigationBar`
+- [x] The calendar icon leaves the timeline's top bar
+- [x] Tapping a day shows that day's entries under the grid
+- [x] "On this day": the same date in past years, reached from the calendar
+- [x] Search stays where it is, at the top
+- [x] The quick bar's save button is an icon
+- [x] "On this day" is a labelled link on the calendar, shown only when no day is selected
+- [x] A filter popup handles many tags instead of an overflowing strip
+
+**Gate:** tabs, day entries, on-this-day, save icon, filter popup — tested; the reference images
+regenerated and reviewed.
 
 ### P9c — The timeline and the viewer, in Material's own voice
 

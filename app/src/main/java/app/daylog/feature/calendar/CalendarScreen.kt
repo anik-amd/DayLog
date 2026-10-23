@@ -65,10 +65,15 @@ fun CalendarScreen(
         Column {
             DLTopBar(
                 title = CalendarMath.monthName(year, month, locale),
-                leadingIcon = DayLogIcons.History,
-                onLeadingClick = onOpenOnThisDay,
-                leadingContentDescription = "On this day",
                 trailingContent = {
+                    if (selectedDay == null) {
+                        DLText(
+                            text = "On this day",
+                            style = DayLogTheme.typography.label,
+                            color = colors.inkMuted,
+                            modifier = Modifier.pressable(onClick = onOpenOnThisDay),
+                        )
+                    }
                     DLIconButton(
                         imageVector = DayLogIcons.ChevronLeft,
                         contentDescription = "Previous month",
