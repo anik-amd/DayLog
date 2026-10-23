@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,6 +52,7 @@ fun TimelineScreen(
     contentPadding: PaddingValues = PaddingValues(0.dp),
     media: Map<String, List<Media>> = emptyMap(),
     onEntryClick: (String) -> Unit = {},
+    listState: LazyListState = rememberLazyListState(),
 ) {
     val colors = DayLogTheme.colors
     val items = groups.toTimelineItems()
@@ -71,6 +74,7 @@ fun TimelineScreen(
     }
 
     LazyColumn(
+        state = listState,
         modifier = modifier
             .fillMaxSize()
             .background(colors.background),

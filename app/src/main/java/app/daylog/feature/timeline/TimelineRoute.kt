@@ -3,6 +3,14 @@ package app.daylog.feature.timeline
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,15 +18,23 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -64,68 +80,125 @@ fun TimelineRoute(
 
     var filterOpen by remember { mutableStateOf(false) }
 
-    Column(
+    val listState = rememberLazyListState()
+    var barExpanded by remember { mutableStateOf(true) }
+    val previousScroll = remember { mutableIntStateOf(0) }
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.firstVisibleItemIndex * 1000 + listState.firstVisibleItemScrollOffset }
+            .collect { current ->
+                if (listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0) {
+                    barExpanded = true
+                } else if (current > previousScroll.intValue + 30) {
+                    barExpanded = false
+                } else if (current < previousScroll.intValue - 30) {
+                    barExpanded = true
+                }
+                previousScroll.intValue = current
+            }
+    }
+
+    Box(
         modifier = modifier
             .fillMaxSize()
             .background(DayLogTheme.colors.background),
     ) {
-        DLTopBar(
-            title = "DayLog",
-            subtitle = entryCountLabel(state.groups.sumOf { it.entries.size }),
-            trailingContent = {
-                DLIconButton(
-                    imageVector = DayLogIcons.Tag,
-                    contentDescription = "Filter",
-                    onClick = { filterOpen = true },
-                    tint = if (state.selectedTags.isEmpty()) {
-                        DayLogTheme.colors.inkMuted
-                    } else {
-                        DayLogTheme.colors.accent
-                    },
-                )
-                DLIconButton(
-                    imageVector = DayLogIcons.Search,
-                    contentDescription = "Search",
-                    onClick = onOpenSearch,
-                    tint = DayLogTheme.colors.inkMuted,
-                )
-                DLIconButton(
-                    imageVector = DayLogIcons.Settings,
-                    contentDescription = "Settings",
-                    onClick = onOpenSettings,
-                    tint = DayLogTheme.colors.inkMuted,
-                )
-            },
-        )
-
-        Box(modifier = Modifier.weight(1f)) {
-            TimelineScreen(
-                groups = state.groups,
-                contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp),
-                media = state.media,
-                onEntryClick = onOpenEntry,
+        Column(Modifier.fillMaxSize()) {
+            DLTopBar(
+                title = "DayLog",
+                subtitle = entryCountLabel(state.groups.sumOf { it.entries.size }),
+                trailingContent = {
+                    DLIconButton(
+                        imageVector = DayLogIcons.Tag,
+                        contentDescription = "Filter",
+                        onClick = { filterOpen = true },
+                        tint = if (state.selectedTags.isEmpty()) {
+                            DayLogTheme.colors.inkMuted
+                        } else {
+                            DayLogTheme.colors.accent
+                        },
+                    )
+                    DLIconButton(
+                        imageVector = DayLogIcons.Search,
+                        contentDescription = "Search",
+                        onClick = onOpenSearch,
+                        tint = DayLogTheme.colors.inkMuted,
+                    )
+                    DLIconButton(
+                        imageVector = DayLogIcons.Settings,
+                        contentDescription = "Settings",
+                        onClick = onOpenSettings,
+                        tint = DayLogTheme.colors.inkMuted,
+                    )
+                },
             )
+
+            Box(modifier = Modifier.weight(1f)) {
+                TimelineScreen(
+                    groups = state.groups,
+                    contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp),
+                    media = state.media,
+                    onEntryClick = onOpenEntry,
+                    listState = listState,
+                )
+            }
         }
 
-        QuickEntryBar(
-            value = state.draft,
-            onValueChange = viewModel::onDraftChanged,
-            onSave = viewModel::save,
-            onAddPhoto = {
-                photoPicker.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+        // The quick bar floats over the writing. It folds into a plus when the writer scrolls
+        // down, so the writing takes the whole page; scrolling back up unfolds it.
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+        ) {
+            AnimatedVisibility(
+                visible = barExpanded,
+                enter = fadeIn(animationSpec = tween(160)) + slideInVertically(animationSpec = tween(160)) { it },
+                exit = fadeOut(animationSpec = tween(120)) + slideOutVertically(animationSpec = tween(120)) { it },
+            ) {
+                QuickEntryBar(
+                    value = state.draft,
+                    onValueChange = viewModel::onDraftChanged,
+                    onSave = viewModel::save,
+                    onAddPhoto = {
+                        photoPicker.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                        )
+                    },
+                    onExpand = {
+                        val handoff = viewModel.handOffDraft()
+                        if (handoff.uid != null) {
+                            onOpenEntryEditor(handoff.uid, handoff.text)
+                        } else {
+                            onOpenEditor(handoff.text)
+                        }
+                    },
+                    isSaving = state.isSaving,
                 )
-            },
-            onExpand = {
-                val handoff = viewModel.handOffDraft()
-                if (handoff.uid != null) {
-                    onOpenEntryEditor(handoff.uid, handoff.text)
-                } else {
-                    onOpenEditor(handoff.text)
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(16.dp),
+        ) {
+            AnimatedVisibility(
+                visible = !barExpanded,
+                enter = fadeIn(animationSpec = tween(160)) + scaleIn(animationSpec = tween(160)),
+                exit = fadeOut(animationSpec = tween(120)) + scaleOut(animationSpec = tween(120)),
+            ) {
+                FloatingActionButton(
+                    onClick = { barExpanded = true },
+                    containerColor = DayLogTheme.colors.surfaceContainerHigh,
+                    contentColor = DayLogTheme.colors.ink,
+                ) {
+                    Icon(
+                        imageVector = DayLogIcons.Plus,
+                        contentDescription = "Open quick entry",
+                    )
                 }
-            },
-            isSaving = state.isSaving,
-        )
+            }
+        }
     }
 
     if (filterOpen) {

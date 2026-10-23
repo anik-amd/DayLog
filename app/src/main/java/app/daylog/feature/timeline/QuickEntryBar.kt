@@ -116,8 +116,9 @@ fun QuickEntryBar(
                     DLIconButton(
                         imageVector = DayLogIcons.Check,
                         contentDescription = "Save",
-                        onClick = { if (value.isNotBlank()) onSave() },
-                        tint = if (value.isNotBlank()) colors.ink else colors.inkFaint,
+                        onClick = onSave,
+                        enabled = value.isNotBlank(),
+                        tint = colors.ink,
                     )
                 }
             }

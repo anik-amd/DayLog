@@ -112,55 +112,63 @@ private val sampleGroups = listOf(
 @Composable
 private fun DayLogPreview(dark: Boolean = false) {
     DayLogTheme(themeMode = if (dark) DayLogThemeMode.Dark else DayLogThemeMode.Light) {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(DayLogTheme.colors.background)
                 .statusBarsPadding(),
         ) {
-            DLTopBar(
-                title = "DayLog",
-                subtitle = "4 entries",
-                trailingContent = {
-                    DLIconButton(
-                        imageVector = app.daylog.core.designsystem.icon.DayLogIcons.Tag,
-                        contentDescription = "Filter",
-                        onClick = {},
-                        tint = DayLogTheme.colors.inkMuted,
-                    )
-                    DLIconButton(
-                        imageVector = app.daylog.core.designsystem.icon.DayLogIcons.Search,
-                        contentDescription = "Search",
-                        onClick = {},
-                        tint = DayLogTheme.colors.inkMuted,
-                    )
-                    DLIconButton(
-                        imageVector = app.daylog.core.designsystem.icon.DayLogIcons.Settings,
-                        contentDescription = "Settings",
-                        onClick = {},
-                        tint = DayLogTheme.colors.inkMuted,
-                    )
-                },
-            )
-
-            Box(modifier = Modifier.weight(1f)) {
-                TimelineScreen(
-                    groups = sampleGroups,
-                    contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp),
+            Column(Modifier.fillMaxSize()) {
+                DLTopBar(
+                    title = "DayLog",
+                    subtitle = "4 entries",
+                    trailingContent = {
+                        DLIconButton(
+                            imageVector = app.daylog.core.designsystem.icon.DayLogIcons.Tag,
+                            contentDescription = "Filter",
+                            onClick = {},
+                            tint = DayLogTheme.colors.inkMuted,
+                        )
+                        DLIconButton(
+                            imageVector = app.daylog.core.designsystem.icon.DayLogIcons.Search,
+                            contentDescription = "Search",
+                            onClick = {},
+                            tint = DayLogTheme.colors.inkMuted,
+                        )
+                        DLIconButton(
+                            imageVector = app.daylog.core.designsystem.icon.DayLogIcons.Settings,
+                            contentDescription = "Settings",
+                            onClick = {},
+                            tint = DayLogTheme.colors.inkMuted,
+                        )
+                    },
                 )
+
+                Box(modifier = Modifier.weight(1f)) {
+                    TimelineScreen(
+                        groups = sampleGroups,
+                        contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp),
+                    )
+                }
             }
 
+            DayLogBottomBar(
+                current = Routes.Timeline,
+                onTab = {},
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(horizontal = 16.dp, vertical = 72.dp),
+        ) {
             QuickEntryBar(
                 value = "",
                 onValueChange = {},
                 onSave = {},
                 onExpand = {},
                 onAddPhoto = {},
-            )
-
-            DayLogBottomBar(
-                current = Routes.Timeline,
-                onTab = {},
             )
         }
     }
