@@ -171,29 +171,45 @@ reference images regenerated and reviewed.
 - [x] Bottom tabs: Timeline, Calendar — Material's own `NavigationBar`
 - [x] The calendar icon leaves the timeline's top bar
 - [x] Tapping a day shows that day's entries under the grid
-- [x] "On this day": the same date in past years, reached from the calendar
-- [x] Search stays where it is, at the top
-- [x] The quick bar's save button is an icon
-- [x] "On this day" is a labelled link on the calendar, shown only when no day is selected
+- [x] The quick bar's save button is an icon, and it saves only when there is something to save
 - [x] A filter popup handles many tags instead of an overflowing strip
+- [x] The quick bar is a floating bubble above the tabs; scrolling down folds it into a plus,
+      scrolling up unfolds it again
+- [x] The shapes go rounder: a bubble shape and a hairline border for the quick bar, rounder
+      cards and chips
+- [x] "On this day": the same date in past years, an icon with a count badge on the timeline's
+      top bar
+- [x] Search stays where it is, at the top
+- [x] The timeline, the calendar's day list and "On this day" read plain text — no markdown
+      clothing, no tags aglow; the reader keeps both
+- [x] Tags and a place can be given to a thought in both editors: chips to pick, a word to type,
+      and a filled chip to take a tag off again; the place can be named, changed or removed
+- [x] The reader's moment sits above the entry, small and muted, with the place beside it; edit
+      and delete are icons in the reader's top bar
+- [x] The pin is a teardrop, as a map pin is
 
-**Gate:** tabs, day entries, on-this-day, save icon, filter popup — tested; the reference images
-regenerated and reviewed.
+**Gate:** tabs, day entries, on-this-day, save icon, filter popup, editors' tag and place
+pickers, parser and extractor rules — tested; the reference images regenerated and reviewed.
 
 ### P9c — The timeline and the viewer, in Material's own voice
 
+*The feedback rounds of P9b reshaped the quick bar, the reader and the previews; what is left
+here is the timeline's own layout and the viewer's fullness.*
+
+- [x] The preview is the first few lines, plain text — no markdown on the timeline (P9b)
+- [x] No empty lines in the timeline's preview of an entry (P9b)
+- [x] Edit and delete are icons in the reader's top bar (P9b)
 - [ ] Dates horizontal, entries under them, closer together
-- [ ] No empty lines in the timeline's preview of an entry
-- [ ] The preview is the first few lines, plain text — no markdown on the timeline
-- [ ] A full-screen viewer for an entry: word count, tags, place, weather, photos
-- [ ] Full CRUD on an entry from the viewer, including delete
+- [ ] The viewer's facts line gains the word count — words, tags, place, weather, photos, all in
+      one small voice
 
 ### P9d — Places
 
-- [ ] Filter by several tags at once, and by place
+- [x] Filter by several tags at once — the filter popup keeps tags working together (P9b)
+- [ ] Filter by place
 - [ ] A place stored as coordinates and a trimmed name, resolved from the device's own location
       or a typed name, kept for reuse
-- [ ] The location action joins the photo at the bottom of the quick editor
+- [x] The location action sits at the bottom of the quick editor (P9b)
 
 **Gate per stage:** tests green, `assembleDebug` green, the reference images regenerated and
 looked at.
