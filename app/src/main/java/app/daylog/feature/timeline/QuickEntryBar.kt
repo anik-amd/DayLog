@@ -137,16 +137,11 @@ fun QuickEntryBar(
                         imageVector = DayLogIcons.Pin,
                         contentDescription = if (place == null) "Add a location" else "Change the location",
                         onClick = { pickingPlace = true },
+                        // The pin carries the fact on its own colour: set is accent, unset is
+                        // muted. A word saying where beside it would be chrome the bar's one
+                        // line cannot afford.
                         tint = if (place == null) colors.inkMuted else colors.accent,
                     )
-                    if (place != null) {
-                        DLText(
-                            text = place.name,
-                            style = DayLogTheme.typography.meta,
-                            color = colors.inkMuted,
-                            maxLines = 1,
-                        )
-                    }
                     DLIconButton(
                         imageVector = DayLogIcons.Image,
                         contentDescription = "Add a photo",

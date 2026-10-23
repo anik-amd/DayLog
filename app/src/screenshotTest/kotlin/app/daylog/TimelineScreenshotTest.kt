@@ -173,11 +173,13 @@ private fun DayLogPreview(dark: Boolean = false) {
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 96.dp),
             ) {
                 QuickEntryBar(
-                    value = "A thought at the water",
+                    value = "",
                     onValueChange = {},
                     onSave = {},
                     onExpand = {},
                     onAddPhoto = {},
+                    // The pin shows what a place looks like when one is set: the icon alone,
+                    // in the accent, without a word beside it.
                     place = PickedPlace(name = "the harbour"),
                 )
             }
