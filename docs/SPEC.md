@@ -47,8 +47,8 @@ That is the whole loop. Everything else exists to support it or to let the user 
 
 ### Timeline
 
-Entries grouped by day, newest first. Each day has a date in the left margin beside a vertical
-hairline — the app's signature. No cards, no shadows, no coloured headers.
+Entries grouped by day, newest first. Each day is a heading across the page and its entries sit
+under it, close together — the app's signature. No cards, no shadows, no coloured headers.
 
 ### Quick entry
 

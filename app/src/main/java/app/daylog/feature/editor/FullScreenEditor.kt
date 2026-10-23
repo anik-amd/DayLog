@@ -169,6 +169,7 @@ fun FullScreenEditor(
                     val momentText = buildString {
                         append(momentLabel(createdAt, is24Hour = is24Hour))
                         if (state.place != null) append("  ·  ${state.place}")
+                        append("  ·  ${wordCount(value.text)} words")
                     }
                     // The moment is tappable, and the pencil says so: a date you can put right
                     // should not have to be guessed at.

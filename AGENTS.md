@@ -262,11 +262,12 @@ Read `/docs/DESIGN_SYSTEM.md` before touching a screen. The short version:
 - Paper, Night, and a true-black Night. The wallpaper's colours are an option, not the default.
 - One family: Roboto, the platform's own typeface.
 - **Accent marks data, never chrome.** It is not a button colour and not a navigation colour.
-- The margin rule is the app's signature: dates sit in a gutter beside a vertical hairline, and
-  the gutter grows with the text so a day name is never cut off.
-- The quick bar saves on its save button, and nothing is written while the writer is still
-  typing. The editor saves on every way out — the back arrow, the system gesture, the save
-  button — so leaving it never takes the writing with it.
+- The day heading is the app's signature: each day is a heading across the page and its entries
+  sit under it, close together, in the same shape on the timeline, search and day lists.
+- The quick bar is a floating bubble that folds into a plus on scroll down. It saves on its save
+  button, and nothing is written while the writer is still typing. The editor saves on every way
+  out — the back arrow, the system gesture, the save button — so leaving it never takes the
+  writing with it.
 
 ---
 

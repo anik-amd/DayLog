@@ -1,15 +1,11 @@
 package app.daylog.feature.timeline
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -17,13 +13,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.daylog.core.designsystem.component.DLEmptyState
-import app.daylog.core.designsystem.component.DLMeta
 import app.daylog.core.designsystem.component.DLText
 import app.daylog.core.designsystem.component.pressable
 import app.daylog.core.designsystem.theme.DayLogTheme
@@ -42,8 +33,10 @@ private sealed interface TimelineItem {
 /**
  * The timeline.
  *
- * The screen's idea is a ledger's margin: one rule runs down the page and the dates sit against
- * it, so the shape of the diary is visible before a word of it is read.
+ * The days read as a notebook now: the date is a heading across the page and the entries of the
+ * day sit under it, close together. The date is not margins any more — the writing is what has
+ * the room, and the shape of the diary is still readable, from the headings rather than from a
+ * line down the page.
  */
 @Composable
 fun TimelineScreen(
@@ -56,7 +49,6 @@ fun TimelineScreen(
 ) {
     val colors = DayLogTheme.colors
     val items = groups.toTimelineItems()
-    val gutter = gutterWidth()
 
     if (items.isEmpty()) {
         Box(
@@ -82,13 +74,11 @@ fun TimelineScreen(
     ) {
         items(items, key = { itemKey(it) }) { item ->
             when (item) {
-                is TimelineItem.Heading -> DayHeading(item.group, Modifier.marginRule())
+                is TimelineItem.Heading -> DayHeading(item.group)
                 is TimelineItem.Row -> EntryRow(
                     entry = item.entry,
                     media = media[item.entry.uid].orEmpty(),
-                    modifier = Modifier
-                        .marginRule()
-                        .pressable { onEntryClick(item.entry.uid) },
+                    modifier = Modifier.pressable { onEntryClick(item.entry.uid) },
                 )
             }
         }
@@ -96,29 +86,7 @@ fun TimelineScreen(
 }
 
 /**
- * Draws the margin rule down a row.
- *
- * The rule is drawn a piece at a time, by each row, so it begins with the first day and ends
- * with the last entry. A rule that ran on past the writing into the empty space below would be a
- * line to nothing.
- */
-@Composable
-fun Modifier.marginRule(): Modifier {
-    val gutter = gutterWidth()
-    val color = DayLogTheme.colors.rule
-    return this.drawBehind {
-        val x = gutter.toPx()
-        drawLine(
-            color = color,
-            start = Offset(x, 0f),
-            end = Offset(x, size.height),
-            strokeWidth = 1f,
-        )
-    }
-}
-
-/**
- * The day's name, in the margin.
+ * The day's heading, across the page.
  *
  * Shared with the search screen, so a result looks like the entry it is.
  */
@@ -126,27 +94,15 @@ fun Modifier.marginRule(): Modifier {
 fun DayHeading(group: DayGroup, modifier: Modifier = Modifier) {
     val colors = DayLogTheme.colors
 
-    Row(
+    DLText(
+        text = group.header,
+        style = DayLogTheme.typography.label,
+        color = colors.ink,
+        maxLines = 1,
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = 26.dp, end = 20.dp),
-        verticalAlignment = Alignment.Top,
-    ) {
-        // The heading hugs the rule, the way a date is written in the margin of a ledger.
-        Box(
-            modifier = Modifier
-                .width(gutterWidth())
-                .padding(end = 12.dp),
-            contentAlignment = Alignment.TopEnd,
-        ) {
-            DLText(
-                text = group.header,
-                style = DayLogTheme.typography.label,
-                color = colors.ink,
-                maxLines = 1,
-            )
-        }
-    }
+            .padding(start = 20.dp, end = 20.dp, top = 18.dp, bottom = 2.dp),
+    )
 }
 
 /**

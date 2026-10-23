@@ -28,13 +28,13 @@ import app.daylog.core.designsystem.theme.DayLogTheme
 import app.daylog.core.model.DayGroup
 import app.daylog.feature.timeline.DayHeading
 import app.daylog.feature.timeline.EntryRow
-import app.daylog.feature.timeline.marginRule
 
 /**
  * Finding an entry.
  *
- * One field at the top and the results underneath, in the same margin the timeline uses, so a
- * result looks like the entry it is. The search is over the words of the entries and their tags.
+ * One field at the top and the results underneath, in the same notebook shape the timeline uses,
+ * so a result looks like the entry it is. The search is over the words of the entries and their
+ * tags.
  */
 @Composable
 fun SearchScreen(
@@ -105,14 +105,12 @@ fun SearchScreen(
                 ) {
                     groups.forEach { group ->
                         item(key = "day-${group.key}") {
-                            DayHeading(group, Modifier.marginRule())
+                            DayHeading(group)
                         }
                         items(group.entries, key = { it.uid }) { entry ->
                             EntryRow(
                                 entry = entry,
-                                modifier = Modifier
-                                    .marginRule()
-                                    .pressable { onEntryClick(entry.uid) },
+                                modifier = Modifier.pressable { onEntryClick(entry.uid) },
                             )
                         }
                     }

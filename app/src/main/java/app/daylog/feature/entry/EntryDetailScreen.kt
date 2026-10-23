@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.daylog.core.common.DayLabels
 import app.daylog.core.common.toLocalDateTime
+import app.daylog.core.common.wordCount
 import app.daylog.core.designsystem.component.DLChip
 import app.daylog.core.designsystem.component.DLConfirmDialog
 import app.daylog.core.designsystem.component.DLIconButton
@@ -100,6 +101,11 @@ fun EntryDetailScreen(
                 DLMeta(
                     text = DayLabels.time(entry.createdAt.toLocalDateTime(zone), locale),
                     color = colors.inkMuted,
+                )
+                Spacer(Modifier.width(8.dp))
+                DLMeta(
+                    text = "${wordCount(entry.content)} words",
+                    color = colors.inkFaint,
                 )
             }
 

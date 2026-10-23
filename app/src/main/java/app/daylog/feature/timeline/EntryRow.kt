@@ -5,16 +5,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import app.daylog.core.common.DayLabels
 import app.daylog.core.common.plainPreview
@@ -28,40 +28,16 @@ import app.daylog.core.designsystem.theme.DayLogTheme
 import app.daylog.core.model.Entry
 import app.daylog.core.model.Media
 import coil3.compose.AsyncImage
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.foundation.shape.RoundedCornerShape
 import java.time.ZoneId
 import java.util.Locale
 
 /**
- * The width of the margin the dates sit in.
- *
- * It is wide enough for "Yesterday" and "12 March" to sit against the rule without wrapping, and
- * narrow enough to leave the entry text the room it needs to be read in.
- *
- * The margin grows with the text. A reader who has turned the font up has already said they want
- * fewer words on a line, so the margin takes its share rather than the day name being cut off.
- */
-@Composable
-fun gutterWidth(): Dp = (GUTTER_WIDTH_DP * LocalDensity.current.fontScale)
-    .coerceAtMost(GUTTER_MAX_DP)
-    .dp
-
-private const val GUTTER_WIDTH_DP = 80f
-private const val GUTTER_MAX_DP = 112f
-
-/**
- * The space between the margin rule and the entry text.
- */
-val GutterGap = 16.dp
-
-/**
  * One entry in the timeline.
  *
- * The time sits above the text in the muted face, and the text is set in the serif at a reading
- * size. Tags, a place and the weather are chips underneath, because they are data about the
- * entry rather than part of it.
+ * The time sits above the text in the muted face, and the text is set in the platform face at a
+ * reading size. Entries sit tight under their day's heading, because a day is one place on the
+ * page rather than one entry per breath. Tags are already written in the entry; a place and the
+ * weather are data about it, so they are chips underneath.
  */
 @Composable
 fun EntryRow(
@@ -77,7 +53,7 @@ fun EntryRow(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = gutterWidth() + GutterGap, end = 20.dp, bottom = 22.dp)
+            .padding(start = 20.dp, end = 20.dp, bottom = 10.dp)
             .then(
                 if (onClick != null) {
                     Modifier.pressable(onClick = onClick)
@@ -91,7 +67,7 @@ fun EntryRow(
             color = colors.inkFaint,
         )
 
-        Spacer(Modifier.height(3.dp))
+        Spacer(Modifier.height(1.dp))
 
         DLText(
             text = plainPreview(entry.content),

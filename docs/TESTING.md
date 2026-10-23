@@ -27,8 +27,8 @@ protecting is already covered on the JVM.
 and compared against reference images that are committed to the repository.
 
 This is the only way the design is ever looked at in CI, and it is worth as much as the unit
-tests: a change that breaks the margin rule, truncates a day name or makes the text unreadable
-fails the build rather than being noticed weeks later.
+tests: a change that breaks a screen's spacing, truncates a day heading or makes the text
+unreadable fails the build rather than being noticed weeks later.
 
 ```
 app/src/screenshotTest/          the previews that are rendered

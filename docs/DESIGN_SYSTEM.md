@@ -4,7 +4,8 @@
 
 A native Android app: tonal surfaces, the platform's own widgets, and the option of taking its
 colours from the wallpaper. On top of that, one idea that belongs to this app and to no other:
-a diary read like a well-made ledger, where the dates sit in the margin beside a rule.
+a diary read like a notebook, where each day is a heading on the page and the writing sits
+underneath it.
 
 ---
 
@@ -85,28 +86,27 @@ animation, which is the only motion that is not explaining a change.
 
 ## Signature elements
 
-### The margin rule
+### The day heading
 
-A gutter runs down the left of the timeline with a 1dp rule at its edge. The date sits in that
-gutter, right-aligned against the rule, the way a date is written in the margin of a ledger.
+The timeline reads as a notebook: each day is a heading across the page in the label face, and the
+entries of the day sit under it, close together, each with its time in the muted face above the
+text. The date is not in a margin any more — the writing has the room.
 
-The gutter **grows with the text**. A reader who has turned the font up has already said they
-want fewer words on a line, so the margin takes its share rather than the day name being cut
-off.
-
-The rule is drawn a piece at a time, by each row, so it begins with the first day and ends with
-the last entry. A rule that ran on past the writing into the empty space below would be a line to
-nothing.
+The search results carry the same shape, so a result looks like the entry it is.
 
 ### The writing line
 
-The composer is a bar on a tonal container with a hairline above it. There is no box around the
-field and no save button.
+The composer is a **floating bubble**: a rounded tonal container with a bubble shape and a
+hairline border, sitting above the tabs. Nothing is saved while the writer types — the save
+button (Material's own check icon) is the only thing that writes the thought down, and only when
+there is writing to save.
 
 The placeholder *is* the field: it sits exactly where the text will be, so the field never
 changes shape and the placeholder is never a label above the input.
 
-The bar rides above the keyboard rather than hiding behind it.
+The bar rides above the keyboard rather than hiding behind it. Scrolling down folds the bubble
+into a small plus at the bottom-left, so the writing takes the whole page; scrolling back up
+unfolds it again.
 
 ---
 
@@ -140,7 +140,7 @@ and a Bézier circle is exact.
 - Sentence case. No tracked capitals.
 - Every colour pair that carries text meets WCAG AA (4.5:1). The design system asserts this in
   `DayLogPalettesTest`, so a palette change that breaks readability fails the build.
-- One signature element per screen. The margin rule is enough.
+- One signature element per screen. The day heading is enough.
 
 ---
 
