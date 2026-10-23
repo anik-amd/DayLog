@@ -22,6 +22,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -62,6 +64,7 @@ fun TimelineRoute(
     onOpenSettings: () -> Unit,
     onOpenEntry: (String) -> Unit,
     onOpenSearch: () -> Unit,
+    onOpenOnThisDay: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val viewModel: TimelineViewModel = viewModel(
@@ -108,6 +111,20 @@ fun TimelineRoute(
                 title = "DayLog",
                 subtitle = entryCountLabel(state.groups.sumOf { it.entries.size }),
                 trailingContent = {
+                    BadgedBox(
+                        badge = {
+                            if (state.onThisDayCount > 0) {
+                                Badge { Text(state.onThisDayCount.toString()) }
+                            }
+                        },
+                    ) {
+                        DLIconButton(
+                            imageVector = DayLogIcons.History,
+                            contentDescription = "On this day",
+                            onClick = onOpenOnThisDay,
+                            tint = DayLogTheme.colors.inkMuted,
+                        )
+                    }
                     DLIconButton(
                         imageVector = DayLogIcons.Tag,
                         contentDescription = "Filter",
@@ -149,7 +166,7 @@ fun TimelineRoute(
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = 16.dp, vertical = 24.dp),
         ) {
             AnimatedVisibility(
                 visible = barExpanded,
@@ -181,7 +198,7 @@ fun TimelineRoute(
         Box(
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(16.dp),
+                .padding(24.dp),
         ) {
             AnimatedVisibility(
                 visible = !barExpanded,

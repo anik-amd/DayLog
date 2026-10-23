@@ -11,6 +11,7 @@ import app.daylog.core.model.DayGrouper
 import app.daylog.core.model.Entry
 import app.daylog.core.model.Media
 import app.daylog.core.model.Tag
+import app.daylog.core.model.onThisDay
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +21,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.ZoneId
 import java.util.Locale
 
 /**
@@ -36,6 +39,8 @@ data class TimelineUiState(
     val draft: String = "",
     /** True while the draft is being written to the database. */
     val isSaving: Boolean = false,
+    /** How many entries were written on this day in past years. */
+    val onThisDayCount: Int = 0,
 )
 
 /**
@@ -90,6 +95,11 @@ class TimelineViewModel(
         }
 
     /**
+     * Every entry, for the "on this day" count — that one is not filtered by the chosen tags.
+     */
+    private val allEntries: Flow<List<Entry>> = repository.observeEntries()
+
+    /**
      * The content of the timeline: the entries, the tags and the photos.
      */
     private val content = combine(
@@ -98,13 +108,21 @@ class TimelineViewModel(
         repository.observeMediaByEntry(),
     ) { entries, tags, media -> Triple(entries, tags, media) }
 
+    /**
+     * How many entries were written on this day in past years, for the badge on the top bar.
+     */
+    private val onThisDayCountFlow: Flow<Int> = allEntries.map { entries ->
+        onThisDay(entries, LocalDate.now(), ZoneId.systemDefault()).sumOf { it.entries.size }
+    }
+
     val state: StateFlow<TimelineUiState> =
         combine(
             content,
             selectedTags,
             draft,
             saving,
-        ) { (entries, tags, media), chosen, draftText, isSaving ->
+            onThisDayCountFlow,
+        ) { (entries, tags, media), chosen, draftText, isSaving, count ->
             TimelineUiState(
                 groups = DayGrouper.group(entries, locale = locale),
                 tags = tags,
@@ -112,6 +130,7 @@ class TimelineViewModel(
                 selectedTags = chosen,
                 draft = draftText,
                 isSaving = isSaving,
+                onThisDayCount = count,
             )
         }.stateIn(
             scope = viewModelScope,

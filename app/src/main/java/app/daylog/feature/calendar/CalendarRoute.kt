@@ -37,7 +37,6 @@ import java.util.Locale
 @Composable
 fun CalendarRoute(
     container: AppContainer,
-    onOpenOnThisDay: () -> Unit,
     onOpenEntry: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -54,7 +53,6 @@ fun CalendarRoute(
         onDaySelected = viewModel::selectDay,
         onPreviousMonth = viewModel::previousMonth,
         onNextMonth = viewModel::nextMonth,
-        onOpenOnThisDay = onOpenOnThisDay,
         selectedEntries = state.selectedEntries,
         onOpenEntry = onOpenEntry,
         modifier = modifier,

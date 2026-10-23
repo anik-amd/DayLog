@@ -127,6 +127,12 @@ private fun DayLogPreview(dark: Boolean = false) {
                     subtitle = "4 entries",
                     trailingContent = {
                         DLIconButton(
+                            imageVector = app.daylog.core.designsystem.icon.DayLogIcons.History,
+                            contentDescription = "On this day",
+                            onClick = {},
+                            tint = DayLogTheme.colors.inkMuted,
+                        )
+                        DLIconButton(
                             imageVector = app.daylog.core.designsystem.icon.DayLogIcons.Tag,
                             contentDescription = "Filter",
                             onClick = {},
@@ -275,7 +281,6 @@ fun CalendarPreview() {
                 onDaySelected = {},
                 onPreviousMonth = {},
                 onNextMonth = {},
-                onOpenOnThisDay = {},
                 selectedEntries = listOf(sampleEntries[0]),
                 onOpenEntry = {},
                 modifier = Modifier.weight(1f),

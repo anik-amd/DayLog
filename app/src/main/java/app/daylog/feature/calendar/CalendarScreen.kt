@@ -46,7 +46,6 @@ fun CalendarScreen(
     onDaySelected: (Int) -> Unit,
     onPreviousMonth: () -> Unit,
     onNextMonth: () -> Unit,
-    onOpenOnThisDay: () -> Unit,
     selectedEntries: List<Entry>,
     onOpenEntry: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -122,23 +121,6 @@ fun CalendarScreen(
                             )
                         }
                     }
-                }
-            }
-
-            // A link to this day in past years, shown only when no day is filtered.
-            if (selectedDay == null) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    DLText(
-                        text = "On this day",
-                        style = DayLogTheme.typography.label,
-                        color = colors.inkMuted,
-                        modifier = Modifier.pressable(onClick = onOpenOnThisDay),
-                    )
                 }
             }
 

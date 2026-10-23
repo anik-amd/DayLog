@@ -90,6 +90,9 @@ fun DayLogNavHost(
                     onOpenSearch = {
                         navController.navigate(Routes.Search)
                     },
+                    onOpenOnThisDay = {
+                        navController.navigate(Routes.OnThisDay)
+                    },
                 )
             }
 
@@ -104,9 +107,6 @@ fun DayLogNavHost(
             composable(Routes.Calendar) {
                 CalendarRoute(
                     container = container,
-                    onOpenOnThisDay = {
-                        navController.navigate(Routes.OnThisDay)
-                    },
                     onOpenEntry = { uid ->
                         navController.navigate(Routes.entry(uid))
                     },
