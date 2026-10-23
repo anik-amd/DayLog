@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.4.1] - 2026-10-23
+
+### Added
+- A place can be given in three ways: type a name and the app finds where in the world it is, tap
+  one of the names you have already used, or ask "My location" — the first time, the app asks for
+  the location permission and keeps the street you last stood on. A place is stored with its
+  coordinates, and a place once named is a tap away the next time
+- The timeline's filter popup now offers places beside tags — see only what was written on the
+  waterfront, in the office, wherever you wrote at
+- Word counts ride on the facts line in the reader and in the editor
+
+### Changed
+- The timeline reads as a notebook: each day is a heading across the page with its entries sitting
+  right under it, and the days come with a quiet line between them. Search looks the same
+- The pin in the quick entry bar says where with its colour alone — no word beside it
+
 ## [0.4.0] - 2026-10-23
 
 ### Added
