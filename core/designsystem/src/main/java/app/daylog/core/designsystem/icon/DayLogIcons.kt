@@ -199,6 +199,13 @@ object DayLogIcons {
         close()
     }
 
+    /** A chevron pointing right, for a collapsed row. */
+    val ChevronRight: ImageVector = icon("ChevronRight") {
+        moveTo(9f, 6f)
+        lineTo(15f, 12f)
+        lineTo(9f, 18f)
+    }
+
     /** A chevron pointing left, for the month before. */
     val ChevronLeft: ImageVector = icon("ChevronLeft") {
         moveTo(15f, 6f)
