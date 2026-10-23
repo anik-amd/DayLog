@@ -70,8 +70,14 @@ object TagExtractor {
             val onStartBoundary = at == 0 || content[at - 1].isWhitespace()
             val onEndBoundary = end == content.length || content[end].isWhitespace()
             if (onStartBoundary && onEndBoundary) {
-                val skip = if (at == 0) 0 else 1
-                return content.substring(0, at - skip) + content.substring(end)
+                // The space the tag leaves behind goes with it, before or after as the tag sits.
+                val from = if (at == 0 && end < content.length && content[end].isWhitespace()) {
+                    end + 1
+                } else {
+                    end
+                }
+                val skip = if (at > 0) 1 else 0
+                return content.substring(0, at - skip) + content.substring(from)
             }
             search = at + 1
         }
