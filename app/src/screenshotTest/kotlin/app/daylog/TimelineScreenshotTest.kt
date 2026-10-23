@@ -360,8 +360,11 @@ fun EditorPreview() {
         )
     }
 }
+@PreviewTest
+@Preview(name = "Statistics", widthDp = 400, heightDp = 780, showBackground = true)
+@Composable
+fun StatisticsPreview() {
     DayLogTheme {
-        StatisticsScreen(
             statistics = calculateStatistics(
                 entries = sampleEntries,
                 tags = listOf(
