@@ -88,11 +88,14 @@ fun TimelineScreen(
 /**
  * The day's heading, across the page.
  *
- * Shared with the search screen, so a result looks like the entry it is.
+ * A day starts with air: the gap to the day above it is bigger than the gap under the heading
+ * itself, so the days read apart and the entries read together. Shared with the search screen,
+ * so a result looks like the entry it is.
  */
 @Composable
 fun DayHeading(group: DayGroup, modifier: Modifier = Modifier) {
     val colors = DayLogTheme.colors
+    val spacing = DayLogTheme.spacing
 
     DLText(
         text = group.header,
@@ -101,7 +104,12 @@ fun DayHeading(group: DayGroup, modifier: Modifier = Modifier) {
         maxLines = 1,
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = 20.dp, end = 20.dp, top = 18.dp, bottom = 2.dp),
+            .padding(
+                start = spacing.xl,
+                end = spacing.xl,
+                top = spacing.xxxl,
+                bottom = spacing.md,
+            ),
     )
 }
 

@@ -35,8 +35,8 @@ import java.util.Locale
  * One entry in the timeline.
  *
  * The time sits above the text in the muted face, and the text is set in the platform face at a
- * reading size. Entries sit tight under their day's heading, because a day is one place on the
- * page rather than one entry per breath. Tags are already written in the entry; a place and the
+ * reading size. The entries under one day's heading share its air; the spacing scale puts the
+ * room between them, not an eyeballed dp. Tags are already written in the entry; a place and the
  * weather are data about it, so they are chips underneath.
  */
 @Composable
@@ -49,11 +49,12 @@ fun EntryRow(
     onClick: (() -> Unit)? = null,
 ) {
     val colors = DayLogTheme.colors
+    val spacing = DayLogTheme.spacing
 
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = 20.dp, end = 20.dp, bottom = 10.dp)
+            .padding(start = spacing.xl, end = spacing.xl, bottom = spacing.lg)
             .then(
                 if (onClick != null) {
                     Modifier.pressable(onClick = onClick)
@@ -67,7 +68,7 @@ fun EntryRow(
             color = colors.inkFaint,
         )
 
-        Spacer(Modifier.height(1.dp))
+        Spacer(Modifier.height(spacing.xxs))
 
         DLText(
             text = plainPreview(entry.content),
@@ -79,8 +80,8 @@ fun EntryRow(
         // The photos, if the entry has any. A thumbnail strip, not a gallery: the entry is read
         // in a list and the full size belongs on the entry's own screen.
         if (media.isNotEmpty()) {
-            Spacer(Modifier.height(10.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Spacer(Modifier.height(spacing.md))
+            Row(horizontalArrangement = Arrangement.spacedBy(spacing.sm)) {
                 media.take(4).forEach { item ->
                     AsyncImage(
                         model = item.thumbnailPath ?: item.path,
@@ -101,9 +102,9 @@ fun EntryRow(
         val weatherSummary = entry.weatherSummary
 
         if (placeName != null || weatherSummary != null) {
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(spacing.md))
             Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                horizontalArrangement = Arrangement.spacedBy(spacing.sm),
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth(),
             ) {
