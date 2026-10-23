@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.4.0] - 2026-10-23
+
+### Added
+- Bottom tabs: the timeline and the calendar are the app's two homes, one tap apart
+- "On this day": the same date in past years, with a count on the timeline's top bar so you know
+  when there is something to look back at
+- Tags and places can be given to a thought in the quick entry bar and in the full editor — pick
+  a tag from the ones you have used, type a new one, take a tag back off, name a place or change
+  it
+- Tags glow in an entry when you read it, so the filing shows through the writing
+- A filter popup for choosing which tags the timeline shows, instead of a strip that ran out of
+  room
+
+### Changed
+- The app is friendlier under the fingers: the quick entry bar is now a floating bubble with a
+  border that folds into a small plus when you scroll down and comes back when you scroll up, and
+  the shapes all went rounder
+- An entry opens with its date and time above the text, small and out of the way, and edit and
+  delete as small icons at the top
+- The timeline, the calendar's day lists and "On this day" read plain text — no markdown marks,
+  nothing lit up; an entry marks its tags only when you are reading it
+- The location icon is drawn as a proper map pin
+
 ## [0.3.8] - 2026-10-22
 
 ### Added
