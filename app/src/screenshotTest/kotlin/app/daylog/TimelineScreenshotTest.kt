@@ -118,6 +118,7 @@ private fun DayLogPreview(dark: Boolean = false) {
                 .fillMaxSize()
                 .background(DayLogTheme.colors.background)
                 .statusBarsPadding(),
+            contentAlignment = Alignment.BottomCenter,
         ) {
             Column(Modifier.fillMaxSize()) {
                 DLTopBar(
@@ -151,26 +152,24 @@ private fun DayLogPreview(dark: Boolean = false) {
                         contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp),
                     )
                 }
+
+                DayLogBottomBar(
+                    current = Routes.Timeline,
+                    onTab = {},
+                )
             }
 
-            DayLogBottomBar(
-                current = Routes.Timeline,
-                onTab = {},
-            )
-        }
-
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(horizontal = 16.dp, vertical = 72.dp),
-        ) {
-            QuickEntryBar(
-                value = "",
-                onValueChange = {},
-                onSave = {},
-                onExpand = {},
-                onAddPhoto = {},
-            )
+            Box(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 72.dp),
+            ) {
+                QuickEntryBar(
+                    value = "",
+                    onValueChange = {},
+                    onSave = {},
+                    onExpand = {},
+                    onAddPhoto = {},
+                )
+            }
         }
     }
 }
