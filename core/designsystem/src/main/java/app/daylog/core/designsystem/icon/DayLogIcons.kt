@@ -189,11 +189,14 @@ object DayLogIcons {
         lineTo(18f, 9f)
     }
 
-    /** A chevron pointing right, for a collapsed row. */
-    val ChevronRight: ImageVector = icon("ChevronRight") {
-        moveTo(9f, 6f)
-        lineTo(15f, 12f)
-        lineTo(9f, 18f)
+    /** A pencil, for editing. */
+    val Edit: ImageVector = icon("Edit") {
+        moveTo(16f, 4f)
+        lineTo(20f, 8f)
+        lineTo(8f, 20f)
+        lineTo(4f, 20f)
+        lineTo(4f, 16f)
+        close()
     }
 
     /** A chevron pointing left, for the month before. */

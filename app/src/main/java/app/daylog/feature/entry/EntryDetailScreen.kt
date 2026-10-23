@@ -24,8 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.daylog.core.common.DayLabels
 import app.daylog.core.common.toLocalDateTime
-import app.daylog.core.designsystem.component.DLButton
-import app.daylog.core.designsystem.component.DLButtonStyle
 import app.daylog.core.designsystem.component.DLChip
 import app.daylog.core.designsystem.component.DLConfirmDialog
 import app.daylog.core.designsystem.component.DLIconButton
@@ -70,6 +68,20 @@ fun EntryDetailScreen(
                 title = "",
                 leadingIcon = DayLogIcons.Back,
                 onLeadingClick = onBack,
+                trailingContent = {
+                    DLIconButton(
+                        imageVector = DayLogIcons.Edit,
+                        contentDescription = "Edit",
+                        onClick = onEdit,
+                        tint = colors.inkMuted,
+                    )
+                    DLIconButton(
+                        imageVector = DayLogIcons.Trash,
+                        contentDescription = "Delete",
+                        onClick = { confirmingDelete = true },
+                        tint = colors.inkMuted,
+                    )
+                },
             )
 
             Row(
@@ -134,28 +146,6 @@ fun EntryDetailScreen(
             }
 
             Spacer(Modifier.weight(1f))
-
-            // The destructive action goes last, says what it does, and asks first. A diary is the
-            // one thing here that cannot be written again.
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                DLButton(
-                    text = "Edit",
-                    onClick = onEdit,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                DLButton(
-                    text = "Delete this entry",
-                    onClick = { confirmingDelete = true },
-                    style = DLButtonStyle.Text,
-                    modifier = Modifier.fillMaxWidth(),
-                    contentColor = colors.danger,
-                )
-            }
 
             if (confirmingDelete) {
                 DLConfirmDialog(
