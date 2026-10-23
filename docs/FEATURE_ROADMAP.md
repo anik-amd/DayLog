@@ -208,9 +208,12 @@ here is the timeline's own layout and the viewer's fullness.*
 ### P9d — Places
 
 - [x] Filter by several tags at once — the filter popup keeps tags working together (P9b)
-- [ ] Filter by place
-- [ ] A place stored as coordinates and a trimmed name, resolved from the device's own location
-      or a typed name, kept for reuse
+- [x] Filter by place — the filter popup offers the places already used beside the tags; a place
+      filter shows the entries at any chosen place, and works together with the tags
+- [x] A place stored as coordinates and a trimmed name, resolved from the device's own location
+      or a typed name, kept for reuse — a typed name is resolved against the geocoder, the
+      device's answer is asked for with the location permission on the tap that wants it, and the
+      names already writes are offered as chips in both editors
 - [x] The location action sits at the bottom of the quick editor (P9b)
 
 **Gate per stage:** tests green, `assembleDebug` green, the reference images regenerated and
